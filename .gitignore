@@ -54,3 +54,6 @@ _ReSharper*/
 _NCrunch_*/
 _NCrunch_*
 *.ncrunch*
+
+# packeges
+packages/
