@@ -16,7 +16,7 @@ jobs:
           # semantic version range syntax or exact version of a dotnet version
           dotnet-version: "6.x"
       - name: Set Working directory to project directory
-        working-directory: QuizMaster/WebApp/backend/QuizMaster.API.Authentication/
+        working-directory: ./WebApp/backend/QuizMaster.API.Authentication
         run: |
           ls -la
       - name: Install Dependencies
