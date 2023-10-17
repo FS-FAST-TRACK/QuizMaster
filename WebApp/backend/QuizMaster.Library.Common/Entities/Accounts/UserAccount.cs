@@ -1,44 +1,40 @@
-﻿using QuizMaster.Library.Common.Entities.Details;
+﻿using Microsoft.AspNetCore.Identity;
+using QuizMaster.Library.Common.Entities.Details;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace QuizMaster.Library.Common.Entities.Accounts
 {
-    public class UserAccount
+    public class UserAccount: IdentityUser<int>
     {
         [Key]
-        public int Id { get; set; }
+        public override int Id { get; set; }
 
-        [AllowNull]
         [MaxLength(50)]
-        public string Lastname { get; set; }
+        public string? LastName { get; set; }
 
-        [AllowNull]
         [MaxLength(50)]
-        public string Firstname { get; set; }
+        public string? FirstName { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string Email { get; set; }
+        public override string Email { get; set; }
 
         [Required]
         [MaxLength(20)]
-        public string Username { get; set; }
+        public override string UserName { get; set; }
 
-        [Required]
-        public string Password { get; set; }
-
-        [Required]
-        public UserRole UserRole { get; set; } = UserRole.USER;
         [Required] 
         public bool ActiveData { get; set; } = true;
+
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
-        [AllowNull]
-        public DateTime DateUpdated { get; set; }
-        [AllowNull]
-        public UserAccount UpdatedByUser { get; set; }
+
+
+        public DateTime? DateUpdated { get; set; }
+
+        public UserAccount? UpdatedByUser { get; set; }
 
     }
 }
