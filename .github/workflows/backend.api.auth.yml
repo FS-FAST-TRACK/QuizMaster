@@ -1,0 +1,23 @@
+name: QuizMaster - Auth API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup .NET 6.x
+        uses: actions/setup-dotnet@v3
+        with:
+          # semantic version range syntax or exact version of a dotnet version
+          dotnet-version: "6.x"
+      - name: Install Dependencies
+        run: dotnet restore
+      - name: Build Project
+        run: dotnet build
+      - name: Test with the dotnet CLI
+        run: dotnet test
