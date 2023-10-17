@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./WebApp/backend/QuizMaster.API.Authentication
+        working-directory: WebApp/backend/QuizMaster.API.Authentication
 
     steps:
       - name: Setup .NET 6.x
@@ -18,9 +18,6 @@ jobs:
         with:
           # semantic version range syntax or exact version of a dotnet version
           dotnet-version: "6.x"
-      - name: Set Working directory to project directory
-        run: |
-          ls -la
       - name: Install Dependencies
         run: dotnet restore
       - name: Build Project
