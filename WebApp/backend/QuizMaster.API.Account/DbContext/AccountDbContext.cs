@@ -14,16 +14,7 @@ namespace QuizMaster.API.Account.DbContext
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-
-			modelBuilder.Entity<IdentityUserLogin<int>>().HasKey(ul => new { ul.UserId, ul.LoginProvider, ul.ProviderKey });
-
-			modelBuilder.Entity<IdentityUserRole<int>>().HasKey(ur => new { ur.UserId, ur.RoleId });
-
-			modelBuilder.Entity<IdentityUserClaim<int>>().HasKey(uc => uc.Id);
-
-			modelBuilder.Entity<IdentityUserToken<int>>().HasKey(ut => new { ut.UserId, ut.LoginProvider, ut.Name });
-
-			modelBuilder.Entity<IdentityRoleClaim<int>>().HasKey(rc => rc.Id);
+			base.OnModelCreating(modelBuilder);
 
 
 			// Seed Roles
