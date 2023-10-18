@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuizMaster.Library.Common.Models.Account
+namespace QuizMaster.API.Account.Models
 {
 	public class AccountDto
 	{
