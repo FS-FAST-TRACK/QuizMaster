@@ -1,4 +1,5 @@
 ﻿using QuizMaster.Library.Common.Entities.Accounts;
+using QuizMaster.Library.Common.Entities.Roles;
 
 namespace QuizMaster.API.Authentication.Services.Temp
 {
@@ -6,5 +7,6 @@ namespace QuizMaster.API.Authentication.Services.Temp
     {
         UserAccount GetUserByEmail(string email);
         UserAccount GetUserByUsername(string username);
+        IEnumerable<UserRole> GetRoles(int userId);
     }
 }

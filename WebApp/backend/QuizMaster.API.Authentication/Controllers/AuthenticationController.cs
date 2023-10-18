@@ -27,7 +27,11 @@ namespace QuizMaster.API.Authentication.Controllers
             var tokenHolder = _authenticationServices.Authenticate(requestModel);
 
             // if no token is generated, it is an invalid credentials
-            if(tokenHolder.Token == null) { return Unauthorized(new { Message = "Invalid Credentials" }); };
+            if(tokenHolder.Token == null) {
+                // this will clear a cookie if there is any
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return Unauthorized(new { Message = "Invalid Credentials" }); 
+            };
 
             // create the cookie
             var cookieFragment = CookieHelper.BuildCookie(tokenHolder.Token);
