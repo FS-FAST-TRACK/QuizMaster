@@ -4,6 +4,8 @@ option csharp_namespace = "QuizMaster.API.Account.Proto";
 
 service AccountService {
 	rpc Register(RegisterRequest) returns (RegisterResponseOrUserNotFound);
+	rpc GetAllUsers(Empty) returns (stream AllUserReply);
+
 
 }
 
@@ -33,4 +35,18 @@ message RegisterResponseOrUserNotFound {
 		RegisterResponse registerResponse = 1;
 		UserNotFound userNotFound = 2;
 	}
+}
+
+message Empty {}
+
+message AllUserReply{
+	int32 id =1;
+string lastName= 2;
+	string firstName = 3;
+	string email = 4;
+	string userName = 5;
+	bool activeData = 6;
+	string dateCreated = 7;
+	string dateUpdated = 8;
+	string updatedByUser = 9;
 }

@@ -1,5 +1,6 @@
 ﻿using Grpc.Core;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
 
@@ -44,19 +45,26 @@ namespace QuizMaster.API.Account.Service
             }
 
             return await Task.FromResult(response);
-
-            //return Ok(new AccountDto
-            //{
-            //    Id = user.Id,
-            //    ActiveData = user.ActiveData,
-            //    FirstName = user.FirstName,
-            //    LastName = user.LastName,
-            //    Email = user.Email,
-            //    UserName = user.UserName,
-            //    DateCreated = user.DateCreated,
-            //    DateUpdated = user.DateUpdated,
-            //    UpdatedByUser = user.UpdatedByUser,
-            //});
         }
+
+        public override async Task GetAllUsers(Empty request, IServerStreamWriter<AllUserReply> responseStream, ServerCallContext context)
+        {
+            var reply = new AllUserReply();
+            foreach (var user in _userManager.Users.ToArray())
+            {
+                reply.Id = user.Id;
+                reply.LastName = user.LastName != null ? user.LastName : "";
+                reply.FirstName = user.FirstName != null ? user.FirstName : "";
+                reply.Email = user.Email;
+                reply.UserName = user.UserName;
+                reply.ActiveData = user.ActiveData;
+                reply.DateCreated = user.DateCreated.ToString();
+                reply.DateUpdated = user.DateUpdated != null ? user.DateUpdated.ToString() : "";
+                reply.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
+
+                await responseStream.WriteAsync(reply);
+            }
+        }
+
     }
 }

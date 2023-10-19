@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Protos\accounts.proto" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.24.4" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
     <PackageReference Include="Grpc.Tools" Version="2.59.0">
       <PrivateAssets>all</PrivateAssets>
@@ -21,7 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\accounts.proto" GrpcServices="Client" />
+    <Protobuf Include="..\QuizMaster.API.Account\Proto\accounts.proto" GrpcServices="Client">
+      <Link>Protos\accounts.proto</Link>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

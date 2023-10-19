@@ -1,4 +1,5 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Account.Proto;
 
@@ -31,6 +32,23 @@ namespace QuizMaster.API.Gatewway.Controllers
             }
 
             return Ok(response.RegisterResponse);
+        }
+
+        [HttpGet]
+        [Route("api/[controller]/GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var request = new Empty();
+
+            var response = _channelClient.GetAllUsers(request);
+
+            var users = new List<AllUserReply>();
+            while (await response.ResponseStream.MoveNext())
+            {
+                users.Add(response.ResponseStream.Current);
+            }
+
+            return Ok(users);
         }   
     }
 }
