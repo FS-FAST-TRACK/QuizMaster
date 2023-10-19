@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using QuizMaster.API.Authentication.Services.Auth;
 using QuizMaster.Library.Common.Utilities;
 using System.Security.Claims;
 
@@ -18,14 +19,19 @@ namespace QuizMaster.API.Authentication.Helper
 
                 if(claimToken != null)
                 {
-                    IDictionary<string, string> tokenData = JWTHelper.DecodeJsonWebToken(SecretKey, claimToken);
+                    var AuthStore = AuthenticationServices.ValidateToken(SecretKey, claimToken);
 
-
-                    // temporary checks * reject cookie if decoded dictionary has no entries *
-                    if(tokenData.Count == 0)
+                    // reject request if no decoded value from token
+                    if(AuthStore == null)
                     {
-                        context.RejectPrincipal();
-                        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        await RejectPrincipal(context);
+                        return;
+                    }
+                    
+                    // reject request if token expired
+                    if (AuthStore.IsExpired())
+                    {
+                        await RejectPrincipal(context);
                     }
                 }
             }
@@ -70,6 +76,12 @@ namespace QuizMaster.API.Authentication.Helper
             };
 
             return new(authProperties, principal);
+        }
+
+        private static async Task RejectPrincipal(CookieValidatePrincipalContext context)
+        {
+            context.RejectPrincipal();
+            await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
     }
 }
