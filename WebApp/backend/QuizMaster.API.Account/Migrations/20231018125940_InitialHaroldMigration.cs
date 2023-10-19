@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaster.API.Account.Migrations
 {
     /// <inheritdoc />
-    public partial class QuizMasterAccountInitialMigration : Migration
+    public partial class InitialHaroldMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -150,8 +150,8 @@ namespace QuizMaster.API.Account.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName", "UserRoleDesc" },
                 values: new object[,]
                 {
-                    { 1, "0ca08c91-9f45-4a5c-adc4-e3956152e72f", "Administrator", "ADMINISTRATOR", "Admin" },
-                    { 2, "2c866777-a118-4f02-9e68-06df22272d70", "User", "USER", "User" }
+                    { 1, "2190c408-5167-4700-ae03-f445f8df7ac4", "Administrator", "ADMINISTRATOR", "Admin" },
+                    { 2, "2a14ab8f-086b-454e-8dfd-4527f91beb95", "User", "USER", "User" }
                 });
 
             migrationBuilder.InsertData(
@@ -162,7 +162,7 @@ namespace QuizMaster.API.Account.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccessFailedCount", "ActiveData", "ConcurrencyStamp", "DateCreated", "DateUpdated", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UpdatedByUserId", "UserName" },
-                values: new object[] { 1, 0, true, "7f2be116-b82b-4651-8be2-f3f50015abca", new DateTime(2023, 10, 17, 16, 18, 24, 790, DateTimeKind.Utc).AddTicks(7522), null, "admin@gmail.com", false, null, null, false, null, null, null, "AQAAAAEAACcQAAAAEDFHayMh1Wm6m2jlSf/kLi77CzDJiK63xRkjubqfPtGpZAeA8sfgfBsaQGBhVmLEbQ==", null, false, "d54efa43-f93f-404b-a94d-d469dc24f9b5", false, null, "Admin" });
+                values: new object[] { 1, 0, true, "4803c39f-6de0-430c-8847-3bfd3d1e70f7", new DateTime(2023, 10, 18, 12, 59, 40, 124, DateTimeKind.Utc).AddTicks(2590), null, "admin@gmail.com", false, null, null, false, null, null, null, "AQAAAAEAACcQAAAAEFYKdbq6dJzJ9OIhIv0r/dS1nUkSButd9DDWD5y5d5+P3APYGxzrtUcqDXfboLDQJg==", null, false, "e52bc46b-d83e-484e-95ed-2cfbcc412a5b", false, null, "Admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_UpdatedByUserId",

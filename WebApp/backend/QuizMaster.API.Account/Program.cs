@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Account.DbContext;
+using QuizMaster.API.Account.Service;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Roles;
 
@@ -13,7 +14,7 @@ namespace QuizMaster.API.Account
 			var builder = WebApplication.CreateBuilder(args);
 
 			// Add services to the container.
-
+			builder.Services.AddGrpc();
 			builder.Services.AddControllers();
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddEndpointsApiExplorer();
@@ -41,8 +42,10 @@ namespace QuizMaster.API.Account
 
 			app.UseAuthorization();
 
+			app.MapGrpcService<InformationService>();
+            app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
-			app.MapControllers();
+            app.MapControllers();
 
 			app.Run();
 		}
