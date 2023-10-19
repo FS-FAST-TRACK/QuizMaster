@@ -12,13 +12,8 @@ using QuizMaster.API.Account.DbContext;
 namespace QuizMaster.API.Account.Migrations
 {
     [DbContext(typeof(AccountDbContext))]
-<<<<<<<< HEAD:WebApp/backend/QuizMaster.API.Account/Migrations/20231018125940_InitialHaroldMigration.Designer.cs
-    [Migration("20231018125940_InitialHaroldMigration")]
-    partial class InitialHaroldMigration
-========
-    [Migration("20231018115901_QuizMasterAccountInitialMigration")]
-    partial class QuizMasterAccountInitialMigration
->>>>>>>> fd8d37fcdfa17fd26990d99ad819008d77ee5ca3:WebApp/backend/QuizMaster.API.Account/Migrations/20231018115901_QuizMasterAccountInitialMigration.Designer.cs
+    [Migration("20231019091942_UpdateMigration")]
+    partial class UpdateMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -253,25 +248,14 @@ namespace QuizMaster.API.Account.Migrations
                             Id = 1,
                             AccessFailedCount = 0,
                             ActiveData = true,
-<<<<<<<< HEAD:WebApp/backend/QuizMaster.API.Account/Migrations/20231018125940_InitialHaroldMigration.Designer.cs
-                            ConcurrencyStamp = "4803c39f-6de0-430c-8847-3bfd3d1e70f7",
-                            DateCreated = new DateTime(2023, 10, 18, 12, 59, 40, 124, DateTimeKind.Utc).AddTicks(2590),
+                            ConcurrencyStamp = "624f1bad-0ff0-41db-b236-672fcff42fd2",
+                            DateCreated = new DateTime(2023, 10, 19, 9, 19, 41, 677, DateTimeKind.Utc).AddTicks(1076),
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAEAACcQAAAAEFYKdbq6dJzJ9OIhIv0r/dS1nUkSButd9DDWD5y5d5+P3APYGxzrtUcqDXfboLDQJg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEMXYJbdGVE5UBm2FnIGB2U0zr2zBru8HMiU612F+6wfiG4U+FPKx04mwEnpsZJZ5WA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "e52bc46b-d83e-484e-95ed-2cfbcc412a5b",
-========
-                            ConcurrencyStamp = "20021221-b5d0-4185-9d92-1a1343227719",
-                            DateCreated = new DateTime(2023, 10, 18, 11, 59, 1, 412, DateTimeKind.Utc).AddTicks(1078),
-                            Email = "admin@gmail.com",
-                            EmailConfirmed = false,
-                            LockoutEnabled = false,
-                            PasswordHash = "AQAAAAEAACcQAAAAECsDH0DmmCLs/e4G+gI0DfuyuENxcHcrPl4timWtZDyXZvNME0G7ER0W+1RUbDG4qw==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "6cc89f4d-29f9-4884-9880-810b0fa338ef",
->>>>>>>> fd8d37fcdfa17fd26990d99ad819008d77ee5ca3:WebApp/backend/QuizMaster.API.Account/Migrations/20231018115901_QuizMasterAccountInitialMigration.Designer.cs
+                            SecurityStamp = "1cb9a652-7a89-4197-b7df-deb5bded7205",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -315,11 +299,7 @@ namespace QuizMaster.API.Account.Migrations
                         new
                         {
                             Id = 1,
-<<<<<<<< HEAD:WebApp/backend/QuizMaster.API.Account/Migrations/20231018125940_InitialHaroldMigration.Designer.cs
-                            ConcurrencyStamp = "2190c408-5167-4700-ae03-f445f8df7ac4",
-========
-                            ConcurrencyStamp = "9eb06960-10d2-4691-9039-9783e380141f",
->>>>>>>> fd8d37fcdfa17fd26990d99ad819008d77ee5ca3:WebApp/backend/QuizMaster.API.Account/Migrations/20231018115901_QuizMasterAccountInitialMigration.Designer.cs
+                            ConcurrencyStamp = "599476f9-5b63-4c59-b662-6cf749e3fe67",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR",
                             UserRoleDesc = "Admin"
@@ -327,11 +307,7 @@ namespace QuizMaster.API.Account.Migrations
                         new
                         {
                             Id = 2,
-<<<<<<<< HEAD:WebApp/backend/QuizMaster.API.Account/Migrations/20231018125940_InitialHaroldMigration.Designer.cs
-                            ConcurrencyStamp = "2a14ab8f-086b-454e-8dfd-4527f91beb95",
-========
-                            ConcurrencyStamp = "87a79645-232b-4d17-a088-9a42250a4b7a",
->>>>>>>> fd8d37fcdfa17fd26990d99ad819008d77ee5ca3:WebApp/backend/QuizMaster.API.Account/Migrations/20231018115901_QuizMasterAccountInitialMigration.Designer.cs
+                            ConcurrencyStamp = "7f89f3b2-569d-4f38-b0f2-297fe007d11d",
                             Name = "User",
                             NormalizedName = "USER",
                             UserRoleDesc = "User"

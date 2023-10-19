@@ -245,14 +245,14 @@ namespace QuizMaster.API.Account.Migrations
                             Id = 1,
                             AccessFailedCount = 0,
                             ActiveData = true,
-                            ConcurrencyStamp = "20021221-b5d0-4185-9d92-1a1343227719",
-                            DateCreated = new DateTime(2023, 10, 18, 11, 59, 1, 412, DateTimeKind.Utc).AddTicks(1078),
+                            ConcurrencyStamp = "624f1bad-0ff0-41db-b236-672fcff42fd2",
+                            DateCreated = new DateTime(2023, 10, 19, 9, 19, 41, 677, DateTimeKind.Utc).AddTicks(1076),
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAEAACcQAAAAECsDH0DmmCLs/e4G+gI0DfuyuENxcHcrPl4timWtZDyXZvNME0G7ER0W+1RUbDG4qw==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEMXYJbdGVE5UBm2FnIGB2U0zr2zBru8HMiU612F+6wfiG4U+FPKx04mwEnpsZJZ5WA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "6cc89f4d-29f9-4884-9880-810b0fa338ef",
+                            SecurityStamp = "1cb9a652-7a89-4197-b7df-deb5bded7205",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -296,7 +296,7 @@ namespace QuizMaster.API.Account.Migrations
                         new
                         {
                             Id = 1,
-                            ConcurrencyStamp = "9eb06960-10d2-4691-9039-9783e380141f",
+                            ConcurrencyStamp = "599476f9-5b63-4c59-b662-6cf749e3fe67",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR",
                             UserRoleDesc = "Admin"
@@ -304,7 +304,7 @@ namespace QuizMaster.API.Account.Migrations
                         new
                         {
                             Id = 2,
-                            ConcurrencyStamp = "87a79645-232b-4d17-a088-9a42250a4b7a",
+                            ConcurrencyStamp = "7f89f3b2-569d-4f38-b0f2-297fe007d11d",
                             Name = "User",
                             NormalizedName = "USER",
                             UserRoleDesc = "User"

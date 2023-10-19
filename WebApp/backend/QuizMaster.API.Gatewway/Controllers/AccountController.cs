@@ -25,8 +25,12 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             var response = await _channelClient.RegisterAsync(request);
+            if(response.UserNotFound != null)
+            {
+                return NotFound(response.UserNotFound);
+            }
 
-            return Ok(response);
+            return Ok(response.RegisterResponse);
         }   
     }
 }

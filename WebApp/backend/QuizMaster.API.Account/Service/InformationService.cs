@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
-using QuizMaster.Library.Common.Models.Account;
-using QuizMaster.Library.Common.Models.Response;
 
 namespace QuizMaster.API.Account.Service
 {
@@ -16,30 +14,36 @@ namespace QuizMaster.API.Account.Service
             _userManager = userManager;
         }
 
-        public override async Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
+        public override async Task<RegisterResponseOrUserNotFound> Register(RegisterRequest request, ServerCallContext context)
         {
-            var reply = new RegisterResponse();
+            var success = new RegisterResponse();
+            var error = new UserNotFound();
+            var response = new RegisterResponseOrUserNotFound();
+
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
-            //if (user == null)
-            //{
-            //    return BadRequest(new ResponseDto
-            //    {
-            //        Type = "Error",
-            //        Message = "User doesn't exist."
-            //    });
-            //}
+            if (user == null)
+            {
+                error.Code = "404";
+                error.Message = "User not found";
 
-            reply.Id = user.Id;
-            reply.LastName = user.LastName;
-            reply.FirstName = user.FirstName;
-            reply.Email = user.Email;
-            reply.UserName = user.UserName;
-            reply.ActiveData = user.ActiveData;
-            reply.DateCreated = user.DateCreated.ToString();
-            reply.DateUpdated = user.DateUpdated.ToString();
-            reply.UpdatedByUser = user.UpdatedByUser !=null ? user.UpdatedByUser.ToString() : "";
+                response.UserNotFound = error;
+            }
+            else
+            {
+                success.Id = user.Id;
+                success.LastName = user.LastName != null ? user.LastName : "";
+                success.FirstName = user.FirstName != null ? user.FirstName : "";
+                success.Email = user.Email;
+                success.UserName = user.UserName;
+                success.ActiveData = user.ActiveData;
+                success.DateCreated = user.DateCreated.ToString();
+                success.DateUpdated = user.DateUpdated != null ? user.DateUpdated.ToString() : "";
+                success.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
 
-            return await Task.FromResult(reply);
+                response.RegisterResponse = success;
+            }
+
+            return await Task.FromResult(response);
 
             //return Ok(new AccountDto
             //{

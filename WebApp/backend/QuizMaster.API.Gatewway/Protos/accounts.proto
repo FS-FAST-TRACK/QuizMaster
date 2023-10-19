@@ -3,7 +3,8 @@ syntax = "proto3";
 option csharp_namespace = "QuizMaster.API.Account.Proto";
 
 service AccountService {
-	rpc Register(RegisterRequest) returns (RegisterResponse);
+	rpc Register(RegisterRequest) returns (RegisterResponseOrUserNotFound);
+
 }
 
 message RegisterRequest {
@@ -20,4 +21,16 @@ message RegisterResponse {
 	string dateCreated = 7;
 	string dateUpdated = 8;
 	string updatedByUser = 9;
+}
+//Create a message if the user is not found
+message UserNotFound {
+	string code = 1;
+	string message = 2;
+}
+
+message RegisterResponseOrUserNotFound {
+	oneof response {
+		RegisterResponse registerResponse = 1;
+		UserNotFound userNotFound = 2;
+	}
 }
