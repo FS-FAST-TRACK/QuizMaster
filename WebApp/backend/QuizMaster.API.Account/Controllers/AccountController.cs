@@ -1,11 +1,12 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuizMaster.API.Account.Models;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Roles;
-using QuizMaster.Library.Common.Models.Account;
-using QuizMaster.Library.Common.Models.Response;
+using QuizMaster.Library.Common.Models;
 
 namespace QuizMaster.API.Account.Controllers
 {
@@ -17,108 +18,75 @@ namespace QuizMaster.API.Account.Controllers
 		private readonly ILogger<AccountController> _logger;
 		private readonly UserManager<UserAccount> _userManager;
 		private readonly RoleManager<UserRole> _roleManager;
+		private readonly IMapper _mapper;
 
-		public AccountController(ILogger<AccountController> logger, UserManager<UserAccount> userManager, RoleManager<UserRole> roleManager)
+		public AccountController(ILogger<AccountController> logger, UserManager<UserAccount> userManager, RoleManager<UserRole> roleManager, IMapper	 mapper)
 		{
 			_logger = logger;
 			_userManager = userManager;
 			_roleManager = roleManager;
+			_mapper = mapper;
 		}
 
 		[HttpGet(Name = "GetUsers")]
 		public async Task<ActionResult<IEnumerable<AccountDto>>> Get()
 		{
 			var users = await _userManager.Users.ToListAsync();
-			IEnumerable<AccountDto> accountDtos = users.Select(user => new AccountDto
-			{
-				Id = user.Id,
-				ActiveData = user.ActiveData,
-				FirstName = user.FirstName,
-				LastName = user.LastName,
-				Email = user.Email,
-				UserName = user.UserName,
-				DateCreated = user.DateCreated,
-				DateUpdated = user.DateUpdated,
-				UpdatedByUser = user.UpdatedByUser,
-			});
-			return Ok(accountDtos);
+
+			// Return the users
+			return Ok(_mapper.Map<IEnumerable<AccountDto>>(users));
 		}
 
 		[HttpGet("{id}", Name = "GetUser")]
 		public async Task<ActionResult<AccountDto>> Get(int id)
 		{
+			// Get user by Id
 			var user = await _userManager.FindByIdAsync(id.ToString());
+
+			// user null guard
 			if (user == null)
 			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "User doesn't exist."
-				});
+				return ReturnUserDoesNotExist();
 			}
-			return Ok(new AccountDto
-			{
-				Id = user.Id,
-				ActiveData = user.ActiveData,
-				FirstName = user.FirstName,
-				LastName = user.LastName,
-				Email = user.Email,
-				UserName = user.UserName,
-				DateCreated = user.DateCreated,
-				DateUpdated = user.DateUpdated,
-				UpdatedByUser = user.UpdatedByUser,
-			});
+
+			// return converted user 
+			return Ok(_mapper.Map<AccountDto>(user));
 		}
 
 		[Route("create")]
 		[HttpPost]
 		public async Task<IActionResult> Create(AccountCreateDto account)
 		{
+			// Validate ModelState
 			if (!ModelState.IsValid)
 			{
-				var errorList = ModelState.Values
-									.SelectMany(v => v.Errors)
-									.Select(e => e.ErrorMessage)
-									.ToList();
-
-				var errorString = string.Join(", ", errorList);
-
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = errorString
-				});
+				return ReturnModelStateErrors();
 
 			}
 
+			// Check if username is already taken
 			if (await _userManager.FindByNameAsync(account.UserName) != null)
 			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "UserName already exist."
-				});
+				return ReturnUserNameAlreadyExist();
+
 			}
 
-			UserAccount user = new UserAccount()
-			{
-				FirstName = account.FirstName,
-				LastName = account.LastName,
-				Email = account.Email,
-				SecurityStamp = Guid.NewGuid().ToString(),
-				UserName = account.UserName,
-			};
+			// Convert AccountCreateDto to UserAccount
+			var user = _mapper.Map<UserAccount>(account);
 
-
+			// Create new user
 			var result = await _userManager.CreateAsync(user, account.Password);
 
+			// Check if create succeed 
 			if (!result.Succeeded)
 			{
 				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create user." });
 			}
 
+			// Add user as default role
 			await _userManager.AddToRoleAsync(user, "user");
 
+			// Return success
 			return Ok(new ResponseDto { Type = "Success", Message = "Successfully created User", });
 		}
 
@@ -126,35 +94,21 @@ namespace QuizMaster.API.Account.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreatePartial(AccountCreatePartialDto account)
 		{
+			// Validate ModelState
 			if (!ModelState.IsValid)
 			{
-				var errorList = ModelState.Values
-									.SelectMany(v => v.Errors)
-									.Select(e => e.ErrorMessage)
-									.ToList();
-
-				var errorString = string.Join(", ", errorList);
-
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = errorString
-				});
-
+				return ReturnModelStateErrors();
 			}
 
+			// Check if username is already taken
 			if (await _userManager.FindByNameAsync(account.UserName) != null)
 			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "UserName already exist."
-				});
+				return ReturnUserNameAlreadyExist();
 			}
 
+			// Convert AccountCreateDto to UserAccount
 			UserAccount user = new UserAccount()
 			{
-
 				Email = account.Email,
 				UserName = account.UserName,
 			};
@@ -178,13 +132,10 @@ namespace QuizMaster.API.Account.Controllers
 		{
 
 			var user = await _userManager.FindByIdAsync(id.ToString());
+
 			if (user == null)
 			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "User doesn't exist."
-				});
+				return ReturnUserDoesNotExist();
 			}
 
 			user.ActiveData = false;
@@ -205,13 +156,10 @@ namespace QuizMaster.API.Account.Controllers
 		{
 
 			var userFromDb = await _userManager.FindByIdAsync(id.ToString());
+
 			if (userFromDb == null)
 			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "User doesn't exist."
-				});
+				return ReturnUserDoesNotExist();
 			}
 
 			patch.ApplyTo(userFromDb);
@@ -244,6 +192,42 @@ namespace QuizMaster.API.Account.Controllers
 			return NoContent();
 
 		}
+
+		private IActionResult ReturnModelStateErrors()
+		{
+			var errorList = ModelState.Values
+				.SelectMany(v => v.Errors)
+				.Select(e => e.ErrorMessage)
+				.ToList();
+
+			var errorString = string.Join(", ", errorList);
+
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = errorString
+			});
+		}
+
+		private ActionResult ReturnUserDoesNotExist()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "User doesn't exist."
+			});
+
+		}
+
+		private ActionResult ReturnUserNameAlreadyExist()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "UserName already exist."
+			});
+		}
+
 
 
 	}

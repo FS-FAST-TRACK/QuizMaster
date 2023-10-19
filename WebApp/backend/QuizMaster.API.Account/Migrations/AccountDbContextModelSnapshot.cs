@@ -41,7 +41,9 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RoleClaims");
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
 
                     b.HasData(
                         new
@@ -79,14 +81,13 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserClaims");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
 
@@ -96,9 +97,14 @@ namespace QuizMaster.API.Account.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId", "LoginProvider", "ProviderKey");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.ToTable("UserLogins");
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
@@ -111,7 +117,9 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.HasKey("UserId", "RoleId");
 
-                    b.ToTable("UserRoles");
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
 
                     b.HasData(
                         new
@@ -137,7 +145,7 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("UserTokens");
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Accounts.UserAccount", b =>
@@ -155,6 +163,7 @@ namespace QuizMaster.API.Account.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateCreated")
@@ -165,8 +174,8 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -186,10 +195,12 @@ namespace QuizMaster.API.Account.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -211,14 +222,22 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("AspNetUsers", (string)null);
 
                     b.HasData(
                         new
@@ -226,14 +245,14 @@ namespace QuizMaster.API.Account.Migrations
                             Id = 1,
                             AccessFailedCount = 0,
                             ActiveData = true,
-                            ConcurrencyStamp = "4803c39f-6de0-430c-8847-3bfd3d1e70f7",
-                            DateCreated = new DateTime(2023, 10, 18, 12, 59, 40, 124, DateTimeKind.Utc).AddTicks(2590),
+                            ConcurrencyStamp = "20021221-b5d0-4185-9d92-1a1343227719",
+                            DateCreated = new DateTime(2023, 10, 18, 11, 59, 1, 412, DateTimeKind.Utc).AddTicks(1078),
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
-                            PasswordHash = "AQAAAAEAACcQAAAAEFYKdbq6dJzJ9OIhIv0r/dS1nUkSButd9DDWD5y5d5+P3APYGxzrtUcqDXfboLDQJg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAECsDH0DmmCLs/e4G+gI0DfuyuENxcHcrPl4timWtZDyXZvNME0G7ER0W+1RUbDG4qw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "e52bc46b-d83e-484e-95ed-2cfbcc412a5b",
+                            SecurityStamp = "6cc89f4d-29f9-4884-9880-810b0fa338ef",
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -248,13 +267,16 @@ namespace QuizMaster.API.Account.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UserRoleDesc")
                         .IsRequired()
@@ -263,13 +285,18 @@ namespace QuizMaster.API.Account.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            ConcurrencyStamp = "2190c408-5167-4700-ae03-f445f8df7ac4",
+                            ConcurrencyStamp = "9eb06960-10d2-4691-9039-9783e380141f",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR",
                             UserRoleDesc = "Admin"
@@ -277,11 +304,62 @@ namespace QuizMaster.API.Account.Migrations
                         new
                         {
                             Id = 2,
-                            ConcurrencyStamp = "2a14ab8f-086b-454e-8dfd-4527f91beb95",
+                            ConcurrencyStamp = "87a79645-232b-4d17-a088-9a42250a4b7a",
                             Name = "User",
                             NormalizedName = "USER",
                             UserRoleDesc = "User"
                         });
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Roles.UserRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Accounts.UserAccount", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Accounts.UserAccount", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Roles.UserRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizMaster.Library.Common.Entities.Accounts.UserAccount", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Accounts.UserAccount", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Accounts.UserAccount", b =>
