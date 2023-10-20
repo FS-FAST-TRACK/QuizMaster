@@ -8,8 +8,9 @@ service AccountService {
 	rpc	CheckUserName(CheckUserNameRequest) returns (CheckUserNameResponse);
 	rpc CreateAccount(CreateAccountRequest) returns (CreateAccountReply);
 	rpc CreateAccountPartial(CreateAccountPartialRquest) returns (CreateAccountReply);
+	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
 }
-
+ 
 // Request account by id
 message RegisterRequest {
 	int32 id = 1;
@@ -85,4 +86,11 @@ message CreateAccountReply{
 message CreateAccountPartialRquest{
 	string email = 1;
 	string userName = 2;
+}
+
+message DeleteAccountRequest{
+	int32 id = 1;
+}
+message DeleteAccountReply{
+	int32 statusCode = 1;
 }

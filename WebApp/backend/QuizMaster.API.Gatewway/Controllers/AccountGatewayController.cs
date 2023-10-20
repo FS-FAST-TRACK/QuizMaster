@@ -124,6 +124,29 @@ namespace QuizMaster.API.Gatewway.Controllers
             return Ok(reply);
         }
 
+        [HttpDelete]
+        [Route("gateway/api/[controller]/delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var request = new DeleteAccountRequest
+            {
+                Id = id
+            };
+
+            var reply = await _channelClient.DeleteAccountAsync(request);
+
+            if(reply.StatusCode == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to delete user." });
+            }
+            else if(reply.StatusCode == 404)
+            {
+                return NotFound("Account does not exists");
+            }
+
+            return NoContent();
+        }
+
         // Check if model is valid
         private IActionResult ReturnModelStateErrors()
         {
@@ -149,6 +172,17 @@ namespace QuizMaster.API.Gatewway.Controllers
                 Type = "Error",
                 Message = "UserName already exist."
             });
+        }
+
+        // Return if user doesn't exist
+        private ActionResult ReturnUserDoesNotExist()
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = "User doesn't exist."
+            });
+
         }
     }
 }

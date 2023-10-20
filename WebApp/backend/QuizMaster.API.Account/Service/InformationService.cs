@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Grpc.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -152,6 +153,28 @@ namespace QuizMaster.API.Account.Service
                 await _userManager.AddToRoleAsync(user, "user");
             }
 
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<DeleteAccountReply> DeleteAccount(DeleteAccountRequest request, ServerCallContext context)
+        {
+            var reply = new DeleteAccountReply { StatusCode = 203 };
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
+            if (user == null)
+            {
+                reply.StatusCode = 404;
+                return await Task.FromResult(reply);
+            }
+
+            user.ActiveData = false;
+            user.DateUpdated = DateTime.Now;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                reply.StatusCode = 500;
+            }
             return await Task.FromResult(reply);
         }
     }

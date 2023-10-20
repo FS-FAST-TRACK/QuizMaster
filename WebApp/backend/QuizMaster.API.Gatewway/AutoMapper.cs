@@ -10,6 +10,7 @@ namespace QuizMaster.API.Gatewway
         {
             CreateMap<AccountCreateDto, CreateAccountRequest>();
             CreateMap<AccountCreatePartialDto, CreateAccountPartialRquest>();
+            CreateMap<DeleteAccountRequest, RegisterResponse>().ReverseMap();
         }
     }
 }
