@@ -1,6 +1,7 @@
 ﻿using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace QuizMaster.Library.Common.Entities.Questionnaire
@@ -8,6 +9,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
     public class Question: IEntity
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
@@ -40,10 +42,10 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         [AllowNull]
         public DateTime DateUpdated { get; set; }
 
-        [Required]
-        public UserAccount CreatedByUser { get; set; }
+		[Required]
+		public int CreatedByUserId { get; set; }
 
-        [AllowNull]
-        public UserAccount UpdatedByUser { get; set; }
-    }
+		[AllowNull]
+		public int UpdatedByUserId { get; set; }
+	}
 }

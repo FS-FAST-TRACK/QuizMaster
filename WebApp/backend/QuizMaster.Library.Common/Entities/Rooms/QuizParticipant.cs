@@ -34,13 +34,17 @@ namespace QuizMaster.Library.Common.Entities.Rooms
 
         [Required]
         public bool ActiveData { get; set; } = true;
+
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.Now;
+
         [AllowNull]
         public DateTime DateUpdated { get; set; }
+
         [Required]
-        public UserAccount CreatedByUser { get; set; }
+        public int CreatedByUserId { get; set; }
+
         [AllowNull]
-        public UserAccount UpdatedByUser { get; set; }
+        public int UpdatedByUserId { get; set; }
     }
 }
