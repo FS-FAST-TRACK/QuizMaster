@@ -45,7 +45,6 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 		[Required]
 		public int CreatedByUserId { get; set; }
 
-		[AllowNull]
-		public int UpdatedByUserId { get; set; }
+		public int? UpdatedByUserId { get; set; }
 	}
 }

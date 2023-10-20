@@ -29,7 +29,6 @@ namespace QuizMaster.Library.Common.Entities.Rooms
         [Required]
         public int CreatedByUserId { get; set; }
 
-        [AllowNull]
-        public int UpdatedByUserId { get; set; }
+        public int? UpdatedByUserId { get; set; }
     }
 }
