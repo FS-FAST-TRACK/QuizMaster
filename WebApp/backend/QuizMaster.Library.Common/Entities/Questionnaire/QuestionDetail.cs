@@ -8,7 +8,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
     public class QuestionDetail: IEntity
     {
         [Key]
-        public int QDetailId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public string QDetailDesc { get; set; }
@@ -18,12 +18,16 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 
         [Required]
         public bool ActiveData { get; set; } = true;
+
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.Now;
+
         [AllowNull]
         public DateTime DateUpdated { get; set; }
+
         [Required]
         public UserAccount CreatedByUser { get; set; }
+
         [AllowNull]
         public UserAccount UpdatedByUser { get; set; }
     }

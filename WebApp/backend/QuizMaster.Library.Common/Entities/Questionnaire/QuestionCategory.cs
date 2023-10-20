@@ -8,7 +8,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
     public class QuestionCategory: IEntity
     {
         [Key]
-        public int QCategoryId { get; set; }
+        public int  Id { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -16,12 +16,16 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 
         [Required]
         public bool ActiveData { get; set; } = true;
+
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.Now;
+
         [AllowNull]
         public DateTime DateUpdated { get; set; }
+
         [Required]
         public UserAccount CreatedByUser { get; set; }
+
         [AllowNull]
         public UserAccount UpdatedByUser { get; set; }
     }
