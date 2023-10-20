@@ -129,5 +129,30 @@ namespace QuizMaster.API.Account.Service
 
             return await Task.FromResult(reply);
         }
+
+        public override async Task<CreateAccountReply> CreateAccountPartial(CreateAccountPartialRquest request, ServerCallContext context)
+        {
+            var reply = new CreateAccountReply() { Type = "Success", Message = "Successfully created user" };
+
+            var user = new UserAccount()
+            {
+                Email = request.Email,
+                UserName = request.UserName,
+            };
+
+            var result = await _userManager.CreateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                reply.Type = "Error";
+                reply.Message = "Failed to create user.";
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(user, "user");
+            }
+
+            return await Task.FromResult(reply);
+        }
     }
 }

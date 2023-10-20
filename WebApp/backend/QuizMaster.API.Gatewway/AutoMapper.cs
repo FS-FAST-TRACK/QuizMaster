@@ -9,6 +9,7 @@ namespace QuizMaster.API.Gatewway
         public AutoMapper()
         {
             CreateMap<AccountCreateDto, CreateAccountRequest>();
+            CreateMap<AccountCreatePartialDto, CreateAccountPartialRquest>();
         }
     }
 }

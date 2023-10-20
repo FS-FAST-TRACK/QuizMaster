@@ -7,6 +7,7 @@ service AccountService {
 	rpc GetAllUsers(Empty) returns (stream AllUserReply);
 	rpc	CheckUserName(CheckUserNameRequest) returns (CheckUserNameResponse);
 	rpc CreateAccount(CreateAccountRequest) returns (CreateAccountReply);
+	rpc CreateAccountPartial(CreateAccountPartialRquest) returns (CreateAccountReply);
 }
 
 // Request account by id
@@ -79,4 +80,9 @@ message CreateAccountRequest{
 message CreateAccountReply{
 	string type = 1;
 	string message = 2;
+}
+
+message CreateAccountPartialRquest{
+	string email = 1;
+	string userName = 2;
 }

@@ -85,7 +85,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             var response = await _channelClient.CheckUserNameAsync(checkUsername);
-            if(response.IsAvailable == false)
+            if (!response.IsAvailable)
             {
                 return ReturnUserNameAlreadyExist();
             }
@@ -94,7 +94,34 @@ namespace QuizMaster.API.Gatewway.Controllers
 
             var reply = await _channelClient.CreateAccountAsync(request);
 
-            return Ok(reply); 
+            return Ok(reply);
+        }
+
+        [HttpPost]
+        [Route("gateway/api/[controller]/create_account_patrial")]
+        public async Task<IActionResult> CreatePartial(AccountCreatePartialDto account)
+        { 
+            if(!ModelState.IsValid)
+            {
+                return ReturnModelStateErrors();
+            }
+
+            var checkUsername = new CheckUserNameRequest
+            {
+                Username = account.UserName
+            };
+
+            var response = await _channelClient.CheckUserNameAsync(checkUsername);
+
+            if (!response.IsAvailable)
+            {
+                return ReturnUserNameAlreadyExist();
+            }
+
+            var request = _mapper.Map<CreateAccountPartialRquest>(account);
+            var reply = await _channelClient.CreateAccountPartialAsync(request);
+
+            return Ok(reply);
         }
 
         // Check if model is valid
