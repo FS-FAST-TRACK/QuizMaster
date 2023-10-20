@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using AutoMapper;
+using Grpc.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Account.Proto;
@@ -9,12 +10,20 @@ namespace QuizMaster.API.Account.Service
     public class InformationService : AccountService.AccountServiceBase
     {
         private readonly UserManager<UserAccount> _userManager;
+        private readonly IMapper _mapper;
 
-        public InformationService(UserManager<UserAccount> userManager)
+        public InformationService(UserManager<UserAccount> userManager, IMapper mapper)
         {
             _userManager = userManager;
+            _mapper = mapper;
         }
 
+        /// <summary>
+        /// Get account by id
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>Task<RegisterResponseOrUserNotFound></returns>
         public override async Task<RegisterResponseOrUserNotFound> Register(RegisterRequest request, ServerCallContext context)
         {
             var success = new RegisterResponse();
@@ -47,6 +56,13 @@ namespace QuizMaster.API.Account.Service
             return await Task.FromResult(response);
         }
 
+        /// <summary>
+        /// Get all users
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="responseStream"></param>
+        /// <param name="context"></param>
+        /// <returns>Task</returns>
         public override async Task GetAllUsers(Empty request, IServerStreamWriter<AllUserReply> responseStream, ServerCallContext context)
         {
             var reply = new AllUserReply();
@@ -66,5 +82,52 @@ namespace QuizMaster.API.Account.Service
             }
         }
 
+        /// <summary>
+        /// Check if username is still available
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>Task<CheckUserNameResponse></returns>
+        public override async Task<CheckUserNameResponse> CheckUserName(CheckUserNameRequest request, ServerCallContext context)
+        {
+            var reply = new CheckUserNameResponse();
+            var user = _userManager.FindByNameAsync(request.Username).Result;
+            if (user != null)
+            {
+                reply.IsAvailable = false;
+            }
+            else
+            {
+                reply.IsAvailable = true;
+            }
+            return await Task.FromResult(reply);
+        }
+
+        /// <summary>
+        /// Create account
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>Task<CreateAccountReply> </returns>
+        public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request, ServerCallContext context)
+        {
+            var reply = new CreateAccountReply() {Type="Success", Message="Successfully created user" };
+
+            var userAccount = _mapper.Map<UserAccount>(request);
+
+            var result = await _userManager.CreateAsync(userAccount, request.Password);
+
+            if (!result.Succeeded)
+            {
+                reply.Type = "Error";
+                reply.Message = "Failed to create user.";
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(userAccount, "user");
+            }
+
+            return await Task.FromResult(reply);
+        }
     }
 }

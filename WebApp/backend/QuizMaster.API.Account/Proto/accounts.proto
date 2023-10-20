@@ -5,14 +5,15 @@ option csharp_namespace = "QuizMaster.API.Account.Proto";
 service AccountService {
 	rpc Register(RegisterRequest) returns (RegisterResponseOrUserNotFound);
 	rpc GetAllUsers(Empty) returns (stream AllUserReply);
-
-
+	rpc	CheckUserName(CheckUserNameRequest) returns (CheckUserNameResponse);
+	rpc CreateAccount(CreateAccountRequest) returns (CreateAccountReply);
 }
 
+// Request account by id
 message RegisterRequest {
 	int32 id = 1;
 }
-
+// Reply account by id
 message RegisterResponse {
 	int32 id = 1;
 	string lastName= 2;
@@ -24,12 +25,14 @@ message RegisterResponse {
 	string dateUpdated = 8;
 	string updatedByUser = 9;
 }
-//Create a message if the user is not found
+
+// Reply account not found
 message UserNotFound {
 	string code = 1;
 	string message = 2;
 }
 
+// Reply account or not found
 message RegisterResponseOrUserNotFound {
 	oneof response {
 		RegisterResponse registerResponse = 1;
@@ -37,11 +40,13 @@ message RegisterResponseOrUserNotFound {
 	}
 }
 
+// Empty message
 message Empty {}
 
+// Request all users
 message AllUserReply{
 	int32 id =1;
-string lastName= 2;
+	string lastName= 2;
 	string firstName = 3;
 	string email = 4;
 	string userName = 5;
@@ -49,4 +54,29 @@ string lastName= 2;
 	string dateCreated = 7;
 	string dateUpdated = 8;
 	string updatedByUser = 9;
+}
+
+// Request check username
+message CheckUserNameRequest {
+	string username = 1;
+}
+
+// Reply check username
+message CheckUserNameResponse{
+	bool isAvailable = 1;
+}
+
+// Request create account
+message CreateAccountRequest{
+	string lastName=1;
+	string firstName=2;
+	string email=3;
+	string userName=4;
+	string password=5;
+}
+
+// Reply create account
+message CreateAccountReply{
+	string type = 1;
+	string message = 2;
 }
