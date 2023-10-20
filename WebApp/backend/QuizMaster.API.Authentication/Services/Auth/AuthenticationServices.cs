@@ -36,19 +36,43 @@ namespace QuizMaster.API.Authentication.Services.Auth
 
             // attributes to store in the JWT token
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
-            // I will be storing the whole object in the token
-            string userAccountJson = JsonConvert.SerializeObject(userAccount);
-            keyValuePairs.Add("user", userAccountJson);
-            keyValuePairs.Add("timestamp", DateTime.UtcNow.ToString());
 
-            // include user roles in the token
-            string userRolesJson = JsonConvert.SerializeObject(repository.GetRoles(userAccount.Id));
-            keyValuePairs.Add("roles", userRolesJson);
+            // Create an auth store and save it in the token
+            AuthStore authStore = new(userAccount, repository.GetRoles(userAccount.Id), DateTime.Now, appSettings.IntExpireHour);
+
+            var authStoreJson = JsonConvert.SerializeObject(authStore);
+            keyValuePairs.Add("token", authStoreJson);
 
             // generate the token
             string jwtToken = JWTHelper.GenerateJsonWebToken(appSettings.JWTSecret, keyValuePairs);
 
             return new() { Token = jwtToken };
+        }
+
+        /// <summary>
+        /// Validated token will always return an AuthStore object which
+        /// contains the <see cref="UserAccount"/>, IssuedDate, ValidUntil and Roles
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns><see cref="AuthStore"/></returns>
+        public AuthStore? Validate(string token)
+        {
+            return ValidateToken(appSettings.JWTSecret, token);
+        }
+
+        /// <summary>
+        /// Validated token will always return an AuthStore object which
+        /// contains the <see cref="UserAccount"/>, IssuedDate, ValidUntil and Roles
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns><see cref="AuthStore"/></returns>
+        public static AuthStore? ValidateToken(string secret, string token)
+        {
+            IDictionary<string, string> keyValuePairs = JWTHelper.DecodeJsonWebToken(secret,token);
+
+            if(!keyValuePairs.TryGetValue("token", out var authStoreJson)) { return null; }
+
+            return JsonConvert.DeserializeObject<AuthStore>(authStoreJson);
         }
     }
 }
