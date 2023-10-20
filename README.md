@@ -2,19 +2,11 @@
 
 ### Vision
 
-To ignite the spirit of friendly competition, knowledge exploration, and
-personal growth through the Quiz Bee Competition Web and Mobile Application,
-creating a community of lifelong learners and champions.
+To ignite the spirit of friendly competition, knowledge exploration, and personal growth through the Quiz Bee Competition Web and Mobile Application, creating a community of lifelong learners and champions.
 
 ### Mission
 
-At QuizMasters, our mission is to provide a dynamic and engaging platform for
-individuals of all ages and backgrounds to come together, test their knowledge,
-and celebrate learning. We strive to make the QuizMasters Web and Mobile
-Application a space where participants can challenge themselves, showcase their
-expertise, and learn from others. Through this platform, we aim to foster a
-sense of camaraderie, encourage intellectual development, and inspire a thirst
-for knowledge in an inclusive and accessible manner.
+At QuizMasters, our mission is to provide a dynamic and engaging platform for individuals of all ages and backgrounds to come together, test their knowledge, and celebrate learning. We strive to make the QuizMasters Web and Mobile Application a space where participants can challenge themselves, showcase their expertise, and learn from others. Through this platform, we aim to foster a sense of camaraderie, encourage intellectual development, and inspire a thirst for knowledge in an inclusive and accessible manner.
 
 ### Build Status (Github Actions)
 
@@ -29,7 +21,7 @@ for knowledge in an inclusive and accessible manner.
 | ------------- | ------------- | ------------ |
 | C#            | Next.js       | React-Native |
 | ASP.NET Core  | TailwindCSS   | NativeWind   |
-| Microservices |               |
+| Microservices |
 | API           |
-
-RabbitMQ
+| RabbitMQ      |
+| gRPC          |
