@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaster.API.Account.Migrations
 {
     /// <inheritdoc />
-    public partial class QuizMasterAccountInitialMigration : Migration
+    public partial class UpdateMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -177,14 +177,14 @@ namespace QuizMaster.API.Account.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName", "UserRoleDesc" },
                 values: new object[,]
                 {
-                    { 1, "9eb06960-10d2-4691-9039-9783e380141f", "Administrator", "ADMINISTRATOR", "Admin" },
-                    { 2, "87a79645-232b-4d17-a088-9a42250a4b7a", "User", "USER", "User" }
+                    { 1, "599476f9-5b63-4c59-b662-6cf749e3fe67", "Administrator", "ADMINISTRATOR", "Admin" },
+                    { 2, "7f89f3b2-569d-4f38-b0f2-297fe007d11d", "User", "USER", "User" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ActiveData", "ConcurrencyStamp", "DateCreated", "DateUpdated", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UpdatedByUserId", "UserName" },
-                values: new object[] { 1, 0, true, "20021221-b5d0-4185-9d92-1a1343227719", new DateTime(2023, 10, 18, 11, 59, 1, 412, DateTimeKind.Utc).AddTicks(1078), null, "admin@gmail.com", false, null, null, false, null, null, null, "AQAAAAEAACcQAAAAECsDH0DmmCLs/e4G+gI0DfuyuENxcHcrPl4timWtZDyXZvNME0G7ER0W+1RUbDG4qw==", null, false, "6cc89f4d-29f9-4884-9880-810b0fa338ef", false, null, "Admin" });
+                values: new object[] { 1, 0, true, "624f1bad-0ff0-41db-b236-672fcff42fd2", new DateTime(2023, 10, 19, 9, 19, 41, 677, DateTimeKind.Utc).AddTicks(1076), null, "admin@gmail.com", false, null, null, false, null, null, null, "AQAAAAEAACcQAAAAEMXYJbdGVE5UBm2FnIGB2U0zr2zBru8HMiU612F+6wfiG4U+FPKx04mwEnpsZJZ5WA==", null, false, "1cb9a652-7a89-4197-b7df-deb5bded7205", false, null, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoleClaims",
