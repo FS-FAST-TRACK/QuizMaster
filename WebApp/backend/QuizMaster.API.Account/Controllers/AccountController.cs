@@ -20,7 +20,7 @@ namespace QuizMaster.API.Account.Controllers
 		private readonly RoleManager<UserRole> _roleManager;
 		private readonly IMapper _mapper;
 
-		public AccountController(ILogger<AccountController> logger, UserManager<UserAccount> userManager, RoleManager<UserRole> roleManager, IMapper	 mapper)
+		public AccountController(ILogger<AccountController> logger, UserManager<UserAccount> userManager, RoleManager<UserRole> roleManager, IMapper mapper)
 		{
 			_logger = logger;
 			_userManager = userManager;
