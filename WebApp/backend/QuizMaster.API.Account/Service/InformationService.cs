@@ -18,48 +18,6 @@ namespace QuizMaster.API.Account.Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Get account by id
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns>Task<RegisterResponseOrUserNotFound></returns>
-        public override async Task<RegisterResponseOrUserNotFound> Register(RegisterRequest request, ServerCallContext context)
-        {
-            var success = new RegisterResponse();
-            var error = new UserNotFound();
-            var response = new RegisterResponseOrUserNotFound();
-
-            var user = await _userManager.FindByIdAsync(request.Id.ToString());
-
-            var test = JsonConvert.SerializeObject(user);
-
-
-            if (user == null)
-            {
-                error.Code = "404";
-                error.Message = "User not found";
-
-                response.UserNotFound = error;
-            }
-            else
-            {
-                success.Id = user.Id;
-                success.LastName = user.LastName != null ? user.LastName : "";
-                success.FirstName = user.FirstName != null ? user.FirstName : "";
-                success.Email = user.Email;
-                success.UserName = user.UserName;
-                success.ActiveData = user.ActiveData;
-                success.DateCreated = user.DateCreated.ToString();
-                success.DateUpdated = user.DateUpdated != null ? user.DateUpdated.ToString() : "";
-                success.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
-
-                response.RegisterResponse = success;
-            }
-
-            return await Task.FromResult(response);
-        }
-
         public override async Task<AccountOrNotFound> GetAccountById(GetAccountByIdRequest request, ServerCallContext context)
         {
             var success = new GetAccountByIdReply();

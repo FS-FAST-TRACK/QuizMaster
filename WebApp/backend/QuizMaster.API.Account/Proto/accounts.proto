@@ -36,14 +36,6 @@ message UserNotFound {
 	string message = 2;
 }
 
-// Reply account or not found
-message RegisterResponseOrUserNotFound {
-	oneof response {
-		RegisterResponse registerResponse = 1;
-		UserNotFound userNotFound = 2;
-	}
-}
-
 // Empty message
 message Empty {}
 

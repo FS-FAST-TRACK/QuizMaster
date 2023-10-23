@@ -13,7 +13,6 @@ namespace QuizMaster.API.Account.Profiles
 			CreateMap<AccountCreatePartialDto, UserAccount>();
 			CreateMap<UserAccount, AccountDto>();
 			CreateMap<CreateAccountRequest,  UserAccount>();
-			CreateMap<DeleteAccountRequest, RegisterResponse>().ReverseMap();
 			CreateMap<DeleteAccountRequest, UserAccount>();
 		}
 	}
