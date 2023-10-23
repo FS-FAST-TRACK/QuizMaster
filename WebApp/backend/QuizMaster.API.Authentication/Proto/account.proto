@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Authentication.Proto";
+
+service AuthService{
+	rpc GetAuthentication(AuthenticationRequest) returns (AuthenticationReply);
+	rpc ValidateAuthentication(ValidationRequest) returns (ValidationReply);
+}
+
+message AuthenticationRequest{
+	string username = 1;
+	string email = 2;
+	string password = 3;
+}
+
+message AuthenticationReply{
+	string token =1;
+}
+
+message ValidationRequest{
+	string token =1;
+}
+
+message ValidationReply{
+	string authStore = 1;
+}

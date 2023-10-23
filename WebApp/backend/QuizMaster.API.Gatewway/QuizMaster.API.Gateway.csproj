@@ -21,11 +21,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuizMaster.API.Account\QuizMaster.API.Account.csproj" />
+    <ProjectReference Include="..\QuizMaster.API.Authentication\QuizMaster.API.Authentication.csproj" />
+    <ProjectReference Include="..\QuizMaster.Library.Common\QuizMaster.Library.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="..\QuizMaster.API.Account\Proto\accounts.proto" GrpcServices="Client">
       <Link>Protos\accounts.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Authentication\Proto\account.proto" GrpcServices="Client">
+      <Link>Protos\account.proto</Link>
     </Protobuf>
   </ItemGroup>
 
