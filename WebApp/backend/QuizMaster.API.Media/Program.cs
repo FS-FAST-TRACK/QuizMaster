@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using QuizMaster.API.Media.Data.Context;
+using QuizMaster.API.Media.Services;
+
 namespace QuizMaster.API.Media
 {
     public class Program
@@ -13,6 +17,12 @@ namespace QuizMaster.API.Media
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Register DbContext
+            builder.Services.AddDbContext<FileDbContext>(option => option.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnStr")));
+
+            // register services
+            builder.Services.AddScoped<IFileRepository, FileRepository>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,7 +32,9 @@ namespace QuizMaster.API.Media
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
+            // add the cors policy to the app
+            app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
 
             app.UseAuthorization();
 
