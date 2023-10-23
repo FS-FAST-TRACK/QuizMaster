@@ -55,6 +55,26 @@ namespace QuizMaster.API.Authentication.Controllers
         }
 
         [Authorize]
+        [HttpGet]
+        [Route("info")]
+        public IActionResult GetCookieInfo()
+        {
+            // grab the claims identity
+            var tokenClaim = User.Claims.ToList().FirstOrDefault(e => e.Type == "token");
+
+            if(tokenClaim == null) { return NotFound(new { Message = "No information found based on session" }); }
+
+            string token = tokenClaim.Value;
+
+            // get the AuthStore based on token
+            var authStore = _authenticationServices.Validate(token);
+
+            if (authStore == null) return NotFound(new { Message = "No information found based on the token provided" });
+
+            return Ok(new { Message = "Info", authStore });
+        }
+
+        [Authorize]
         [HttpPost]
         [Route("set_admin/{id}")]
         public IActionResult SetAdmin(int id)
