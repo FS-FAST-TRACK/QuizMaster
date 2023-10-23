@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-using Azure;
 using Grpc.Core;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
 
@@ -32,6 +31,10 @@ namespace QuizMaster.API.Account.Service
             var response = new RegisterResponseOrUserNotFound();
 
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
+
+            var test = JsonConvert.SerializeObject(user);
+
+
             if (user == null)
             {
                 error.Code = "404";
@@ -52,6 +55,26 @@ namespace QuizMaster.API.Account.Service
                 success.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
 
                 response.RegisterResponse = success;
+            }
+
+            return await Task.FromResult(response);
+        }
+
+        public override async Task<AccountOrNotFound> GetAccountById(GetAccountByIdRequest request, ServerCallContext context)
+        {
+            var success = new GetAccountByIdReply();
+            var response = new AccountOrNotFound();
+
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
+
+            if (user == null)
+            {
+                response.UserNotFound = new UserNotFound() { Code = "404", Message = "User not found" };
+            }
+            else
+            {
+                success.Account = JsonConvert.SerializeObject(user);
+                response.GetAccountByIdReply = success;
             }
 
             return await Task.FromResult(response);
@@ -112,7 +135,7 @@ namespace QuizMaster.API.Account.Service
         /// <returns>Task<CreateAccountReply> </returns>
         public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request, ServerCallContext context)
         {
-            var reply = new CreateAccountReply() {Type="Success", Message="Successfully created user" };
+            var reply = new CreateAccountReply() { Type = "Success", Message = "Successfully created user" };
 
             var userAccount = _mapper.Map<UserAccount>(request);
 
@@ -175,6 +198,24 @@ namespace QuizMaster.API.Account.Service
             {
                 reply.StatusCode = 500;
             }
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<UpdateAccountReply> UpdateAccount(UpdateAccountRequest request, ServerCallContext context)
+        {
+            var reply = new UpdateAccountReply { StatusCode = 203 };
+
+            var user = JsonConvert.DeserializeObject<UserAccount>(request.Account);
+
+            try
+            {
+                var result = await _userManager.UpdateAsync(user);
+            }
+            catch (Exception ex)
+            {
+                reply.StatusCode = 500;
+            }
+
             return await Task.FromResult(reply);
         }
     }
