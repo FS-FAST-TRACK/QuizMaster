@@ -17,6 +17,57 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		}
 		#endregion
 
+
+		#region Question Methods
+		public async Task<IEnumerable<Question>> GetAllQuestionsAsync()
+		{
+			return await _context.Questions.Where(c => c.ActiveData).ToListAsync();
+		}
+
+		public async Task<Question?> GetQuestionAsync(int id)
+		{
+			return await _context.Questions.Where(q => q.Id == id).FirstOrDefaultAsync();
+		}
+
+		public async Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId)
+		{
+			return await _context.Questions.Where(q => 
+				q.QDifficulty.Id == difficultyId 
+				&& q.QType.Id == typeId
+				&& q.QCategory.Id == categoryId
+				&& q.QStatement.Trim().ToLower().Replace(" ", "") == qStatement.Trim().ToLower().Replace(" ", ""))
+				.FirstOrDefaultAsync();
+		}
+
+		public async Task<bool> AddQuestionAsync(Question question)
+		{
+			try
+			{
+				await _context.Questions.AddAsync(question);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add Question Failed", ex);
+				return false;
+			}
+		}
+
+		public bool UpdateQuestion(Question question)
+		{
+			try
+			{
+				_context.Questions.Update(question);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Update Question Failed", ex);
+				return false;
+			}
+		}
+		#endregion
+
 		#region Category Methods
 		public async Task<IEnumerable<QuestionCategory>> GetAllCategoriesAsync()
 		{	
@@ -157,10 +208,24 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		#endregion
 
 
+		public async Task<int> GetQuestionUseCategoryCount(int categoryId)
+		{
+			return await _context.Questions.Where(q=> q.QCategory.Id  == categoryId).CountAsync();
+		}
+		public async Task<int> GetQuestionUseDifficultyCount(int difficultyId)
+		{
+			return await _context.Questions.Where(q => q.QCategory.Id == difficultyId).CountAsync();
+		}
+		public async Task<int> GetQuestionUseTypeCount(int typeId)
+		{
+			return await _context.Questions.Where(q => q.QCategory.Id == typeId).CountAsync();
+		}
+
 		public async Task<bool> SaveChangesAsync()
 		{
 			var result = await _context.SaveChangesAsync();
 			return result != 0;
 		}
+
 	}
 }
