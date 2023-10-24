@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -32,6 +33,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
+        [Authorize]
         [HttpGet("get_account/{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -55,6 +57,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// Get all account API
         /// </summary>
         /// <returns>Task<IActionResult></returns>
+        [Authorize]
         [HttpGet("get_all_users")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -128,6 +131,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             return Ok(reply);
         }
 
+        [Authorize]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -150,6 +154,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpPatch("update/{id}")]
         public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
         {
