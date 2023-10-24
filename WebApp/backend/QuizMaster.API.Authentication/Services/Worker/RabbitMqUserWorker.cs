@@ -23,14 +23,12 @@ namespace QuizMaster.API.Authentication.Services.Worker
     {
         private ILogger<RabbitMqUserWorker> _logger;
         private  AppSettings AppSettings { get; set; }
-        private Dictionary<int, UserAccount> UserAccounts { get; }
         private readonly RabbitMqRepository rabbitMqRepository;
 
         public RabbitMqUserWorker(ILogger<RabbitMqUserWorker> logger, IOptions<AppSettings> options, RabbitMqRepository repository) 
         { 
             _logger = logger; 
             AppSettings = options.Value;
-            UserAccounts = new Dictionary<int, UserAccount>();
             rabbitMqRepository = repository;
         }
 
@@ -55,8 +53,6 @@ namespace QuizMaster.API.Authentication.Services.Worker
             channel.BasicPublish(AppSettings.RabbitMq_Account_ExchangeName, "", null, body);
             _logger.LogInformation("RabbitMQ: Sending Request to Listener services");
 
-            Thread.Sleep(200); // Pause the process
-
             // declare a response queue for receiving responses
             channel.QueueDeclare(AppSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
             EventingBasicConsumer responseConsumer = new(channel);
@@ -74,7 +70,6 @@ namespace QuizMaster.API.Authentication.Services.Worker
                     rabbitMqRepository.AddCache(responseMessage);
                 }
             };
-            Thread.Sleep(500); // Pause the process
 
             return rabbitMqRepository.TryGetCache(authRequest);
         }
