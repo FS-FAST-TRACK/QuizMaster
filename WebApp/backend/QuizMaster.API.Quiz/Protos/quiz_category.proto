@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuizCata
+
+
+message Empty{}
+
+message GetAllQuizCatagoryRequest{
+	int32 id = 1;
+	string quizCategoryDesc = 2;
+}
