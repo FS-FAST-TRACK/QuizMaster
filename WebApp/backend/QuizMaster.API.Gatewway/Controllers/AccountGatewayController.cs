@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Models;
 using System.Globalization;
@@ -33,7 +34,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpGet("get_account/{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -57,7 +58,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// Get all account API
         /// </summary>
         /// <returns>Task<IActionResult></returns>
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpGet("get_all_users")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -131,7 +132,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             return Ok(reply);
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -154,7 +155,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             return NoContent();
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpPatch("update/{id}")]
         public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
         {

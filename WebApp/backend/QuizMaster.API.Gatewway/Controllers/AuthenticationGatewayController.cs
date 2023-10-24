@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using QuizMaster.API.Authentication.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
+using QuizMaster.API.Gateway.Helper;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -55,7 +56,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "Logged in successfully", reply.Token });
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpPost]
         [Route("logout")]
         public async Task<IActionResult> Logout()
@@ -67,7 +68,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "Logged out successfully" });
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpGet("info")]
         public async Task<IActionResult> GetCookieInfo()
         {
@@ -93,7 +94,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "Info", info });
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpPost]
         [Route("set_admin/{id}")]
         public IActionResult SetAdmin(int id)
