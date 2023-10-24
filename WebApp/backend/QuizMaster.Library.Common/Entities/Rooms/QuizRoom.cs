@@ -9,18 +9,22 @@ namespace QuizMaster.Library.Common.Entities.Rooms
     {
         [Key]
         public int QRoomId { get; set; }
+
         [Required]
         public string QRoomDesc { get; set; }
 
         [Required]
         public bool ActiveData { get; set; } = true;
+
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.Now;
+
         [AllowNull]
         public DateTime DateUpdated { get; set; }
+
         [Required]
-        public UserAccount CreatedByUser { get; set; }
-        [AllowNull]
-        public UserAccount UpdatedByUser { get; set; }
+        public int CreatedByUserId { get; set; }
+
+        public int? UpdatedByUserId { get; set; }
     }
 }

@@ -1,8 +1,14 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Account.Service.Worker;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Helper;
+using QuizMaster.API.Authentication.Proto;
+using QuizMaster.API.Authentication.Services;
 using QuizMaster.API.Authentication.Services.Auth;
+using QuizMaster.API.Authentication.Services.GRPC;
 using QuizMaster.API.Authentication.Services.Temp;
+using QuizMaster.API.Authentication.Services.Worker;
 
 namespace QuizMaster.API.Authentication
 {
@@ -13,18 +19,20 @@ namespace QuizMaster.API.Authentication
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddGrpc();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // register the services
-            builder.Services.AddScoped<IRepository, Repository>();
-            builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
-
             // Configuring strongly typed settings object
             builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+            // register the services
+            builder.Services.AddScoped<IRepository, Repository>();
+            builder.Services.AddScoped<Services.Worker.RabbitMqUserWorker>();
+            builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
+            builder.Services.AddSingleton<RabbitMqRepository>();
 
 
             // configure cookie authentication
@@ -56,7 +64,8 @@ namespace QuizMaster.API.Authentication
             app.UseAuthentication();
             app.UseAuthorization();
 
-
+            app.MapGrpcService<Service>();
+            app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 
             app.Run();

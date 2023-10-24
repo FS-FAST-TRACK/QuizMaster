@@ -10,7 +10,9 @@ namespace QuizMaster.API.Account.DbContext
 	{
 
 
-		public AccountDbContext(DbContextOptions<AccountDbContext> options) : base(options) { }
+		public AccountDbContext(DbContextOptions<AccountDbContext> options) : base(options) {
+			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

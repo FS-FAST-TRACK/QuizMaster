@@ -15,16 +15,23 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\QuizMaster.API.Account\QuizMaster.API.Account.csproj" />
+    <ProjectReference Include="..\QuizMaster.API.Authentication\QuizMaster.API.Authentication.csproj" />
+    <ProjectReference Include="..\QuizMaster.Library.Common\QuizMaster.Library.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="..\QuizMaster.API.Account\Proto\accounts.proto" GrpcServices="Client">
       <Link>Protos\accounts.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Authentication\Proto\account.proto" GrpcServices="Client">
+      <Link>Protos\account.proto</Link>
     </Protobuf>
   </ItemGroup>
 
