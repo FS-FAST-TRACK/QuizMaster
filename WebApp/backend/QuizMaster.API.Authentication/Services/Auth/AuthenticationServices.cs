@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Services.Temp;
+using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Utilities;
 using System.Text.Json;
@@ -12,27 +13,34 @@ namespace QuizMaster.API.Authentication.Services.Auth
 {
     public class AuthenticationServices : IAuthenticationServices
     {
+        private readonly ILogger<AuthenticationServices> _logger;
         private readonly IRepository repository;
         private readonly AppSettings appSettings;
-        public AuthenticationServices(IRepository repository, IOptions<AppSettings> options)
+        private readonly RabbitMqUserWorker rabbitMqUserWorker;
+        public AuthenticationServices(IRepository repository, IOptions<AppSettings> options, RabbitMqUserWorker rabbitMqUserWorker, ILogger<AuthenticationServices> _logger)
         {
             this.repository = repository;
             appSettings = options.Value;
+            this.rabbitMqUserWorker = rabbitMqUserWorker;
+            this._logger = _logger;
         }
 
         public AuthResponse Authenticate(AuthRequest authRequest)
         {
+            UserAccount userAccount = new() { Id = -1 };
+            int tries = 1;
+            while(userAccount.Id == -1 && (tries++ < 15))
+            {
+                userAccount = rabbitMqUserWorker.SendRequest(new Library.Common.Models.Services.AuthRequest { Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
+                _logger.LogInformation(userAccount.Email);
+            }
+            /*
             UserAccount userAccount = repository.GetUserByUsername(authRequest.Username);
 
             if (userAccount.Id == -1) { userAccount = repository.GetUserByEmail(authRequest.Email); }
             if (userAccount.Id == -1) { return new() { Token = null }; };
-
-            // intialize password hasher
-            PasswordHasher<UserAccount> hasher = new();
-
-            // check if password is correct
-            var passwordVerification = hasher.VerifyHashedPassword(userAccount, userAccount.PasswordHash, authRequest.Password);
-            if (PasswordVerificationResult.Success != passwordVerification) { return new() { Token = null }; };
+            */
+            if (userAccount.Id == -1) { return new() { Token = null }; };
 
             // attributes to store in the JWT token
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
