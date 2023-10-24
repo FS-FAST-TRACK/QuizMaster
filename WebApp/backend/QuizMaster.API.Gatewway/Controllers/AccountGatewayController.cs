@@ -94,12 +94,24 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             var response = await _channelClient.CheckUserNameAsync(checkUsername);
+
             if (!response.IsAvailable)
             {
                 return ReturnUserNameAlreadyExist();
             }
+			var checkEmail = new CheckEmailRequest
+			{
+				Email = account.Email
+			};
 
-            var request = _mapper.Map<CreateAccountRequest>(account);
+			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+			if (!emailResponse.IsAvailable)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+			var request = _mapper.Map<CreateAccountRequest>(account);
 
             var reply = await _channelClient.CreateAccountAsync(request);
 
@@ -126,7 +138,21 @@ namespace QuizMaster.API.Gatewway.Controllers
                 return ReturnUserNameAlreadyExist();
             }
 
-            var request = _mapper.Map<CreateAccountPartialRquest>(account);
+            var checkEmail = new CheckEmailRequest
+            {
+                Email = account.Email
+            };
+
+			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+			if (!emailResponse.IsAvailable)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+
+
+			var request = _mapper.Map<CreateAccountPartialRquest>(account);
             var reply = await _channelClient.CreateAccountPartialAsync(request);
 
             return Ok(reply);
@@ -231,5 +257,15 @@ namespace QuizMaster.API.Gatewway.Controllers
             });
 
         }
-    }
+
+        // Return if email already exist
+		private ActionResult ReturnEmailAlreadyExist()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "Email already exist."
+			});
+		}
+	}
 }
