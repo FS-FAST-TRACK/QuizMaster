@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Helper;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Authentication.Services.Auth;
+using QuizMaster.API.Authentication.Services.GRPC;
 using QuizMaster.API.Authentication.Services.Temp;
 
 namespace QuizMaster.API.Authentication
@@ -13,7 +16,7 @@ namespace QuizMaster.API.Authentication
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddGrpc();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -56,7 +59,8 @@ namespace QuizMaster.API.Authentication
             app.UseAuthentication();
             app.UseAuthorization();
 
-
+            app.MapGrpcService<Service>();
+            app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 
             app.Run();

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Grpc.Core;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
 
@@ -18,39 +18,21 @@ namespace QuizMaster.API.Account.Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Get account by id
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns>Task<RegisterResponseOrUserNotFound></returns>
-        public override async Task<RegisterResponseOrUserNotFound> Register(RegisterRequest request, ServerCallContext context)
+        public override async Task<AccountOrNotFound> GetAccountById(GetAccountByIdRequest request, ServerCallContext context)
         {
-            var success = new RegisterResponse();
-            var error = new UserNotFound();
-            var response = new RegisterResponseOrUserNotFound();
+            var success = new GetAccountByIdReply();
+            var response = new AccountOrNotFound();
 
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
+
             if (user == null)
             {
-                error.Code = "404";
-                error.Message = "User not found";
-
-                response.UserNotFound = error;
+                response.UserNotFound = new UserNotFound() { Code = "404", Message = "User not found" };
             }
             else
             {
-                success.Id = user.Id;
-                success.LastName = user.LastName != null ? user.LastName : "";
-                success.FirstName = user.FirstName != null ? user.FirstName : "";
-                success.Email = user.Email;
-                success.UserName = user.UserName;
-                success.ActiveData = user.ActiveData;
-                success.DateCreated = user.DateCreated.ToString();
-                success.DateUpdated = user.DateUpdated != null ? user.DateUpdated.ToString() : "";
-                success.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
-
-                response.RegisterResponse = success;
+                success.Account = JsonConvert.SerializeObject(user);
+                response.GetAccountByIdReply = success;
             }
 
             return await Task.FromResult(response);
@@ -111,7 +93,7 @@ namespace QuizMaster.API.Account.Service
         /// <returns>Task<CreateAccountReply> </returns>
         public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request, ServerCallContext context)
         {
-            var reply = new CreateAccountReply() {Type="Success", Message="Successfully created user" };
+            var reply = new CreateAccountReply() { Type = "Success", Message = "Successfully created user" };
 
             var userAccount = _mapper.Map<UserAccount>(request);
 
@@ -125,6 +107,71 @@ namespace QuizMaster.API.Account.Service
             else
             {
                 await _userManager.AddToRoleAsync(userAccount, "user");
+            }
+
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<CreateAccountReply> CreateAccountPartial(CreateAccountPartialRquest request, ServerCallContext context)
+        {
+            var reply = new CreateAccountReply() { Type = "Success", Message = "Successfully created user" };
+
+            var user = new UserAccount()
+            {
+                Email = request.Email,
+                UserName = request.UserName,
+            };
+
+            var result = await _userManager.CreateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                reply.Type = "Error";
+                reply.Message = "Failed to create user.";
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(user, "user");
+            }
+
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<DeleteAccountReply> DeleteAccount(DeleteAccountRequest request, ServerCallContext context)
+        {
+            var reply = new DeleteAccountReply { StatusCode = 203 };
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
+            if (user == null)
+            {
+                reply.StatusCode = 404;
+                return await Task.FromResult(reply);
+            }
+
+            user.ActiveData = false;
+            user.DateUpdated = DateTime.Now;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                reply.StatusCode = 500;
+            }
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<UpdateAccountReply> UpdateAccount(UpdateAccountRequest request, ServerCallContext context)
+        {
+            var reply = new UpdateAccountReply { StatusCode = 203 };
+
+            var user = JsonConvert.DeserializeObject<UserAccount>(request.Account);
+
+            try
+            {
+                var result = await _userManager.UpdateAsync(user);
+            }
+            catch (Exception ex)
+            {
+                reply.StatusCode = 500;
             }
 
             return await Task.FromResult(reply);

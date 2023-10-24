@@ -3,41 +3,37 @@ syntax = "proto3";
 option csharp_namespace = "QuizMaster.API.Account.Proto";
 
 service AccountService {
-	rpc Register(RegisterRequest) returns (RegisterResponseOrUserNotFound);
+	rpc GetAccountById(GetAccountByIdRequest) returns (AccountOrNotFound);
 	rpc GetAllUsers(Empty) returns (stream AllUserReply);
 	rpc	CheckUserName(CheckUserNameRequest) returns (CheckUserNameResponse);
 	rpc CreateAccount(CreateAccountRequest) returns (CreateAccountReply);
+	rpc CreateAccountPartial(CreateAccountPartialRquest) returns (CreateAccountReply);
+	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
+	rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountReply);
+}
+ 
+// Get account by id
+message GetAccountByIdRequest {
+	int32 id = 1;
 }
 
-// Request account by id
-message RegisterRequest {
-	int32 id = 1;
-}
 // Reply account by id
-message RegisterResponse {
-	int32 id = 1;
-	string lastName= 2;
-	string firstName = 3;
-	string email = 4;
-	string userName = 5;
-	bool activeData = 6;
-	string dateCreated = 7;
-	string dateUpdated = 8;
-	string updatedByUser = 9;
+message GetAccountByIdReply{
+	string account= 1;
+}
+
+// Reply account or not found
+message AccountOrNotFound{
+	oneof response{
+		GetAccountByIdReply  getAccountByIdReply = 1;
+		UserNotFound userNotFound = 2;
+	}
 }
 
 // Reply account not found
 message UserNotFound {
 	string code = 1;
 	string message = 2;
-}
-
-// Reply account or not found
-message RegisterResponseOrUserNotFound {
-	oneof response {
-		RegisterResponse registerResponse = 1;
-		UserNotFound userNotFound = 2;
-	}
 }
 
 // Empty message
@@ -79,4 +75,24 @@ message CreateAccountRequest{
 message CreateAccountReply{
 	string type = 1;
 	string message = 2;
+}
+
+message CreateAccountPartialRquest{
+	string email = 1;
+	string userName = 2;
+}
+
+message DeleteAccountRequest{
+	int32 id = 1;
+}
+message DeleteAccountReply{
+	int32 statusCode = 1;
+}
+
+message UpdateAccountRequest{
+	string account = 1;
+}
+
+message UpdateAccountReply{
+	int32 statusCode = 1;
 }

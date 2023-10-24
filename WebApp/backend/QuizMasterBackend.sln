@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuizMaster.API.Media", "Qui
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuizMaster.API.Monitoring", "QuizMaster.API.Monitoring\QuizMaster.API.Monitoring.csproj", "{B189026F-6EF7-4C37-8E27-988B6DB01DBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuizMaster.API.Gatewway", "QuizMaster.API.Gatewway\QuizMaster.API.Gatewway.csproj", "{09717763-7E2C-44A9-ACE7-48DDAE0FE8A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuizMaster.API.Gateway", "QuizMaster.API.Gatewway\QuizMaster.API.Gateway.csproj", "{09717763-7E2C-44A9-ACE7-48DDAE0FE8A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
