@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Models;
 using System.Globalization;
@@ -33,7 +34,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpGet("get_account/{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -57,7 +58,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// Get all account API
         /// </summary>
         /// <returns>Task<IActionResult></returns>
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpGet("get_all_users")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -93,12 +94,24 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             var response = await _channelClient.CheckUserNameAsync(checkUsername);
+
             if (!response.IsAvailable)
             {
                 return ReturnUserNameAlreadyExist();
             }
+			var checkEmail = new CheckEmailRequest
+			{
+				Email = account.Email
+			};
 
-            var request = _mapper.Map<CreateAccountRequest>(account);
+			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+			if (!emailResponse.IsAvailable)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+			var request = _mapper.Map<CreateAccountRequest>(account);
 
             var reply = await _channelClient.CreateAccountAsync(request);
 
@@ -125,13 +138,27 @@ namespace QuizMaster.API.Gatewway.Controllers
                 return ReturnUserNameAlreadyExist();
             }
 
-            var request = _mapper.Map<CreateAccountPartialRquest>(account);
+            var checkEmail = new CheckEmailRequest
+            {
+                Email = account.Email
+            };
+
+			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+			if (!emailResponse.IsAvailable)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+
+
+			var request = _mapper.Map<CreateAccountPartialRquest>(account);
             var reply = await _channelClient.CreateAccountPartialAsync(request);
 
             return Ok(reply);
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -154,7 +181,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             return NoContent();
         }
 
-        [Authorize]
+        [QuizMasterAuthorization]
         [HttpPatch("update/{id}")]
         public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
         {
@@ -230,5 +257,15 @@ namespace QuizMaster.API.Gatewway.Controllers
             });
 
         }
-    }
+
+        // Return if email already exist
+		private ActionResult ReturnEmailAlreadyExist()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "Email already exist."
+			});
+		}
+	}
 }

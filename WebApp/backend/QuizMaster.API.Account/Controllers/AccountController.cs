@@ -68,7 +68,12 @@ namespace QuizMaster.API.Account.Controllers
 			if (await _userManager.FindByNameAsync(account.UserName) != null)
 			{
 				return ReturnUserNameAlreadyExist();
+			}
 
+			// Check if email is already taken
+			if (await _userManager.FindByEmailAsync(account.Email) != null)
+			{
+				return ReturnEmailAlreadyExist();
 			}
 
 			// Convert AccountCreateDto to UserAccount
@@ -104,6 +109,12 @@ namespace QuizMaster.API.Account.Controllers
 			if (await _userManager.FindByNameAsync(account.UserName) != null)
 			{
 				return ReturnUserNameAlreadyExist();
+			}
+
+			// Check if email is already taken
+			if (await _userManager.FindByEmailAsync(account.Email) != null)
+			{
+				return ReturnEmailAlreadyExist();
 			}
 
 			// Convert AccountCreateDto to UserAccount
@@ -166,19 +177,7 @@ namespace QuizMaster.API.Account.Controllers
 
 			if (!ModelState.IsValid)
 			{
-				var errorList = ModelState.Values
-									.SelectMany(v => v.Errors)
-									.Select(e => e.ErrorMessage)
-									.ToList();
-
-				var errorString = string.Join(", ", errorList);
-
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = errorString
-				});
-
+				return ReturnModelStateErrors();
 			}
 
 
@@ -228,7 +227,14 @@ namespace QuizMaster.API.Account.Controllers
 			});
 		}
 
-
+		private ActionResult ReturnEmailAlreadyExist()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "Email already exist."
+			});
+		}
 
 	}
 }

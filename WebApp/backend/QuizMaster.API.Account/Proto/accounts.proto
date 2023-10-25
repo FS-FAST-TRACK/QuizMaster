@@ -6,6 +6,7 @@ service AccountService {
 	rpc GetAccountById(GetAccountByIdRequest) returns (AccountOrNotFound);
 	rpc GetAllUsers(Empty) returns (stream AllUserReply);
 	rpc	CheckUserName(CheckUserNameRequest) returns (CheckUserNameResponse);
+	rpc CheckEmail(CheckEmailRequest) returns (CheckEmailResponse);
 	rpc CreateAccount(CreateAccountRequest) returns (CreateAccountReply);
 	rpc CreateAccountPartial(CreateAccountPartialRquest) returns (CreateAccountReply);
 	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
@@ -59,6 +60,16 @@ message CheckUserNameRequest {
 
 // Reply check username
 message CheckUserNameResponse{
+	bool isAvailable = 1;
+}
+
+// Request check username
+message CheckEmailRequest {
+	string email = 1;
+}
+
+// Reply check username
+message CheckEmailResponse{
 	bool isAvailable = 1;
 }
 
