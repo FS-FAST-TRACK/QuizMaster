@@ -11,6 +11,7 @@
 		"test:watch": "jest --watchAll"
 	},
 	"dependencies": {
+		"@hookform/resolvers": "^3.3.2",
 		"@mantine/core": "^7.1.5",
 		"@mantine/hooks": "^7.1.5",
 		"@types/node": "^20",
