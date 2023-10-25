@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuizCategoryService{
+	// Get all category
+	rpc GetAllQuizCatagory(Empty) returns (stream GetAllQuizCatagoryResponse);
+	// Get category by id
+	rpc GetCategoryById(GetCategoryByIdRequest) returns (CategoryOrNotFound);
+	// Create category
+	rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryOrFail);
+	// Delete category
+	rpc	DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryReply);
+	// Check category or active
+	rpc CheckCategoryOrActive(CheckCategoryOrActiveRequest) returns (CheckCategoryOrActiveOrFail);
+	// Check category name
+	rpc CheckCategoryName(CheckCategoryNameRequest) returns (CheckCategoryNameReply);
+	// Update category
+	rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryReply);
+}
+
+// empty request
+message Empty{}
+
+// Reply all category
+message GetAllQuizCatagoryResponse{
+	int32 id = 1;
+	string quizCategoryDesc = 2;
+}
+
+// Reply category by id
+message GetCategoryByIdRequest {
+	int32 id = 1;
+}
+
+// Reply category by id
+message GetCategoryByIdReply{
+	int32 id= 1;
+	string quizCategoryDesc = 2;
+}
+
+// Category	not found
+message CategoryNotFound {
+	string code = 1;
+	string message = 2;
+}
+
+// Reply account or not found
+message CategoryOrNotFound{
+	oneof response{
+		GetCategoryByIdReply  getCategoryByIdReply = 1;
+		CategoryNotFound categoryNotFound = 2;
+	}
+}
+
+// Request create category
+message CreateCategoryRequest{
+	string quizCategoryDesc=1;
+}
+
+// Reply created category
+message CreatedCategoryReply{
+	int32 id = 1;
+	string quizCategoryDesc = 2;
+}
+
+// Reply create category fail
+message CreateCategoryFail{
+	string type = 1;
+	string message = 2;
+}
+
+// Reply create category or fail
+message CreateCategoryOrFail{
+	oneof response{
+		CreatedCategoryReply createdCategoryReply = 1;
+		CreateCategoryFail createCategoryFail = 2;
+	}
+}
+
+// Delete category request
+message DeleteCategoryRequest{
+	int32 id = 1;
+}
+
+// Delete category reply
+message DeleteCategoryReply{
+	int32 response = 1;
+}
+
+// Check category or active request
+message CheckCategoryOrActiveRequest{
+	int32 id = 1;
+}
+
+// Check category or active reply
+message CheckCategoryOrActiveReply{
+	string category = 1;
+}
+
+// Check category or active fail
+message CheckCategoryOrActiveFail{
+	string type = 1;
+	string message = 2;
+}
+
+// Check category or active or fail
+message CheckCategoryOrActiveOrFail{
+	oneof response{
+		CheckCategoryOrActiveReply checkCategoryOrActiveReply = 1;
+		CheckCategoryOrActiveFail checkCategoryOrActiveFail = 2;
+	}
+}
+
+// Check category name request
+message CheckCategoryNameRequest{
+	string quizCategoryDesc = 1;
+}
+
+// Check category name reply
+message CheckCategoryNameReply{
+	string status = 1;
+}
+
+// Check category name fail
+message UpdateCategoryRequest{
+	string category = 1;
+}
+
+// Check category name reply
+message UpdateCategoryReply{
+	int32 statusCode = 1;
+	int32 id = 2;
+	string quizCategoryDesc = 3;
+}
