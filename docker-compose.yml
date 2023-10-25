@@ -1,0 +1,54 @@
+version: "3.2"
+
+services:
+
+  quizmaster-api-account:
+    build:
+      context: WebApp/backend
+      dockerfile: QuizMaster.API.Account/Dockerfile
+    ports:
+      - 5051:80
+      - 6051:443
+
+  quizmaster-api-authentication:
+    build:
+      context: WebApp/backend
+      dockerfile: QuizMaster.API.Authentication/Dockerfile
+    ports:
+      - 5052:80
+      - 6052:443
+    depends_on:
+      - quizmaster-api-account
+
+  quizmaster-api-gateway:
+    build:
+      context: WebApp/backend
+      dockerfile: QuizMaster.API.Gatewway/Dockerfile
+    ports:
+      - 5053:80
+      - 6053:443
+    depends_on:
+      - quizmaster-api-account
+      - quizmaster-api-authentication
+
+  #database
+  mssql:
+    container_name: mssql-database
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      - SA_PASSWORD=""
+      - ACCEPT_EULA=Y
+    ports:
+      - "1433:1433"
+    hostname: mssql-database
+
+  #message_bus
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
