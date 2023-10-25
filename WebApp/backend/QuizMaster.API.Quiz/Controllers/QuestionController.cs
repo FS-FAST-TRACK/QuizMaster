@@ -131,6 +131,23 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnModelStateErrors();
 			}
 
+			// Get category, difficulty, and type
+			var category = await _quizRepository.GetCategoryAsync(questionForPatch.QCategoryId);
+			var difficulty = await _quizRepository.GetDifficultyAsync(questionForPatch.QDifficultyId);
+			var type = await _quizRepository.GetTypeAsync(questionForPatch.QTypeId);
+
+			// Guard if category, difficulty, and type is not found
+			var result = ValidateCategoryDifficultyType(category, difficulty, type);
+			if (!result.IsValid)
+			{
+				return BadRequest(new ResponseDto
+				{
+					Type = "Error",
+					Message = result.Error
+				});
+			}
+
+
 			// Check if question description already exist
 			if (await _quizRepository.GetQuestionAsync(questionForPatch.QStatement, questionForPatch.QDifficultyId, questionForPatch.QTypeId, questionForPatch.QCategoryId) != null)
 			{
