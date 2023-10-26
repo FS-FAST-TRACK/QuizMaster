@@ -43,44 +43,58 @@ namespace QuizMaster.API.Account.Service.Worker
         {
             logger.LogInformation("RabbitMQ: Account Worker service is now running...");
 
-            using (var connection = connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+            bool running = false;
+
+            while (!running)
             {
-                // declare an exchange
-                channel.ExchangeDeclare(appSettings.RabbitMq_Account_ExchangeName, ExchangeType.Direct);
-
-                // Declare a request queue for recieving messages
-                channel.QueueDeclare(appSettings.RabbitMq_Account_RequestQueueName, false, false, false, null);
-                channel.QueueBind(appSettings.RabbitMq_Account_RequestQueueName, appSettings.RabbitMq_Account_ExchangeName, "");
-
-                // Declare a response queue for sending responses
-                channel.QueueDeclare(appSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
-
-                // Setup consumer to listen for upcoming messages
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
+                try
                 {
-                    var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
-                    var jsonMssage = Encoding.UTF8.GetString(body);
-                    var requestMessage = JsonConvert.DeserializeObject<AuthRequest>(jsonMssage); // deserialize the json to object [useraccount]
+                    using (var connection = connectionFactory.CreateConnection())
+                    using (var channel = connection.CreateModel())
+                    {
+                        // declare an exchange
+                        channel.ExchangeDeclare(appSettings.RabbitMq_Account_ExchangeName, ExchangeType.Direct);
 
-                    var ProcessedPayload = ProcessRequest(requestMessage);
+                        // Declare a request queue for recieving messages
+                        channel.QueueDeclare(appSettings.RabbitMq_Account_RequestQueueName, false, false, false, null);
+                        channel.QueueBind(appSettings.RabbitMq_Account_RequestQueueName, appSettings.RabbitMq_Account_ExchangeName, "");
 
-                    // serialize the payload to JSON
-                    var jsonResponse = JsonConvert.SerializeObject(ProcessedPayload);
-                    var responseBody = Encoding.UTF8.GetBytes(jsonResponse);
-                    logger.LogInformation("RabbitMQ: Sending Response...\n"+ jsonResponse+"\n\n");
+                        // Declare a response queue for sending responses
+                        channel.QueueDeclare(appSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
 
-                    // publish the response to the response queue
-                    channel.BasicPublish("", appSettings.RabbitMq_Account_ResponseQueueName, null, responseBody);
-                };
+                        // Setup consumer to listen for upcoming messages
+                        var consumer = new EventingBasicConsumer(channel);
+                        consumer.Received += (model, ea) =>
+                        {
+                            var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
+                            var jsonMssage = Encoding.UTF8.GetString(body);
+                            var requestMessage = JsonConvert.DeserializeObject<AuthRequest>(jsonMssage); // deserialize the json to object [useraccount]
 
-                // consume messages from the request queue
-                channel.BasicConsume(appSettings.RabbitMq_Account_RequestQueueName, true, consumer);
+                            var ProcessedPayload = ProcessRequest(requestMessage);
 
-                while(!stoppingToken.IsCancellationRequested)
+                            // serialize the payload to JSON
+                            var jsonResponse = JsonConvert.SerializeObject(ProcessedPayload);
+                            var responseBody = Encoding.UTF8.GetBytes(jsonResponse);
+                            logger.LogInformation("RabbitMQ: Sending Response...\n" + jsonResponse + "\n\n");
+
+                            // publish the response to the response queue
+                            channel.BasicPublish("", appSettings.RabbitMq_Account_ResponseQueueName, null, responseBody);
+                        };
+
+                        // consume messages from the request queue
+                        channel.BasicConsume(appSettings.RabbitMq_Account_RequestQueueName, true, consumer);
+
+                        running = true;
+                        while (!stoppingToken.IsCancellationRequested)
+                        {
+                            await Task.Delay(1000, stoppingToken);
+                        }
+                    }
+                }
+                catch(Exception err)
                 {
-                    await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(3000, stoppingToken);
+                    logger.LogInformation($"RabbitMQ: Error... Retrying service\nError Info: {err.Message}\n\n");
                 }
             }
         }

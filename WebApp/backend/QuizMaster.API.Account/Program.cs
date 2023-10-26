@@ -41,23 +41,37 @@ namespace QuizMaster.API.Account
 
 			var app = builder.Build();
 
-			// Configure the HTTP request pipeline.
-			if (app.Environment.IsDevelopment())
-			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
-			}
+            // Configure the HTTP request pipeline.
+            /*
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+            */
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-			app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
-			app.UseAuthorization();
+
+            app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+            app.UseAuthorization();
 
 			app.MapGrpcService<InformationService>();
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
             app.MapControllers();
 
-			app.Run();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<AccountDbContext>();
+                // Ensure the database is created
+                dbContext.Database.EnsureCreated();
+            }
+
+            app.Run();
 		}
 	}
 }

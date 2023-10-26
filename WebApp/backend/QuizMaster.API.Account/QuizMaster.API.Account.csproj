@@ -49,4 +49,10 @@
     <Protobuf Include="Proto\accounts.proto" GrpcServices="Server" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="localhost_cert.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
