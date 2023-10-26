@@ -24,10 +24,15 @@ const LoginForm = () => {
 			password: hasLength({ min: 1 }, "Password is required"),
 		},
 	});
-	const onSubmit = (data) => console.log(data);
+
 	return (
 		<div>
-			<form className="space-y-5" onSubmit={form.onSubmit(() => {})}>
+			<form
+				className="space-y-5"
+				onSubmit={form.onSubmit((e) => {
+					console.log(e);
+				})}
+			>
 				<TextInput
 					label="Username"
 					placeholder="Username"
