@@ -1,4 +1,4 @@
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "@/components/login-form";
 import LogoutButton from "@/components/logout-button";
 import { Button } from "@mantine/core";
 import { getServerSession } from "next-auth";

@@ -11,7 +11,7 @@ import { isNotEmpty, useForm } from "@mantine/form";
 import logo from "/public/quiz-master-logo.png";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
-import "./LoginForm.module.css";
+import Link from "next/link";
 const LoginForm = () => {
 	const form = useForm({
 		initialValues: {
@@ -91,6 +91,7 @@ const LoginForm = () => {
 					<Button
 						size="18px"
 						h="52px"
+						radius={6}
 						fw={700}
 						color="#FF6633"
 						type="submit"
@@ -100,9 +101,12 @@ const LoginForm = () => {
 					</Button>
 					<p className="text-sm">
 						Don't have an account yet?{" "}
-						<span className="font-medium hover:underline cursor-pointer">
+						<Link
+							href={"/register"}
+							className="font-medium hover:underline cursor-pointer"
+						>
 							Sign up
-						</span>
+						</Link>
 					</p>
 				</div>
 			</form>
