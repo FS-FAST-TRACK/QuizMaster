@@ -4,7 +4,9 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.SeedData;
@@ -22,9 +24,9 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly QuizCategoryService.QuizCategoryServiceClient _channelClient;
         private readonly IMapper _mapper;
 
-        public QuizCategoryGatewayController(IMapper mapper)
+        public QuizCategoryGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7228");
+            _channel = GrpcChannel.ForAddress(options.Value.Quiz_Category_Service);
             _channelClient = new QuizCategoryService.QuizCategoryServiceClient(_channel);
             _mapper = mapper;
         }

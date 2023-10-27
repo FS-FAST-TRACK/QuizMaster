@@ -2,7 +2,9 @@
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Media.Models;
 using QuizMaster.API.Media.Proto;
 using QuizMaster.API.Media.Utility;
@@ -18,9 +20,9 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly ILogger _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public MediaGatewayController(ILogger<MediaGatewayController> logger, IWebHostEnvironment webHostEnvironment)
+        public MediaGatewayController(ILogger<MediaGatewayController> logger, IWebHostEnvironment webHostEnvironment, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7197");
+            _channel = GrpcChannel.ForAddress(options.Value.Media_Service);
             _channelClient = new MediaService.MediaServiceClient(_channel);
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;

@@ -6,6 +6,7 @@ using QuizMaster.API.Authentication.Services.Auth;
 using QuizMaster.API.Authentication.Services.GRPC;
 using QuizMaster.API.Authentication.Services.Temp;
 using QuizMaster.API.Authentication.Services.Worker;
+using QuizMaster.API.Gateway.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Configuring strongly typed settings object
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<GrpcServerConfiguration>(builder.Configuration.GetSection("GrpcServerConfiguration"));
 
 // register the services
 builder.Services.AddScoped<IRepository, Repository>();
