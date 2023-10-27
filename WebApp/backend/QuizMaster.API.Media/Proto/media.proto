@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Media.Proto";
+
+service MediaService{
+	// upload media
+	rpc UploadMedia(UploadMediaRequest) returns (UploadMediaResponse);
+	// get all media
+	rpc GetAllMedia(Empty) returns (stream GetAllMediaResponse);
+	// get media
+    rpc GetMedia(GetMediaRequest) returns (GetMediaReply);
+	// delete media
+	rpc DeleteMedia(GetMediaRequest) returns (GetMediaReply);
+}
+
+// upload media request
+message UploadMediaRequest{
+	string media = 1;
+}
+
+// upload media response
+message UploadMediaResponse{
+	int32 StatusCode = 1;
+}
+
+// empty request
+message Empty{}
+
+// get all media response
+message GetAllMediaResponse{
+	string media = 1;
+}
+
+// get media request
+message GetMediaRequest{
+	string id = 1;
+}
+
+// get media reply
+message GetMediaReply{
+	int32 statusCode = 1;
+	string media = 2;
+}

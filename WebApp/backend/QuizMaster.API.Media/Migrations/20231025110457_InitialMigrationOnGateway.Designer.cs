@@ -11,8 +11,8 @@ using QuizMaster.API.Media.Data.Context;
 namespace QuizMaster.API.Media.Migrations
 {
     [DbContext(typeof(FileDbContext))]
-    [Migration("20231023095706_SqliteMigration_1")]
-    partial class SqliteMigration_1
+    [Migration("20231025110457_InitialMigrationOnGateway")]
+    partial class InitialMigrationOnGateway
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
