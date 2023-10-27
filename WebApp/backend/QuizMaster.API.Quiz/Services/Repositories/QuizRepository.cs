@@ -21,7 +21,12 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		#region Question Methods
 		public async Task<IEnumerable<Question>> GetAllQuestionsAsync()
 		{
-			return await _context.Questions.Where(c => c.ActiveData).ToListAsync();
+			return await _context.Questions
+				.Where(q => q.ActiveData)
+				.Include(q=>q.QCategory)
+				.Include(q=>q.QDifficulty)
+				.Include(q=>q.QType)
+				.ToListAsync();
 		}
 
 		public async Task<Question?> GetQuestionAsync(int id)

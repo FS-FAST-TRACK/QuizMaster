@@ -13,5 +13,6 @@ namespace QuizMaster.API.Quiz.Models
 		public QuestionDifficulty QDifficulty { get; set; }
 		public QuestionCategory QCategory { get; set; }
 		public QuestionType QType { get; set; }
+		public string? Details { get; set; }
 	}
 }
