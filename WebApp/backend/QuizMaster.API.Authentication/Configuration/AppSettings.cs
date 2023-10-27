@@ -8,5 +8,7 @@
         public string RabbitMq_Account_RequestQueueName { get; set; }
         public string RabbitMq_Account_ResponseQueueName { get; set; }
         public string RabbitMq_Hostname { get; set; }
+        public string MICROSERVICE_ACCOUNT_HOST { get; set; }
+        public string MICROSERVICE_AUTH_HOST { get; set; }
     }
 }

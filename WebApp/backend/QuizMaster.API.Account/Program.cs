@@ -39,25 +39,47 @@ namespace QuizMaster.API.Account
 			// Register the worker services
 			builder.Services.AddHostedService<RabbitMqUserWorker>();
 
-			var app = builder.Build();
+            builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+            }));
 
-			// Configure the HTTP request pipeline.
-			if (app.Environment.IsDevelopment())
-			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
-			}
+            var app = builder.Build();
 
-			app.UseHttpsRedirection();
+            // Configure the HTTP request pipeline.
+            /*
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+            */
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-			app.UseAuthorization();
+            //app.UseHttpsRedirection();
 
-			app.MapGrpcService<InformationService>();
+
+            app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+            app.UseAuthorization();
+
+			app.MapGrpcService<InformationService>().RequireCors("AllowAll");
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
             app.MapControllers();
 
-			app.Run();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<AccountDbContext>();
+                // Ensure the database is created
+                dbContext.Database.EnsureCreated();
+            }
+
+            app.Run();
 		}
 	}
 }

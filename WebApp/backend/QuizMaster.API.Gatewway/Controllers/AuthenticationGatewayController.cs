@@ -11,6 +11,8 @@ using QuizMaster.API.Authentication.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Helper;
+using Microsoft.Extensions.Options;
+using QuizMaster.API.Authentication.Configuration;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -21,9 +23,15 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly GrpcChannel _channel;
         private readonly AuthService.AuthServiceClient _channelClient;
 
-        public AuthenticationGatewayController()
+        public AuthenticationGatewayController(IOptions<AppSettings> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7062");
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => {
+                // Implement your custom certificate validation logic here.
+                // Return 'true' if the certificate is trusted, 'false' otherwise.
+                return true; // For simplicity, trust all certificates (not recommended for production).
+            };
+            _channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_AUTH_HOST);
             _channelClient = new AuthService.AuthServiceClient(_channel);
         }
 
