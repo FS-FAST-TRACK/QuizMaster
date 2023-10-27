@@ -46,6 +46,16 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			}
 		}
 
+		public Task<bool> AddQuestionAsync(Question question)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<bool> AddTypeAsync(QuestionType type)
 		{
 			try
@@ -68,6 +78,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		public async Task<IEnumerable<QuestionDifficulty>> GetAllDifficultiesAsync()
 		{
 			return await Task.FromResult(_difficulties);
+		}
+
+		public Task<IEnumerable<Question>> GetAllQuestionsAsync()
+		{
+			throw new NotImplementedException();
 		}
 
 		public Task<IEnumerable<QuestionType>> GetAllTypesAsync()
@@ -95,6 +110,36 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<Question?> GetQuestionAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<int> GetQuestionUseCategoryCount(int categoryId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<int> GetQuestionUseDifficultyCount(int difficultyId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<int> GetQuestionUseTypeCount(int typeId)
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<QuestionType?> GetTypeAsync(int id)
 		{
 			throw new NotImplementedException();
@@ -116,6 +161,16 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public bool UpdateDifficulty(QuestionDifficulty difficulty)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool UpdateQuestion(Question question)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool UpdateQuestionDetail(QuestionDetail detail)
 		{
 			throw new NotImplementedException();
 		}

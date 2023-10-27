@@ -7,20 +7,34 @@ import {
 	Text,
 	TextInput,
 } from "@mantine/core";
-import { isNotEmpty, useForm } from "@mantine/form";
+import {
+	isEmail,
+	isNotEmpty,
+	matches,
+	matchesField,
+	useForm,
+} from "@mantine/form";
 import logo from "/public/quiz-master-logo.png";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-const LoginForm = () => {
+const RegisterForm = () => {
 	const form = useForm({
 		initialValues: {
-			username: "",
+			firstName: "",
+			lastName: "",
+			userName: "",
+			email: "",
 			password: "",
+			confirmPassword: "",
 		},
 		validate: {
-			username: isNotEmpty("Username is required"),
+			firstName: isNotEmpty("First name is required"),
+			lastName: isNotEmpty("Last name is required"),
+			userName: isNotEmpty("Username is required"),
+			email: isEmail("Invalid Email"),
 			password: isNotEmpty("Password is required"),
+			confirmPassword: matchesField("password", "Passwords do not match"),
 		},
 	});
 	const login = async (username, password) => {
@@ -43,7 +57,7 @@ const LoginForm = () => {
 	};
 
 	return (
-		<div className="bg-white p-[64px] w-[450px] rounded-[16px] flex flex-col gap-[32px]  items-center shadow-[0px_4px_4px_rgba(0,0,0,.25)]">
+		<div className="bg-white p-[64px] w-[550px] rounded-[16px] flex flex-col gap-[32px]  items-center shadow-[0px_4px_4px_rgba(0,0,0,.25)]">
 			<Image
 				className=""
 				src={logo}
@@ -51,31 +65,38 @@ const LoginForm = () => {
 				width={100}
 				height={100}
 			/>
-			<p className="font-semibold text-[24px] ">Login to your account</p>
+			<p className="font-semibold text-[24px] ">Create your account</p>
 			<form
 				className="space-y-5 w-full flex-col flex gap-[40px]"
 				onSubmit={form.onSubmit((e) => {
 					login(e.username, e.password);
 				})}
 			>
-				<div className="flex flex-col gap-[15px]">
-					<Text size="16px" fw="500">
-						{" "}
-						Username
-					</Text>
+				<div className="flex flex-col gap-10 w-full">
+					<div className="flex gap-4 items-end">
+						<TextInput
+							radius="6px"
+							placeholder="First name"
+							name="firstName"
+							id="firstName"
+							{...form.getInputProps("firstName")}
+						/>
+						<TextInput
+							radius="6px"
+							placeholder="Last name"
+							name="lastName"
+							id="lastName"
+							{...form.getInputProps("lastName")}
+						/>
+					</div>
 
 					<TextInput
 						radius="6px"
-						placeholder="Username"
-						name="username"
-						id="username"
-						{...form.getInputProps("username")}
+						placeholder="Email"
+						name="email"
+						id="email"
+						{...form.getInputProps("email")}
 					/>
-
-					<Text size="16px" fw="500">
-						{" "}
-						Password
-					</Text>
 					<PasswordInput
 						radius="6px"
 						placeholder="Password"
@@ -83,29 +104,34 @@ const LoginForm = () => {
 						id="password"
 						{...form.getInputProps("password")}
 					/>
-					<p className="text-sm self-end w-full flex justify-end ">
-						Forgot password?
-					</p>
+					<PasswordInput
+						radius="6px"
+						placeholder="Confirm password"
+						name="confirmPassword"
+						id="confirmPassword"
+						{...form.getInputProps("confirmPassword")}
+					/>
 				</div>
+
 				<div className=" flex flex-col justify-center items-center gap-[8px]">
 					<Button
 						size="18px"
 						h="52px"
-						radius={6}
 						fw={700}
 						color="#FF6633"
 						type="submit"
 						fullWidth
+						radius={6}
 					>
-						Login
+						Create account
 					</Button>
 					<p className="text-sm">
-						Don't have an account yet?{" "}
+						Already have an account?{" "}
 						<Link
-							href={"/register"}
+							href={"/"}
 							className="font-medium hover:underline cursor-pointer"
 						>
-							Sign up
+							Login
 						</Link>
 					</p>
 				</div>
@@ -114,4 +140,4 @@ const LoginForm = () => {
 	);
 };
 
-export default LoginForm;
+export default RegisterForm;

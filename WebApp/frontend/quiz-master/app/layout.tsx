@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "@mantine/core/styles.css";
-import { MantineProvider, createTheme, ColorSchemeScript } from "@mantine/core";
-
+import {
+	MantineProvider,
+	createTheme,
+	ColorSchemeScript,
+	TextInput,
+} from "@mantine/core";
+import { AuthProvider } from "./providers";
+import { getServerSession } from "next-auth";
+import toast, { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -11,11 +18,13 @@ export const metadata: Metadata = {
 	description: "QuizMaster",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const session = await getServerSession();
+	console.log(session);
 	return (
 		<html lang="en">
 			<head>
@@ -28,7 +37,10 @@ export default function RootLayout({
 			</head>
 			<body className={inter.className}>
 				{" "}
-				<MantineProvider>{children} </MantineProvider>
+				<MantineProvider>
+					<Toaster />
+					<AuthProvider session={session}>{children}</AuthProvider>{" "}
+				</MantineProvider>
 			</body>
 		</html>
 	);
