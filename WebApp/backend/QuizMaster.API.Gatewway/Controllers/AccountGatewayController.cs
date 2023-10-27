@@ -24,7 +24,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         private readonly AccountService.AccountServiceClient _channelClient;
         private readonly IMapper _mapper;
 
-        public AccountGatewayController(IMapper mapper, IOptions<AppSettings> options)
+        public AccountGatewayController(IMapper mapper, IOptions<AppSettings> options, ILogger<AccountGatewayController> logger)
         {
             var handler = new HttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => {
@@ -34,6 +34,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             //_channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_ACCOUNT_HOST, new GrpcChannelOptions { HttpHandler = handler });
+            logger.LogCritical(options.Value.MICROSERVICE_ACCOUNT_HOST);
             _channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_ACCOUNT_HOST);
             _channelClient = new AccountService.AccountServiceClient(_channel);
             _mapper = mapper;
