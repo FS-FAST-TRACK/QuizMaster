@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Media.Models;
 using QuizMaster.API.Media.Proto;
 using QuizMaster.API.Media.Utility;
@@ -33,6 +34,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="File"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] IFormFile File)
         {
@@ -77,6 +79,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// Get all media
         /// </summary>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpGet("get_all_media")]
         public async Task<IActionResult> GetAllMedia()
         {
@@ -100,6 +103,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>IActionResult</returns>
+        [QuizMasterAuthorization]
         [HttpGet("get_media/{id}")]
         public IActionResult GetMedia(string id)
         {
@@ -127,6 +131,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpGet("download_media/{id}")]
         public async Task<IActionResult> DownloadMedia(string id)
         {
@@ -184,6 +189,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>IActionResult</returns>
+        [QuizMasterAuthorization]
         [HttpDelete("delete_media/{id}")]
         public IActionResult DeleteMedia(string id)
         {

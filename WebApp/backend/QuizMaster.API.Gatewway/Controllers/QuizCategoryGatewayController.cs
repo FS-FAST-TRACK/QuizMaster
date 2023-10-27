@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.SeedData;
@@ -86,6 +87,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="category"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpPost("create_category")]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryCreateDto category)
         {
@@ -123,6 +125,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
@@ -165,6 +168,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// <param name="id"></param>
         /// <param name="patch"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpPatch("update_category/{id}")]
         public async Task<IActionResult> UpdateCategory(int id, JsonPatchDocument<CategoryCreateDto> patch)
         {
