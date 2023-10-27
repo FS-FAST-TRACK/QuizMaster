@@ -4,9 +4,11 @@ using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Models;
@@ -22,9 +24,9 @@ namespace QuizMaster.API.Gatewway.Controllers
         private readonly AccountService.AccountServiceClient _channelClient;
         private readonly IMapper _mapper;
 
-        public AccountGatewayController(IMapper mapper)
+        public AccountGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7175");
+            _channel = GrpcChannel.ForAddress(options.Value.Account_Service);
             _channelClient = new AccountService.AccountServiceClient(_channel);
             _mapper = mapper;
         }
