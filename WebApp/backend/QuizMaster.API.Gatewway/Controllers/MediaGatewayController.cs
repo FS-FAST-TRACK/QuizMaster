@@ -155,10 +155,26 @@ namespace QuizMaster.API.Gateway.Controllers
                 contentType = "application/octet-stream";
             }
 
-            // get the bytes
-            var bytes = await System.IO.File.ReadAllBytesAsync(imagePath);
-            // Return the FileInfo
-            return File(bytes, contentType, $"{file.Name}{file.Type}");
+            try
+            {
+                // download file
+                var bytes = await System.IO.File.ReadAllBytesAsync(imagePath);
+                return File(bytes, contentType, $"{file.Name}{file.Type}");
+            }
+            catch(FileNotFoundException ex)
+            {
+                // delete file info if media does not exist
+                _logger.LogError(ex.Message);
+                DeleteMedia(id);
+
+                return NotFound(new { Message = "Could not find file based on the 'id' specified." });
+            }
+            catch(Exception ex)
+            {
+                // if failed download
+                return BadRequest(new { Message = "Failed to download media" });
+            }
+            
         }
 
         /// <summary>
