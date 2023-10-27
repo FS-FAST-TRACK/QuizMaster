@@ -27,5 +27,8 @@ namespace QuizMaster.API.Quiz.Models
 
 		[Required]
 		public int QTypeId { get; set; }
+
+		// QDetails is a json serialized format of the type of details accepted by a question type
+		public string? QDetails { get; set; }
 	}
 }

@@ -31,6 +31,10 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		Task<bool> AddTypeAsync(QuestionType type);
 		bool UpdateType(QuestionType type);
 
+		Task<QuestionDetail?> GetQuestionDetailAsync(int qId);
+		Task<bool> AddQuestionDetailsAsync(QuestionDetail detail);
+		bool UpdateQuestionDetail(QuestionDetail detail);
+
 		Task<int> GetQuestionUseCategoryCount(int categoryId);
 		Task<int> GetQuestionUseDifficultyCount(int difficultyId);
 		Task<int> GetQuestionUseTypeCount(int typeId);

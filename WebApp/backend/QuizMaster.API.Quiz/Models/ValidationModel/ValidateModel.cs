@@ -1,4 +1,4 @@
-﻿namespace QuizMaster.API.Quiz.Models.ValidationModel
+﻿ namespace QuizMaster.API.Quiz.Models.ValidationModel
 {
 	public class ValidationModel : IValidationModel
 	{

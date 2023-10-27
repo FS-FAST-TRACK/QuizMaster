@@ -57,7 +57,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnModelStateErrors();
 			}
 
-			// Check if question statement already exist
+			// Check if question statement with associated category, difficulty, and type already exist
 			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement , question.QDifficultyId, question.QTypeId, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
@@ -65,22 +65,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnQuestionAlreadyExist();
 			}
 
-			// Get category, difficulty, and type
-			var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
-			var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-			var type = await _quizRepository.GetTypeAsync(question.QTypeId);
 			
-			// Guard if category, difficulty, and type is not found
-			var result = ValidateCategoryDifficultyType(category, difficulty, type);
-			if (!result.IsValid)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = result.Error
-				});
-			}
-
 			bool isSuccess;
 
 			// If question is not null and not active, we set active to true and update the question
@@ -89,12 +74,30 @@ namespace QuizMaster.API.Quiz.Controllers
 				questionFromRepo.ActiveData = true;
 				isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
 			}
-			// else, we create new question
 			else
+			// else, we create new question
 			{
+
+				// Get category, difficulty, and type
+				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
+				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
+				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+
+				// Guard if category, difficulty, and type is not found
+				var result = ValidateCategoryDifficultyType(category, difficulty, type);
+				if (!result.IsValid)
+				{
+					return BadRequest(new ResponseDto
+					{
+						Type = "Error",
+						Message = result.Error
+					});
+				}
+
 				questionFromRepo = _mapper.Map<Question>(question);
 				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
 			}
+			
 
 
 			// Check if update or create is not success 

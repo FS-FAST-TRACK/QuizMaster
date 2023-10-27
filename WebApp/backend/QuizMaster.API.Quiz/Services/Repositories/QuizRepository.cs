@@ -208,14 +208,52 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		#endregion
 
 
+		#region Question Detail Methods
+		public async Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		{
+			return await _context.Details.Where(d => d.Question.Id == qId).FirstOrDefaultAsync();
+		}
+		public async Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+		{
+			try
+			{
+				await _context.Details.AddAsync(detail);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add Type Failed", ex);
+				return false;
+			}
+		}
+		public bool UpdateQuestionDetail(QuestionDetail detail)
+		{
+			try
+			{
+				_context.Details.Update(detail);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Update Type Failed", ex);
+				return false;
+			}
+		}
+		#endregion
+
+		// Returns how many question used a question category
 		public async Task<int> GetQuestionUseCategoryCount(int categoryId)
 		{
 			return await _context.Questions.Where(q=> q.QCategory.Id  == categoryId).CountAsync();
 		}
+
+		// Returns how many question used a question difficulty
 		public async Task<int> GetQuestionUseDifficultyCount(int difficultyId)
 		{
 			return await _context.Questions.Where(q => q.QCategory.Id == difficultyId).CountAsync();
 		}
+
+		// Returns how many question used a question type
 		public async Task<int> GetQuestionUseTypeCount(int typeId)
 		{
 			return await _context.Questions.Where(q => q.QCategory.Id == typeId).CountAsync();
