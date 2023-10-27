@@ -35,7 +35,10 @@ namespace QuizMaster.API.Gatewway.Controllers
 
             //_channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_ACCOUNT_HOST, new GrpcChannelOptions { HttpHandler = handler });
             logger.LogCritical(options.Value.MICROSERVICE_ACCOUNT_HOST);
-            _channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_ACCOUNT_HOST);
+            _channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_ACCOUNT_HOST, new GrpcChannelOptions
+            {
+                HttpHandler = new HttpClientHandler()
+            });
             _channelClient = new AccountService.AccountServiceClient(_channel);
             _mapper = mapper;
         }
