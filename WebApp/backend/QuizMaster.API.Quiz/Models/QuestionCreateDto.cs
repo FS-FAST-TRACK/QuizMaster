@@ -5,13 +5,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace QuizMaster.API.Quiz.Models
 {
-	public class QuestionCreateDto
+	public class QuestionCreateDto<TAnswer, TDetail> 
 	{
 		[Required]
 		public string QStatement { get; set; }
 
 		[Required]
-		public string QAnswer { get; set; }
+		public TAnswer QAnswer { get; set; }
 
 		[Required]
 		public string QImage { get; set; }
@@ -29,6 +29,6 @@ namespace QuizMaster.API.Quiz.Models
 		public int QTypeId { get; set; }
 
 		// QDetails is a json serialized format of the type of details accepted by a question type
-		public string? QDetails { get; set; }
+		public TDetail? QDetails { get; set; }
 	}
 }
