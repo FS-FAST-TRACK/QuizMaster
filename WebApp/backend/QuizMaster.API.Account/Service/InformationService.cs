@@ -85,13 +85,34 @@ namespace QuizMaster.API.Account.Service
             return await Task.FromResult(reply);
         }
 
-        /// <summary>
-        /// Create account
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns>Task<CreateAccountReply> </returns>
-        public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request, ServerCallContext context)
+		/// <summary>
+		/// Check if username is still available
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="context"></param>
+		/// <returns>Task<CheckUserNameResponse></returns>
+		public override async Task<CheckEmailResponse> CheckEmail(CheckEmailRequest request, ServerCallContext context)
+		{
+			var reply = new CheckEmailResponse();
+			var user = _userManager.FindByEmailAsync(request.Email).Result;
+			if (user != null)
+			{
+				reply.IsAvailable = false;
+			}
+			else
+			{
+				reply.IsAvailable = true;
+			}
+			return await Task.FromResult(reply);
+		}
+
+		/// <summary>
+		/// Create account
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="context"></param>
+		/// <returns>Task<CreateAccountReply> </returns>
+		public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request, ServerCallContext context)
         {
             var reply = new CreateAccountReply() { Type = "Success", Message = "Successfully created user" };
 

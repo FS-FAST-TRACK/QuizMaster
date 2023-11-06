@@ -76,10 +76,11 @@ namespace QuizMaster.API.Authentication.Controllers
 
         [Authorize]
         [HttpPost]
-        [Route("set_admin/{id}")]
-        public IActionResult SetAdmin(int id)
+        [Route("set_admin/{Username}")]
+        public IActionResult SetAdmin(string Username)
         {
-            return Ok();
+            var response = _authenticationServices.UpdateRole(new AuthRequest { Username = Username });
+            return Ok(response);
         }
     }
 }

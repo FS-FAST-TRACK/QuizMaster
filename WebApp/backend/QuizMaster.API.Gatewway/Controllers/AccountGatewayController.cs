@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
 using Grpc.Core;
 using Grpc.Net.Client;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Models;
-using System.Globalization;
 
 namespace QuizMaster.API.Gatewway.Controllers
 {
@@ -22,9 +22,9 @@ namespace QuizMaster.API.Gatewway.Controllers
         private readonly AccountService.AccountServiceClient _channelClient;
         private readonly IMapper _mapper;
 
-        public AccountGatewayController(IMapper mapper)
+        public AccountGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7175");
+            _channel = GrpcChannel.ForAddress(options.Value.Account_Service);
             _channelClient = new AccountService.AccountServiceClient(_channel);
             _mapper = mapper;
         }
@@ -35,7 +35,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
         [QuizMasterAuthorization]
-        [HttpGet("get_account/{id}")]
+        [HttpGet("account/{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var request = new GetAccountByIdRequest
@@ -58,8 +58,8 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// Get all account API
         /// </summary>
         /// <returns>Task<IActionResult></returns>
-        [QuizMasterAuthorization]
-        [HttpGet("get_all_users")]
+        [QuizMasterAdminAuthorization]
+        [HttpGet("account")]
         public async Task<IActionResult> GetAllUsers()
         {
             var request = new Empty();
@@ -80,7 +80,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// </summary>
         /// <param name="account"></param>
         /// <returns>Task<IActionResult></returns>
-        [HttpPost("create_account")]
+        [HttpPost("account/create")]
         public async Task<IActionResult> Create(AccountCreateDto account)
         {
             if (!ModelState.IsValid)
@@ -94,19 +94,31 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             var response = await _channelClient.CheckUserNameAsync(checkUsername);
+
             if (!response.IsAvailable)
             {
                 return ReturnUserNameAlreadyExist();
             }
+			var checkEmail = new CheckEmailRequest
+			{
+				Email = account.Email
+			};
 
-            var request = _mapper.Map<CreateAccountRequest>(account);
+			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+			if (!emailResponse.IsAvailable)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+			var request = _mapper.Map<CreateAccountRequest>(account);
 
             var reply = await _channelClient.CreateAccountAsync(request);
 
             return Ok(reply);
         }
 
-        [HttpPost("partial_create_account")]
+        [HttpPost("account/create_partial")]
         public async Task<IActionResult> CreatePartial(AccountCreatePartialDto account)
         { 
             if(!ModelState.IsValid)
@@ -126,14 +138,28 @@ namespace QuizMaster.API.Gatewway.Controllers
                 return ReturnUserNameAlreadyExist();
             }
 
-            var request = _mapper.Map<CreateAccountPartialRquest>(account);
+            var checkEmail = new CheckEmailRequest
+            {
+                Email = account.Email
+            };
+
+			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+			if (!emailResponse.IsAvailable)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+
+
+			var request = _mapper.Map<CreateAccountPartialRquest>(account);
             var reply = await _channelClient.CreateAccountPartialAsync(request);
 
             return Ok(reply);
         }
 
         [QuizMasterAuthorization]
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("account/delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var request = new DeleteAccountRequest
@@ -156,7 +182,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         }
 
         [QuizMasterAuthorization]
-        [HttpPatch("update/{id}")]
+        [HttpPatch("account/update/{id}")]
         public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
         {
             var request = new GetAccountByIdRequest
@@ -231,5 +257,15 @@ namespace QuizMaster.API.Gatewway.Controllers
             });
 
         }
-    }
+
+        // Return if email already exist
+		private ActionResult ReturnEmailAlreadyExist()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "Email already exist."
+			});
+		}
+	}
 }

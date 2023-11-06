@@ -57,6 +57,17 @@ namespace QuizMaster.API.Account
 
             app.MapControllers();
 
+			// Make sure database is created
+			using (var scope = app.Services.CreateScope())
+			{
+				var services = scope.ServiceProvider;
+				var dbContext = services.GetRequiredService<AccountDbContext>();
+
+				// Ensure the database is created
+				dbContext.Database.EnsureCreated();
+			}
+
+
 			app.Run();
 		}
 	}

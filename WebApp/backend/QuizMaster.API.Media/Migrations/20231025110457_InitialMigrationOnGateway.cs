@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaster.API.Media.Migrations
 {
     /// <inheritdoc />
-    public partial class SqliteMigration_1 : Migration
+    public partial class InitialMigrationOnGateway : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.Library.Common.Entities.Accounts;
+using QuizMaster.Library.Common.Models;
 using QuizMaster.Library.Common.Models.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -18,6 +19,9 @@ namespace QuizMaster.API.Authentication.Services.Worker
      * To run RabbitMQ in docker, type this in the console
      * # latest RabbitMQ 3.12
      * docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
+     * 
+     * Update 1.1
+     * I have created a RabbitMQ_AccountPayload class which will include user roles
      */
     public class RabbitMqUserWorker
     {
@@ -32,7 +36,7 @@ namespace QuizMaster.API.Authentication.Services.Worker
             rabbitMqRepository = repository;
         }
 
-        public UserAccount SendRequest(AuthRequest authRequest)
+        public RabbitMQ_AccountPayload RequestUserCredentials(AuthRequest authRequest)
         {
 
             // create the RabbitMQ connection factory
@@ -62,7 +66,7 @@ namespace QuizMaster.API.Authentication.Services.Worker
             {
                 byte[] responseBody = ea.Body.ToArray();
                 var jsonResponse = Encoding.UTF8.GetString(responseBody);
-                var responseMessage = JsonConvert.DeserializeObject<UserAccount>(jsonResponse);
+                var responseMessage = JsonConvert.DeserializeObject<RabbitMQ_AccountPayload>(jsonResponse);
 
                 if(responseMessage != null)
                 {
