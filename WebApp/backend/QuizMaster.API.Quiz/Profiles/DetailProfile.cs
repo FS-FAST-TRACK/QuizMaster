@@ -11,9 +11,20 @@ namespace QuizMaster.API.Quiz.Profiles
 	public class DetailProfile : Profile   
 	{
 		public DetailProfile() {
+			CreateMap<QuestionDetail, DetailDto>();
+
 			// Multiple choice detail
 			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
 				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
+
+			// Multiple choice detail
+			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
+				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
+
+			// Slider detail
+			CreateMap<QuestionCreateDto<SliderAnswer, SliderQuestionDetail>, QuestionDetail>()
+				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
+
 
 
 		}

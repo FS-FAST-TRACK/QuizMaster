@@ -20,6 +20,9 @@ namespace QuizMaster.API.Quiz.Models
 		public string QAudio { get; set; }
 
 		[Required]
+		public int QTime { get; set; }
+
+		[Required]
 		public int QDifficultyId { get; set; }
 
 		[Required]

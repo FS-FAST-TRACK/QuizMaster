@@ -26,7 +26,11 @@ namespace QuizMaster.API.Quiz.Profiles
 
 			// Custom Mapper for type answer question
 			CreateMap<QuestionCreateDto<TypeAnswer, string>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => src.QAnswer));
+				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
+
+			// Custom Mapper for slider question
+			CreateMap<QuestionCreateDto<SliderAnswer, SliderQuestionDetail>, Question>()
+				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
 
 
 
