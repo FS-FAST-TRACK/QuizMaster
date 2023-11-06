@@ -24,6 +24,10 @@ namespace QuizMaster.API.Quiz.Profiles
 			CreateMap<QuestionCreateDto<bool, bool>, Question>()
 				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => src.QAnswer));
 
+			// Custom Mapper for type answer question
+			CreateMap<QuestionCreateDto<TypeAnswer, string>, Question>()
+				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => src.QAnswer));
+
 
 
 			CreateMap<Question, QuestionCreateDto<string, string>>();

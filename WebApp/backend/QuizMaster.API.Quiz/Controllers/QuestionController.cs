@@ -248,10 +248,19 @@ namespace QuizMaster.API.Quiz.Controllers
 		}
 		#endregion
 
-		// POST api/question/true-or-false
+		#region Post Type Answer Question
+		// POST api/question/type-answer
 		[HttpPost("type-answer")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, TypeAnswerQuestionDetail> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, string> question)
 		{
+			if (question.QTypeId != QuestionTypes.TypeAnswerSeedData.Id)
+			{
+				return BadRequest(new ResponseDto
+				{
+					Type = "Error",
+					Message = "API endpoint is only applicable to Type Answer type of question."
+				});
+			}
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -296,15 +305,6 @@ namespace QuizMaster.API.Quiz.Controllers
 						Message = result.Error
 					});
 				}
-				if (type.QTypeDesc.ToLower() == "type answer")
-				{
-					return BadRequest(new ResponseDto
-					{
-						Type = "Error",
-						Message = "API endpoint is only applicable to Type Answer type of question."
-					});
-				}
-
 
 				questionFromRepo = _mapper.Map<Question>(question);
 
@@ -316,8 +316,6 @@ namespace QuizMaster.API.Quiz.Controllers
 				questionFromRepo.QDifficulty = difficulty;
 				questionFromRepo.QType = type;
 #pragma warning restore CS8601 // Possible null reference assignment.
-
-				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
 
 				questionFromRepo = _mapper.Map<Question>(question);
 				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
@@ -335,7 +333,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			await _quizRepository.SaveChangesAsync();
 			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, _mapper.Map<QuestionDto>(questionFromRepo));
 		}
-
+		#endregion
 
 		// POST api/question
 		[HttpPost]
