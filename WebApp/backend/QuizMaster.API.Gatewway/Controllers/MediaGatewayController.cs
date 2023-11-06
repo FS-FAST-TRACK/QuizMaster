@@ -2,7 +2,10 @@
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Media.Models;
 using QuizMaster.API.Media.Proto;
 using QuizMaster.API.Media.Utility;
@@ -18,9 +21,9 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly ILogger _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public MediaGatewayController(ILogger<MediaGatewayController> logger, IWebHostEnvironment webHostEnvironment)
+        public MediaGatewayController(ILogger<MediaGatewayController> logger, IWebHostEnvironment webHostEnvironment, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7197");
+            _channel = GrpcChannel.ForAddress(options.Value.Media_Service);
             _channelClient = new MediaService.MediaServiceClient(_channel);
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
@@ -31,6 +34,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="File"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] IFormFile File)
         {
@@ -75,6 +79,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// Get all media
         /// </summary>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpGet("get_all_media")]
         public async Task<IActionResult> GetAllMedia()
         {
@@ -98,6 +103,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>IActionResult</returns>
+        [QuizMasterAuthorization]
         [HttpGet("get_media/{id}")]
         public IActionResult GetMedia(string id)
         {
@@ -125,6 +131,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Task<IActionResult></returns>
+        [QuizMasterAuthorization]
         [HttpGet("download_media/{id}")]
         public async Task<IActionResult> DownloadMedia(string id)
         {
@@ -155,10 +162,26 @@ namespace QuizMaster.API.Gateway.Controllers
                 contentType = "application/octet-stream";
             }
 
-            // get the bytes
-            var bytes = await System.IO.File.ReadAllBytesAsync(imagePath);
-            // Return the FileInfo
-            return File(bytes, contentType, $"{file.Name}{file.Type}");
+            try
+            {
+                // download file
+                var bytes = await System.IO.File.ReadAllBytesAsync(imagePath);
+                return File(bytes, contentType, $"{file.Name}{file.Type}");
+            }
+            catch(FileNotFoundException ex)
+            {
+                // delete file info if media does not exist
+                _logger.LogError(ex.Message);
+                DeleteMedia(id);
+
+                return NotFound(new { Message = "Could not find file based on the 'id' specified." });
+            }
+            catch(Exception ex)
+            {
+                // if failed download
+                return BadRequest(new { Message = "Failed to download media" });
+            }
+            
         }
 
         /// <summary>
@@ -166,6 +189,7 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>IActionResult</returns>
+        [QuizMasterAuthorization]
         [HttpDelete("delete_media/{id}")]
         public IActionResult DeleteMedia(string id)
         {

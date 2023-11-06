@@ -11,6 +11,8 @@ using QuizMaster.API.Authentication.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Helper;
+using Microsoft.Extensions.Options;
+using QuizMaster.API.Gateway.Configuration;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -21,9 +23,9 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly GrpcChannel _channel;
         private readonly AuthService.AuthServiceClient _channelClient;
 
-        public AuthenticationGatewayController()
+        public AuthenticationGatewayController(IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress("https://localhost:7062");
+            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
             _channelClient = new AuthService.AuthServiceClient(_channel);
         }
 
