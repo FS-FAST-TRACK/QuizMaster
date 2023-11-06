@@ -34,6 +34,10 @@ namespace QuizMaster.API.Authentication.Services
                     logger.LogInformation("Cached Data for User: " + accountPayload.Account.UserName);
                     users.Add(accountPayload.Account.Id, accountPayload);
                 }
+                else
+                {
+                    users[accountPayload.Account.Id] = accountPayload;
+                }
             }
         }
 
@@ -46,6 +50,11 @@ namespace QuizMaster.API.Authentication.Services
                         return v;
                 if (v.Account.Email != null)
                     if (v.Account.Email.ToLower() == authRequest.Email.ToLower())
+                        return v;
+                // try parsing the username to Id
+                _ = Int32.TryParse(authRequest.Username, out int Id);
+                if (Id != 0)
+                    if (Id == k)
                         return v;
             }
 

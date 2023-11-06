@@ -36,7 +36,7 @@ namespace QuizMaster.API.Authentication.Services.Worker
             rabbitMqRepository = repository;
         }
 
-        public RabbitMQ_AccountPayload SendRequest(AuthRequest authRequest)
+        public RabbitMQ_AccountPayload RequestUserCredentials(AuthRequest authRequest)
         {
 
             // create the RabbitMQ connection factory

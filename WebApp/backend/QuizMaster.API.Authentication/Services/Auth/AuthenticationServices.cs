@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Configuration;
@@ -15,12 +16,10 @@ namespace QuizMaster.API.Authentication.Services.Auth
     public class AuthenticationServices : IAuthenticationServices
     {
         private readonly ILogger<AuthenticationServices> _logger;
-        private readonly IRepository repository;
         private readonly AppSettings appSettings;
         private readonly RabbitMqUserWorker rabbitMqUserWorker;
-        public AuthenticationServices(IRepository repository, IOptions<AppSettings> options, RabbitMqUserWorker rabbitMqUserWorker, ILogger<AuthenticationServices> _logger)
+        public AuthenticationServices(IOptions<AppSettings> options, RabbitMqUserWorker rabbitMqUserWorker, ILogger<AuthenticationServices> _logger)
         {
-            this.repository = repository;
             appSettings = options.Value;
             this.rabbitMqUserWorker = rabbitMqUserWorker;
             this._logger = _logger;
@@ -32,8 +31,7 @@ namespace QuizMaster.API.Authentication.Services.Auth
             int tries = 1;
             while(retrieveUserInformation.Account.Id == -1 && (tries++ < 15))
             {
-                retrieveUserInformation = rabbitMqUserWorker.SendRequest(new Library.Common.Models.Services.AuthRequest { Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
-                _logger.LogInformation(retrieveUserInformation.Account.Email);
+                retrieveUserInformation = rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
             }
             /*
             UserAccount userAccount = repository.GetUserByUsername(authRequest.Username);
@@ -82,6 +80,25 @@ namespace QuizMaster.API.Authentication.Services.Auth
             if(!keyValuePairs.TryGetValue("token", out var authStoreJson)) { return null; }
 
             return JsonConvert.DeserializeObject<AuthStore>(authStoreJson);
+        }
+
+        public ResponseDto UpdateRole(AuthRequest authRequest)
+        {
+            RabbitMQ_AccountPayload retrieveUserInformation = new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
+            int tries = 1;
+
+            while (retrieveUserInformation.Account.Id == -1 && (tries++ < 15))
+            {
+                retrieveUserInformation = rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Type = "RoleUpdate", Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
+            }
+
+            _logger.LogInformation(JsonConvert.SerializeObject(retrieveUserInformation));
+
+            if (retrieveUserInformation.Roles.Contains("Administrator"))
+            {
+                return new ResponseDto { Message = $"User[{retrieveUserInformation.Account.UserName}] is now an admin", Type = "Role Update" };
+            }
+            return new ResponseDto { Message = $"User[{retrieveUserInformation.Account.UserName}] was revoked from admin", Type = "Role Update" };
         }
     }
 }
