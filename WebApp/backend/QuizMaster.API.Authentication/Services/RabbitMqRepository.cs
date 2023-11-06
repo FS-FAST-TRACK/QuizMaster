@@ -1,43 +1,55 @@
 ﻿using QuizMaster.Library.Common.Entities.Accounts;
+using QuizMaster.Library.Common.Models;
 using QuizMaster.Library.Common.Models.Services;
 
 namespace QuizMaster.API.Authentication.Services
 {
     public class RabbitMqRepository
     {
-        private readonly Dictionary<int, UserAccount> users;
+        private readonly Dictionary<int, RabbitMQ_AccountPayload> users;
         private readonly ILogger<RabbitMqRepository> logger;
 
         public RabbitMqRepository(ILogger<RabbitMqRepository> logger) 
         { 
-            users = new Dictionary<int, UserAccount>();
+            users = new Dictionary<int, RabbitMQ_AccountPayload>();
             this.logger = logger;
         }
 
 
 
-        public void AddCache(UserAccount account)
+        public void AddCache(RabbitMQ_AccountPayload accountPayload)
         {
+            /*
             if (!users.ContainsKey(account.Id))
             {
                 logger.LogInformation("Cached Data for User: "+account.UserName);
                 users.Add(account.Id, account);
             }
+            */
+
+            if(accountPayload.Account.Id != -1)
+            {
+                if(!users.ContainsKey(accountPayload.Account.Id)) 
+                {
+                    logger.LogInformation("Cached Data for User: " + accountPayload.Account.UserName);
+                    users.Add(accountPayload.Account.Id, accountPayload);
+                }
+            }
         }
 
-        public UserAccount TryGetCache(AuthRequest authRequest)
+        public RabbitMQ_AccountPayload TryGetCache(AuthRequest authRequest)
         {
             foreach (var (k, v) in users)
             {
-                if (v.UserName != null)
-                    if (v.UserName.ToLower() == authRequest.Username.ToLower())
+                if (v.Account.UserName != null)
+                    if (v.Account.UserName.ToLower() == authRequest.Username.ToLower())
                         return v;
-                if (v.Email != null)
-                    if (v.Email.ToLower() == authRequest.Email.ToLower())
+                if (v.Account.Email != null)
+                    if (v.Account.Email.ToLower() == authRequest.Email.ToLower())
                         return v;
             }
 
-            return new() { Id = -1 };
+            return new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
         }
     }
 }
