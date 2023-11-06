@@ -17,12 +17,12 @@ namespace QuizMaster.API.Quiz.Profiles
 			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
 				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
 
-			// Multiple choice detail
-			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
-				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
-
 			// Slider detail
 			CreateMap<QuestionCreateDto<SliderAnswer, SliderQuestionDetail>, QuestionDetail>()
+				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
+
+			// Puzzle detail
+			CreateMap<QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
 				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
 
 

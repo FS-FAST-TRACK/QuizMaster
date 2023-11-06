@@ -33,6 +33,11 @@ namespace QuizMaster.API.Quiz.Profiles
 				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
 
 
+			// Custom Mapper for puzzle question
+			CreateMap<QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail>, Question>()
+				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
+
+
 
 			CreateMap<Question, QuestionCreateDto<string, string>>();
 		}
