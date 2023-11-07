@@ -37,6 +37,10 @@ namespace QuizMaster.API.Quiz.Profiles
 			CreateMap<QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail>, Question>()
 				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
 
+			// Custom Mapper for multiple choice plus audio question
+			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoicePlusAudioQuestionDetail>, Question>()
+				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
+
 
 
 			CreateMap<Question, QuestionCreateDto<string, string>>();
