@@ -56,5 +56,14 @@ namespace QuizMaster.API.Authentication.Services.GRPC
             }
             return Task.FromResult(reply);
         }
+
+        public override async Task<SetAdminReply> SetAdmin(SetAdminRequest request, ServerCallContext context)
+        {
+            var reply = new SetAdminReply();
+            var response = _authenticationServices.UpdateRole(new AuthRequest { Username = request.Username });
+            reply.Response = JsonConvert.SerializeObject(response);
+
+            return await Task.FromResult(reply);
+        }
     }
 }
