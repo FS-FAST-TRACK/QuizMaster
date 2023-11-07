@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Helper;
 using QuizMaster.API.Authentication.Services;
@@ -18,7 +20,39 @@ builder.Services.AddControllers();
 builder.Services.AddLogging();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "QuizMaster - API Gateway! Lez gaww baybiii!",
+        Version = "v1",
+    });
+    // Enable token based auth in swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        In=Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description="Please enter JWT Token",
+        Name="Authorization",
+        Type=Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        BearerFormat="JWT",
+        Scheme="bearer"
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference= new OpenApiReference{
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    }) ;
+});
+
 builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Configuring strongly typed settings object
@@ -53,8 +87,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c =>
+    {
+        c.PreSerializeFilters.Add((swagger, httpReq) =>
+        {
+            swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" } };
+        });
+    });
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
+    });
 }
 
 app.UseHttpsRedirection();

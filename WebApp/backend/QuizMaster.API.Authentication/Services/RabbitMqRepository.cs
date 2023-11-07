@@ -45,6 +45,8 @@ namespace QuizMaster.API.Authentication.Services
         {
             foreach (var (k, v) in users)
             {
+                if (v.Account == null)
+                    continue;
                 if (v.Account.UserName != null)
                     if (v.Account.UserName.ToLower() == authRequest.Username.ToLower())
                         return v;
