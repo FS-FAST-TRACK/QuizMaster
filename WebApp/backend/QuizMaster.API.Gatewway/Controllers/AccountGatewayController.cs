@@ -70,7 +70,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// Get all account API
         /// </summary>
         /// <returns>Task<IActionResult></returns>
-        //[QuizMasterAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("get_all_users")]
         public async Task<IActionResult> GetAllUsers()
         {
