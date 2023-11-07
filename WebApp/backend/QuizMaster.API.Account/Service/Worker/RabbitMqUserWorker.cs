@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Configuration;
 using QuizMaster.Library.Common.Entities.Accounts;
+using QuizMaster.Library.Common.Models;
 using QuizMaster.Library.Common.Models.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -20,6 +21,9 @@ namespace QuizMaster.API.Account.Service.Worker
      * To run RabbitMQ in docker, type this in the console
      * # latest RabbitMQ 3.12
      * docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
+     * 
+     * Update 1.1
+     * I have created a RabbitMQ_AccountPayload class which will include user roles
      */
     public class RabbitMqUserWorker : BackgroundService
     {
@@ -62,24 +66,36 @@ namespace QuizMaster.API.Account.Service.Worker
                         // Declare a response queue for sending responses
                         channel.QueueDeclare(appSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
 
-                        // Setup consumer to listen for upcoming messages
-                        var consumer = new EventingBasicConsumer(channel);
-                        consumer.Received += (model, ea) =>
+                // Setup consumer to listen for upcoming messages
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += async (model, ea) =>
+                {
+                    var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
+                    var jsonMssage = Encoding.UTF8.GetString(body);
+                    var requestMessage = JsonConvert.DeserializeObject<AuthRequest>(jsonMssage); // deserialize the json to object [useraccount]
+
+                    if(requestMessage != null)
+                    {
+                        RabbitMQ_AccountPayload? ProcessedPayload = null;
+
+                        if (requestMessage.Type == "Credentials")
                         {
-                            var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
-                            var jsonMssage = Encoding.UTF8.GetString(body);
-                            var requestMessage = JsonConvert.DeserializeObject<AuthRequest>(jsonMssage); // deserialize the json to object [useraccount]
+                            ProcessedPayload = await ProcessAccountRequest(requestMessage);
+                        }
+                        else
+                        {
+                            ProcessedPayload = await ProcessRoleRequest(requestMessage);
+                        }
 
-                            var ProcessedPayload = ProcessRequest(requestMessage);
+                        // serialize the payload to JSON
+                        var jsonResponse = JsonConvert.SerializeObject(ProcessedPayload);
+                        var responseBody = Encoding.UTF8.GetBytes(jsonResponse);
+                        logger.LogInformation("RabbitMQ: Sending Response...\n" + jsonResponse + "\n\n");
 
-                            // serialize the payload to JSON
-                            var jsonResponse = JsonConvert.SerializeObject(ProcessedPayload);
-                            var responseBody = Encoding.UTF8.GetBytes(jsonResponse);
-                            logger.LogInformation("RabbitMQ: Sending Response...\n" + jsonResponse + "\n\n");
-
-                            // publish the response to the response queue
-                            channel.BasicPublish("", appSettings.RabbitMq_Account_ResponseQueueName, null, responseBody);
-                        };
+                        // publish the response to the response queue
+                        channel.BasicPublish("", appSettings.RabbitMq_Account_ResponseQueueName, null, responseBody);
+                    }
+                };
 
                         // consume messages from the request queue
                         channel.BasicConsume(appSettings.RabbitMq_Account_RequestQueueName, true, consumer);
@@ -100,9 +116,10 @@ namespace QuizMaster.API.Account.Service.Worker
         }
 
 
-        private UserAccount ProcessRequest(AuthRequest? request)
+        private async Task<RabbitMQ_AccountPayload> ProcessAccountRequest(AuthRequest? request)
         {
             UserAccount userAccount = new() { Id = -1 };
+            IList<string> roles = new List<string>();
             // Worker services do not support scoped lifetime services, that's why we will call the service provider
             using (var scope = serviceProvider.CreateScope())
             {
@@ -110,12 +127,15 @@ namespace QuizMaster.API.Account.Service.Worker
 
                 // return an empty user with Id of -1 when userManager was failed to invoke
                 if(userManager == null)
-                    return new() { Id = -1 };
+                    return new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
 
                 userAccount = GetUser(request, userManager);
+
+                // get the user roles
+                roles = await userManager.GetRolesAsync(userAccount);
             }
 
-            return userAccount;
+            return new RabbitMQ_AccountPayload { Account = userAccount, Roles = roles };
         }
 
         private UserAccount GetUser(AuthRequest? request, UserManager<UserAccount> userManager)
@@ -138,6 +158,55 @@ namespace QuizMaster.API.Account.Service.Worker
             if (PasswordVerificationResult.Success != passwordVerification) { return new() { Id = -1 }; };
 
             return userAccount;
+        }
+
+
+        private async Task<RabbitMQ_AccountPayload> ProcessRoleRequest(AuthRequest? request)
+        {
+            UserAccount? userAccount = new() { Id = -1 };
+            IList<string> roles = new List<string>();
+            // Worker services do not support scoped lifetime services, that's why we will call the service provider
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetService<UserManager<UserAccount>>();
+
+                // return an empty user with Id of -1 when userManager was failed to invoke
+                if (userManager == null || request == null)
+                    return new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
+
+                // retrieve user information
+                userAccount = userManager.Users.FirstOrDefault(u => u.Email == request.Email);
+                userAccount ??= userManager.Users.FirstOrDefault(u => u.UserName == request.Username);
+
+                // try parsing username to Id (int)
+                _ = Int32.TryParse(request.Username, out int userId);
+                userAccount ??= userManager.Users.FirstOrDefault(u => u.Id == userId);
+
+                // return empty user with Id of -1 when userAccount not found
+                if (userAccount == null)
+                    return new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
+
+                // get the user roles
+                roles = await userManager.GetRolesAsync(userAccount);
+
+                // if no administrator found, add user to administrator
+                // if already admin, remove the role
+                try
+                {
+                    if (await userManager.IsInRoleAsync(userAccount, "Administrator"))
+                    {
+                        await userManager.RemoveFromRoleAsync(userAccount, "Administrator");
+                    }
+                    else
+                    {
+                        await userManager.AddToRoleAsync(userAccount, "Administrator");
+                    }
+                    
+                }
+                catch { }
+            }
+
+            return new RabbitMQ_AccountPayload { Account = userAccount, Roles = roles };
         }
 
     }

@@ -10,8 +10,10 @@ namespace QuizMaster.API.Quiz.Models
 		public string QAnswer { get; set; }
 		public string QImage { get; set; }
 		public string QAudio { get; set; }
-		public QuestionDifficulty QDifficulty { get; set; }
-		public QuestionCategory QCategory { get; set; }
-		public QuestionType QType { get; set; }
+		public int QTime { get; set; }
+		public DifficultyDto QDifficulty { get; set; }
+		public CategoryDto QCategory { get; set; }
+		public TypeDto QType { get; set; }
+		public DetailDto? Details { get; set; }
 	}
 }
