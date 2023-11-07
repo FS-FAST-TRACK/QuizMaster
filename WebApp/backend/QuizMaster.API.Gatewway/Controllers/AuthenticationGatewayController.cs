@@ -11,8 +11,6 @@ using QuizMaster.API.Authentication.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Helper;
-using Microsoft.Extensions.Options;
-using QuizMaster.API.Authentication.Configuration;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -23,7 +21,7 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly GrpcChannel _channel;
         private readonly AuthService.AuthServiceClient _channelClient;
 
-        public AuthenticationGatewayController(IOptions<AppSettings> options)
+        public AuthenticationGatewayController()
         {
             var handler = new HttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => {
@@ -32,6 +30,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return true; // For simplicity, trust all certificates (not recommended for production).
             };
             _channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_AUTH_HOST);
+            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
             _channelClient = new AuthService.AuthServiceClient(_channel);
         }
 
