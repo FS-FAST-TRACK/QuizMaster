@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NuGet.ProjectModel;
 using QuizMaster.API.Quiz.DbContexts;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.Quiz.Services.Repositories
 {
@@ -27,6 +30,36 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				.Include(q=>q.QDifficulty)
 				.Include(q=>q.QType)
 				.ToListAsync();
+		}
+		public async Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
+		{
+			var collection = _context.Questions as IQueryable<Question>;
+
+			if (resourceParameter.IsOnlyActiveData)
+			{
+				collection = collection.Where(q => q.ActiveData);
+			}
+			collection = collection
+				.Include(q => q.QCategory)
+				.Include(q => q.QDifficulty)
+				.Include(q => q.QType);
+
+			if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
+			{
+				var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
+				collection = collection
+					.Where(q => 
+					q.QStatement.ToLower().Replace(" ", "").Contains(query)
+					&& q.QCategory.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
+					&& q.QType.QTypeDesc.ToLower().Replace(" ", "").Contains(query)
+					&& q.QDifficulty.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
+					);
+				
+			}
+
+			return await PagedList<Question>.CreateAsync(collection,
+				resourceParameter.PageNumber,
+				resourceParameter.PageSize);
 		}
 
 		public async Task<Question?> GetQuestionAsync(int id)

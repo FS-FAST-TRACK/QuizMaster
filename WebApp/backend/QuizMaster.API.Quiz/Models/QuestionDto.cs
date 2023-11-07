@@ -6,6 +6,7 @@ namespace QuizMaster.API.Quiz.Models
 {
 	public class QuestionDto
 	{
+		public int Id { get; set; }
 		public string QStatement { get; set; }
 		public string QAnswer { get; set; }
 		public string QImage { get; set; }
