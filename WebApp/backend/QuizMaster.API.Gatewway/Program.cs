@@ -6,6 +6,7 @@ using QuizMaster.API.Authentication.Services.Auth;
 using QuizMaster.API.Authentication.Services.GRPC;
 using QuizMaster.API.Authentication.Services.Temp;
 using QuizMaster.API.Authentication.Services.Worker;
+using QuizMaster.API.Gateway.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Inject Auto Mapper
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddControllers();
+builder.Services.AddLogging();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -21,6 +23,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Configuring strongly typed settings object
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<GrpcServerConfiguration>(builder.Configuration.GetSection("GrpcServerConfiguration"));
 
 // register the services
 builder.Services.AddScoped<IRepository, Repository>();

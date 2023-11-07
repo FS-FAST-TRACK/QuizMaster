@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Media.Data.Context;
 using QuizMaster.API.Media.Services;
+using QuizMaster.API.Media.Services.GRPC;
 
 namespace QuizMaster.API.Media
 {
@@ -11,8 +12,9 @@ namespace QuizMaster.API.Media
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddGrpc();
             builder.Services.AddControllers();
+            builder.Services.AddLogging();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -39,6 +41,8 @@ namespace QuizMaster.API.Media
 
             app.UseAuthorization();
 
+            app.MapGrpcService<Service>();
+            app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
             app.MapControllers();
 
