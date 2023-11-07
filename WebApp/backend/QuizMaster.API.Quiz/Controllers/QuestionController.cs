@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Models.ValidationModel;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
+using QuizMaster.Library.Common.Entities.Questionnaire.Details;
 using QuizMaster.Library.Common.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -24,6 +27,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			_mapper = mapper;
 		}
 
+		#region Get All Questions
 		// GET: api/question
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get()
@@ -32,24 +36,414 @@ namespace QuizMaster.API.Quiz.Controllers
 			var questions = await _quizRepository.GetAllQuestionsAsync();
 			return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
 		}
+		#endregion
 
+		#region Get Question
 		// GET api/question/5
 		[HttpGet("{id}", Name = "GetQuestion")]
 		public async Task<ActionResult<QuestionDto>> Get(int id)
 		{
 			// Get Question asynchronously
 			var question = await _quizRepository.GetQuestionAsync(id);
+			var questionDetail = await _quizRepository.GetQuestionDetailAsync(id);
 
 			// Return not found if question doesn't exist or no longer active
 			if (question == null || !question.ActiveData) return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
 
-			return Ok(_mapper.Map<QuestionDto>(question));
+			var questionDto = _mapper.Map<QuestionDto>(question);
+			questionDto.Details = _mapper.Map<DetailDto>(questionDetail);
+			
+			return Ok(questionDto);
 
 		}
+		#endregion
 
-		// POST api/question
-		[HttpPost]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto question)
+		#region Post Multiple Choice Question
+		// POST api/question/multiple-choice
+		[HttpPost("multiple-choice")]
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail> question)
+		{
+
+			if (question.QTypeId != QuestionTypes.MultipleChoiceSeedData.Id)
+			{
+				return BadRequest(new ResponseDto
+				{
+					Type = "Error",
+					Message = "API endpoint is only applicable to Multiple type of question."
+				});
+			}
+
+			// validate model
+			if (!ModelState.IsValid)
+			{
+				return ReturnModelStateErrors();
+			}
+
+			// Check if question statement with associated category, difficulty, and type already exist
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+
+			if (questionFromRepo != null && questionFromRepo.ActiveData)
+			{
+				return ReturnQuestionAlreadyExist();
+			}
+
+
+			bool isSuccess;
+
+			// Extract the detail from question
+			var detail = _mapper.Map<QuestionDetail>(question);
+
+			// If question is not null and not active, we set active to true and update the question
+			if (questionFromRepo != null && !questionFromRepo.ActiveData)
+			{
+				questionFromRepo.ActiveData = true;
+				isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
+			}
+			else
+			// else, we create new question
+			{
+
+				// Get category, difficulty, and type
+				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
+				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
+				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+
+				// Guard if category, difficulty, and type is not found
+				var result = ValidateCategoryDifficultyType(category, difficulty, type);
+				if (!result.IsValid)
+				{
+					return BadRequest(new ResponseDto
+					{
+						Type = "Error",
+						Message = result.Error
+					});
+				}
+
+				questionFromRepo = _mapper.Map<Question>(question);
+
+				
+
+				// Assign category, difficulty, and type
+				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
+#pragma warning disable CS8601 // Possible null reference assignment.
+				questionFromRepo.QCategory = category;
+				questionFromRepo.QDifficulty = difficulty;
+				questionFromRepo.QType = type;
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+				var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionFromRepo);
+				var isDetailAddedSuccessfully = true;
+
+				if (isQuestionAddedSuccessfully)
+				{
+					// Link the details to question. 
+					detail.Question = questionFromRepo;
+					// Created by UserId must be updated by the time we have access to tokens
+					detail.CreatedByUserId = 1;
+					isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
+				}
+
+				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
+			}
+
+
+
+			// Check if update or create is not success 
+			if (!isSuccess)
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+
+			}
+
+			await _quizRepository.SaveChangesAsync();
+
+			var questionDto = _mapper.Map<QuestionDto>(questionFromRepo);
+
+			questionDto.Details = _mapper.Map<DetailDto>(detail);
+			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, questionDto);
+		}
+		#endregion
+
+		#region Post True or False Question
+		// POST api/question/true-or-false
+		[HttpPost("true-or-false")]
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<bool, bool> question)
+		{
+			if (question.QTypeId != QuestionTypes.TrueOrFalseSeedData.Id)
+			{
+				return BadRequest(new ResponseDto
+				{
+					Type = "Error",
+					Message = "API endpoint is only applicable to True or False type of question."
+				});
+			}
+
+			// validate model
+			if (!ModelState.IsValid)
+			{
+				return ReturnModelStateErrors();
+			}
+
+			// Check if question statement with associated category, difficulty, and type already exist
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+
+			if (questionFromRepo != null && questionFromRepo.ActiveData)
+			{
+				return ReturnQuestionAlreadyExist();
+			}
+
+
+
+			bool isSuccess;
+
+
+			// If question is not null and not active, we set active to true and update the question
+			if (questionFromRepo != null && !questionFromRepo.ActiveData)
+			{
+				questionFromRepo.ActiveData = true;
+				isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
+			}
+			else
+			// else, we create new question
+			{
+
+				// Get category, difficulty, and type
+				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
+				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
+				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+
+				// Guard if category, difficulty, and type is not found
+				var result = ValidateCategoryDifficultyType(category, difficulty, type);
+				if (!result.IsValid)
+				{
+					return BadRequest(new ResponseDto
+					{
+						Type = "Error",
+						Message = result.Error
+					});
+				}
+
+
+
+				questionFromRepo = _mapper.Map<Question>(question);
+
+
+				// Assign category, difficulty, and type
+				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
+#pragma warning disable CS8601 // Possible null reference assignment.
+				questionFromRepo.QCategory = category;
+				questionFromRepo.QDifficulty = difficulty;
+				questionFromRepo.QType = type;
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
+			}
+
+
+
+			// Check if update or create is not success 
+			if (!isSuccess)
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+
+			}
+
+			await _quizRepository.SaveChangesAsync();
+			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, _mapper.Map<QuestionDto>(questionFromRepo));
+		}
+		#endregion
+
+		#region Post Type Answer Question
+		// POST api/question/type-answer
+		[HttpPost("type-answer")]
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, string> question)
+		{
+			if (question.QTypeId != QuestionTypes.TypeAnswerSeedData.Id)
+			{
+				return BadRequest(new ResponseDto
+				{
+					Type = "Error",
+					Message = "API endpoint is only applicable to Type Answer type of question."
+				});
+			}
+			// validate model
+			if (!ModelState.IsValid)
+			{
+				return ReturnModelStateErrors();
+			}
+
+			// Check if question statement with associated category, difficulty, and type already exist
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+
+			if (questionFromRepo != null && questionFromRepo.ActiveData)
+			{
+				return ReturnQuestionAlreadyExist();
+			}
+
+
+
+			bool isSuccess;
+
+
+			// If question is not null and not active, we set active to true and update the question
+			if (questionFromRepo != null && !questionFromRepo.ActiveData)
+			{
+				questionFromRepo.ActiveData = true;
+				isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
+			}
+			else
+			// else, we create new question
+			{
+
+				// Get category, difficulty, and type
+				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
+				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
+				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+
+				// Guard if category, difficulty, and type is not found
+				var result = ValidateCategoryDifficultyType(category, difficulty, type);
+				if (!result.IsValid)
+				{
+					return BadRequest(new ResponseDto
+					{
+						Type = "Error",
+						Message = result.Error
+					});
+				}
+
+				questionFromRepo = _mapper.Map<Question>(question);
+
+
+				// Assign category, difficulty, and type
+				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
+#pragma warning disable CS8601 // Possible null reference assignment.
+				questionFromRepo.QCategory = category;
+				questionFromRepo.QDifficulty = difficulty;
+				questionFromRepo.QType = type;
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
+			}
+
+
+
+			// Check if update or create is not success 
+			if (!isSuccess)
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+
+			}
+
+			await _quizRepository.SaveChangesAsync();
+			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, _mapper.Map<QuestionDto>(questionFromRepo));
+		}
+		#endregion
+
+		#region Post Slider Question
+		// POST api/question/slider
+		[HttpPost("slider")]
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<SliderAnswer, SliderQuestionDetail> question)
+		{
+			if (question.QTypeId != QuestionTypes.SliderSeedData.Id)
+			{
+				return BadRequest(new ResponseDto
+				{
+					Type = "Error",
+					Message = "API endpoint is only applicable to Slider type of question."
+				});
+			}
+			// validate model
+			if (!ModelState.IsValid)
+			{
+				return ReturnModelStateErrors();
+			}
+
+			// Check if question statement with associated category, difficulty, and type already exist
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+
+			if (questionFromRepo != null && questionFromRepo.ActiveData)
+			{
+				return ReturnQuestionAlreadyExist();
+			}
+
+
+			bool isSuccess;
+
+			// Extract the slider detail from question
+			var detail = _mapper.Map<QuestionDetail>(question);
+
+			// If question is not null and not active, we set active to true and update the question
+			if (questionFromRepo != null && !questionFromRepo.ActiveData)
+			{
+				questionFromRepo.ActiveData = true;
+				isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
+			}
+			else
+			// else, we create new question
+			{
+
+				// Get category, difficulty, and type
+				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
+				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
+				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+
+				// Guard if category, difficulty, and type is not found
+				var result = ValidateCategoryDifficultyType(category, difficulty, type);
+				if (!result.IsValid)
+				{
+					return BadRequest(new ResponseDto
+					{
+						Type = "Error",
+						Message = result.Error
+					});
+				}
+
+				questionFromRepo = _mapper.Map<Question>(question);
+
+
+				// Assign category, difficulty, and type
+				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
+#pragma warning disable CS8601 // Possible null reference assignment.
+				questionFromRepo.QCategory = category;
+				questionFromRepo.QDifficulty = difficulty;
+				questionFromRepo.QType = type;
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+				var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionFromRepo);
+				var isDetailAddedSuccessfully = true;
+
+				if (isQuestionAddedSuccessfully)
+				{
+					// Link the details to question. 
+					detail.Question = questionFromRepo;
+					// Created by UserId must be updated by the time we have access to tokens
+					detail.CreatedByUserId = 1;
+					isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
+				}
+
+				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
+			}
+
+
+
+			// Check if update or create is not success 
+			if (!isSuccess)
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+
+			}
+
+			await _quizRepository.SaveChangesAsync();
+
+			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, _mapper.Map<QuestionDto>(questionFromRepo));
+		}
+		#endregion
+
+
+		#region Post Puzzle Question
+		// POST api/question/puzzle
+		[HttpPost("puzzle")]
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail> question)
 		{
 			// validate model
 			if (!ModelState.IsValid)
@@ -58,14 +452,107 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement , question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.PuzzleSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
 				return ReturnQuestionAlreadyExist();
 			}
 
-			
+
+			bool isSuccess;
+
+			// Extract the slider detail from question
+			var detail = _mapper.Map<QuestionDetail>(question);
+
+			// If question is not null and not active, we set active to true and update the question
+			if (questionFromRepo != null && !questionFromRepo.ActiveData)
+			{
+				questionFromRepo.ActiveData = true;
+				isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
+			}
+			else
+			// else, we create new question
+			{
+
+				// Get category, difficulty, and type
+				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
+				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.PuzzleSeedData.Id);
+
+				// Guard if category, difficulty, and type is not found
+				var result = ValidateCategoryDifficultyType(category, difficulty, type);
+				if (!result.IsValid)
+				{
+					return BadRequest(new ResponseDto
+					{
+						Type = "Error",
+						Message = result.Error
+					});
+				}
+
+				questionFromRepo = _mapper.Map<Question>(question);
+
+
+				// Assign category, difficulty, and type
+				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
+#pragma warning disable CS8601 // Possible null reference assignment.
+				questionFromRepo.QCategory = category;
+				questionFromRepo.QDifficulty = difficulty;
+				questionFromRepo.QType = type;
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+				var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionFromRepo);
+				var isDetailAddedSuccessfully = true;
+
+				if (isQuestionAddedSuccessfully)
+				{
+					// Link the details to question. 
+					detail.Question = questionFromRepo;
+					// Created by UserId must be updated by the time we have access to tokens
+					detail.CreatedByUserId = 1;
+					isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
+				}
+
+				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
+			}
+
+
+
+			// Check if update or create is not success 
+			if (!isSuccess)
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+
+			}
+
+			await _quizRepository.SaveChangesAsync();
+
+			var questionDto = _mapper.Map<QuestionDto>(questionFromRepo);
+			questionDto.Details = _mapper.Map<DetailDto>(detail);
+			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, questionDto);
+		}
+		#endregion
+
+		// POST api/question
+		[HttpPost]
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<string, string> question)
+		{
+			// validate model
+			if (!ModelState.IsValid)
+			{
+				return ReturnModelStateErrors();
+			}
+
+			// Check if question statement with associated category, difficulty, and type already exist
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+
+			if (questionFromRepo != null && questionFromRepo.ActiveData)
+			{
+				return ReturnQuestionAlreadyExist();
+			}
+
+
 			bool isSuccess;
 
 			// If question is not null and not active, we set active to true and update the question
@@ -97,7 +584,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				questionFromRepo = _mapper.Map<Question>(question);
 				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
 			}
-			
+
 
 
 			// Check if update or create is not success 
@@ -113,7 +600,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 		// PATCH api/question/5
 		[HttpPatch("{id}")]
-		public async Task<ActionResult<QuestionDto>> Put(int id, JsonPatchDocument<QuestionCreateDto> patch)
+		public async Task<ActionResult<QuestionDto>> Put(int id, JsonPatchDocument<QuestionCreateDto<string, string>> patch)
 		{
 
 			var questionFromRepo = await _quizRepository.GetQuestionAsync(id);
@@ -124,7 +611,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnQuestionDoesNotExist(id);
 			}
 
-			var questionForPatch = new QuestionCreateDto();
+			var questionForPatch = new QuestionCreateDto<string, string>();
 
 			patch.ApplyTo(questionForPatch);
 
@@ -249,7 +736,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			{
 				validationModel.Error += "Difficulty is not found. ";
 
-				
+
 			}
 			if (type == null || !type.ActiveData)
 			{
