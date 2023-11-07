@@ -21,10 +21,10 @@ namespace QuizMaster.API.Authentication.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] AuthRequest requestModel)
+        public async Task<IActionResult> Login([FromBody] AuthenticationRequestDTO requestModel)
         {
             // generate the token by calling the authentication service
-            var tokenHolder = _authenticationServices.Authenticate(requestModel);
+            var tokenHolder = _authenticationServices.Authenticate(requestModel.GetAuthRequest());
 
             // if no token is generated, it is an invalid credentials
             if(tokenHolder.Token == null) {

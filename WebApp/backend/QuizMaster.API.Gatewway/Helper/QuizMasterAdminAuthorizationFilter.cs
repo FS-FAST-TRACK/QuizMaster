@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Services.Auth;
+using QuizMaster.Library.Common.Utilities;
 
 namespace QuizMaster.API.Gateway.Helper
 {
@@ -8,16 +12,18 @@ namespace QuizMaster.API.Gateway.Helper
     {
         private readonly IAuthenticationServices _authenticationServices;
         private readonly ILogger<QuizMasterAdminAuthorizationFilter> _logger;
-        public QuizMasterAdminAuthorizationFilter(IAuthenticationServices authenticationServices, ILogger<QuizMasterAdminAuthorizationFilter> logger)
+        private readonly AppSettings _appSettings;
+        public QuizMasterAdminAuthorizationFilter(IAuthenticationServices authenticationServices, ILogger<QuizMasterAdminAuthorizationFilter> logger, IOptions<AppSettings> options)
         {
             _authenticationServices = authenticationServices;
             _logger = logger;
+            _appSettings = options.Value;
         }
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             // Retrieve the user's principal from the HttpContext
             var principal = context.HttpContext.User;
-
+            
             if (principal.Identity == null)
             {
                 context.Result = new UnauthorizedResult();
@@ -27,7 +33,12 @@ namespace QuizMaster.API.Gateway.Helper
             // Check if the user is authenticated
             if (!principal.Identity.IsAuthenticated)
             {
-                context.Result = new UnauthorizedResult();
+                // If not authenticated, try to check if there is a JWT token in the header
+                bool isJWTAuthenticated = IsJWTAuthenticated(context.HttpContext);
+                if(!isJWTAuthenticated)
+                {
+                    context.Result = new UnauthorizedResult();
+                }
                 return;
             }
 
@@ -85,6 +96,33 @@ namespace QuizMaster.API.Gateway.Helper
                 return false;
 
             return true;
+        }
+
+        private bool IsJWTAuthenticated(HttpContext context)
+        {
+            try
+            {
+                var token = context.Request.Headers.Authorization.ToString().Split(" ")[1];
+
+                // validate the token
+                var authStore = _authenticationServices.Validate(token);
+
+                // if auth store is null, the token specified failed to decode
+                if (authStore == null)
+                    return false;
+
+                // if the role is not admin, return false
+                var userRole = authStore.Roles.FirstOrDefault(r => r == "Administrator");
+                if (userRole == null)
+                    return false;
+
+                return true;
+            }
+            catch
+            {
+                // If error on splitting the token, return false
+                return false;
+            }
         }
     }
 }

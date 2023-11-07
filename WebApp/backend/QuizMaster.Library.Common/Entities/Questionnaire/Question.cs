@@ -24,6 +24,9 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         [AllowNull]
         public string QAudio { get; set; }
 
+        [Required] 
+        public int QTime { get; set; }
+
         [Required]
         public QuestionDifficulty QDifficulty { get; set; }
 
