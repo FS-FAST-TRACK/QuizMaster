@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.Library.Common.Entities.Accounts;
@@ -24,9 +25,18 @@ namespace QuizMaster.API.Gatewway.Controllers
         private readonly AccountService.AccountServiceClient _channelClient;
         private readonly IMapper _mapper;
 
-        public AccountGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
+        public AccountGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options, ILogger<AccountGatewayController> logger)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Account_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            //_channel = GrpcChannel.ForAddress(options.Value.MICROSERVICE_ACCOUNT_HOST, new GrpcChannelOptions { HttpHandler = handler });
+            logger.LogCritical(options.Value.Account_Service);
+            _channel = GrpcChannel.ForAddress(options.Value.Account_Service, new GrpcChannelOptions
+            {
+                HttpHandler = handler
+            });
             _channelClient = new AccountService.AccountServiceClient(_channel);
             _mapper = mapper;
         }
