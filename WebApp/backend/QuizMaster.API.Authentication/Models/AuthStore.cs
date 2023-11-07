@@ -8,9 +8,9 @@ namespace QuizMaster.API.Authentication.Models
         public UserAccount UserData { get; set; }
         public DateTime IssuedDate { get; set; }
         public DateTime ValidUntil { get; set; }
-        public IEnumerable<UserRole> Roles { get; set; }
+        public IEnumerable<string> Roles { get; set; }
 
-        public AuthStore(UserAccount userData, IEnumerable<UserRole> roles, DateTime timestamp, int validityOffsetHours)
+        public AuthStore(UserAccount userData, IEnumerable<string> roles, DateTime timestamp, int validityOffsetHours)
         {
             UserData = userData;
             IssuedDate = timestamp;
