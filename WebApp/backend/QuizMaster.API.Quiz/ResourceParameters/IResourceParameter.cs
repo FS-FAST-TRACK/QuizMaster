@@ -1,4 +1,4 @@
-﻿namespace QuizMaster.API.Quiz.ResoureParameters
+﻿namespace QuizMaster.API.Quiz.ResourceParameters
 {
 	public interface IResourceParameter
 	{

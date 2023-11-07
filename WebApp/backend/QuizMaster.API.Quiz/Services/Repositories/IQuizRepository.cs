@@ -1,10 +1,13 @@
-﻿using QuizMaster.Library.Common.Entities.Questionnaire;
+﻿using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.Quiz.Services.Repositories
 {
 	public interface IQuizRepository
 	{
 		Task<IEnumerable<Question>> GetAllQuestionsAsync();
+		Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter);
 		Task<Question?> GetQuestionAsync(int id);
 		Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId);
 		Task<bool> AddQuestionAsync(Question question);

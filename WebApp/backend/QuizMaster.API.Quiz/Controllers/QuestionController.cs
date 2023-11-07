@@ -10,6 +10,7 @@ using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
 using QuizMaster.Library.Common.Entities.Questionnaire.Details;
 using QuizMaster.Library.Common.Models;
+using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -30,12 +31,70 @@ namespace QuizMaster.API.Quiz.Controllers
 
 		#region Get All Questions
 		// GET: api/question
-		[HttpGet]
-		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get()
+		[HttpGet(Name = "GetQuestions")]
+		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get([FromQuery] QuestionResourceParameter resourceParameter)
 		{
 			// Get all active questions asynchronously
-			var questions = await _quizRepository.GetAllQuestionsAsync();
+			var questions = await _quizRepository.GetAllQuestionsAsync(resourceParameter);
+
+			var paginationMetadata = new Dictionary<string, object?>
+				{
+					{ "totalCount", questions.TotalCount },
+					{ "pageSize", questions.PageSize },
+					{ "currentPage", questions.CurrentPage },
+					{ "totalPages", questions.TotalPages },
+					{ "previousPageLink", questions.HasPrevious ?
+						Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
+						: null },
+					{ "nextPageLink", questions.HasNext ?
+						Url.Link("GetQuestions", resourceParameter.GetObject("next"))
+						: null }
+				};
+
+			Response.Headers.Add("X-Pagination",
+				   JsonSerializer.Serialize(paginationMetadata));
+
+			Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
+
 			return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
+		}
+		private string? CreateResourceUri(
+			QuestionResourceParameter resourceParameters,
+			string type)
+		{
+			switch (type)
+			{
+				case "prev":
+					return Url.Link("GetQuestions",
+						new
+						{
+							pageNumber = resourceParameters.PageNumber - 1,
+							pageSize = resourceParameters.PageSize,
+							isOnlyActiveData = resourceParameters.IsOnlyActiveData,
+							includeDetails = resourceParameters.IncludeDetails,
+							searchQuery = resourceParameters.SearchQuery
+						});
+				case "next":
+					return Url.Link("GetQuestions",
+						new
+						{
+							pageNumber = resourceParameters.PageNumber + 1,
+							pageSize = resourceParameters.PageSize,
+							isOnlyActiveData = resourceParameters.IsOnlyActiveData,
+							includeDetails = resourceParameters.IncludeDetails,
+							searchQuery = resourceParameters.SearchQuery
+						});
+				default:
+					return Url.Link("GetQuestions",
+						new
+						{
+							pageNumber = resourceParameters.PageNumber,
+							pageSize = resourceParameters.PageSize,
+							isOnlyActiveData = resourceParameters.IsOnlyActiveData,
+							includeDetails = resourceParameters.IncludeDetails,
+							searchQuery = resourceParameters.SearchQuery
+						});
+			}
 		}
 		#endregion
 
@@ -53,7 +112,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			var questionDto = _mapper.Map<QuestionDto>(question);
 			questionDto.Details = _mapper.Map<DetailDto>(questionDetail);
-			
+
 			return Ok(questionDto);
 
 		}
@@ -122,7 +181,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 				questionFromRepo = _mapper.Map<Question>(question);
 
-				
+
 
 				// Assign category, difficulty, and type
 				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
