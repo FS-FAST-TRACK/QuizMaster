@@ -30,7 +30,7 @@ namespace QuizMaster.API.Gateway.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] AuthRequest requestModel)
+        public async Task<IActionResult> Login([FromBody] AuthenticationRequestDTO requestModel)
         {
             var request = new AuthenticationRequest()
             {
