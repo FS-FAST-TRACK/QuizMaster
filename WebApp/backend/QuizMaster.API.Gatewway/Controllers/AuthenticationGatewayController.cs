@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Helper;
 using Microsoft.Extensions.Options;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.Library.Common.Models;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -96,12 +97,19 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "Info", info });
         }
 
-        [QuizMasterAuthorization]
+        [QuizMasterAdminAuthorization]
         [HttpPost]
-        [Route("set_admin/{id}")]
-        public IActionResult SetAdmin(int id)
+        [Route("set_admin/{username}")]
+        public IActionResult SetAdmin(string username)
         {
-            return Ok();
+            var request = new SetAdminRequest()
+            {
+                Username = username
+            };
+
+            var response = _channelClient.SetAdmin(request);
+            var info = JsonConvert.DeserializeObject<ResponseDto>(response.Response);
+            return Ok(info);
         }
     }
 }
