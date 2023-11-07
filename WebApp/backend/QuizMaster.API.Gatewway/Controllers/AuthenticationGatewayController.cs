@@ -74,12 +74,27 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpGet("info")]
         public async Task<IActionResult> GetCookieInfo()
         {
+            string token = string.Empty;
             // grab the claims identity
             var tokenClaim = User.Claims.ToList().FirstOrDefault(e => e.Type == "token");
 
-            if(tokenClaim == null) { return NotFound(new { Message = "No information found based on session" }); }
-
-            string token = tokenClaim.Value;
+            if(tokenClaim == null) 
+            {
+                // Check the request header if there is a JWT token
+                try
+                {
+                    token = HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+                }
+                catch
+                {
+                    return NotFound(new { Message = "No information found based on session" });
+                }
+            }
+            else
+            {
+                token = tokenClaim.Value;
+            }
+            
 
             var request = new ValidationRequest()
             {

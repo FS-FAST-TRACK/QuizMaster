@@ -26,7 +26,13 @@ namespace QuizMaster.API.Gateway.Helper
             // Check if the user is authenticated
             if (!principal.Identity.IsAuthenticated)
             {
-                context.Result = new UnauthorizedResult();
+                // If not authenticated, try to check if there is a JWT token in the header
+                bool isJWTAuthenticated = IsJWTAuthenticated(context.HttpContext);
+                if (!isJWTAuthenticated)
+                {
+                    // if still not authorized, return unauthorized
+                    context.Result = new UnauthorizedResult();
+                }
                 return;
             }
 
@@ -61,6 +67,27 @@ namespace QuizMaster.API.Gateway.Helper
 
             // If token is valid, return true; otherwise, return false.
             return true;
+        }
+        private bool IsJWTAuthenticated(HttpContext context)
+        {
+            try
+            {
+                var token = context.Request.Headers.Authorization.ToString().Split(" ")[1];
+
+                // validate the token
+                var authStore = _authenticationServices.Validate(token);
+
+                // if auth store is null, the token specified failed to decode
+                if (authStore == null)
+                    return false;
+
+                return true;
+            }
+            catch
+            {
+                // If error on splitting the token, return false
+                return false;
+            }
         }
     }
 }
