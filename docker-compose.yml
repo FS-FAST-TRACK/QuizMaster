@@ -46,7 +46,7 @@ services:
       dockerfile: QuizMaster.API.Gatewway/Dockerfile
     ports:
       - 5060:80
-      - 6060:443
+      - 7081:443
     environment:
       - ASPNETCORE_URLS=https://+:443;http://+:80
     depends_on:

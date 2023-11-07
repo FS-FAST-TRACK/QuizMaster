@@ -21,4 +21,4 @@ RUN dotnet publish "QuizMaster.API.Authentication.csproj" -c Release -o /app/pub
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "QuizMaster.API.Authentication.dll"]
+ENTRYPOINT ["dotnet", "QuizMaster.API.Authentication.dll", "https://*:6053"]
