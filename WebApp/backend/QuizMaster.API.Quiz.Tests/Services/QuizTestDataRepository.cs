@@ -1,6 +1,8 @@
-﻿using QuizMaster.API.Quiz.SeedData;
+﻿using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.Quiz.Tests.Services
 {
@@ -85,7 +87,12 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
-		public Task<IEnumerable<QuestionType>> GetAllTypesAsync()
+        public Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<QuestionType>> GetAllTypesAsync()
 		{
 			throw new NotImplementedException();
 		}

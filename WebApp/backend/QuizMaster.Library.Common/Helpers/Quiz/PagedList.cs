@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace QuizMaster.Library.Common.Helpers.Quiz
 {
@@ -11,7 +12,13 @@ namespace QuizMaster.Library.Common.Helpers.Quiz
 		public bool HasPrevious => ( CurrentPage > 1 );
 		public bool HasNext => ( CurrentPage < TotalPages );
 
-		public PagedList(List<T> items, int count, int pageNumber, int pageSize)
+        [JsonConstructor]
+        public PagedList()
+        {
+            // Parameterless constructor for JSON.NET deserialization
+        }
+
+        public PagedList(List<T> items, int count, int pageNumber, int pageSize)
 		{
 			TotalCount = count;
 			PageSize = pageSize;

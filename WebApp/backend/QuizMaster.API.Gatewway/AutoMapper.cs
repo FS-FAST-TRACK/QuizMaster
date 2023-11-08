@@ -15,6 +15,7 @@ namespace QuizMaster.API.Gatewway
             CreateMap<AccountCreatePartialDto, CreateAccountPartialRquest>();
             CreateMap<UserAccount, AccountDto>().ReverseMap();
             CreateMap<CategoryCreateDto, QuestionCategory>().ReverseMap();
+            CreateMap<Question, QuestionDto>();
         }
     }
 }

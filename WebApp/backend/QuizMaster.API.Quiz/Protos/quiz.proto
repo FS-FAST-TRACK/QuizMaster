@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuestionServices{
+	rpc GetQuestion(QuestionRequest) returns (QuestionResponse);
+}
+
+message QuestionRequest{
+	string parameter = 1;
+}
+
+message QuestionResponse{
+	string questions = 1;
+}
