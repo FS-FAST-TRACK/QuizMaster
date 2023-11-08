@@ -140,6 +140,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			bool isSuccess;
 
+			// Check if Question Details is null
+			if (question.QDetails == null)
+			{
+				return ReturnQuestionDetailIsRequired();
+			}
+
 			// Extract the detail from question
 			var detail = _mapper.Map<QuestionDetail>(question);
 
@@ -313,8 +319,6 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnQuestionAlreadyExist();
 			}
 
-
-
 			bool isSuccess;
 
 
@@ -393,6 +397,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 
 			bool isSuccess;
+
+			// Check if Question Details is null
+			if (question.QDetails == null)
+			{
+				return ReturnQuestionDetailIsRequired();
+			}
 
 			// Extract the slider detail from question
 			var detail = _mapper.Map<QuestionDetail>(question);
@@ -487,9 +497,6 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			bool isSuccess;
 
-			// Extract the slider detail from question
-			var detail = _mapper.Map<QuestionDetail>(question);
-
 			// If question is not null and not active, we set active to true and update the question
 			if (questionFromRepo != null && !questionFromRepo.ActiveData)
 			{
@@ -528,18 +535,8 @@ namespace QuizMaster.API.Quiz.Controllers
 #pragma warning restore CS8601 // Possible null reference assignment.
 
 				var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionFromRepo);
-				var isDetailAddedSuccessfully = true;
-
-				if (isQuestionAddedSuccessfully)
-				{
-					// Link the details to question. 
-					detail.Question = questionFromRepo;
-					// Created by UserId must be updated by the time we have access to tokens
-					detail.CreatedByUserId = 1;
-					isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
-				}
-
-				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
+				
+				isSuccess = isQuestionAddedSuccessfully;
 			}
 
 
@@ -554,7 +551,6 @@ namespace QuizMaster.API.Quiz.Controllers
 			await _quizRepository.SaveChangesAsync();
 
 			var questionDto = _mapper.Map<QuestionDto>(questionFromRepo);
-			questionDto.Details = _mapper.Map<DetailDto>(detail);
 			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, questionDto);
 		}
 		#endregion
@@ -582,6 +578,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			bool isSuccess;
 
+			// Check if Question Details is null
+			if(question.QDetails == null)
+			{
+				return ReturnQuestionDetailIsRequired();
+			}
+			
 			// Extract the slider detail from question
 			var detail = _mapper.Map<QuestionDetail>(question);
 
@@ -839,6 +841,15 @@ namespace QuizMaster.API.Quiz.Controllers
 			{
 				Type = "Error",
 				Message = "Question already exist."
+			});
+		}
+
+		private ActionResult ReturnQuestionDetailIsRequired()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "Question detail is required."
 			});
 		}
 
