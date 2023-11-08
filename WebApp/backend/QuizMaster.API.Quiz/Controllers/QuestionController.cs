@@ -227,7 +227,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post True or False Question
 		// POST api/question/true-or-false
 		[HttpPost("true-or-false")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<bool, bool> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<bool, EmptyQuestionDetail> question)
 		{
 			if (question.QTypeId != QuestionTypes.TrueOrFalseSeedData.Id)
 			{
@@ -316,7 +316,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post Type Answer Question
 		// POST api/question/type-answer
 		[HttpPost("type-answer")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, string> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, EmptyQuestionDetail> question)
 		{
 			if (question.QTypeId != QuestionTypes.TypeAnswerSeedData.Id)
 			{
@@ -503,7 +503,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post Puzzle Question
 		// POST api/question/puzzle
 		[HttpPost("puzzle")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, bool> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, EmptyQuestionDetail> question)
 		{
 			// validate model
 			if (!ModelState.IsValid)
