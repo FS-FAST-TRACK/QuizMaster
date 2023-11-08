@@ -123,16 +123,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("multiple-choice")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail> question)
 		{
-
-			if (question.QTypeId != QuestionTypes.MultipleChoiceSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to Multiple type of question."
-				});
-			}
-
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -140,7 +130,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.MultipleChoiceSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -166,7 +156,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.MultipleChoiceSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -229,15 +219,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("true-or-false")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<bool, EmptyQuestionDetail> question)
 		{
-			if (question.QTypeId != QuestionTypes.TrueOrFalseSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to True or False type of question."
-				});
-			}
-
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -245,7 +226,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.TrueOrFalseSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -270,7 +251,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.TrueOrFalseSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -318,14 +299,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("type-answer")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, EmptyQuestionDetail> question)
 		{
-			if (question.QTypeId != QuestionTypes.TypeAnswerSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to Type Answer type of question."
-				});
-			}
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -333,7 +306,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.TypeAnswerSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -358,7 +331,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.TypeAnswerSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -404,14 +377,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("slider")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<SliderAnswer, SliderQuestionDetail> question)
 		{
-			if (question.QTypeId != QuestionTypes.SliderSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to Slider type of question."
-				});
-			}
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -419,7 +384,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.SliderSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -445,7 +410,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.SliderSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -671,8 +636,6 @@ namespace QuizMaster.API.Quiz.Controllers
 
 				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
 			}
-
-
 
 			// Check if update or create is not success 
 			if (!isSuccess)
