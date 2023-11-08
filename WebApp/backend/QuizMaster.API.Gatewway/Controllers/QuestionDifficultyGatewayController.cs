@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
+using QuizMaster.Library.Common.Models;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -35,6 +36,48 @@ namespace QuizMaster.API.Gateway.Controllers
                 difficulties.Add(_mapper.Map<DifficultyDto>(response.ResponseStream.Current));
             }
             return Ok(difficulties);
+        }
+
+        [HttpGet("get_difficulty/{id}")]
+        public async Task<IActionResult> GetDifficulty(int id)
+        {
+            var request = new GetDificultyRequest
+            {
+                Id = id
+            };
+            var response = await _channelClient.GetDificultyAsync(request);
+            if(response.NotFoundDifficulty != null)
+            {
+                if(response.NotFoundDifficulty.Code == 404)
+                    return NotFound("Difficulty not found");
+                return BadRequest(response.NotFoundDifficulty.Message);
+            }
+            return Ok(_mapper.Map<DifficultyDto>(response.DificultiesReply));
+        }
+
+        [HttpPost("add_difficulty")]
+        public async Task<IActionResult> AddDifficulty([FromBody] DifficultyCreateDto difficulty)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ReturnModelStateErrors();
+            }
+            return Ok();
+        }
+        private ActionResult ReturnModelStateErrors()
+        {
+            var errorList = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            var errorString = string.Join(", ", errorList);
+
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = errorString
+            });
         }
     }
 }

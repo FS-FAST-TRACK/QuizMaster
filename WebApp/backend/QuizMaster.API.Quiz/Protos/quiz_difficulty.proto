@@ -4,6 +4,7 @@ option csharp_namespace = "QuizMaster.API.Quiz.Protos";
 
 service QuizDifficultyService{
 	rpc GetDificulties(EmptyDifficultyRequest) returns (stream DificultiesReply);
+	rpc GetDificulty(GetDificultyRequest) returns (DifficultyOrNotFound);
 }
 
 message EmptyDifficultyRequest{}
@@ -11,4 +12,20 @@ message EmptyDifficultyRequest{}
 message DificultiesReply{
 	int32 id = 1;
 	string qDifficultyDesc =2;
+}
+
+message GetDificultyRequest{
+	int32 id = 1;
+}
+
+message NotFoundDifficulty{
+	int32 code = 1;
+	string message = 2;
+}
+
+message DifficultyOrNotFound{
+	oneof response{
+		DificultiesReply dificultiesReply = 1;
+		NotFoundDifficulty notFoundDifficulty = 2;
+	}
 }
