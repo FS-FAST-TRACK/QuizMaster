@@ -503,7 +503,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post Puzzle Question
 		// POST api/question/puzzle
 		[HttpPost("puzzle")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, bool> question)
 		{
 			// validate model
 			if (!ModelState.IsValid)
