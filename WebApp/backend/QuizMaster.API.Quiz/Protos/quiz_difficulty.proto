@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuizDifficultyService{
+	rpc GetDificulties(EmptyDifficultyRequest) returns (stream DificultiesReply);
+}
+
+message EmptyDifficultyRequest{}
+
+message DificultiesReply{
+	int32 id = 1;
+	string qDifficultyDesc =2;
+}
