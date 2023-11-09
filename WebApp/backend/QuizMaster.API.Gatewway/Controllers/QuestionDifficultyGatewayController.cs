@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
@@ -106,6 +108,33 @@ namespace QuizMaster.API.Gateway.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update difficulty." });
             }
             return NoContent();
+        }
+
+        [HttpPatch("update_difficulty/{id}")]
+        public async Task<IActionResult> UpdateDifficulty(int id, JsonPatchDocument<DifficultyCreateDto> patch)
+        {
+            var request = new UpdateDifficultyRequest();
+            request.Id = id;
+            request.Patch = JsonConvert.SerializeObject(patch);
+
+            var response = await _channelClient.UpdateDifficultyAsync(request);
+
+            if(response.Code == 404)
+            {
+                return ReturnDifficultyDoesNotExist(id);
+            }
+
+            if(response.Code == 409)
+            {
+                return ReturnDifficultyAlreadyExist();
+            }
+
+            if(response.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update difficulty." });
+            }
+
+            return Ok(new { id = response.Id, qDifficultyDesc = response.QDifficultyDesc });
         }
 
         private ActionResult ReturnModelStateErrors()

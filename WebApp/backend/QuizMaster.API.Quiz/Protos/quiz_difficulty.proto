@@ -8,6 +8,7 @@ service QuizDifficultyService{
 	rpc	GetDifficultyByDesc(GetDifficultyByDescRequest) returns (DifficultyByDescResponse);
 	rpc CreateDifficulty(CreateDifficultyRequest) returns (CreateDifficultyResponse);
 	rpc DeleteDifficulty(GetDificultyRequest) returns (DeleteDifficultyReply);
+	rpc	UpdateDifficulty(UpdateDifficultyRequest) returns (UpdateDifficultyResponse);
 }
 
 message EmptyDifficultyRequest{}
@@ -54,4 +55,15 @@ message CreateDifficultyResponse{
 
 message DeleteDifficultyReply{
 	int32 code = 1;
+}
+
+message UpdateDifficultyRequest{
+	int32  id = 1;
+	string patch = 2;
+}
+
+message UpdateDifficultyResponse{
+	int32 code = 1;
+	int32 id = 2;
+	string qDifficultyDesc = 3;
 }
