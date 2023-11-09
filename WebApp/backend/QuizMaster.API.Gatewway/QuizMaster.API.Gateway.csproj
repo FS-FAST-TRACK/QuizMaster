@@ -52,6 +52,9 @@
     <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_difficulty.proto" GrpcServices="Client">
       <Link>Protos\quiz_difficulty.proto</Link>
     </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_type.proto" GrpcServices="Client">
+      <Link>Protos\quiz_type.proto</Link>
+    </Protobuf>
   </ItemGroup>
 
   <ItemGroup>
