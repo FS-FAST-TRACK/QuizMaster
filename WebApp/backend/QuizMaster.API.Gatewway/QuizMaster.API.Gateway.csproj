@@ -43,8 +43,14 @@
     <Protobuf Include="..\QuizMaster.API.Media\Proto\media.proto" GrpcServices="Client">
       <Link>Protos\media.proto</Link>
     </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz.proto" GrpcServices="Client">
+      <Link>Protos\quiz.proto</Link>
+    </Protobuf>
     <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_category.proto" GrpcServices="Client">
       <Link>Protos\quiz_category.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_difficulty.proto" GrpcServices="Client">
+      <Link>Protos\quiz_difficulty.proto</Link>
     </Protobuf>
   </ItemGroup>
 

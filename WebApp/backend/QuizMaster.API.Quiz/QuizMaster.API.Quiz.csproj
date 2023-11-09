@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Protos\quiz.proto" />
     <None Remove="Protos\quiz_category.proto" />
+    <None Remove="Protos\quiz_difficulty.proto" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,7 +44,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\quiz.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\quiz_category.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\quiz_difficulty.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>
