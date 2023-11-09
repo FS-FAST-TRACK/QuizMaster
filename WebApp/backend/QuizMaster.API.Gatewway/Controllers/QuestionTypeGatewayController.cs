@@ -50,5 +50,23 @@ namespace QuizMaster.API.Gateway.Controllers
 
             return Ok(_mapper.Map<TypeDto>(response.Type));
         }
+
+        [HttpPost("add_type")]
+        public async Task<IActionResult> Addtype([FromBody] TypeCreateDto type)
+        {
+            var request = new AddQuisTypeRequest { QTypeDesc = type.QTypeDesc, QDetailRequired = type.QDetailRequired };
+            var response = await _channelClient.AddQuizTypeAsync(request);
+
+            if(response.Code == 409)
+            {
+                return Conflict(new { Type = "Error", Message = $"Type with description {type.QTypeDesc} already exists." });
+            }
+
+            if(response.Code == 500)
+            {
+                return BadRequest(new { Type = "Error", Message = $"Something went wrong." });
+            }
+            return Ok(new {id = response.Type.Id, qTypeDesc=response.Type.QTypeDesc, qDetailRequired = response.Type.QDetailRequired});
+        }
     }
 }

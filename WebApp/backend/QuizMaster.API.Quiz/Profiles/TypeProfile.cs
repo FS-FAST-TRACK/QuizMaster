@@ -13,6 +13,7 @@ namespace QuizMaster.API.Quiz.Profiles
 			CreateMap<TypeCreateDto, QuestionType>();
 			CreateMap<QuestionType, TypeCreateDto>();
 			CreateMap<QuestionType, TypeReply>().ReverseMap();
+			CreateMap<AddQuisTypeRequest, QuestionType>().ReverseMap();
 		}
 	}
 }

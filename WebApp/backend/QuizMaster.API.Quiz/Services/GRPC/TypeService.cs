@@ -2,6 +2,7 @@
 using Grpc.Core;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 
 namespace QuizMaster.API.Quiz.Services.GRPC
 {
@@ -29,9 +30,9 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             }
         }
 
-        public override async Task<GetQuizTypeResponse> GetQuizType(GetQuizTypeRequest request, ServerCallContext context)
+        public override async Task<QuizTypeResponse> GetQuizType(GetQuizTypeRequest request, ServerCallContext context)
         {
-            var reply = new GetQuizTypeResponse();
+            var reply = new QuizTypeResponse();
 
             var type = _quizRepository.GetTypeAsync(request.Id).Result;
             if(type == null)
@@ -42,6 +43,45 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             reply.Code = 200;
             reply.Type = _mapper.Map<TypeReply>(type);
+
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<QuizTypeResponse> AddQuizType(AddQuisTypeRequest request, ServerCallContext context)
+        {
+            var reply = new QuizTypeResponse();
+            var checkAvailabity = _quizRepository.GetTypeAsync(request.QTypeDesc).Result;
+            if(checkAvailabity != null && checkAvailabity.ActiveData)
+            {
+                reply.Code = 409;
+                return await Task.FromResult(reply);
+            }
+
+            bool isSuccess;
+
+            if(checkAvailabity != null && !checkAvailabity.ActiveData)
+            {
+                checkAvailabity.ActiveData = true;
+                isSuccess =  _quizRepository.UpdateType(checkAvailabity);
+                await _quizRepository.SaveChangesAsync();
+                reply.Code = 200;
+                reply.Type = _mapper.Map<TypeReply>(checkAvailabity);
+            }
+            else 
+            {
+                var createType = _mapper.Map<QuestionType>(request);
+                isSuccess = await _quizRepository.AddTypeAsync(createType);
+                await _quizRepository.SaveChangesAsync();
+                reply.Code = 200;
+                reply.Type = _mapper.Map<TypeReply>(createType);
+            }
+
+            if(!isSuccess)
+            {
+                reply.Code = 500;
+                return await Task.FromResult(reply);
+            }
+
 
             return await Task.FromResult(reply);
         }
