@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuizTypeService{
+	rpc GetAllTypes(EmptyTypeRequest) returns (stream TypeReply);
+	rpc GetQuizType(GetQuizTypeRequest) returns (QuizTypeResponse);
+	rpc AddQuizType(AddQuisTypeRequest) returns (QuizTypeResponse);
+	rpc DeleteType(GetQuizTypeRequest) returns (QuizTypeResponse);
+	rpc UpdateType(UpdateTypeRequest) returns (QuizTypeResponse);
+}
+
+message EmptyTypeRequest{}
+
+message TypeReply{
+	int32 id = 1;
+	string qTypeDesc = 2;
+	bool qDetailRequired = 3;
+}
+
+message GetQuizTypeRequest{
+	int32 id = 1;
+}
+
+message AddQuisTypeRequest{
+	string qTypeDesc = 1;
+	bool qDetailRequired = 2;
+}
+
+message QuizTypeResponse{
+	int32 code =1;
+	TypeReply type = 2;
+}
+
+message UpdateTypeRequest{
+	int32 id = 1;
+	string patch = 2;
+}
