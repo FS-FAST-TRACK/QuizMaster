@@ -118,5 +118,33 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             return await Task.FromResult(reply);
         }
+
+        public override async Task<DeleteDifficultyReply> DeleteDifficulty(GetDificultyRequest request, ServerCallContext context)
+        {
+            var reply = new DeleteDifficultyReply();
+
+            var difficulty = _quizRepository.GetDifficultyAsync(request.Id).Result;
+            if(difficulty == null || !difficulty.ActiveData)
+            {
+                reply.Code = 404;
+            }
+            else
+            {
+                difficulty.ActiveData = false;
+                var isSuccess = _quizRepository.UpdateDifficulty(difficulty);
+
+                if (!isSuccess)
+                {
+                    reply.Code = 500;
+                }
+                else
+                {
+                    reply.Code = 200;
+                }
+                await _quizRepository.SaveChangesAsync();
+            }
+
+            return await Task.FromResult(reply);
+        }
     }
 }

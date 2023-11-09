@@ -74,9 +74,9 @@ namespace QuizMaster.API.Gateway.Controllers
                 return ReturnDifficultyAlreadyExist();
             }
 
-            if(checkDifficulty.Code == 401)
+            if(checkDifficulty.Code == 201)
             {
-                return Ok(new { id = checkDifficulty.Id, qDifficultyDesc = difficulty });
+                return Ok(new { id = checkDifficulty.Id, qDifficultyDesc = difficulty.QDifficultyDesc });
             }
 
             if (checkDifficulty.Code == 400)
@@ -90,6 +90,22 @@ namespace QuizMaster.API.Gateway.Controllers
                 return Ok(new { id = createDifficulty.Id, qDifficultyDesc  = createDifficulty.QDifficultyDesc});
             }
             return BadRequest("Something went wrong");
+        }
+
+        [HttpDelete("delete_difficulty/{id}")]
+        public async Task<IActionResult> DeleteDifficulty(int id)
+        {
+            var request = new GetDificultyRequest() { Id = id };
+            var resposnse = await _channelClient.DeleteDifficultyAsync(request);
+            if(resposnse.Code == 404)
+            {
+                return ReturnDifficultyDoesNotExist(id);
+            }
+            if(resposnse.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update difficulty." });
+            }
+            return NoContent();
         }
 
         private ActionResult ReturnModelStateErrors()
@@ -114,6 +130,15 @@ namespace QuizMaster.API.Gateway.Controllers
                 Type = "Error",
                 Message = "Difficulty already exist."
             });
+        }
+        private ActionResult ReturnDifficultyDoesNotExist(int id)
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = $"Difficulty with id {id} doesn't exist."
+            });
+
         }
     }
 }
