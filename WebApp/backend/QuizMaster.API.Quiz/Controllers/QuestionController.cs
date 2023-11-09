@@ -123,16 +123,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("multiple-choice")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail> question)
 		{
-
-			if (question.QTypeId != QuestionTypes.MultipleChoiceSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to Multiple type of question."
-				});
-			}
-
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -140,7 +130,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.MultipleChoiceSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -149,6 +139,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 
 			bool isSuccess;
+
+			// Check if Question Details is null
+			if (question.QDetails == null)
+			{
+				return ReturnQuestionDetailIsRequired();
+			}
 
 			// Extract the detail from question
 			var detail = _mapper.Map<QuestionDetail>(question);
@@ -166,7 +162,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.MultipleChoiceSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -227,17 +223,8 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post True or False Question
 		// POST api/question/true-or-false
 		[HttpPost("true-or-false")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<bool, bool> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<bool, EmptyQuestionDetail> question)
 		{
-			if (question.QTypeId != QuestionTypes.TrueOrFalseSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to True or False type of question."
-				});
-			}
-
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -245,7 +232,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.TrueOrFalseSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -270,7 +257,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.TrueOrFalseSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -316,16 +303,8 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post Type Answer Question
 		// POST api/question/type-answer
 		[HttpPost("type-answer")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, string> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<TypeAnswer, EmptyQuestionDetail> question)
 		{
-			if (question.QTypeId != QuestionTypes.TypeAnswerSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to Type Answer type of question."
-				});
-			}
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -333,14 +312,12 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.TypeAnswerSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
 				return ReturnQuestionAlreadyExist();
 			}
-
-
 
 			bool isSuccess;
 
@@ -358,7 +335,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.TypeAnswerSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -404,14 +381,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("slider")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<SliderAnswer, SliderQuestionDetail> question)
 		{
-			if (question.QTypeId != QuestionTypes.SliderSeedData.Id)
-			{
-				return BadRequest(new ResponseDto
-				{
-					Type = "Error",
-					Message = "API endpoint is only applicable to Slider type of question."
-				});
-			}
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -419,7 +388,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			// Check if question statement with associated category, difficulty, and type already exist
-			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
+			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, QuestionTypes.SliderSeedData.Id, question.QCategoryId);
 
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
@@ -428,6 +397,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 
 			bool isSuccess;
+
+			// Check if Question Details is null
+			if (question.QDetails == null)
+			{
+				return ReturnQuestionDetailIsRequired();
+			}
 
 			// Extract the slider detail from question
 			var detail = _mapper.Map<QuestionDetail>(question);
@@ -445,7 +420,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
-				var type = await _quizRepository.GetTypeAsync(question.QTypeId);
+				var type = await _quizRepository.GetTypeAsync(QuestionTypes.SliderSeedData.Id);
 
 				// Guard if category, difficulty, and type is not found
 				var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -503,7 +478,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Post Puzzle Question
 		// POST api/question/puzzle
 		[HttpPost("puzzle")]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<PuzzleAnswer, EmptyQuestionDetail> question)
 		{
 			// validate model
 			if (!ModelState.IsValid)
@@ -521,9 +496,6 @@ namespace QuizMaster.API.Quiz.Controllers
 
 
 			bool isSuccess;
-
-			// Extract the slider detail from question
-			var detail = _mapper.Map<QuestionDetail>(question);
 
 			// If question is not null and not active, we set active to true and update the question
 			if (questionFromRepo != null && !questionFromRepo.ActiveData)
@@ -563,18 +535,8 @@ namespace QuizMaster.API.Quiz.Controllers
 #pragma warning restore CS8601 // Possible null reference assignment.
 
 				var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionFromRepo);
-				var isDetailAddedSuccessfully = true;
-
-				if (isQuestionAddedSuccessfully)
-				{
-					// Link the details to question. 
-					detail.Question = questionFromRepo;
-					// Created by UserId must be updated by the time we have access to tokens
-					detail.CreatedByUserId = 1;
-					isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
-				}
-
-				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
+				
+				isSuccess = isQuestionAddedSuccessfully;
 			}
 
 
@@ -589,7 +551,6 @@ namespace QuizMaster.API.Quiz.Controllers
 			await _quizRepository.SaveChangesAsync();
 
 			var questionDto = _mapper.Map<QuestionDto>(questionFromRepo);
-			questionDto.Details = _mapper.Map<DetailDto>(detail);
 			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, questionDto);
 		}
 		#endregion
@@ -617,6 +578,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			bool isSuccess;
 
+			// Check if Question Details is null
+			if(question.QDetails == null)
+			{
+				return ReturnQuestionDetailIsRequired();
+			}
+			
 			// Extract the slider detail from question
 			var detail = _mapper.Map<QuestionDetail>(question);
 
@@ -671,8 +638,6 @@ namespace QuizMaster.API.Quiz.Controllers
 
 				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
 			}
-
-
 
 			// Check if update or create is not success 
 			if (!isSuccess)
@@ -876,6 +841,15 @@ namespace QuizMaster.API.Quiz.Controllers
 			{
 				Type = "Error",
 				Message = "Question already exist."
+			});
+		}
+
+		private ActionResult ReturnQuestionDetailIsRequired()
+		{
+			return BadRequest(new ResponseDto
+			{
+				Type = "Error",
+				Message = "Question detail is required."
 			});
 		}
 

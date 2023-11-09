@@ -12,12 +12,16 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		private readonly IEnumerable<QuestionCategory> _categories;
 		private readonly IEnumerable<QuestionType> _types;
 		private readonly IEnumerable<QuestionDifficulty> _difficulties;
+		private readonly IEnumerable<Question> _questions;
+		private readonly IEnumerable<QuestionDetail> _questionsDetails;
 
 		public QuizTestDataRepository()
 		{
 			_categories = QuestionCategories.Categories;
 			_types = QuestionTypes.Types;
 			_difficulties = QuestionDifficulties.Difficulties;
+			_questions = new List<Question>();
+			_questionsDetails = new List<QuestionDetail>();
 		}
 
 		public async Task<bool> AddCategoryAsync(QuestionCategory category)
@@ -87,12 +91,13 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
-        public Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
-        {
-            throw new NotImplementedException();
-        }
+		public async Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
+		{
+			var collection = _questions.AsQueryable();
+			return await Task.FromResult(PagedList<Question>.Create(collection, resourceParameter.PageNumber, resourceParameter.PageSize));
+		}
 
-        public Task<IEnumerable<QuestionType>> GetAllTypesAsync()
+		public Task<IEnumerable<QuestionType>> GetAllTypesAsync()
 		{
 			throw new NotImplementedException();
 		}
