@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using Grpc.Core;
+using Microsoft.AspNetCore.JsonPatch;
+using Newtonsoft.Json;
+using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -109,6 +112,46 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             await _quizRepository.SaveChangesAsync();
             reply.Code = 204;
+            return await Task.FromResult(reply);
+        }
+
+        public override async  Task<QuizTypeResponse> UpdateType(UpdateTypeRequest request, ServerCallContext context)
+        {
+            var reply = new QuizTypeResponse();
+            var id = request.Id;
+            var patch = JsonConvert.DeserializeObject<JsonPatchDocument<TypeCreateDto>>(request.Patch);
+
+            var checkTypeId = _quizRepository.GetTypeAsync(id).Result;
+            if(checkTypeId == null || !checkTypeId.ActiveData)
+            {
+                reply.Code = 404;
+                return await Task.FromResult(reply);
+            }
+
+            var typePatch = new TypeCreateDto();
+
+            _mapper.Map(checkTypeId, typePatch);
+
+            patch.ApplyTo(typePatch);
+
+            if(_quizRepository.GetTypeAsync(typePatch.QTypeDesc).Result != null)
+            {
+                reply.Code = 409;
+                return await Task.FromResult(reply);
+            }
+
+            _mapper.Map(typePatch, checkTypeId);
+
+            var isSuccess = _quizRepository.UpdateType(checkTypeId);
+            if(!isSuccess)
+            {
+                 reply.Code = 500;
+                return await Task.FromResult(reply);
+            }
+
+            await _quizRepository.SaveChangesAsync();
+            reply.Type = _mapper.Map<TypeReply>(checkTypeId);
+
             return await Task.FromResult(reply);
         }
     }

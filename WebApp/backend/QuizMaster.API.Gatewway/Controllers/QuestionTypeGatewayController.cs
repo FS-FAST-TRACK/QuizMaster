@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
@@ -86,6 +88,33 @@ namespace QuizMaster.API.Gateway.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPatch("update_type/{id}")]
+        public async Task<IActionResult> UpdateType(int id, JsonPatchDocument<TypeCreateDto> patch)
+        {
+            var request = new UpdateTypeRequest();
+            request.Id = id;
+            request.Patch = JsonConvert.SerializeObject(patch);
+
+            var response = await _channelClient.UpdateTypeAsync(request);
+
+            if (response.Code == 404)
+            {
+                return ReturnTypeDoesNotExist(id);
+            }
+
+            if (response.Code == 409)
+            {
+                return Conflict(new { Type = "Error", Message = $"Type already exists." });
+            }
+
+            if (response.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update type." });
+            }
+
+            return Ok(new { id = response.Type.Id, qTypeDesc = response.Type.QTypeDesc, qDetailRequired = response.Type.QDetailRequired });
         }
 
         private ActionResult ReturnTypeDoesNotExist(int id)

@@ -7,6 +7,7 @@ service QuizTypeService{
 	rpc GetQuizType(GetQuizTypeRequest) returns (QuizTypeResponse);
 	rpc AddQuizType(AddQuisTypeRequest) returns (QuizTypeResponse);
 	rpc DeleteType(GetQuizTypeRequest) returns (QuizTypeResponse);
+	rpc UpdateType(UpdateTypeRequest) returns (QuizTypeResponse);
 }
 
 message EmptyTypeRequest{}
@@ -29,4 +30,9 @@ message AddQuisTypeRequest{
 message QuizTypeResponse{
 	int32 code =1;
 	TypeReply type = 2;
+}
+
+message UpdateTypeRequest{
+	int32 id = 1;
+	string patch = 2;
 }
