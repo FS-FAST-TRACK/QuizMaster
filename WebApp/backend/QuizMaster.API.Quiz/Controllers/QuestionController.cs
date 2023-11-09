@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
@@ -32,6 +33,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Get All Questions
 		// GET: api/question
 		[HttpGet(Name = "GetQuestions")]
+		[Authorize]
 		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get([FromQuery] QuestionResourceParameter resourceParameter)
 		{
 			// Get all active questions asynchronously
@@ -57,44 +59,6 @@ namespace QuizMaster.API.Quiz.Controllers
 			Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
 
 			return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
-		}
-		private string? CreateResourceUri(
-			QuestionResourceParameter resourceParameters,
-			string type)
-		{
-			switch (type)
-			{
-				case "prev":
-					return Url.Link("GetQuestions",
-						new
-						{
-							pageNumber = resourceParameters.PageNumber - 1,
-							pageSize = resourceParameters.PageSize,
-							isOnlyActiveData = resourceParameters.IsOnlyActiveData,
-							includeDetails = resourceParameters.IncludeDetails,
-							searchQuery = resourceParameters.SearchQuery
-						});
-				case "next":
-					return Url.Link("GetQuestions",
-						new
-						{
-							pageNumber = resourceParameters.PageNumber + 1,
-							pageSize = resourceParameters.PageSize,
-							isOnlyActiveData = resourceParameters.IsOnlyActiveData,
-							includeDetails = resourceParameters.IncludeDetails,
-							searchQuery = resourceParameters.SearchQuery
-						});
-				default:
-					return Url.Link("GetQuestions",
-						new
-						{
-							pageNumber = resourceParameters.PageNumber,
-							pageSize = resourceParameters.PageSize,
-							isOnlyActiveData = resourceParameters.IsOnlyActiveData,
-							includeDetails = resourceParameters.IncludeDetails,
-							searchQuery = resourceParameters.SearchQuery
-						});
-			}
 		}
 		#endregion
 
@@ -561,6 +525,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpPost("multiple-choice-audio")]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<MultipleChoiceAnswer, MultipleChoicePlusAudioQuestionDetail> question)
 		{
+
 			// validate model
 			if (!ModelState.IsValid)
 			{
@@ -656,7 +621,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 		// POST api/question
 		[HttpPost]
-		public async Task<IActionResult> Post([FromBody] QuestionCreateDto<string, string> question)
+		public async Task<IActionResult> Post([FromBody] QuestionCreateDto question)
 		{
 			// validate model
 			if (!ModelState.IsValid)
@@ -664,6 +629,16 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnModelStateErrors();
 			}
 
+			var validationResult = question.IsValid();
+			if (!validationResult.IsValid)
+			{
+				return BadRequest(
+					new ResponseDto
+					{
+						Type = " Error",
+						Message = validationResult.Error
+					});
+			}
 			// Check if question statement with associated category, difficulty, and type already exist
 			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
 
@@ -700,8 +675,16 @@ namespace QuizMaster.API.Quiz.Controllers
 						Message = result.Error
 					});
 				}
-
+				
 				questionFromRepo = _mapper.Map<Question>(question);
+				
+				// Assign category, difficulty, and type
+				// Suppress null reference assignment, because null checking is already done by ValidateCategoryDifficultyType Method
+#pragma warning disable CS8601 // Possible null reference assignment.
+				questionFromRepo.QCategory = category;
+				questionFromRepo.QDifficulty = difficulty;
+				questionFromRepo.QType = type;
+#pragma warning restore CS8601 // Possible null reference assignment.
 				isSuccess = await _quizRepository.AddQuestionAsync(questionFromRepo);
 			}
 
