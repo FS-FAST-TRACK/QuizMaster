@@ -28,5 +28,22 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 await responseStream.WriteAsync(reply);
             }
         }
+
+        public override async Task<GetQuizTypeResponse> GetQuizType(GetQuizTypeRequest request, ServerCallContext context)
+        {
+            var reply = new GetQuizTypeResponse();
+
+            var type = _quizRepository.GetTypeAsync(request.Id).Result;
+            if(type == null)
+            {
+                reply.Code = 404;
+                return await Task.FromResult(reply);
+            }
+
+            reply.Code = 200;
+            reply.Type = _mapper.Map<TypeReply>(type);
+
+            return await Task.FromResult(reply);
+        }
     }
 }

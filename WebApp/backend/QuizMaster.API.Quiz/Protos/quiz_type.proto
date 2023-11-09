@@ -4,6 +4,7 @@ option csharp_namespace = "QuizMaster.API.Quiz.Protos";
 
 service QuizTypeService{
 	rpc GetAllTypes(EmptyTypeRequest) returns (stream TypeReply);
+	rpc GetQuizType(GetQuizTypeRequest) returns (GetQuizTypeResponse);
 }
 
 message EmptyTypeRequest{}
@@ -12,4 +13,13 @@ message TypeReply{
 	int32 id = 1;
 	string qTypeDesc = 2;
 	bool qDetailRequired = 3;
+}
+
+message GetQuizTypeRequest{
+	int32 id = 1;
+}
+
+message GetQuizTypeResponse{
+	int32 code =1;
+	TypeReply type = 2;
 }
