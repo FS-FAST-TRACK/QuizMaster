@@ -31,7 +31,7 @@ namespace QuizMaster.API.Gateway.Controllers
             var request = new EmptyDifficultyRequest();
             var response = _channelClient.GetDificulties(request);
             var difficulties = new List<DifficultyDto>();
-            while(await response.ResponseStream.MoveNext())
+            while (await response.ResponseStream.MoveNext())
             {
                 difficulties.Add(_mapper.Map<DifficultyDto>(response.ResponseStream.Current));
             }
@@ -46,9 +46,9 @@ namespace QuizMaster.API.Gateway.Controllers
                 Id = id
             };
             var response = await _channelClient.GetDificultyAsync(request);
-            if(response.NotFoundDifficulty != null)
+            if (response.NotFoundDifficulty != null)
             {
-                if(response.NotFoundDifficulty.Code == 404)
+                if (response.NotFoundDifficulty.Code == 404)
                     return NotFound("Difficulty not found");
                 return BadRequest(response.NotFoundDifficulty.Message);
             }
@@ -58,12 +58,40 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPost("add_difficulty")]
         public async Task<IActionResult> AddDifficulty([FromBody] DifficultyCreateDto difficulty)
         {
+            var request = new GetDifficultyByDescRequest
+            {
+                Desc = difficulty.QDifficultyDesc
+            };
             if (!ModelState.IsValid)
             {
                 return ReturnModelStateErrors();
             }
-            return Ok();
+
+            var checkDifficulty = await _channelClient.GetDifficultyByDescAsync(request);
+
+            if (checkDifficulty.Code == 200)
+            {
+                return ReturnDifficultyAlreadyExist();
+            }
+
+            if(checkDifficulty.Code == 401)
+            {
+                return Ok(new { id = checkDifficulty.Id, qDifficultyDesc = difficulty });
+            }
+
+            if (checkDifficulty.Code == 400)
+            {
+                var createDifficulty = await _channelClient.CreateDifficultyAsync(_mapper.Map<CreateDifficultyRequest>(difficulty));
+                if (createDifficulty.Code == 500)
+                {
+                    return BadRequest("Failed to create difficulty");
+                }
+
+                return Ok(new { id = createDifficulty.Id, qDifficultyDesc  = createDifficulty.QDifficultyDesc});
+            }
+            return BadRequest("Something went wrong");
         }
+
         private ActionResult ReturnModelStateErrors()
         {
             var errorList = ModelState.Values
@@ -77,6 +105,14 @@ namespace QuizMaster.API.Gateway.Controllers
             {
                 Type = "Error",
                 Message = errorString
+            });
+        }
+        private ActionResult ReturnDifficultyAlreadyExist()
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = "Difficulty already exist."
             });
         }
     }

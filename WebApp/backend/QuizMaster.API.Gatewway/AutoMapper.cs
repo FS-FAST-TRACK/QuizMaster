@@ -18,6 +18,7 @@ namespace QuizMaster.API.Gatewway
             CreateMap<CategoryCreateDto, QuestionCategory>().ReverseMap();
             CreateMap<Question, QuestionDto>();
             CreateMap<DificultiesReply, DifficultyDto>().ReverseMap();
+            CreateMap<DifficultyCreateDto, CreateDifficultyRequest>().ReverseMap();
         }
     }
 }

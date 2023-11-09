@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Grpc.Core;
+using Newtonsoft.Json;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 
 namespace QuizMaster.API.Quiz.Services.GRPC
 {
@@ -51,11 +53,69 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                     reply.DificultiesReply = success;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 error.Code = 500;
                 error.Message = ex.Message;
             }
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<DifficultyByDescResponse> GetDifficultyByDesc(GetDifficultyByDescRequest request, ServerCallContext context)
+        {
+            var reply = new DifficultyByDescResponse();
+
+            try
+            {
+                var checkDesc = await _quizRepository.GetDifficultyAsync(request.Desc);
+                if (checkDesc == null)
+                {
+                    reply.Code = 400;
+                }
+                else
+                {
+                    if (checkDesc.ActiveData)
+                    {
+                        reply.Code = 200;
+
+                    }
+                    else
+                    {
+                        reply.Code = 201;
+                        reply.Id = checkDesc.Id;
+                        checkDesc.ActiveData = true;
+                        _quizRepository.UpdateDifficulty(checkDesc);
+                        _quizRepository.SaveChangesAsync();
+
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                reply.Code = 500;
+            }
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<CreateDifficultyResponse> CreateDifficulty(CreateDifficultyRequest request, ServerCallContext context)
+        {
+            var reply = new CreateDifficultyResponse();
+
+            try
+            {
+                var difficulty = _mapper.Map<QuestionDifficulty>(request);
+                await _quizRepository.AddDifficultyAsync(difficulty);
+                await _quizRepository.SaveChangesAsync();
+
+                reply.Code = 201;
+                reply.Id = difficulty.Id;
+                reply.QDifficultyDesc = difficulty.QDifficultyDesc;
+            }
+            catch (Exception)
+            {
+                reply.Code = 500;
+            }
+
             return await Task.FromResult(reply);
         }
     }
