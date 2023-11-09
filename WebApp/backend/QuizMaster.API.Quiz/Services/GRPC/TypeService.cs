@@ -85,5 +85,31 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             return await Task.FromResult(reply);
         }
+
+        public override async Task<QuizTypeResponse> DeleteType(GetQuizTypeRequest request, ServerCallContext context)
+        {
+            var reply = new QuizTypeResponse();
+
+            var type = _quizRepository.GetTypeAsync(request.Id).Result;
+
+            if(type == null || !type.ActiveData)
+            {
+                reply.Code = 404;
+                return await Task.FromResult(reply);
+            }
+
+            type.ActiveData = false;
+            var isSuccess = _quizRepository.UpdateType(type);
+
+            if(!isSuccess)
+            {
+                reply.Code = 500;
+                return await Task.FromResult(reply);
+            }
+
+            await _quizRepository.SaveChangesAsync();
+            reply.Code = 204;
+            return await Task.FromResult(reply);
+        }
     }
 }

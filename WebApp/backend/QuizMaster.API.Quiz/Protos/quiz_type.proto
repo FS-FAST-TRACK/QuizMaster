@@ -6,6 +6,7 @@ service QuizTypeService{
 	rpc GetAllTypes(EmptyTypeRequest) returns (stream TypeReply);
 	rpc GetQuizType(GetQuizTypeRequest) returns (QuizTypeResponse);
 	rpc AddQuizType(AddQuisTypeRequest) returns (QuizTypeResponse);
+	rpc DeleteType(GetQuizTypeRequest) returns (QuizTypeResponse);
 }
 
 message EmptyTypeRequest{}

@@ -52,7 +52,7 @@ namespace QuizMaster.API.Gateway.Controllers
         }
 
         [HttpPost("add_type")]
-        public async Task<IActionResult> Addtype([FromBody] TypeCreateDto type)
+        public async Task<IActionResult> AddType([FromBody] TypeCreateDto type)
         {
             var request = new AddQuisTypeRequest { QTypeDesc = type.QTypeDesc, QDetailRequired = type.QDetailRequired };
             var response = await _channelClient.AddQuizTypeAsync(request);
@@ -67,6 +67,35 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(new { Type = "Error", Message = $"Something went wrong." });
             }
             return Ok(new {id = response.Type.Id, qTypeDesc=response.Type.QTypeDesc, qDetailRequired = response.Type.QDetailRequired});
+        }
+
+        [HttpDelete("delete_type/{id}")]
+        public async Task<IActionResult> DeleteType(int id)
+        {
+            var request = new GetQuizTypeRequest { Id = id };
+            var response = await _channelClient.DeleteTypeAsync(request);
+
+            if (response.Code == 404)
+            {
+                return ReturnTypeDoesNotExist(id);
+            }
+
+            if(response.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update type." });
+            }
+
+            return NoContent();
+        }
+
+        private ActionResult ReturnTypeDoesNotExist(int id)
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = $"Type with id {id} doesn't exist."
+            });
+
         }
     }
 }
