@@ -78,39 +78,41 @@ namespace QuizMaster.API.Quiz.Models
 		public ValidationModel.ValidationModel IsValid()
 		{
 			string errors = "";
-			if(QTypeId == QuestionTypes.MultipleChoiceSeedData.Id)
+
+			switch (QTypeId)
 			{
-				errors +=  MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for Multiple Choice Question. " : "" ;
-				errors += MultipleChoiceQuestionDetail == null ? "MultipleChoiceQuestionDetail is required for Multiple Choice Question. " : "";
+				case QuestionTypes.MultipleChoiceSeedDataId:
+					errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for Multiple Choice Question. " : "";
+					errors += MultipleChoiceQuestionDetail == null ? "MultipleChoiceQuestionDetail is required for Multiple Choice Question. " : "";
+					break;
+
+				case QuestionTypes.TrueOrFalseSeedDataId:
+					errors += TrueOrFalseAnswer == null ? "TrueOrFalseAnswer is required for True or False Question. " : "";
+					break;
+
+				case QuestionTypes.TypeAnswerSeedDataId:
+					errors += TypeAnswer == null ? "TypeAnswer is required for TypeAnswer Question. " : "";
+					break;
+
+				case QuestionTypes.PuzzleSeedDataId:
+					errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for PuzzleSeedData Question. " : "";
+					break;
+
+				case QuestionTypes.SliderSeedDataId:
+					errors += SliderAnswer == null ? "SliderAnswer is required for Slider Question. " : "";
+					errors += SliderQuestionDetail == null ? "SliderQuestionDetail is required for Slider Question. " : "";
+					break;
+
+				case QuestionTypes.MultipleChoicePlusAudioSeedDataId:
+					errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for Multiple Choice Plus Audio Question. " : "";
+					errors += MultipleChoicePlusAudioQuestionDetail == null ? "MultipleChoicePlusAudioQuestionDetails is required for Multiple Choice Plus Audio Question. " : "";
+					break;
 			}
 
-			if (QTypeId == QuestionTypes.TrueOrFalseSeedData.Id)
-			{
-				errors += TrueOrFalseAnswer == null ? "TrueOrFalseAnswer is required for True or False Question. " : "";
-			}
-
-			if (QTypeId == QuestionTypes.TypeAnswerSeedData.Id)
-			{
-				errors += TypeAnswer == null ? "TypeAnswer is required for TypeAnswer Question. " : "";
-			}
-
-			if (QTypeId == QuestionTypes.PuzzleSeedData.Id)
-			{
-				errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for PuzzleSeedData Question. " : "";
-			}
-
-
-			if (QTypeId == QuestionTypes.SliderSeedData.Id)
-			{
-				errors += SliderAnswer == null ? "SliderAnswer is required for Slider Question. " : "";
-				errors += SliderQuestionDetail == null ? "SliderQuestionDetail is required for Slider Question. " : "";
-
-			}
 			return new ValidationModel.ValidationModel()
 			{
 				Error = errors,
 			};
-
 		}
 	}
 }

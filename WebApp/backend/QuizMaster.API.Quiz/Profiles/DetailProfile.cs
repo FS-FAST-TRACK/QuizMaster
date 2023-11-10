@@ -3,34 +3,16 @@ using Newtonsoft.Json;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Questionnaire;
-using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
 using QuizMaster.Library.Common.Entities.Questionnaire.Details;
-using QuizMaster.Library.Common.Entities.Questionnaire.Options;
 
 namespace QuizMaster.API.Quiz.Profiles
 {
-	public class DetailProfile : Profile   
+	public class DetailProfile : Profile
 	{
-		public DetailProfile() {
+		public DetailProfile()
+		{
 			CreateMap<QuestionDetail, DetailDto>();
 
-			// Multiple choice detail
-			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
-				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
-
-			// Slider detail
-			CreateMap<QuestionCreateDto<SliderAnswer, SliderQuestionDetail>, QuestionDetail>()
-				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
-
-			// Puzzle detail
-			CreateMap<QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail>, QuestionDetail>()
-				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
-
-			// Multiple choice plus audio detail
-			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoicePlusAudioQuestionDetail>, QuestionDetail>()
-				.ForMember(destination => destination.QDetailDesc, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QDetails)));
-
-			
 			CreateMap<QuestionCreateDto, QuestionDetail>()
 				.ForMember(destination => destination.QDetailDesc, act =>
 				act.MapFrom(src =>
@@ -42,8 +24,16 @@ namespace QuizMaster.API.Quiz.Profiles
 					? JsonConvert.SerializeObject(src.MultipleChoicePlusAudioQuestionDetail) :
 				""));
 
-
-
+			CreateMap<QuestionDetail, QuestionCreateDto>()
+				.ForMember(destination => destination.MultipleChoiceQuestionDetail, act =>
+				act.MapFrom((src, destination)=> destination.QTypeId == QuestionTypes.MultipleChoiceSeedDataId ?JsonConvert.DeserializeObject<MultipleChoiceQuestionDetail>(src.QDetailDesc) : null
+				))
+				.ForMember(destination => destination.SliderQuestionDetail, act =>
+				act.MapFrom((src, destination) => destination.QTypeId == QuestionTypes.SliderSeedDataId? JsonConvert.DeserializeObject<SliderQuestionDetail>(src.QDetailDesc) : null
+				))
+				.ForMember(destination => destination.MultipleChoicePlusAudioQuestionDetail, act =>
+				act.MapFrom((src, destination) => destination.QTypeId == QuestionTypes.MultipleChoicePlusAudioSeedDataId ? JsonConvert.DeserializeObject<MultipleChoicePlusAudioQuestionDetail>(src.QDetailDesc) : null
+				));
 		}
 
 	}

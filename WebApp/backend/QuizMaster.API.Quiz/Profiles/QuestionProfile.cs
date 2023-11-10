@@ -28,37 +28,9 @@ namespace QuizMaster.API.Quiz.Profiles
 					? JsonConvert.SerializeObject(src.PuzzleAnswer) :
 				src.QTypeId == QuestionTypes.MultipleChoicePlusAudioSeedData.Id 
 					? JsonConvert.SerializeObject(src.MultipleChoiceAnswer) :
-				""));
-			CreateMap<Question, QuestionCreateDto<string, string>>();
+				"")).ReverseMap();
 
-			// Custom Mapper for multiple choices question
-			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoiceQuestionDetail>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src=> JsonConvert.SerializeObject(src.QAnswer)));
-
-			// Custom Mapper for true or false question
-			CreateMap<QuestionCreateDto<bool, bool>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => src.QAnswer));
-
-			// Custom Mapper for type answer question
-			CreateMap<QuestionCreateDto<TypeAnswer, string>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
-
-			// Custom Mapper for slider question
-			CreateMap<QuestionCreateDto<SliderAnswer, SliderQuestionDetail>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
-
-
-			// Custom Mapper for puzzle question
-			CreateMap<QuestionCreateDto<PuzzleAnswer, MultipleChoiceQuestionDetail>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
-
-			// Custom Mapper for multiple choice plus audio question
-			CreateMap<QuestionCreateDto<MultipleChoiceAnswer, MultipleChoicePlusAudioQuestionDetail>, Question>()
-				.ForMember(destination => destination.QAnswer, act => act.MapFrom(src => JsonConvert.SerializeObject(src.QAnswer)));
-
-
-
-			CreateMap<Question, QuestionCreateDto<string, string>>();
+			
 		}
 	}
 }
