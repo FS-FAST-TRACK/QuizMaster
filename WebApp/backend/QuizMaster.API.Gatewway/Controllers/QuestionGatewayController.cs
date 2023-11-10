@@ -9,6 +9,7 @@ using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Helpers.Quiz;
+using QuizMaster.Library.Common.Models;
 using System.Threading.Channels;
 
 namespace QuizMaster.API.Gateway.Controllers
@@ -36,7 +37,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 Parameter = JsonConvert.SerializeObject(resourceParameter)
             };
 
-            var response = await _channelClient.GetQuestionAsync(request);
+            var response = await _channelClient.GetQuestionsAsync(request);
 
             var questions = JsonConvert.DeserializeObject<PagedList<Question>>(response.Questions);
 
@@ -60,6 +61,21 @@ namespace QuizMaster.API.Gateway.Controllers
             Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
 
             return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
+        }
+
+        [HttpGet("get_question/{id}")] 
+        public async Task<IActionResult> GetQuestion(int id)
+        {
+            var request = new GetQuestionRequest() { Id = id};
+
+            var response = await _channelClient.GetQuestionAsync(request);
+
+            if(response.Code == 404)
+            {
+                return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
+            }
+            var question = JsonConvert.DeserializeObject<QuestionDto>(response.Questions);
+            return Ok(question);
         }
     }
 }
