@@ -7,6 +7,7 @@ service QuestionServices{
 	rpc GetQuestion(GetQuestionRequest) returns (QuestionResponse);
 	rpc AddQuestion(QuestionRequest) returns (QuestionResponse);
 	rpc DeleteQuestion(GetQuestionRequest) returns (QuestionResponse);
+	rpc PatchQuestion(PatchQuestionRequest) returns (QuestionResponse);
 }
 
 message QuestionRequest{
@@ -20,4 +21,9 @@ message QuestionResponse{
 
 message GetQuestionRequest{
 	int32 id = 1;
+}
+
+message PatchQuestionRequest{
+	int32 id = 1;
+	string patch = 2;
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using Grpc.Core;
+using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Models.ValidationModel;
@@ -147,6 +148,64 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             await _quizRepository.SaveChangesAsync();
 
             return await Task.FromResult(reply);
+        }
+
+        public override async Task<QuestionResponse> PatchQuestion(PatchQuestionRequest request, ServerCallContext context)
+        {
+            var reply = new QuestionResponse();
+
+            var id = request.Id;
+            var patch = JsonConvert.DeserializeObject<JsonPatchDocument<QuestionCreateDto>>(request.Patch);
+
+            var question = await _quizRepository.GetQuestionAsync(id);
+
+            if(question == null || !question.ActiveData)
+            {
+                reply.Code = 404;
+                return await Task.FromResult(reply);
+            }
+
+            var questionPatch = _mapper.Map<QuestionCreateDto>(question);
+
+            patch.ApplyTo(questionPatch);
+
+            //var validation = questionPatch.IsValid();
+            //if(!validation.IsValid)
+            //{
+            //    reply.Code = 500;
+            //    reply.Questions = validation.Error;
+            //    return await Task.FromResult(reply);
+            //}
+
+            var category = await _quizRepository.GetCategoryAsync(questionPatch.QCategoryId);
+            var difficulty = await _quizRepository.GetDifficultyAsync(questionPatch.QDifficultyId);
+            var type = await _quizRepository.GetTypeAsync(questionPatch.QTypeId);
+
+            if(await _quizRepository.GetQuestionAsync(questionPatch.QStatement, questionPatch.QDifficultyId,
+                                                      questionPatch.QTypeId, questionPatch.QCategoryId) != null)
+            {
+                reply.Code = 409;
+                return await Task.FromResult(reply);
+            }
+
+            _mapper.Map(questionPatch, question);
+
+            try
+            {
+                _quizRepository.UpdateQuestion(question);
+                await _quizRepository.SaveChangesAsync();
+
+                reply.Code = 200;
+                reply.Questions = JsonConvert.SerializeObject(question);
+
+                return await Task.FromResult(reply);
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Questions = ex.Message;
+                return await Task.FromResult(reply);
+            }
         }
     }
 }

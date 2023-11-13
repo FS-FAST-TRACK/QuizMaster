@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Azure;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -132,6 +134,38 @@ namespace QuizMaster.API.Gateway.Controllers
             return NoContent();
         }
 
+        [HttpPatch("update_question/{id}")]
+        public async Task<IActionResult> UpdateQuestion(int id,[FromBody] JsonPatchDocument<QuestionCreateDto> patch)
+        {
+            var patchRequest = JsonConvert.SerializeObject(patch);
+            var request = new PatchQuestionRequest() { Id = id, Patch = patchRequest };
+
+            var reply = await _channelClient.PatchQuestionAsync(request);
+            
+            if(reply.Code == 404)
+            {
+                return ReturnQuestionDoesNotExist(id);
+            }
+
+            if (reply.Code == 500)
+            {
+                return BadRequest(new ResponseDto
+                {
+                    Type = "Error",
+                    Message = reply.Questions
+                });
+            }
+            
+            if(reply.Code == 409)
+            {
+                return ReturnQuestionAlreadyExist();
+            }
+
+            var result = JsonConvert.DeserializeObject<Question>(reply.Questions);
+            return Ok(_mapper.Map<QuestionDto>(result));
+        }
+
+        #region Utility
         private ActionResult ReturnQuestionDoesNotExist(int id)
         {
             return BadRequest(new ResponseDto
@@ -166,5 +200,6 @@ namespace QuizMaster.API.Gateway.Controllers
                 Message = errorString
             });
         }
+        #endregion
     }
 }
