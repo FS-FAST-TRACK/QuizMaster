@@ -3,7 +3,11 @@ syntax = "proto3";
 option csharp_namespace = "QuizMaster.API.Quiz.Protos";
 
 service QuestionServices{
-	rpc GetQuestion(QuestionRequest) returns (QuestionResponse);
+	rpc GetQuestions(QuestionRequest) returns (QuestionResponse);
+	rpc GetQuestion(GetQuestionRequest) returns (QuestionResponse);
+	rpc AddQuestion(QuestionRequest) returns (QuestionResponse);
+	rpc DeleteQuestion(GetQuestionRequest) returns (QuestionResponse);
+	rpc PatchQuestion(PatchQuestionRequest) returns (QuestionResponse);
 }
 
 message QuestionRequest{
@@ -12,4 +16,14 @@ message QuestionRequest{
 
 message QuestionResponse{
 	string questions = 1;
+	int32 code = 2;
+}
+
+message GetQuestionRequest{
+	int32 id = 1;
+}
+
+message PatchQuestionRequest{
+	int32 id = 1;
+	string patch = 2;
 }
