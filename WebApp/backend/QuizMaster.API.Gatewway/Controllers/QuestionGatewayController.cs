@@ -113,6 +113,35 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(createdQuestion);
         }
 
+        [HttpDelete("delete_question/{id}")]
+        public async Task<IActionResult> DeleteQuestion(int id)
+        {
+            var request = new GetQuestionRequest() { Id = id };
+            var reply = await _channelClient.DeleteQuestionAsync(request);
+
+            if(reply.Code == 404)
+            {
+                return ReturnQuestionDoesNotExist(id);
+            }
+
+            if(reply.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to delete question." });
+            }
+
+            return NoContent();
+        }
+
+        private ActionResult ReturnQuestionDoesNotExist(int id)
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = $"Question with id {id} doesn't exist."
+            });
+
+        }
+
         private ActionResult ReturnQuestionAlreadyExist()
         {
             return BadRequest(new ResponseDto

@@ -122,5 +122,31 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             return await Task.FromResult(reply);
         }
+
+        public override async Task<QuestionResponse> DeleteQuestion(GetQuestionRequest request, ServerCallContext context)
+        {
+            var reply = new QuestionResponse();
+            var question = await _quizRepository.GetQuestionAsync(request.Id);
+
+            if(question == null || !question.ActiveData)
+            {
+                reply.Code = 404;
+                return await Task.FromResult(reply);
+            }
+
+            question.ActiveData = false;
+            var isSuccess = _quizRepository.UpdateQuestion(question);
+
+            if (!isSuccess) 
+            {
+                reply.Code = 500;
+                return await Task.FromResult(reply);
+            }
+
+            reply.Code = 200;
+            await _quizRepository.SaveChangesAsync();
+
+            return await Task.FromResult(reply);
+        }
     }
 }

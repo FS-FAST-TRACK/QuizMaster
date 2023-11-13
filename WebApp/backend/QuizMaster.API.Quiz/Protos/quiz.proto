@@ -6,6 +6,7 @@ service QuestionServices{
 	rpc GetQuestions(QuestionRequest) returns (QuestionResponse);
 	rpc GetQuestion(GetQuestionRequest) returns (QuestionResponse);
 	rpc AddQuestion(QuestionRequest) returns (QuestionResponse);
+	rpc DeleteQuestion(GetQuestionRequest) returns (QuestionResponse);
 }
 
 message QuestionRequest{
