@@ -77,5 +77,65 @@ namespace QuizMaster.API.Gateway.Controllers
             var question = JsonConvert.DeserializeObject<QuestionDto>(response.Questions);
             return Ok(question);
         }
+
+        [HttpPost("add_question")]
+        public async Task<IActionResult> AddQuestion([FromBody] QuestionCreateDto questionDto)
+        {
+            if(!ModelState.IsValid)
+
+            {
+                return ReturnModelStateErrors();
+            }
+            var validationResult = questionDto.IsValid();
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(
+                    new ResponseDto { Type = "Error", Message = validationResult.Error }
+                );
+            }
+
+            var question = JsonConvert.SerializeObject(questionDto);
+            var request = new QuestionRequest() { Parameter = question };
+
+            var reply = await _channelClient.AddQuestionAsync(request);
+
+            if (reply.Code == 409)
+            {
+                return ReturnQuestionAlreadyExist();
+            }
+
+            if(reply.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+            }
+
+            var createdQuestion = JsonConvert.DeserializeObject<QuestionDto>(reply.Questions);
+            return Ok(createdQuestion);
+        }
+
+        private ActionResult ReturnQuestionAlreadyExist()
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = "Question already exist."
+            });
+        }
+
+        private ActionResult ReturnModelStateErrors()
+        {
+            var errorList = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            var errorString = string.Join(", ", errorList);
+
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = errorString
+            });
+        }
     }
 }

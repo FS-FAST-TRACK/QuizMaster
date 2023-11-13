@@ -5,6 +5,7 @@ option csharp_namespace = "QuizMaster.API.Quiz.Protos";
 service QuestionServices{
 	rpc GetQuestions(QuestionRequest) returns (QuestionResponse);
 	rpc GetQuestion(GetQuestionRequest) returns (QuestionResponse);
+	rpc AddQuestion(QuestionRequest) returns (QuestionResponse);
 }
 
 message QuestionRequest{
