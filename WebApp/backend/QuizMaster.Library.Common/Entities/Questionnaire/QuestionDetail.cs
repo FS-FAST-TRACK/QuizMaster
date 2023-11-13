@@ -12,13 +12,21 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int Id { get; set; }
 
-        [Required]
-        public string QDetailDesc { get; set; }
-
-        [Required]
+        [ForeignKey(nameof(Question))]
+        public int QuestionId { get; set; }
         public Question Question { get; set; }
 
-        [Required]
+		[ForeignKey(nameof(Detail))]
+		public int DetailId { get; set; }
+		public Detail Detail { get; set; }
+
+		[ForeignKey(nameof(QuestionDetailType))]
+		public int QuestionDetailTypeId { get; set; }
+		public QuestionDetailType QuestionDetailType { get; set; }
+
+
+
+		[Required]
         public bool ActiveData { get; set; } = true;
 
         [Required]
@@ -27,8 +35,8 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         [AllowNull]
         public DateTime DateUpdated { get; set; }
 
-		[Required]
-		public int CreatedByUserId { get; set; }
+        [Required]
+        public int CreatedByUserId { get; set; } = 1; 
 
 		public int? UpdatedByUserId { get; set; }
 	}

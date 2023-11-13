@@ -29,6 +29,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				.Include(q=>q.QCategory)
 				.Include(q=>q.QDifficulty)
 				.Include(q=>q.QType)
+				.Include(q=>q.Details)
 				.ToListAsync();
 		}
 		public async Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
@@ -250,13 +251,76 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		}
 		#endregion
 
-
 		#region Question Detail Methods
-		public async Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId)
 		{
-			return await _context.Details.Where(d => d.Question.Id == qId).FirstOrDefaultAsync();
+			return await _context.QuestionDetails
+				.Where(qDetail => qDetail.Question.Id == qId)
+				.Include(qDetail => qDetail.Detail)
+				.Include(qDetail => qDetail.QuestionDetailType)
+				.ToListAsync();
 		}
-		public async Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+
+		public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
+		{
+			return await _context.QuestionDetails
+				.Where(qDetail => qDetail.Question.Id == qId && qDetail.QuestionDetailType.Id == detailTypeId)
+				.Include(qDetail => qDetail.Detail)
+				.Include(qDetail => qDetail.QuestionDetailType)
+				.ToListAsync();
+		}
+
+		public async Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail)
+		{
+			try
+			{
+				await _context.QuestionDetails.AddAsync(questionDetail);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Adding Detail Failed", ex);
+				return false;
+			}
+		}
+
+		public async Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails)
+		{
+			try
+			{
+				await _context.QuestionDetails.AddRangeAsync(questionDetails);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Adding Detail Failed", ex);
+				return false;
+			}
+		}
+
+
+		public bool UpdateQuestionDetail(QuestionDetail questionDetail)
+		{
+			try
+			{
+				_context.QuestionDetails.Update(questionDetail);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Adding Detail Failed", ex);
+				return false;
+			}
+		}
+		#endregion
+
+		#region Detail Methods
+		public async Task<Detail?> GetDetailAsync(int id)
+		{
+			return await _context.Details.Where(detail => detail.Id == id).FirstOrDefaultAsync();
+		}
+
+		public async Task<bool> AddDetailAsync(Detail detail)
 		{
 			try
 			{
@@ -265,11 +329,12 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError("Add Type Failed", ex);
+				_logger.LogError("Adding Detail Failed", ex);
 				return false;
 			}
 		}
-		public bool UpdateQuestionDetail(QuestionDetail detail)
+
+		public bool UpdateDetail(Detail detail)
 		{
 			try
 			{
@@ -278,28 +343,41 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError("Update Type Failed", ex);
+				_logger.LogError("Adding Detail Failed", ex);
 				return false;
 			}
 		}
 		#endregion
 
-		// Returns how many question used a question category
+		#region Detail Type Methods
+		public async Task<IEnumerable<QuestionDetailType>> GetQuestionDetailTypesAsync()
+		{
+			return await _context.DetailTypes.Where(dTypes => dTypes.ActiveData).ToListAsync();
+		}
+
+		public async Task<QuestionDetailType?> GetQuestionDetailTypeAsync(int id)
+		{
+			return await _context.DetailTypes.Where(dTypes => dTypes.Id == id && dTypes.ActiveData).FirstOrDefaultAsync();
+		}
+		#endregion
+
+
+		// Returns how many active questions used a question category
 		public async Task<int> GetQuestionUseCategoryCount(int categoryId)
 		{
-			return await _context.Questions.Where(q=> q.QCategory.Id  == categoryId).CountAsync();
+			return await _context.Questions.Where(q=> q.ActiveData && q.QCategory.Id  == categoryId ).CountAsync();
 		}
 
-		// Returns how many question used a question difficulty
+		// Returns how many questions used a question difficulty
 		public async Task<int> GetQuestionUseDifficultyCount(int difficultyId)
 		{
-			return await _context.Questions.Where(q => q.QCategory.Id == difficultyId).CountAsync();
+			return await _context.Questions.Where(q => q.ActiveData && q.QDifficulty.Id == difficultyId).CountAsync();
 		}
 
-		// Returns how many question used a question type
+		// Returns how many active questions used a question type
 		public async Task<int> GetQuestionUseTypeCount(int typeId)
 		{
-			return await _context.Questions.Where(q => q.QCategory.Id == typeId).CountAsync();
+			return await _context.Questions.Where(q => q.ActiveData && q.QType.Id == typeId).CountAsync();
 		}
 
 		public async Task<bool> SaveChangesAsync()
@@ -307,6 +385,8 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			var result = await _context.SaveChangesAsync();
 			return result != 0;
 		}
+
+
 
 	}
 }

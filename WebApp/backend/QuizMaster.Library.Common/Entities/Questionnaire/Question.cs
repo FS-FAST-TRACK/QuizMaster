@@ -16,7 +16,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public string QStatement { get; set; }
 
         [Required]
-        public string QAnswer { get; set; }
+        public IEnumerable<QuestionDetail> Details { get; set; }
 
         [Required]
         public string QImage { get; set; }

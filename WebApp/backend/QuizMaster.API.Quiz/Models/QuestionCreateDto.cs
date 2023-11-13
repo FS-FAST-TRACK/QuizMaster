@@ -42,12 +42,6 @@ namespace QuizMaster.API.Quiz.Models
 		[Required]
 		public string QStatement { get; set; }
 
-		public MultipleChoiceAnswer? MultipleChoiceAnswer { get; set; }
-		public bool? TrueOrFalseAnswer { get; set; }
-		public TypeAnswer? TypeAnswer { get; set; }
-		public SliderAnswer? SliderAnswer { get; set; }
-		public PuzzleAnswer? PuzzleAnswer { get; set; }
-
 		[Required]
 		public string QImage { get; set; }
 
@@ -66,14 +60,13 @@ namespace QuizMaster.API.Quiz.Models
 		[Required]
 		public int QTypeId { get; set; }
 
-		// Question detail for Multiple choice type of question
-		public MultipleChoiceQuestionDetail? MultipleChoiceQuestionDetail { get; set; }
-
-		// Question detail for Slider type of question
-		public SliderQuestionDetail? SliderQuestionDetail { get; set; }
-
-		// Question details for Multiple choice plus audio typ of questio
-		public MultipleChoicePlusAudioQuestionDetail? MultipleChoicePlusAudioQuestionDetail { get; set; }
+		public IEnumerable<OptionCreateDto> Options { get; set; }
+		public string? Minimum { get; set; }
+		public string? Maximum { get; set; }
+		public string? Interval { get; set; }
+		public string? Margin { get; set; }
+		public string? TextToAudio { get; set; }
+		public string? Language { get; set; }
 
 		public ValidationModel.ValidationModel IsValid()
 		{
@@ -82,30 +75,35 @@ namespace QuizMaster.API.Quiz.Models
 			switch (QTypeId)
 			{
 				case QuestionTypes.MultipleChoiceSeedDataId:
-					errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for Multiple Choice Question. " : "";
-					errors += MultipleChoiceQuestionDetail == null ? "MultipleChoiceQuestionDetail is required for Multiple Choice Question. " : "";
+					errors += Options.Where(o => o.IsAnswer).Count() == 0 ? "[Multiple Choice Question] Provide at least one answer for the given options. " : "";
+					errors += Options.Count() < 2 ? "[Multiple Choice Question] Provide at least 2 options. " : "";
 					break;
 
 				case QuestionTypes.TrueOrFalseSeedDataId:
-					errors += TrueOrFalseAnswer == null ? "TrueOrFalseAnswer is required for True or False Question. " : "";
+					errors += Options.Where(o => o.IsAnswer).Count() == 0 ? "[True or False Question] Provide at least one answer for the given options. " : "";
 					break;
 
 				case QuestionTypes.TypeAnswerSeedDataId:
-					errors += TypeAnswer == null ? "TypeAnswer is required for TypeAnswer Question. " : "";
+					errors += Options.Where(o => o.IsAnswer).Count() == 0 ? "[Type Answer Question] Provide at least one answer for the given options. " : "";
 					break;
 
 				case QuestionTypes.PuzzleSeedDataId:
-					errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for PuzzleSeedData Question. " : "";
+					errors += Options.Where(o => o.IsAnswer).Count() == 0 ? "[Puzzle Question] Provide at least one answer for the given options. " : "";
+					errors += Options.Count() < 2 ? "[Puzzle Question] Provide at least 2 options " : "";
 					break;
 
 				case QuestionTypes.SliderSeedDataId:
-					errors += SliderAnswer == null ? "SliderAnswer is required for Slider Question. " : "";
-					errors += SliderQuestionDetail == null ? "SliderQuestionDetail is required for Slider Question. " : "";
+					errors += Options.Where(o => o.IsAnswer).Count() == 0 ? "[Puzzle Question] Provide at least one answer for the given options. " : "";
+					errors += Minimum == null ? "[Puzzle Question] Provide minimum value. " : "";
+					errors += Maximum == null ? "[Puzzle Question] Provide maximum value. " : "";
+					errors += Interval == null ? "[Puzzle Question] Provide interval value. " : "";
 					break;
 
 				case QuestionTypes.MultipleChoicePlusAudioSeedDataId:
-					errors += MultipleChoiceAnswer == null ? "MultipleChoiceAnswer is required for Multiple Choice Plus Audio Question. " : "";
-					errors += MultipleChoicePlusAudioQuestionDetail == null ? "MultipleChoicePlusAudioQuestionDetails is required for Multiple Choice Plus Audio Question. " : "";
+					errors += Options.Where(o => o.IsAnswer).Count() == 0 ? "[Multiple Choice Plus Audio Question] Provide at least one answer for the given options. " : "";
+					errors += Options.Count() < 2 ? "[Multiple Choice Plus Audio Question] Provide at least 2 options. " : "";
+					errors += TextToAudio == null ? "[Multiple Choice Plus Audio Question] Provide textToAudio value. " : "";
+					errors += Language == null ? "[Multiple Choice Plus Audio Question] Provide language value. " : "";
 					break;
 			}
 

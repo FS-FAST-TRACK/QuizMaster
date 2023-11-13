@@ -38,6 +38,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			}
 		}
 
+		public Task<bool> AddDetailAsync(Detail detail)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<bool> AddDifficultyAsync(QuestionDifficulty difficulty)
 		{
 			try
@@ -57,7 +62,17 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail)
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails)
 		{
 			throw new NotImplementedException();
 		}
@@ -112,6 +127,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<Detail?> GetDetailAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<QuestionDifficulty?> GetDifficultyAsync(int id)
 		{
 			throw new NotImplementedException();
@@ -133,6 +153,26 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<QuestionDetailType?> GetQuestionDetailTypeAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetailType>> GetQuestionDetailTypesAsync()
 		{
 			throw new NotImplementedException();
 		}
@@ -168,6 +208,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public bool UpdateCategory(QuestionCategory category)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool UpdateDetail(Detail detail)
 		{
 			throw new NotImplementedException();
 		}

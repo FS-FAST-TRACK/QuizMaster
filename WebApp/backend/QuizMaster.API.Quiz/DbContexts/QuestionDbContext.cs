@@ -11,7 +11,9 @@ namespace QuizMaster.API.Quiz.DbContexts
 		public DbSet<QuestionCategory> Categories { get; set; }
 		public DbSet<QuestionDifficulty> Difficulties { get; set; }
 		public DbSet<QuestionType> Types { get; set; }
-		public DbSet<QuestionDetail> Details { get; set; }
+		public DbSet<QuestionDetail> QuestionDetails { get; set; }
+		public DbSet<QuestionDetailType> DetailTypes { get; set; }
+		public DbSet<Detail> Details { get; set; }
 		public QuestionDbContext(DbContextOptions<QuestionDbContext> options) : base(options) { }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +32,10 @@ namespace QuizMaster.API.Quiz.DbContexts
 			// Seed Question Category
 			modelBuilder.Entity<QuestionCategory>()
 							.HasData(QuestionCategories.Categories);
+
+			// Seed Detail Types
+			modelBuilder.Entity<QuestionDetailType>()
+							.HasData(QuestionDetailTypes.DetailTypes);
 
 		}
 	}

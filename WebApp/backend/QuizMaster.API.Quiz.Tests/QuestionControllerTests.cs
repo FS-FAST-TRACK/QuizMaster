@@ -6,6 +6,7 @@ using QuizMaster.API.Quiz.Controllers;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Profiles;
 using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Tests.Services;
 using System.Text.Json;
 
@@ -24,8 +25,9 @@ namespace QuizMaster.API.Quiz.Tests
 					cfg.AddProfile<DetailProfile>();
 					});
 			var mapper = new Mapper(mapperConfiguration);
+			var moqQuestionDetailManager = new Mock<IQuestionDetailManager>(); 
 		
-			var questionController = new QuestionController(quizTestDataRepository, mapper);
+			var questionController = new QuestionController(quizTestDataRepository, moqQuestionDetailManager.Object, mapper);
 
 			questionController.ControllerContext.HttpContext = new DefaultHttpContext();
 			
