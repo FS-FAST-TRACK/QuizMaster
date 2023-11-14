@@ -6,7 +6,7 @@
 	}
 	public class QuestionDetailCreateDto
 	{
-		public string DetailDesc { get; set; }
-		public IEnumerable<int> DetailTypeIds { get; set; }
+		public string QDetailDesc { get; set; }
+		public IEnumerable<string> DetailTypes { get; set; }
 	}
 }

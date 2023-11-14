@@ -79,7 +79,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			if (question == null || !question.ActiveData) return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
 
 			var questionDto = _mapper.Map<QuestionDto>(question);
-			questionDto.QuestionDetails = _mapper.Map<IEnumerable<QuestionDetailDto>>(questionDetail);
+			questionDto.Details = _mapper.Map<IEnumerable<QuestionDetailDto>>(questionDetail);
 
 			return Ok(questionDto);
 
@@ -116,10 +116,6 @@ namespace QuizMaster.API.Quiz.Controllers
 			}
 
 			bool isSuccess;
-
-			// Extract the question details from question
-			var questionDetail = _mapper.Map<QuestionDetailsCreateDto>(question);
-
 
 			// If question is not null and not active, we set active to true and update the question
 			if (questionFromRepo != null && !questionFromRepo.ActiveData)
@@ -162,13 +158,11 @@ namespace QuizMaster.API.Quiz.Controllers
 
 				if (isQuestionAddedSuccessfully)
 				{
-					isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionFromRepo, questionDetail.QuestionDetailCreateDtos);
+					isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionFromRepo, question.questionDetailCreateDtos);
 				}
 
 				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
 			}
-
-
 
 			// Check if update or create is not success 
 			if (!isSuccess)

@@ -22,7 +22,7 @@ namespace QuizMaster.API.Quiz.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.Detail", b =>
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.DetailType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -36,22 +36,101 @@ namespace QuizMaster.API.Quiz.Migrations
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("DTypeDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DetailDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("QuestionDetailId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("UpdatedByUserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Details");
+                    b.HasIndex("QuestionDetailId");
+
+                    b.ToTable("DetailTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Answer",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Option",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Minimum",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Maximum",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Interval",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Margin",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "TextToAudio",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ActiveData = false,
+                            CreatedByUserId = 0,
+                            DTypeDesc = "Language",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.Question", b =>
@@ -150,7 +229,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(289),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(9718),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Science"
                         },
@@ -159,7 +238,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1659),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(742),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Movies"
                         },
@@ -168,7 +247,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1664),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(747),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Animals"
                         },
@@ -177,7 +256,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 4,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1666),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(748),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Places"
                         },
@@ -186,7 +265,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 5,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1667),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(749),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "People"
                         },
@@ -195,7 +274,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 6,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1675),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(760),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "System Operations and Maintenance"
                         },
@@ -204,7 +283,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 7,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1676),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(761),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Data Structures"
                         },
@@ -213,7 +292,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 8,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1677),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(762),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Algorithms"
                         });
@@ -239,11 +318,9 @@ namespace QuizMaster.API.Quiz.Migrations
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DetailId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuestionDetailTypeId")
-                        .HasColumnType("int");
+                    b.Property<string>("QDetailDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
@@ -253,10 +330,6 @@ namespace QuizMaster.API.Quiz.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DetailId");
-
-                    b.HasIndex("QuestionDetailTypeId");
-
                     b.HasIndex("QuestionId");
 
                     b.ToTable("QuestionDetails");
@@ -264,21 +337,17 @@ namespace QuizMaster.API.Quiz.Migrations
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetailType", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("QuestionDetailId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("DetailTypeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("ActiveData")
                         .HasColumnType("bit");
 
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("int");
-
-                    b.Property<string>("DTypeDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
@@ -289,83 +358,11 @@ namespace QuizMaster.API.Quiz.Migrations
                     b.Property<int?>("UpdatedByUserId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("QuestionDetailId", "DetailTypeId");
 
-                    b.ToTable("DetailTypes");
+                    b.HasIndex("DetailTypeId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Answer",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(5944),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Option",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6715),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Minimum",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6719),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Maximum",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6720),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Interval",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6720),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Margin",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6721),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "TextToAudio",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6722),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ActiveData = true,
-                            CreatedByUserId = 1,
-                            DTypeDesc = "Language",
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6723),
-                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
+                    b.ToTable("QuestionDetailTypes");
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDifficulty", b =>
@@ -406,7 +403,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 333, DateTimeKind.Local).AddTicks(2307),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(4234),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDifficultyDesc = "Easy"
                         },
@@ -415,7 +412,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 333, DateTimeKind.Local).AddTicks(3675),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(5277),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDifficultyDesc = "Average"
                         },
@@ -424,7 +421,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 333, DateTimeKind.Local).AddTicks(3751),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(5318),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDifficultyDesc = "Difficult"
                         });
@@ -471,7 +468,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 329, DateTimeKind.Local).AddTicks(6012),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 591, DateTimeKind.Local).AddTicks(7943),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Multiple Choice"
@@ -481,7 +478,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8490),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8736),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Multiple Choice + Audio"
@@ -491,7 +488,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8512),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8748),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = false,
                             QTypeDesc = "True or False"
@@ -501,7 +498,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 4,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8514),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8750),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Type Answer"
@@ -511,7 +508,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 5,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8515),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8750),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Slider"
@@ -521,11 +518,18 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 6,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8516),
+                            DateCreated = new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8751),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Puzzle"
                         });
+                });
+
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.DetailType", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetail", null)
+                        .WithMany("DetailTypes")
+                        .HasForeignKey("QuestionDetailId");
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.Question", b =>
@@ -557,34 +561,42 @@ namespace QuizMaster.API.Quiz.Migrations
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetail", b =>
                 {
-                    b.HasOne("QuizMaster.Library.Common.Entities.Questionnaire.Detail", "Detail")
-                        .WithMany()
-                        .HasForeignKey("DetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetailType", "QuestionDetailType")
-                        .WithMany()
-                        .HasForeignKey("QuestionDetailTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("QuizMaster.Library.Common.Entities.Questionnaire.Question", "Question")
                         .WithMany("Details")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Detail");
-
                     b.Navigation("Question");
+                });
 
-                    b.Navigation("QuestionDetailType");
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetailType", b =>
+                {
+                    b.HasOne("QuizMaster.Library.Common.Entities.Questionnaire.DetailType", "DetailType")
+                        .WithMany()
+                        .HasForeignKey("DetailTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetail", "QuestionDetail")
+                        .WithMany()
+                        .HasForeignKey("QuestionDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DetailType");
+
+                    b.Navigation("QuestionDetail");
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.Question", b =>
                 {
                     b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Questionnaire.QuestionDetail", b =>
+                {
+                    b.Navigation("DetailTypes");
                 });
 #pragma warning restore 612, 618
         }

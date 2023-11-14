@@ -1,4 +1,4 @@
-﻿using QuizMaster.API.Quiz.Models;
+﻿using QuizMaster.API.Quiz.Models;using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 
@@ -20,27 +20,27 @@ namespace QuizMaster.API.Quiz.Services
 			try
 			{
 				var questionDetails = new List<QuestionDetail>();
+				var questionDetailTypes = new List<QuestionDetailType>();
 				questionDetailCreateDto.ToList().ForEach(async questionDetailCreateDto =>
 				{
-
-
-					var detail = new Detail()
+					var detail = new QuestionDetail()
 					{
-						DetailDesc = questionDetailCreateDto.DetailDesc
+						QDetailDesc = questionDetailCreateDto.QDetailDesc,
+						Question = question
 					};
-					await _quizRepository.AddDetailAsync(detail);
 					
-					questionDetailCreateDto.DetailTypeIds.ToList().ForEach(async dTypeId =>
+					
+					questionDetailCreateDto.DetailTypes.ToList().ForEach( dType =>
 					{
-						var questionDetail = new QuestionDetail();
-						questionDetail.Detail = detail;
-						questionDetail.Question = question;
-						questionDetail.QuestionDetailTypeId = dTypeId;
-						questionDetails.Add(questionDetail);
+						var questionDetailType = new QuestionDetailType();
+						questionDetailType.QuestionDetail = detail;
+						questionDetailType.DetailTypeId = DetailTypes.keyValuePairs[dType];
+						questionDetailTypes.Add(questionDetailType);						
 					});
 				});
 
-				await _quizRepository.AddQuestionDetailsAsync(questionDetails); 
+				await _quizRepository.AddQuestionDetailsAsync(questionDetails);
+				await _quizRepository.AddQuestionDetailTypesAsync(questionDetailTypes);
 				return true;
 			}
 			catch (Exception ex)

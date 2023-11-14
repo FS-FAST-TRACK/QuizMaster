@@ -9,6 +9,7 @@ namespace QuizMaster.API.Quiz.Profiles
         public QuestionDetailProfile()
         {
 			CreateMap<QuestionDetail, QuestionDetailDto>();
+
 		}
-    }
+	}
 }

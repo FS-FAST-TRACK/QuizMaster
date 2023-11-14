@@ -20,7 +20,7 @@ namespace QuizMaster.API.Quiz.Models
 		public int QCategoryId { get; set; }
 
 		public int QTypeId { get; set; }
-		public IEnumerable<QuestionDetailDto> QuestionDetails { get; set; }
+		public IEnumerable<QuestionDetailDto> Details { get; set; }
 
 	}
 }

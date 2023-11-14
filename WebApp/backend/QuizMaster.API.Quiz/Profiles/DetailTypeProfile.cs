@@ -8,7 +8,7 @@ namespace QuizMaster.API.Quiz.Profiles
 	{
         public DetailTypeProfile()
         {
-			CreateMap<QuestionDetailType, DetailTypeDto>();
+			CreateMap<DetailType, DetailTypeDto>();
 		}
     }
 }

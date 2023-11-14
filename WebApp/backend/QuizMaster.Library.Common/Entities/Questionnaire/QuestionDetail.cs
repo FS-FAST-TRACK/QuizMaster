@@ -12,19 +12,15 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int Id { get; set; }
 
+        [Required]
+        public string QDetailDesc { get; set; }
+
         [ForeignKey(nameof(Question))]
         public int QuestionId { get; set; }
         public Question Question { get; set; }
 
-		[ForeignKey(nameof(Detail))]
-		public int DetailId { get; set; }
-		public Detail Detail { get; set; }
 
-		[ForeignKey(nameof(QuestionDetailType))]
-		public int QuestionDetailTypeId { get; set; }
-		public QuestionDetailType QuestionDetailType { get; set; }
-
-
+		public IEnumerable<DetailType> DetailTypes { get; set; }
 
 		[Required]
         public bool ActiveData { get; set; } = true;

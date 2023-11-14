@@ -32,42 +32,6 @@ namespace QuizMaster.API.Quiz.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Details",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DetailDesc = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActiveData = table.Column<bool>(type: "bit", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedByUserId = table.Column<int>(type: "int", nullable: false),
-                    UpdatedByUserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Details", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DetailTypes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DTypeDesc = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActiveData = table.Column<bool>(type: "bit", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedByUserId = table.Column<int>(type: "int", nullable: false),
-                    UpdatedByUserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DetailTypes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Difficulties",
                 columns: table => new
                 {
@@ -149,9 +113,8 @@ namespace QuizMaster.API.Quiz.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    QDetailDesc = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
-                    DetailId = table.Column<int>(type: "int", nullable: false),
-                    QuestionDetailTypeId = table.Column<int>(type: "int", nullable: false),
                     ActiveData = table.Column<bool>(type: "bit", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -162,23 +125,61 @@ namespace QuizMaster.API.Quiz.Migrations
                 {
                     table.PrimaryKey("PK_QuestionDetails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuestionDetails_DetailTypes_QuestionDetailTypeId",
-                        column: x => x.QuestionDetailTypeId,
-                        principalTable: "DetailTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_QuestionDetails_Details_DetailId",
-                        column: x => x.DetailId,
-                        principalTable: "Details",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_QuestionDetails_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DetailTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DTypeDesc = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActiveData = table.Column<bool>(type: "bit", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedByUserId = table.Column<int>(type: "int", nullable: false),
+                    UpdatedByUserId = table.Column<int>(type: "int", nullable: true),
+                    QuestionDetailId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DetailTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DetailTypes_QuestionDetails_QuestionDetailId",
+                        column: x => x.QuestionDetailId,
+                        principalTable: "QuestionDetails",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionDetailTypes",
+                columns: table => new
+                {
+                    QuestionDetailId = table.Column<int>(type: "int", nullable: false),
+                    DetailTypeId = table.Column<int>(type: "int", nullable: false),
+                    ActiveData = table.Column<bool>(type: "bit", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedByUserId = table.Column<int>(type: "int", nullable: false),
+                    UpdatedByUserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionDetailTypes", x => new { x.QuestionDetailId, x.DetailTypeId });
+                    table.ForeignKey(
+                        name: "FK_QuestionDetailTypes_DetailTypes_DetailTypeId",
+                        column: x => x.DetailTypeId,
+                        principalTable: "DetailTypes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionDetailTypes_QuestionDetails_QuestionDetailId",
+                        column: x => x.QuestionDetailId,
+                        principalTable: "QuestionDetails",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.InsertData(
@@ -186,29 +187,29 @@ namespace QuizMaster.API.Quiz.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QCategoryDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(289), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Science", null },
-                    { 2, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1659), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Movies", null },
-                    { 3, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1664), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Animals", null },
-                    { 4, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1666), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Places", null },
-                    { 5, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1667), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "People", null },
-                    { 6, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1675), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System Operations and Maintenance", null },
-                    { 7, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1676), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Data Structures", null },
-                    { 8, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(1677), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Algorithms", null }
+                    { 1, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(9718), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Science", null },
+                    { 2, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(742), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Movies", null },
+                    { 3, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(747), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Animals", null },
+                    { 4, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(748), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Places", null },
+                    { 5, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(749), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "People", null },
+                    { 6, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(760), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System Operations and Maintenance", null },
+                    { 7, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(761), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Data Structures", null },
+                    { 8, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 595, DateTimeKind.Local).AddTicks(762), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Algorithms", null }
                 });
 
             migrationBuilder.InsertData(
                 table: "DetailTypes",
-                columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DTypeDesc", "DateCreated", "DateUpdated", "UpdatedByUserId" },
+                columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DTypeDesc", "DateCreated", "DateUpdated", "QuestionDetailId", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, "Answer", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(5944), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 2, true, 1, "Option", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6715), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 3, true, 1, "Minimum", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6719), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 4, true, 1, "Maximum", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6720), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 5, true, 1, "Interval", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6720), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 6, true, 1, "Margin", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6721), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 7, true, 1, "TextToAudio", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6722), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 8, true, 1, "Language", new DateTime(2023, 11, 13, 23, 1, 56, 334, DateTimeKind.Local).AddTicks(6723), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null }
+                    { 1, false, 0, "Answer", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 2, false, 0, "Option", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 3, false, 0, "Minimum", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 4, false, 0, "Maximum", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 5, false, 0, "Interval", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 6, false, 0, "Margin", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 7, false, 0, "TextToAudio", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
+                    { 8, false, 0, "Language", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -216,9 +217,9 @@ namespace QuizMaster.API.Quiz.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QDifficultyDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 333, DateTimeKind.Local).AddTicks(2307), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Easy", null },
-                    { 2, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 333, DateTimeKind.Local).AddTicks(3675), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Average", null },
-                    { 3, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 333, DateTimeKind.Local).AddTicks(3751), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Difficult", null }
+                    { 1, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(4234), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Easy", null },
+                    { 2, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(5277), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Average", null },
+                    { 3, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 594, DateTimeKind.Local).AddTicks(5318), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Difficult", null }
                 });
 
             migrationBuilder.InsertData(
@@ -226,28 +227,28 @@ namespace QuizMaster.API.Quiz.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QDetailRequired", "QTypeDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 329, DateTimeKind.Local).AddTicks(6012), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Multiple Choice", null },
-                    { 2, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8490), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Multiple Choice + Audio", null },
-                    { 3, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8512), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, "True or False", null },
-                    { 4, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8514), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Type Answer", null },
-                    { 5, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8515), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Slider", null },
-                    { 6, true, 1, new DateTime(2023, 11, 13, 23, 1, 56, 330, DateTimeKind.Local).AddTicks(8516), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Puzzle", null }
+                    { 1, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 591, DateTimeKind.Local).AddTicks(7943), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Multiple Choice", null },
+                    { 2, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8736), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Multiple Choice + Audio", null },
+                    { 3, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8748), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, "True or False", null },
+                    { 4, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8750), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Type Answer", null },
+                    { 5, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8750), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Slider", null },
+                    { 6, true, 1, new DateTime(2023, 11, 14, 18, 54, 0, 592, DateTimeKind.Local).AddTicks(8751), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Puzzle", null }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuestionDetails_DetailId",
-                table: "QuestionDetails",
-                column: "DetailId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuestionDetails_QuestionDetailTypeId",
-                table: "QuestionDetails",
-                column: "QuestionDetailTypeId");
+                name: "IX_DetailTypes_QuestionDetailId",
+                table: "DetailTypes",
+                column: "QuestionDetailId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionDetails_QuestionId",
                 table: "QuestionDetails",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionDetailTypes_DetailTypeId",
+                table: "QuestionDetailTypes",
+                column: "DetailTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QCategoryId",
@@ -269,13 +270,13 @@ namespace QuizMaster.API.Quiz.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "QuestionDetails");
+                name: "QuestionDetailTypes");
 
             migrationBuilder.DropTable(
                 name: "DetailTypes");
 
             migrationBuilder.DropTable(
-                name: "Details");
+                name: "QuestionDetails");
 
             migrationBuilder.DropTable(
                 name: "Questions");

@@ -31,6 +31,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				.Include(q=>q.QType)
 				.Include(q=>q.Details)
 				.ToListAsync();
+			
 		}
 		public async Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
 		{
@@ -70,6 +71,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				.Include(q => q.QCategory)
 				.Include(q => q.QDifficulty)
 				.Include(q => q.QType)
+				.Include(q => q.Details)
 				.FirstOrDefaultAsync();
 		}
 
@@ -256,17 +258,15 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		{
 			return await _context.QuestionDetails
 				.Where(qDetail => qDetail.Question.Id == qId)
-				.Include(qDetail => qDetail.Detail)
-				.Include(qDetail => qDetail.QuestionDetailType)
+				.Include(qDetail => qDetail.DetailTypes)
 				.ToListAsync();
 		}
 
 		public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
 		{
 			return await _context.QuestionDetails
-				.Where(qDetail => qDetail.Question.Id == qId && qDetail.QuestionDetailType.Id == detailTypeId)
-				.Include(qDetail => qDetail.Detail)
-				.Include(qDetail => qDetail.QuestionDetailType)
+				.Where(qDetail => qDetail.QuestionId == qId )
+				.Include(qDetail => qDetail.DetailTypes.Where(dType => dType.Id == detailTypeId))
 				.ToListAsync();
 		}
 
@@ -314,51 +314,47 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		}
 		#endregion
 
-		#region Detail Methods
-		public async Task<Detail?> GetDetailAsync(int id)
+		#region Detail Type Methods
+		public async Task<IEnumerable<DetailType>> GetDetailTypesAsync()
 		{
-			return await _context.Details.Where(detail => detail.Id == id).FirstOrDefaultAsync();
+			return await _context.DetailTypes.Where(dType => dType.ActiveData).ToListAsync();
 		}
 
-		public async Task<bool> AddDetailAsync(Detail detail)
+		public async Task<DetailType?> GetDetailTypeAsync(int id)
 		{
-			try
-			{
-				await _context.Details.AddAsync(detail);
-				return true;
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError("Adding Detail Failed", ex);
-				return false;
-			}
-		}
-
-		public bool UpdateDetail(Detail detail)
-		{
-			try
-			{
-				_context.Details.Update(detail);
-				return true;
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError("Adding Detail Failed", ex);
-				return false;
-			}
+			return await _context.DetailTypes.Where(dType => dType.Id == id && dType.ActiveData).FirstOrDefaultAsync();
 		}
 		#endregion
 
-		#region Detail Type Methods
-		public async Task<IEnumerable<QuestionDetailType>> GetQuestionDetailTypesAsync()
+		#region Question - Detail Type Methods
+		public async Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes)
 		{
-			return await _context.DetailTypes.Where(dTypes => dTypes.ActiveData).ToListAsync();
+			try
+			{
+				await _context.QuestionDetailTypes.AddRangeAsync(questionDetailTypes);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add QuestionDetailTypes Failed", ex);
+				return false;
+			}
 		}
 
-		public async Task<QuestionDetailType?> GetQuestionDetailTypeAsync(int id)
+		public async Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType)
 		{
-			return await _context.DetailTypes.Where(dTypes => dTypes.Id == id && dTypes.ActiveData).FirstOrDefaultAsync();
+			try
+			{
+				await _context.QuestionDetailTypes.AddAsync(questionDetailType);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add QuestionDetailTypes Failed", ex);
+				return false;
+			}
 		}
+
 		#endregion
 
 

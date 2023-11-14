@@ -3,7 +3,7 @@
 	public class QuestionDetailDto
 	{
 		public int Id { get; set; }
-		public DetailDto Detail { get; set; }
-		public DetailTypeDto QuestionDetailType { get; set; }
+		public string QDetailDesc { get; set; }
+		public IEnumerable<DetailTypeDto> DetailTypes { get; set; }
 	}
 }

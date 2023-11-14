@@ -50,7 +50,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             else
             {
                 var questionDto = _mapper.Map<QuestionDto>(question);
-                questionDto.QuestionDetails = _mapper.Map<IEnumerable<QuestionDetailDto>>(questionDetail);
+                questionDto.Details = _mapper.Map<IEnumerable<QuestionDetailDto>>(questionDetail);
                 reply.Code = 200;
                 reply.Questions = JsonConvert.SerializeObject(questionDto);
             }
@@ -116,7 +116,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             await _quizRepository.SaveChangesAsync();
             var questionDto = _mapper.Map<QuestionDto>(questionRepo);
-            questionDto.QuestionDetails = _mapper.Map<IEnumerable<QuestionDetailDto>>(detail);
+            questionDto.Details = _mapper.Map<IEnumerable<QuestionDetailDto>>(detail);
 
             reply.Code = 200;
             reply.Questions = JsonConvert.SerializeObject(questionDto);
