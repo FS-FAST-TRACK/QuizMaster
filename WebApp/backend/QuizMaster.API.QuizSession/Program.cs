@@ -1,5 +1,3 @@
-using QuizMaster.API.QuizSession.Services.Repositories;
-
 namespace QuizMaster.API.QuizSession
 {
     public class Program
@@ -14,9 +12,6 @@ namespace QuizMaster.API.QuizSession
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
-            // Register Services
-            builder.Services.AddSingleton<IChatRepository, SingletonChatRepository>(); // chat service repository
 
             var app = builder.Build();
 
