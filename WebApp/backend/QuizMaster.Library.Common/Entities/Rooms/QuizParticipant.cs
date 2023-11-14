@@ -20,7 +20,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
         public QuizRoom QRoom { get; set; }
 
         [Required]
-        public UserAccount UserAccount { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         public int Score { get; set; }
