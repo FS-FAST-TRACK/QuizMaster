@@ -57,7 +57,27 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail)
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes)
 		{
 			throw new NotImplementedException();
 		}
@@ -111,6 +131,15 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		{
 			throw new NotImplementedException();
 		}
+		public Task<DetailType?> GetDetailTypeAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<DetailType>> GetDetailTypesAsync()
+		{
+			throw new NotImplementedException();
+		}
 
 		public Task<QuestionDifficulty?> GetDifficultyAsync(int id)
 		{
@@ -133,6 +162,26 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<QuestionDetailType?> GetQuestionDetailTypeAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetailType>> GetQuestionDetailTypesAsync()
 		{
 			throw new NotImplementedException();
 		}
