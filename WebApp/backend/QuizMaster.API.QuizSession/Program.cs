@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Handlers;
 using QuizMaster.API.QuizSession.Hubs;
 using QuizMaster.API.QuizSession.Services.Repositories;
@@ -25,7 +27,13 @@ namespace QuizMaster.API.QuizSession
             builder.Services.AddSingleton<SessionHandler>(); // session handler service
             builder.Services.AddSingleton<SignalR_QuizSessionHub>(); // signalR hub service
 
-            var app = builder.Build();
+            // Add DBcontext
+			builder.Services.AddDbContext<QuizSessionDbContext>(
+				dbContextOptions => dbContextOptions.UseSqlite(
+					builder.Configuration["ConnectionStrings:QuizMasterQuizSessionDBConnectionString"]));
+
+
+			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -1,6 +1,6 @@
 ﻿using QuizMaster.Library.Common.Entities.Questionnaire;
 
-namespace QuizMaster.Library.Common.SeedData
+namespace QuizMaster.Library.Common.SeedData.Quiz
 {
 	public static class QuestionCategories
 	{
