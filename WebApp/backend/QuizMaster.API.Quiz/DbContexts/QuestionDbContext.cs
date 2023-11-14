@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Questionnaire;
-using QuizMaster.API.Quiz.Models;
 
 namespace QuizMaster.API.Quiz.DbContexts
 {
@@ -11,7 +10,9 @@ namespace QuizMaster.API.Quiz.DbContexts
 		public DbSet<QuestionCategory> Categories { get; set; }
 		public DbSet<QuestionDifficulty> Difficulties { get; set; }
 		public DbSet<QuestionType> Types { get; set; }
-		public DbSet<QuestionDetail> Details { get; set; }
+		public DbSet<QuestionDetail> QuestionDetails { get; set; }
+		public DbSet<QuestionDetailType> QuestionDetailTypes { get; set; }
+		public DbSet<DetailType> DetailTypes { get; set; }
 		public QuestionDbContext(DbContextOptions<QuestionDbContext> options) : base(options) { }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +31,10 @@ namespace QuizMaster.API.Quiz.DbContexts
 			// Seed Question Category
 			modelBuilder.Entity<QuestionCategory>()
 							.HasData(QuestionCategories.Categories);
+
+			// Seed Detail Types
+			modelBuilder.Entity<DetailType>()
+							.HasData(SeedData.DetailTypes.SeedData);
 
 		}
 	}

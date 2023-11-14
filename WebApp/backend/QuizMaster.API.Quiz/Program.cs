@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Quiz.DbContexts;
+using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.GRPC;
 using QuizMaster.API.Quiz.Services.Repositories;
 
@@ -23,6 +24,8 @@ namespace QuizMaster.API.Quiz
 
 
 			builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+
+			builder.Services.AddScoped<IQuestionDetailManager, QuestionDetailManager>();
 
 			builder.Services.AddLogging();
 
