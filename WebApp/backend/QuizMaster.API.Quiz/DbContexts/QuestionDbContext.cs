@@ -19,6 +19,11 @@ namespace QuizMaster.API.Quiz.DbContexts
 		{
 			base.OnModelCreating(modelBuilder);
 
+			// Disable cascade delete
+			var cascadeFKs = modelBuilder.Model.GetEntityTypes()
+				.SelectMany(t => t.GetForeignKeys())
+				.Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.NoAction);
+
 
 			// Seed Question Types
 			modelBuilder.Entity<QuestionType>()
