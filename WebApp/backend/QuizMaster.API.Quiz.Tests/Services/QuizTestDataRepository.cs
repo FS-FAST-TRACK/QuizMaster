@@ -38,11 +38,6 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			}
 		}
 
-		public Task<bool> AddDetailAsync(Detail detail)
-		{
-			throw new NotImplementedException();
-		}
-
 		public async Task<bool> AddDifficultyAsync(QuestionDifficulty difficulty)
 		{
 			try
@@ -73,6 +68,16 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes)
 		{
 			throw new NotImplementedException();
 		}
@@ -126,8 +131,12 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		{
 			throw new NotImplementedException();
 		}
+		public Task<DetailType?> GetDetailTypeAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
 
-		public Task<Detail?> GetDetailAsync(int id)
+		public Task<IEnumerable<DetailType>> GetDetailTypesAsync()
 		{
 			throw new NotImplementedException();
 		}
@@ -208,11 +217,6 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public bool UpdateCategory(QuestionCategory category)
-		{
-			throw new NotImplementedException();
-		}
-
-		public bool UpdateDetail(Detail detail)
 		{
 			throw new NotImplementedException();
 		}

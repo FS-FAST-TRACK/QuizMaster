@@ -22,7 +22,7 @@ namespace QuizMaster.API.Quiz.Tests
 			var mapperConfiguration = new MapperConfiguration(
 				cfg => {
 					cfg.AddProfile<QuestionProfile>();
-					cfg.AddProfile<DetailProfile>();
+					cfg.AddProfile<QuestionDetailProfile>();
 					});
 			var mapper = new Mapper(mapperConfiguration);
 			var moqQuestionDetailManager = new Mock<IQuestionDetailManager>(); 
