@@ -1,6 +1,7 @@
 ﻿using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace QuizMaster.Library.Common.Entities.Rooms
@@ -8,6 +9,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
     public class QuizParticipant: IEntity
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int QParticipantId { get; set; }
 
         [Required]
