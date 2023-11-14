@@ -1,3 +1,7 @@
+using QuizMaster.API.QuizSession.Handlers;
+using QuizMaster.API.QuizSession.Hubs;
+using QuizMaster.API.QuizSession.Services.Repositories;
+
 namespace QuizMaster.API.QuizSession
 {
     public class Program
@@ -13,6 +17,14 @@ namespace QuizMaster.API.QuizSession
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Enable SignalR
+            builder.Services.AddSignalR();
+
+            // Register Services
+            builder.Services.AddSingleton<IChatRepository, SingletonChatRepository>(); // chat service repository
+            builder.Services.AddSingleton<SessionHandler>(); // session handler service
+            builder.Services.AddSingleton<SignalR_QuizSessionHub>(); // signalR hub service
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,10 +34,17 @@ namespace QuizMaster.API.QuizSession
                 app.UseSwaggerUI();
             }
 
+            app.UseRouting(); // required when use endpoints is implemented
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
+            // quizsession signalR endpoint
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<SignalR_QuizSessionHub>("/quizmaster_ws");
+            });
 
             app.MapControllers();
 
