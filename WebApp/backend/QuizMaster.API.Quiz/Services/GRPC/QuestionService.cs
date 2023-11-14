@@ -41,7 +41,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             var reply = new QuestionResponse();
 
             var question = await _quizRepository.GetQuestionAsync(request.Id);
-            var questionDetail = await _quizRepository.GetQuestionDetailAsync(request.Id);
+            var questionDetail = await _quizRepository.GetQuestionDetailsAsync(request.Id);
 
             if(question == null || !question.ActiveData) 
             {
@@ -50,7 +50,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             else
             {
                 var questionDto = _mapper.Map<QuestionDto>(question);
-                questionDto.Details = _mapper.Map<DetailDto>(questionDetail);
+                questionDto.QuestionDetails = _mapper.Map<IEnumerable<QuestionDetailDto>>(questionDetail);
                 reply.Code = 200;
                 reply.Questions = JsonConvert.SerializeObject(questionDto);
             }
@@ -102,7 +102,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                     detail.Question = questionRepo;
                     // Created by UserId must be updated by the time we have access to tokens
                     detail.CreatedByUserId = 1;
-                    isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
+                    isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailAsync(detail);
                 }
 
                 isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
@@ -116,7 +116,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             await _quizRepository.SaveChangesAsync();
             var questionDto = _mapper.Map<QuestionDto>(questionRepo);
-            questionDto.Details = _mapper.Map<DetailDto>(detail);
+            questionDto.QuestionDetails = _mapper.Map<IEnumerable<QuestionDetailDto>>(detail);
 
             reply.Code = 200;
             reply.Questions = JsonConvert.SerializeObject(questionDto);
