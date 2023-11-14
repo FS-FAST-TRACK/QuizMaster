@@ -36,6 +36,17 @@ namespace QuizMaster.API.Quiz.DbContexts
 			modelBuilder.Entity<DetailType>()
 							.HasData(SeedData.DetailTypes.SeedData);
 
+			// Seed Questions
+			modelBuilder.Entity<Question>()
+							.HasData(SeedData.Questions.SeedData);
+
+			// Seed Question Details
+			modelBuilder.Entity<QuestionDetail>()
+							.HasData(SeedData.QuestionDetails.SeedData);
+
+			// Seed Question Detail Type
+			modelBuilder.Entity<QuestionDetailType>()
+							.HasData(SeedData.QuestionDetailTypes.SeedData);
 		}
 	}
 }

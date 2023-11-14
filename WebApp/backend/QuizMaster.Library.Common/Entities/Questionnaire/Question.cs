@@ -28,13 +28,20 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public int QTime { get; set; }
 
         [Required]
+        [ForeignKey(nameof(QDifficulty))]
+        public int QDifficultyId { get; set; }
         public QuestionDifficulty QDifficulty { get; set; }
 
-        [Required]
-        public QuestionCategory QCategory { get; set; }
+
+		[Required]
+		[ForeignKey(nameof(QCategory))]
+		public int QCategoryId { get; set; }
+		public QuestionCategory QCategory { get; set; }
 
         [Required]
-        public QuestionType QType { get; set; }
+		[ForeignKey(nameof(QType))]
+		public int QTypeId { get; set; }
+		public QuestionType QType { get; set; }
 
         [Required]
         public bool ActiveData { get; set; } = true;
