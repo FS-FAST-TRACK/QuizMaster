@@ -6,5 +6,7 @@ namespace QuizMaster.API.QuizSession.Models
     {
         [Required]
         public string Message { get; set; } = string.Empty;
+        [Required]
+        public int RoomId { get;set; }
     }
 }
