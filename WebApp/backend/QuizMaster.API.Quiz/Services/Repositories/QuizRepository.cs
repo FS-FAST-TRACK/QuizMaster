@@ -66,13 +66,26 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 
 		public async Task<Question?> GetQuestionAsync(int id)
 		{
-			return await _context.Questions
+			var question = await _context.Questions
 				.Where(q => q.Id == id)
 				.Include(q => q.QCategory)
 				.Include(q => q.QDifficulty)
 				.Include(q => q.QType)
 				.Include(q => q.Details)
 				.FirstOrDefaultAsync();
+
+			if (question != null)
+			{
+				question.Details.ToList().ForEach(qDetail =>
+				{
+					qDetail.DetailTypes = _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetail.Id).Select((qDetailType) =>
+					 qDetailType.DetailType).ToList();
+				});
+			}
+
+			return question;
+			
+				
 		}
 
 		public async Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId)
