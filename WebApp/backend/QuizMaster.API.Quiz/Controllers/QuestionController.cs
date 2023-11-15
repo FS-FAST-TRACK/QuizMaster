@@ -1,17 +1,13 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Models.ValidationModel;
 using QuizMaster.API.Quiz.ResourceParameters;
-using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
-using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
-using QuizMaster.Library.Common.Entities.Questionnaire.Details;
 using QuizMaster.Library.Common.Models;
 using System.Text.Json;
 
@@ -78,7 +74,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			if (question == null || !question.ActiveData) return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
 
 			var questionDto = _mapper.Map<QuestionDto>(question);
-			
+
 
 			return Ok(questionDto);
 
@@ -104,7 +100,7 @@ namespace QuizMaster.API.Quiz.Controllers
 					new ResponseDto { Type = "Error", Message = validationResult.Error }
 				);
 			}
-			 
+
 			// Check if question statement with associated category, difficulty, and type already exist
 			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
 
@@ -125,7 +121,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			else
 			// else, we create new question
 			{
-				
+
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
@@ -141,7 +137,7 @@ namespace QuizMaster.API.Quiz.Controllers
 						Message = result.Error
 					});
 				}
-				
+
 
 				questionFromRepo = _mapper.Map<Question>(question);
 
@@ -192,29 +188,22 @@ namespace QuizMaster.API.Quiz.Controllers
 				return ReturnQuestionDoesNotExist(id);
 			}
 
+			// Patch the changes into the question from repo
 			var questionForPatch = _mapper.Map<QuestionCreateDto>(questionFromRepo);
-			
 			patch.ApplyTo(questionForPatch);
-
-			var validationResult = questionForPatch.IsValid();
-			if (!validationResult.IsValid)
-			{
-				return BadRequest(
-					new ResponseDto { Type = "Error", Message = validationResult.Error }
-				);
-			}
+			_mapper.Map(questionForPatch, questionFromRepo);
 
 			// Validate model of question
-			if (!TryValidateModel(questionForPatch))
+			if (!TryValidateModel(questionFromRepo))
 			{
 				return ReturnModelStateErrors();
 			}
-			
 
 			// Get category, difficulty, and type
-			var category = await _quizRepository.GetCategoryAsync(questionForPatch.QCategoryId);
-			var difficulty = await _quizRepository.GetDifficultyAsync(questionForPatch.QDifficultyId);
-			var type = await _quizRepository.GetTypeAsync(questionForPatch.QTypeId);
+			var category = await _quizRepository.GetCategoryAsync(questionFromRepo.QCategoryId);
+			var difficulty = await _quizRepository.GetDifficultyAsync(questionFromRepo.QDifficultyId);
+			var type = await _quizRepository.GetTypeAsync(questionFromRepo.QTypeId);
+
 
 			// Guard if category, difficulty, and type is not found
 			var result = ValidateCategoryDifficultyType(category, difficulty, type);
@@ -229,12 +218,10 @@ namespace QuizMaster.API.Quiz.Controllers
 
 
 			// Check if question description already exist
-			if (await _quizRepository.GetQuestionAsync(questionForPatch.QStatement, questionForPatch.QDifficultyId, questionForPatch.QTypeId, questionForPatch.QCategoryId) != null)
+			if (await _quizRepository.GetQuestionAsync(questionFromRepo.QStatement, questionFromRepo.QDifficultyId, questionFromRepo.QTypeId, questionFromRepo.QCategoryId) != null)
 			{
 				return ReturnQuestionAlreadyExist();
 			}
-
-			_mapper.Map(questionForPatch, questionFromRepo);
 
 			var isSuccess = _quizRepository.UpdateQuestion(questionFromRepo);
 
