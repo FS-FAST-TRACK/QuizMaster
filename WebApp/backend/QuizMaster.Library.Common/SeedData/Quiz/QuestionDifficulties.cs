@@ -1,17 +1,16 @@
-﻿using QuizMaster.Library.Common.Entities.Accounts;
-using QuizMaster.Library.Common.Entities.Questionnaire;
+﻿using QuizMaster.Library.Common.Entities.Questionnaire;
 
-namespace QuizMaster.API.Quiz.SeedData
+namespace QuizMaster.Library.Common.SeedData.Quiz
 {
 	public static class QuestionDifficulties
 	{
 		private static readonly IEnumerable<string> _difficulties = new string[] { "Easy", "Average", "Difficult"};
 
 		public static IEnumerable<QuestionDifficulty> Difficulties = _difficulties
-			.Select((difficulty, index) => new QuestionDifficulty
+			.Select((category, index) => new QuestionDifficulty
 			{
 				Id = index + 1,
-				QDifficultyDesc = difficulty,
+				QDifficultyDesc = category,
 				CreatedByUserId = 1,
 			}).ToList();
 	}

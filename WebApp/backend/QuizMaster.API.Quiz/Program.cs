@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using QuizMaster.API.Quiz.Configuration;
 using QuizMaster.API.Quiz.DbContexts;
 using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.GRPC;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.API.Quiz.Services.Workers;
 
 namespace QuizMaster.API.Quiz
 {
@@ -22,6 +24,9 @@ namespace QuizMaster.API.Quiz
 				dbContextOptions => dbContextOptions.UseSqlServer(
 					builder.Configuration["ConnectionStrings:QuizMasterQuestionDBConnectionString"]));
 
+			// Configure strongly typed app settings object
+			builder.Services.Configure<QuizApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
+
 
 			builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 
@@ -32,6 +37,9 @@ namespace QuizMaster.API.Quiz
 			builder.Services.AddControllers().AddNewtonsoftJson();
 
 			builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+			// Register worker services
+			builder.Services.AddHostedService<QuizDataSynchronizationWorker>();
 
 			var app = builder.Build();
 

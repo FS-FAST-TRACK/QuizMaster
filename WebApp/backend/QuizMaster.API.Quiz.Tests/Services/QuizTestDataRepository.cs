@@ -106,7 +106,17 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			return await Task.FromResult(_difficulties);
 		}
 
-		public Task<IEnumerable<Question>> GetAllQuestionsAsync()
+        public Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<QuestionDetailType>> GetAllQuestionDetailTypesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Question>> GetAllQuestionsAsync()
 		{
 			throw new NotImplementedException();
 		}
