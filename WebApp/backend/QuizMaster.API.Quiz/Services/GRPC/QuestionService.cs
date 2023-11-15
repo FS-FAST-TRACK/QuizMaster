@@ -16,11 +16,13 @@ namespace QuizMaster.API.Quiz.Services.GRPC
     public class QuestionService : QuestionServices.QuestionServicesBase
     {
         private readonly IQuizRepository _quizRepository;
+        private readonly IQuestionDetailManager _questionDetailManager;
         private readonly IMapper _mapper;
 
-        public QuestionService(IQuizRepository quizRepository, IMapper mapper)
+        public QuestionService(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager,IMapper mapper)
         {
             _quizRepository = quizRepository;
+            _questionDetailManager = questionDetailManager;
             _mapper = mapper;
         }
 
@@ -41,7 +43,6 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             var reply = new QuestionResponse();
 
             var question = await _quizRepository.GetQuestionAsync(request.Id);
-            var questionDetail = await _quizRepository.GetQuestionDetailAsync(request.Id);
 
             if(question == null || !question.ActiveData) 
             {
@@ -50,7 +51,6 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             else
             {
                 var questionDto = _mapper.Map<QuestionDto>(question);
-                questionDto.Details = _mapper.Map<DetailDto>(questionDetail);
                 reply.Code = 200;
                 reply.Questions = JsonConvert.SerializeObject(questionDto);
             }
@@ -96,13 +96,9 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionRepo);
                 var isDetailAddedSuccessfully = true;
 
-                if (isQuestionAddedSuccessfully && type!.QDetailRequired)
+                if (isQuestionAddedSuccessfully)
                 {
-                    // Link the details to question. 
-                    detail.Question = questionRepo;
-                    // Created by UserId must be updated by the time we have access to tokens
-                    detail.CreatedByUserId = 1;
-                    isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
+                    isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionRepo, question.)
                 }
 
                 isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
@@ -116,7 +112,6 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             await _quizRepository.SaveChangesAsync();
             var questionDto = _mapper.Map<QuestionDto>(questionRepo);
-            questionDto.Details = _mapper.Map<DetailDto>(detail);
 
             reply.Code = 200;
             reply.Questions = JsonConvert.SerializeObject(questionDto);
@@ -168,18 +163,6 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             var questionPatch = _mapper.Map<QuestionCreateDto>(question);
 
             patch.ApplyTo(questionPatch);
-
-            //var validation = questionPatch.IsValid();
-            //if(!validation.IsValid)
-            //{
-            //    reply.Code = 500;
-            //    reply.Questions = validation.Error;
-            //    return await Task.FromResult(reply);
-            //}
-
-            var category = await _quizRepository.GetCategoryAsync(questionPatch.QCategoryId);
-            var difficulty = await _quizRepository.GetDifficultyAsync(questionPatch.QDifficultyId);
-            var type = await _quizRepository.GetTypeAsync(questionPatch.QTypeId);
 
             if(await _quizRepository.GetQuestionAsync(questionPatch.QStatement, questionPatch.QDifficultyId,
                                                       questionPatch.QTypeId, questionPatch.QCategoryId) != null)
