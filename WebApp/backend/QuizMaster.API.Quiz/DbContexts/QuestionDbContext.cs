@@ -19,6 +19,11 @@ namespace QuizMaster.API.Quiz.DbContexts
 		{
 			base.OnModelCreating(modelBuilder);
 
+			// Disable cascade delete
+			var cascadeFKs = modelBuilder.Model.GetEntityTypes()
+				.SelectMany(t => t.GetForeignKeys())
+				.Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.NoAction);
+
 
 			// Seed Question Types
 			modelBuilder.Entity<QuestionType>()
@@ -36,6 +41,17 @@ namespace QuizMaster.API.Quiz.DbContexts
 			modelBuilder.Entity<DetailType>()
 							.HasData(SeedData.DetailTypes.SeedData);
 
+			// Seed Questions
+			modelBuilder.Entity<Question>()
+							.HasData(SeedData.Questions.SeedData);
+
+			// Seed Question Details
+			modelBuilder.Entity<QuestionDetail>()
+							.HasData(SeedData.QuestionDetails.SeedData);
+
+			// Seed Question Detail Type
+			modelBuilder.Entity<QuestionDetailType>()
+							.HasData(SeedData.QuestionDetailTypes.SeedData);
 		}
 	}
 }

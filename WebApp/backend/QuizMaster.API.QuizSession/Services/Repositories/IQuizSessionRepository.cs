@@ -1,4 +1,5 @@
-﻿using QuizMaster.Library.Common.Entities.Questionnaire;
+﻿using QuizMaster.API.QuizSession.DbContexts;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.QuizSession.Services.Repositories
@@ -21,5 +22,6 @@ namespace QuizMaster.API.QuizSession.Services.Repositories
 
 		Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId);
 		Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId);
+		QuizSessionDbContext QuizSessionDbContext { get; }
 	}
 }
