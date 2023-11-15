@@ -8,6 +8,7 @@ using QuizMaster.API.Quiz.Models.ValidationModel;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Models;
 
@@ -164,7 +165,21 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             patch.ApplyTo(questionPatch);
 
-            if(await _quizRepository.GetQuestionAsync(questionPatch.QStatement, questionPatch.QDifficultyId,
+            var category = await _quizRepository.GetCategoryAsync(questionPatch.QCategoryId);
+            var difficulty = await _quizRepository.GetDifficultyAsync(questionPatch.QDifficultyId);
+            var type = await _quizRepository.GetTypeAsync(questionPatch.QTypeId);
+
+
+            // Guard if category, difficulty, and type is not found
+            var result = ValidateCategoryDifficultyType(category, difficulty, type);
+            if (!result.IsValid)
+            {
+                reply.Code = 400;
+                reply.Questions = result.Error;
+                return await Task.FromResult(reply);
+            }
+
+            if (await _quizRepository.GetQuestionAsync(questionPatch.QStatement, questionPatch.QDifficultyId,
                                                       questionPatch.QTypeId, questionPatch.QCategoryId) != null)
             {
                 reply.Code = 409;
@@ -189,6 +204,22 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 reply.Questions = ex.Message;
                 return await Task.FromResult(reply);
             }
+        }
+
+        private ValidationModel ValidateCategoryDifficultyType(QuestionCategory? category, QuestionDifficulty? difficulty, QuestionType? type)
+        {
+            var validationModel = new ValidationModel();
+
+            validationModel.Error += ValidateItem(category, "Category");
+            validationModel.Error += ValidateItem(difficulty, "Difficulty");
+            validationModel.Error += ValidateItem(type, "Type");
+
+            return validationModel;
+        }
+
+        private string ValidateItem(IEntity? item, string itemName)
+        {
+            return item == null || !item.ActiveData ? $"{itemName} is not found. " : "";
         }
     }
 }

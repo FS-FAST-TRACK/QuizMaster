@@ -39,16 +39,13 @@ namespace QuizMaster.API.Quiz.Models
 	}
 	public class QuestionCreateDto
 	{
-
-
-		[Required]
+        [Required]
 		public string QStatement { get; set; }
 
 		[Required]
 		public string QImage { get; set; }
 
-		[AllowNull]
-		public string QAudio { get; set; }
+		public string? QAudio { get; set; }
 
 		[Required]
 		public int QTime { get; set; }
