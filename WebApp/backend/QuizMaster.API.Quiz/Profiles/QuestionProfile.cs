@@ -10,6 +10,7 @@ namespace QuizMaster.API.Quiz.Profiles
 		public QuestionProfile()
 		{
 			CreateMap<Question, QuestionDto>();
+			CreateMap<Question, QuestionCreateDto>();
 			CreateMap<QuestionCreateDto, Question>();
 
 			//CreateMap<QuestionCreateDto, QuestionDetailsCreateDto>()
