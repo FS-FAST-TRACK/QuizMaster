@@ -73,13 +73,12 @@ namespace QuizMaster.API.Quiz.Controllers
 		{
 			// Get Question asynchronously
 			var question = await _quizRepository.GetQuestionAsync(id);
-			var questionDetail = await _quizRepository.GetQuestionDetailsAsync(id);
 
 			// Return not found if question doesn't exist or no longer active
 			if (question == null || !question.ActiveData) return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
 
 			var questionDto = _mapper.Map<QuestionDto>(question);
-			questionDto.Details = _mapper.Map<IEnumerable<QuestionDetailDto>>(questionDetail);
+			
 
 			return Ok(questionDto);
 
