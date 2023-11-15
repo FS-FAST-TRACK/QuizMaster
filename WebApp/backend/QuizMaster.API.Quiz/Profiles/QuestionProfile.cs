@@ -10,7 +10,7 @@ namespace QuizMaster.API.Quiz.Profiles
 		public QuestionProfile()
 		{
 			CreateMap<Question, QuestionDto>();
-			CreateMap<QuestionCreateDto, Question>();
+			CreateMap<QuestionCreateDto, Question>().ReverseMap();
 
 			//CreateMap<QuestionCreateDto, QuestionDetailsCreateDto>()
 			//	.ForMember(destination => destination.QuestionDetailCreateDtos, act => act.MapFrom((src, destination) =>

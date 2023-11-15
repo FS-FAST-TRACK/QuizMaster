@@ -8,6 +8,7 @@ using QuizMaster.API.Quiz.Models.ValidationModel;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Models;
 
@@ -16,11 +17,13 @@ namespace QuizMaster.API.Quiz.Services.GRPC
     public class QuestionService : QuestionServices.QuestionServicesBase
     {
         private readonly IQuizRepository _quizRepository;
+        private readonly IQuestionDetailManager _questionDetailManager;
         private readonly IMapper _mapper;
 
-        public QuestionService(IQuizRepository quizRepository, IMapper mapper)
+        public QuestionService(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager,IMapper mapper)
         {
             _quizRepository = quizRepository;
+            _questionDetailManager = questionDetailManager;
             _mapper = mapper;
         }
 
@@ -74,8 +77,6 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             bool isSuccess;
 
-            var detail = _mapper.Map<QuestionDetail>(question);
-
             if (questionRepo != null && !questionRepo.ActiveData)
             {
                 questionRepo.ActiveData = true;
@@ -96,13 +97,9 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionRepo);
                 var isDetailAddedSuccessfully = true;
 
-                if (isQuestionAddedSuccessfully && type!.QDetailRequired)
+                if (isQuestionAddedSuccessfully)
                 {
-                    // Link the details to question. 
-                    detail.Question = questionRepo;
-                    // Created by UserId must be updated by the time we have access to tokens
-                    detail.CreatedByUserId = 1;
-                    isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailAsync(detail);
+                    isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionRepo, question.questionDetailCreateDtos);
                 }
 
                 isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
@@ -116,7 +113,6 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             await _quizRepository.SaveChangesAsync();
             var questionDto = _mapper.Map<QuestionDto>(questionRepo);
-            questionDto.Details = _mapper.Map<IEnumerable<QuestionDetailDto>>(detail);
 
             reply.Code = 200;
             reply.Questions = JsonConvert.SerializeObject(questionDto);
@@ -169,19 +165,21 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
             patch.ApplyTo(questionPatch);
 
-            //var validation = questionPatch.IsValid();
-            //if(!validation.IsValid)
-            //{
-            //    reply.Code = 500;
-            //    reply.Questions = validation.Error;
-            //    return await Task.FromResult(reply);
-            //}
-
             var category = await _quizRepository.GetCategoryAsync(questionPatch.QCategoryId);
             var difficulty = await _quizRepository.GetDifficultyAsync(questionPatch.QDifficultyId);
             var type = await _quizRepository.GetTypeAsync(questionPatch.QTypeId);
 
-            if(await _quizRepository.GetQuestionAsync(questionPatch.QStatement, questionPatch.QDifficultyId,
+
+            // Guard if category, difficulty, and type is not found
+            var result = ValidateCategoryDifficultyType(category, difficulty, type);
+            if (!result.IsValid)
+            {
+                reply.Code = 400;
+                reply.Questions = result.Error;
+                return await Task.FromResult(reply);
+            }
+
+            if (await _quizRepository.GetQuestionAsync(questionPatch.QStatement, questionPatch.QDifficultyId,
                                                       questionPatch.QTypeId, questionPatch.QCategoryId) != null)
             {
                 reply.Code = 409;
@@ -206,6 +204,22 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 reply.Questions = ex.Message;
                 return await Task.FromResult(reply);
             }
+        }
+
+        private ValidationModel ValidateCategoryDifficultyType(QuestionCategory? category, QuestionDifficulty? difficulty, QuestionType? type)
+        {
+            var validationModel = new ValidationModel();
+
+            validationModel.Error += ValidateItem(category, "Category");
+            validationModel.Error += ValidateItem(difficulty, "Difficulty");
+            validationModel.Error += ValidateItem(type, "Type");
+
+            return validationModel;
+        }
+
+        private string ValidateItem(IEntity? item, string itemName)
+        {
+            return item == null || !item.ActiveData ? $"{itemName} is not found. " : "";
         }
     }
 }
