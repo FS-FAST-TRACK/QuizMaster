@@ -7,6 +7,6 @@ namespace QuizMaster.API.Quiz.Models
 		public int Id { get; set; }
 
 		[Required]
-		public string QDetailDesc { get; set; }
+		public string DetailDesc { get; set; }
 	}
 }

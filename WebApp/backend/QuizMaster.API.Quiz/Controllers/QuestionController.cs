@@ -6,6 +6,7 @@ using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Models.ValidationModel;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.SeedData;
+using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -23,18 +24,20 @@ namespace QuizMaster.API.Quiz.Controllers
 	public class QuestionController : ControllerBase
 	{
 		private readonly IQuizRepository _quizRepository;
+		private readonly IQuestionDetailManager _questionDetailManager;
 		private readonly IMapper _mapper;
 
-		public QuestionController(IQuizRepository quizRepository, IMapper mapper)
+
+		public QuestionController(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager, IMapper mapper)
 		{
 			_quizRepository = quizRepository;
+			_questionDetailManager = questionDetailManager;
 			_mapper = mapper;
 		}
 
 		#region Get All Questions
 		// GET: api/question
 		[HttpGet(Name = "GetQuestions")]
-		//[Authorize]
 		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get([FromQuery] QuestionResourceParameter resourceParameter)
 		{
 			// Get all active questions asynchronously
@@ -70,13 +73,12 @@ namespace QuizMaster.API.Quiz.Controllers
 		{
 			// Get Question asynchronously
 			var question = await _quizRepository.GetQuestionAsync(id);
-			var questionDetail = await _quizRepository.GetQuestionDetailAsync(id);
 
 			// Return not found if question doesn't exist or no longer active
 			if (question == null || !question.ActiveData) return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
 
 			var questionDto = _mapper.Map<QuestionDto>(question);
-			questionDto.Details = _mapper.Map<DetailDto>(questionDetail);
+			
 
 			return Ok(questionDto);
 
@@ -93,6 +95,8 @@ namespace QuizMaster.API.Quiz.Controllers
 			{
 				return ReturnModelStateErrors();
 			}
+
+			// Custom Validation
 			var validationResult = question.IsValid();
 			if (!validationResult.IsValid)
 			{
@@ -100,19 +104,17 @@ namespace QuizMaster.API.Quiz.Controllers
 					new ResponseDto { Type = "Error", Message = validationResult.Error }
 				);
 			}
+			 
 			// Check if question statement with associated category, difficulty, and type already exist
 			var questionFromRepo = await _quizRepository.GetQuestionAsync(question.QStatement, question.QDifficultyId, question.QTypeId, question.QCategoryId);
 
+			// Return question already exist error
 			if (questionFromRepo != null && questionFromRepo.ActiveData)
 			{
 				return ReturnQuestionAlreadyExist();
 			}
 
-
 			bool isSuccess;
-
-			// Extract the detail from question
-			var detail = _mapper.Map<QuestionDetail>(question);
 
 			// If question is not null and not active, we set active to true and update the question
 			if (questionFromRepo != null && !questionFromRepo.ActiveData)
@@ -123,7 +125,7 @@ namespace QuizMaster.API.Quiz.Controllers
 			else
 			// else, we create new question
 			{
-
+				
 				// Get category, difficulty, and type
 				var category = await _quizRepository.GetCategoryAsync(question.QCategoryId);
 				var difficulty = await _quizRepository.GetDifficultyAsync(question.QDifficultyId);
@@ -153,24 +155,18 @@ namespace QuizMaster.API.Quiz.Controllers
 				var isQuestionAddedSuccessfully = await _quizRepository.AddQuestionAsync(questionFromRepo);
 				var isDetailAddedSuccessfully = true;
 
-				if (isQuestionAddedSuccessfully && type!.QDetailRequired)
+				if (isQuestionAddedSuccessfully)
 				{
-					// Link the details to question. 
-					detail.Question = questionFromRepo;
-					// Created by UserId must be updated by the time we have access to tokens
-					detail.CreatedByUserId = 1;
-					isDetailAddedSuccessfully = await _quizRepository.AddQuestionDetailsAsync(detail);
+					isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionFromRepo, question.questionDetailCreateDtos);
 				}
 
 				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
 			}
 
-
-
 			// Check if update or create is not success 
 			if (!isSuccess)
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "error", Message = "failed to create question." });
 
 			}
 
@@ -178,7 +174,6 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			var questionDto = _mapper.Map<QuestionDto>(questionFromRepo);
 
-			questionDto.Details = _mapper.Map<DetailDto>(detail);
 			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, questionDto);
 		}
 		#endregion
@@ -190,7 +185,6 @@ namespace QuizMaster.API.Quiz.Controllers
 		{
 
 			var questionFromRepo = await _quizRepository.GetQuestionAsync(id);
-			var questionDetail = await _quizRepository.GetQuestionDetailAsync(id);
 
 			// Checks if question does not exist or (if it exist) checks if question is active
 			if (questionFromRepo == null || !questionFromRepo.ActiveData)

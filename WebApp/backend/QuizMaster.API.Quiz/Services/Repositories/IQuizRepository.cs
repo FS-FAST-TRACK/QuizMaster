@@ -34,9 +34,17 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		Task<bool> AddTypeAsync(QuestionType type);
 		bool UpdateType(QuestionType type);
 
-		Task<QuestionDetail?> GetQuestionDetailAsync(int qId);
-		Task<bool> AddQuestionDetailsAsync(QuestionDetail detail);
-		bool UpdateQuestionDetail(QuestionDetail detail);
+		Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId);
+		Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId);
+		Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail);
+		Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails);
+		bool UpdateQuestionDetail(QuestionDetail questionDetail);		
+
+		Task<IEnumerable<DetailType>> GetDetailTypesAsync();
+		Task<DetailType?> GetDetailTypeAsync(int id);
+
+		Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes);
+		Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType);
 
 		Task<int> GetQuestionUseCategoryCount(int categoryId);
 		Task<int> GetQuestionUseDifficultyCount(int difficultyId);

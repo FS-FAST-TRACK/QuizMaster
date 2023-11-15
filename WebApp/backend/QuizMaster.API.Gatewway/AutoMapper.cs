@@ -24,21 +24,21 @@ namespace QuizMaster.API.Gatewway
             CreateMap<TypeReply, TypeDto>().ReverseMap();
             CreateMap<Question, QuestionDto>().ReverseMap();
             CreateMap<Question, QuestionDto>();
-            CreateMap<QuestionCreateDto, Question>()
-    .ForMember(destination => destination.QAnswer, act => act.MapFrom(src =>
-    src.QTypeId == QuestionTypes.MultipleChoiceSeedData.Id
-        ? JsonConvert.SerializeObject(src.MultipleChoiceAnswer) :
-    src.QTypeId == QuestionTypes.TrueOrFalseSeedData.Id
-        ? JsonConvert.SerializeObject(src.TrueOrFalseAnswer) :
-    src.QTypeId == QuestionTypes.TypeAnswerSeedData.Id
-        ? JsonConvert.SerializeObject(src.TypeAnswer) :
-    src.QTypeId == QuestionTypes.SliderSeedData.Id
-        ? JsonConvert.SerializeObject(src.SliderAnswer) :
-    src.QTypeId == QuestionTypes.PuzzleSeedData.Id
-        ? JsonConvert.SerializeObject(src.PuzzleAnswer) :
-    src.QTypeId == QuestionTypes.MultipleChoicePlusAudioSeedData.Id
-        ? JsonConvert.SerializeObject(src.MultipleChoiceAnswer) :
-    "")).ReverseMap();
+    //        CreateMap<QuestionCreateDto, Question>()
+    //.ForMember(destination => destination.QAnswer, act => act.MapFrom(src =>
+    //src.QTypeId == QuestionTypes.MultipleChoiceSeedData.Id
+    //    ? JsonConvert.SerializeObject(src.MultipleChoiceAnswer) :
+    //src.QTypeId == QuestionTypes.TrueOrFalseSeedData.Id
+    //    ? JsonConvert.SerializeObject(src.TrueOrFalseAnswer) :
+    //src.QTypeId == QuestionTypes.TypeAnswerSeedData.Id
+    //    ? JsonConvert.SerializeObject(src.TypeAnswer) :
+    //src.QTypeId == QuestionTypes.SliderSeedData.Id
+    //    ? JsonConvert.SerializeObject(src.SliderAnswer) :
+    //src.QTypeId == QuestionTypes.PuzzleSeedData.Id
+    //    ? JsonConvert.SerializeObject(src.PuzzleAnswer) :
+    //src.QTypeId == QuestionTypes.MultipleChoicePlusAudioSeedData.Id
+    //    ? JsonConvert.SerializeObject(src.MultipleChoiceAnswer) :
+    //"")).ReverseMap();
         }
     }
 }
