@@ -13,6 +13,8 @@ namespace QuizMaster.API.QuizSession.Services.Repositories
             _context = context;
         }
 
+        public QuizSessionDbContext QuizSessionDbContext => _context;
+
         public async Task<IEnumerable<QuestionCategory>> GetAllCategoriesAsync()
         {
             return await _context.Categories.Where(c => c.ActiveData).ToListAsync();
