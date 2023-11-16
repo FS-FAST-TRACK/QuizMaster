@@ -99,7 +99,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
                 if (isQuestionAddedSuccessfully)
                 {
-                    isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionRepo, question.questionDetailCreateDtos);
+                    isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetailAsync(questionRepo, question.questionDetailCreateDtos);
                 }
 
                 isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;

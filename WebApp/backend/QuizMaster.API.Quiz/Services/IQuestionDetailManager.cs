@@ -5,8 +5,9 @@ namespace QuizMaster.API.Quiz.Services
 {
 	public interface IQuestionDetailManager
 	{	
-		Task<bool> AddQuestionDetail(Question question, QuestionDetail questionDetail);
-		Task<bool> AddQuestionDetail(Question question, QuestionDetailCreateDto questionDetailCreateDto);
-		Task<bool> AddQuestionDetail(Question question, IEnumerable<QuestionDetailCreateDto> questionDetailCreateDto);
+		Task<bool> AddQuestionDetailAsync(Question question, QuestionDetail questionDetail);
+		Task<bool> AddQuestionDetailAsync(Question question, QuestionDetailCreateDto questionDetailCreateDto);
+		Task<bool> AddQuestionDetailAsync(Question question, IEnumerable<QuestionDetailCreateDto> questionDetailCreateDto);
+		Task<bool> UpdateQuestionDetailAsync(Question question, QuestionDetail questionDetail);
 	}
 }

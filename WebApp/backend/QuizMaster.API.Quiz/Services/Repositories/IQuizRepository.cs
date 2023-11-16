@@ -37,15 +37,19 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId);
         Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync();
         Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId);
+		Task<QuestionDetail?> GetQuestionDetailAsync(int qId, int id);
 		Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail);
 		Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails);
 		bool UpdateQuestionDetail(QuestionDetail questionDetail);		
 
 		Task<IEnumerable<DetailType>> GetDetailTypesAsync();
 		Task<DetailType?> GetDetailTypeAsync(int id);
+		Task<Dictionary<string, DetailType>> GetDetailTypesDictAsync();
+		Task<IEnumerable<DetailType>> GetDetailTypesAsync(IEnumerable<string> detailTypes);
 
 		Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes);
 		Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType);
+		Task<bool> RemoveQuestionDetailTypesOfQuestionDetailByIdAsync(int qDetailId);
 		Task<IEnumerable<QuestionDetailType>> GetAllQuestionDetailTypesAsync();
 
 		Task<int> GetQuestionUseCategoryCount(int categoryId);
