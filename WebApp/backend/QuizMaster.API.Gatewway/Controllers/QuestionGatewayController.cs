@@ -161,6 +161,15 @@ namespace QuizMaster.API.Gateway.Controllers
                 return ReturnQuestionAlreadyExist();
             }
 
+            if (reply.Code == 400)
+            {
+                return BadRequest(new ResponseDto
+                {
+                    Type = "Error",
+                    Message = reply.Questions
+                }) ;
+            }
+
             var result = JsonConvert.DeserializeObject<Question>(reply.Questions);
             return Ok(_mapper.Map<QuestionDto>(result));
         }

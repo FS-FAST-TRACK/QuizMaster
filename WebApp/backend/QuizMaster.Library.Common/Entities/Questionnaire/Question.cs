@@ -1,4 +1,5 @@
-﻿using QuizMaster.Library.Common.Entities.Accounts;
+﻿using Newtonsoft.Json;
+using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,6 +17,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public string QStatement { get; set; }
 
         [Required]
+        [JsonIgnore]
         public IEnumerable<QuestionDetail> Details { get; set; }
 
         [Required]

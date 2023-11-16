@@ -295,7 +295,12 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return qDetail;
 		}
 
-		public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailsByDetailTypeAsync(int qId, int detailTypeId)
+        public async Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync()
+        {
+			return await _context.QuestionDetails.ToListAsync();
+        }
+
+        public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
 		{
 			return await _context.QuestionDetails
 				.Where(qDetail => qDetail.QuestionId == qId)
@@ -435,10 +440,16 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			}
 		}
 		#endregion
+		public async Task<IEnumerable<QuestionDetailType>> GetAllQuestionDetailTypesAsync()
+		{
+			return await _context.QuestionDetailTypes.ToListAsync();
+		}
+
+        #endregion
 
 
-		// Returns how many active questions used a question category
-		public async Task<int> GetQuestionUseCategoryCount(int categoryId)
+        // Returns how many active questions used a question category
+        public async Task<int> GetQuestionUseCategoryCount(int categoryId)
 		{
 			return await _context.Questions.Where(q => q.ActiveData && q.QCategory.Id == categoryId).CountAsync();
 		}
@@ -461,7 +472,6 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return result != 0;
 		}
 
-
-
-	}
+        
+    }
 }
