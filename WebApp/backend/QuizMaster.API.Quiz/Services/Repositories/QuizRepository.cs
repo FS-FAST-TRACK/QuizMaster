@@ -270,7 +270,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId)
 		{
 			var details = await _context.QuestionDetails
-				.Where(qDetail => qDetail.Question.Id == qId)
+				.Where(qDetail => qDetail.Question.Id == qId && qDetail.ActiveData)
 				.Include(qDetail => qDetail.DetailTypes)
 				.ToListAsync();
 			details.ToList().ForEach(qDetail =>

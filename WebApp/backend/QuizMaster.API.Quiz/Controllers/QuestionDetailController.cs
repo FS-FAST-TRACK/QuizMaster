@@ -41,12 +41,20 @@ namespace QuizMaster.API.Quiz.Controllers
 		}
 
 		// GET api/<QuestionDetailController>/5
-		[HttpGet("{id}", Name ="GetQuestionDetail")]
+		[HttpGet("{id}", Name = "GetQuestionDetail")]
 		public async Task<ActionResult<QuestionDetailDto>> Get(int questionId, int id)
 		{
 			var questionDetail = await _quizRepository.GetQuestionDetailAsync(questionId, id);
+			if (questionDetail == null || !questionDetail.ActiveData) {
+				return NotFound(new ResponseDto
+				{
+					Type = "Not Found",
+					Message = "QuestionDetail not found."
+				});
+			}
 			return _mapper.Map<QuestionDetailDto>(questionDetail);
 		}
+
 
 		// POST api/<QuestionDetailController>
 		[HttpPost]
