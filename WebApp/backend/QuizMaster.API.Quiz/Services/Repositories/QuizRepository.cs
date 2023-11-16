@@ -439,7 +439,6 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				return false;
 			}
 		}
-		#endregion
 		public async Task<IEnumerable<QuestionDetailType>> GetAllQuestionDetailTypesAsync()
 		{
 			return await _context.QuestionDetailTypes.ToListAsync();

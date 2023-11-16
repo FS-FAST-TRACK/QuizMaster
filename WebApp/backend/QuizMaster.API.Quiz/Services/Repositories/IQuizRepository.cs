@@ -37,7 +37,6 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId);
         Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync();
         Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId);
-		Task<IEnumerable<QuestionDetail>> GetQuestionDetailsByDetailTypeAsync(int qId, int detailTypeId);
 		Task<QuestionDetail?> GetQuestionDetailAsync(int qId, int id);
 		Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail);
 		Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails);
