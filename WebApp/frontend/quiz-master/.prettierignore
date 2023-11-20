@@ -3,4 +3,21 @@ build
 coverage
 .next
 api
-publi
+public
+lib
+test-utils
+types
+__tests__
+
+# Ignore files
+jest.config.js
+jest.setup.js
+next.config.js
+package-lock.json
+package.json
+postcss.config.js
+README.md
+tailwind.config.ts
+tsconfig.json
+.eslintrc.json
+
