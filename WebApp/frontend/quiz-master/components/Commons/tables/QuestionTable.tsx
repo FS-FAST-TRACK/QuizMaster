@@ -14,10 +14,10 @@ export default function QuestionTable() {
   }, []);
 
   return (
-    <div className="w-full border-2 rounded-xl border-[var(--primary)] overflow-x-auto">
+    <div className="w-full border-2 rounded-xl overflow-x-auto">
       <table className="w-full ">
         <thead>
-          <tr className="table-row bg-[var(--primary-800)] text-black">
+          <tr className="table-row font-bold text-black border-b border">
             {questionTableColumns.map((column, index) => (
               <th
                 key={index}
@@ -42,10 +42,7 @@ export default function QuestionTable() {
         <tbody>
           {questions.map((question, index) => (
             <>
-              <tr
-                key={index}
-                className="table-row bg-white border border-black"
-              >
+              <tr key={index} className="table-row bg-white ">
                 {questionTableColumns.map((column, index2) => (
                   <td
                     key={index2}
