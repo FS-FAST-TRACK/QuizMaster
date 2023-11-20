@@ -2,18 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-.mantine-TextInput-input {
-	height: 46px !important;
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --primary: #358c5b;
+  --primary-800: #0b2e02;
+  --primary-700: #104502;
+  --primary-600: #155a03;
+  --primary-500: #1f8505;
+  --primary-400: #79b669;
+  --primary-300: #bcdbb4;
+  --primary-200: #b8d6b0;
+  --primary-100: #daedd5;
+  --success: #198754;
+  --error: #bc1c1c;
+}
 
-	padding-left: 20px !important;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+.mantine-TextInput-input {
+  height: 46px !important;
+
+  padding-left: 20px !important;
 }
 
 .mantine-PasswordInput-input {
-	height: 46px !important;
-	padding-left: 20px !important;
+  height: 46px !important;
+  padding-left: 20px !important;
 }
 
 .mantine-PasswordInput-innerInput {
-	height: 46px !important;
-	padding-left: 20px !important;
+  height: 46px !important;
+  padding-left: 20px !important;
 }

@@ -1,23 +1,51 @@
 "use client";
 
-import { HomeIcon, BookOpenIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  HomeIcon,
+  QuestionMarkCircleIcon,
+  CircleStackIcon,
+  DocumentTextIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import GroupLink from "./GroupLink";
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+  { label: "Dashboard", href: "/dashboard", icon: HomeIcon },
   {
-    name: "Questions",
-    href: "/dashboard/questions",
-    icon: BookOpenIcon,
+    label: "Questions",
+    icon: QuestionMarkCircleIcon,
+    links: [
+      {
+        label: "Questions",
+        href: "/dashboard/questions",
+      },
+      {
+        label: "Question Set",
+        href: "/question-sets",
+      },
+      {
+        label: "Categories",
+        href: "/categories",
+      },
+      {
+        label: "Difficulty",
+        href: "/difficulties",
+      },
+    ],
   },
   {
-    name: "Create Question",
+    label: "Quiz Rooms",
     href: "/dashboard/create-question",
-    icon: PlusIcon,
+    icon: CircleStackIcon,
+  },
+  {
+    label: "Reports",
+    href: "/dashboard/create-question",
+    icon: DocumentTextIcon,
   },
 ];
 
@@ -28,21 +56,25 @@ export default function NavLinks() {
     <>
       {links.map((link) => {
         const LinkIcon = link.icon;
-        return (
-          <Link
-            key={link.name}
-            href={link.href}
-            className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
-              {
-                "bg-sky-100 text-blue-600": pathname === link.href,
-              }
-            )}
-          >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
-          </Link>
-        );
+        if (link?.href) {
+          return (
+            <Link
+              key={link.label}
+              href={link.href}
+              className={clsx(
+                "flex h-[48px] transition-all duration-300 items-center gap-3 rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] justify-start p-2 px-3",
+                {
+                  "bg-[--primary] text-white  hover:bg-[--primary]":
+                    pathname === link.href,
+                }
+              )}
+            >
+              <LinkIcon className="w-6" />
+              <p className="block">{link.label}</p>
+            </Link>
+          );
+        }
+        return <GroupLink {...link} />;
       })}
     </>
   );
