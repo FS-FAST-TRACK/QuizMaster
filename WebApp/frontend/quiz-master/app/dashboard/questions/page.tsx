@@ -5,12 +5,12 @@ import { fetchQuestions } from "@/lib/quizData";
 import { useEffect } from "react";
 
 export default function Page() {
-  return (
-    <div className="flex flex-col">
-      <div className="flex flex-col md:flex-row justify-between ">
-        <h3>Questions</h3>
-      </div>
-      <QuestionTable />
-    </div>
-  );
+    return (
+        <div className="flex flex-col">
+            <div className="flex flex-col md:flex-row justify-between ">
+                <h3>Questions</h3>
+            </div>
+            <QuestionTable />
+        </div>
+    );
 }

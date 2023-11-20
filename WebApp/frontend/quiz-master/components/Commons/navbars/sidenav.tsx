@@ -9,30 +9,35 @@ import UserNavBar from "./UserNavBar";
 import { useState } from "react";
 
 export default function SideNav() {
-  const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
-  return (
-    <div
-      className="h-full border border-r-2"
-      style={{
-        transform: isOpen ? "translateX(256px)" : "none",
-      }}
-    >
-      <div className="flex h-full flex-col rounded-3xl">
-        <Link
-          className="flex items-end justify-center rounded-md p-8 mb-16"
-          href="/dashboard"
+    return (
+        <div
+            className="h-full border border-r-2"
+            style={{
+                transform: isOpen ? "translateX(256px)" : "none",
+            }}
         >
-          <div className="text-white">
-            <Image src={logo} alt="QuizMaster Logo" width={100} height={100} />
-          </div>
-        </Link>
-        <div className="flex grow flex-col justify-between space-x-0">
-          <NavLinks />
-          <div className="h-auto w-full grow rounded-md bg-transparent block"></div>
-          <UserNavBar userName="Admin" email="admin@gmail.com" />
+            <div className="flex h-full flex-col rounded-3xl">
+                <Link
+                    className="flex items-end justify-center rounded-md p-8 mb-16"
+                    href="/dashboard"
+                >
+                    <div className="text-white">
+                        <Image
+                            src={logo}
+                            alt="QuizMaster Logo"
+                            width={100}
+                            height={100}
+                        />
+                    </div>
+                </Link>
+                <div className="flex grow flex-col justify-between space-x-0">
+                    <NavLinks />
+                    <div className="h-auto w-full grow rounded-md bg-transparent block"></div>
+                    <UserNavBar userName="Admin" email="admin@gmail.com" />
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
