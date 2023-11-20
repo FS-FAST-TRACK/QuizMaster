@@ -6,13 +6,13 @@ import { PropsWithChildren } from "react";
 import { Session } from "next-auth";
 
 type AuthProviderProps = {
-	children: React.ReactNode;
-	session?: Session | null;
+  children: React.ReactNode;
+  session?: Session | null;
 };
 
 export const AuthProvider = ({
-	children,
-	session,
+  children,
+  session,
 }: PropsWithChildren<AuthProviderProps>) => {
-	return <SessionProvider session={session}>{children}</SessionProvider>;
+  return <SessionProvider session={session}>{children}</SessionProvider>;
 };

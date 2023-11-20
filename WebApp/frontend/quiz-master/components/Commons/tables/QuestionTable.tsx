@@ -8,7 +8,6 @@ export default function QuestionTable() {
   useEffect(() => {
     var questionsFetch = fetchQuestions();
     questionsFetch.then((res) => {
-      console.log(res);
       setQuestions(res);
     });
   }, []);
@@ -28,15 +27,6 @@ export default function QuestionTable() {
                 {column.label}
               </th>
             ))}
-            {/* <th>
-              <div
-                className={`${
-                  isEditMode ? "w-[150px]" : "w-0 "
-                }  transition-all duration-1000 overflow-hidden`}
-              >
-                Actions
-              </div>
-            </th> */}
           </tr>
         </thead>
         <tbody>
@@ -45,7 +35,7 @@ export default function QuestionTable() {
               <tr key={index} className="table-row bg-white ">
                 {questionTableColumns.map((column, index2) => (
                   <td
-                    key={index2}
+                    key={"index2" + index2}
                     className={`px-2 py-2 table-cell ${
                       column.className && column.className
                     }`}
@@ -55,47 +45,7 @@ export default function QuestionTable() {
                       : (question as any)[column.key]}
                   </td>
                 ))}
-                <td>
-                  {/* <div
-                    className={`${
-                      isEditMode ? "w-[150px]" : "w-0 "
-                    }  transition-all duration-1000 overflow-hidden`}
-                  >
-                    <div className="flex w-min">
-                      <IconButton
-                        variant="text"
-                        color="green"
-                        disabled={isLoading}
-                        onClick={() => handleLike(contact)}
-                      >
-                        {contact.isFavorite && (
-                          <FavoriteRoundedIcon
-                            fontSize="medium"
-                            color="success"
-                          />
-                        )}
-                        {!contact.isFavorite && (
-                          <FavoriteBorderRoundedIcon
-                            fontSize="medium"
-                            color="success"
-                          />
-                        )}
-                      </IconButton>
-                      <Link href={`/contacts/edit-contact/${contact.id}`}>
-                        <IconButton variant="text" color="green">
-                          <ModeEditOutlineRoundedIcon fontSize="medium" />
-                        </IconButton>
-                      </Link>
-                      <IconButton
-                        variant="text"
-                        color="red"
-                        onClick={() => handleDelete(contact)}
-                      >
-                        <DeleteOutlineRoundedIcon fontSize="medium" />
-                      </IconButton>
-                    </div>
-                  </div> */}
-                </td>
+                <td></td>
               </tr>
             </>
           ))}

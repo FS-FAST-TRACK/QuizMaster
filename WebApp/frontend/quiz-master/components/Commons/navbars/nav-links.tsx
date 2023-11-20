@@ -66,7 +66,7 @@ export default function NavLinks() {
                 {
                   "bg-[--primary] text-white  hover:bg-[--primary]":
                     pathname === link.href,
-                }
+                },
               )}
             >
               <LinkIcon className="w-6" />

@@ -32,7 +32,7 @@ export default function GroupLink({
         "ml-5 flex h-[48px] transition-all duration-300 items-center gap-3 rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] justify-start px-3",
         {
           "text-[--primary]  hover:bg-[--primary-200]": pathname === link.href,
-        }
+        },
       )}
     >
       <p className="block">{link.label}</p>
@@ -48,7 +48,7 @@ export default function GroupLink({
             "bg-[--primary] text-white  hover:bg-[--primary]": links
               ?.map((link2) => link2.href)
               .includes(pathname),
-          }
+          },
         )}
         onClick={() => setOpened(!opened)}
       >

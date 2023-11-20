@@ -69,14 +69,14 @@ export default function QuestionCreate() {
           case 1:
             if (
               value.findIndex((qDetail) =>
-                qDetail.detailTypes.includes("answer")
+                qDetail.detailTypes.includes("answer"),
               ) < 0
             ) {
               errors += "Answer is required for multiple type of question. ";
             }
             if (
               value.findIndex((qDetail) =>
-                qDetail.detailTypes.includes("option")
+                qDetail.detailTypes.includes("option"),
               ) < 0
             ) {
               errors += "Option is required for multiple type of question. ";
@@ -85,14 +85,14 @@ export default function QuestionCreate() {
           case 2:
             if (
               value.findIndex((qDetail) =>
-                qDetail.detailTypes.includes("answer")
+                qDetail.detailTypes.includes("answer"),
               ) < 0
             ) {
               errors += "Answer is required for multiple type of question. ";
             }
             if (
               value.findIndex((qDetail) =>
-                qDetail.detailTypes.includes("option")
+                qDetail.detailTypes.includes("option"),
               ) < 0
             ) {
               errors += "Option is required for multiple type of question. ";

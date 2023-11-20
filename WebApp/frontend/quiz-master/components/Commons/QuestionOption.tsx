@@ -11,7 +11,7 @@ export default function QuestionOption({
   form: UseFormReturnType<QuestionCreateValues>;
 }) {
   var options = form.values.questionDetailCreateDtos.filter((qDetail) =>
-    qDetail.detailTypes.includes("option")
+    qDetail.detailTypes.includes("option"),
   );
   console.log(options, form.values.questionDetailCreateDtos);
   if (form.values.qTypeId == "1")

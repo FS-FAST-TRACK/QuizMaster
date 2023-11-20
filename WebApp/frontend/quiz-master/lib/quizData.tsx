@@ -4,11 +4,11 @@ import {
   QuestionDifficulty,
   QuestionType,
 } from "./definitions";
+
 export async function fetchQuestions() {
+  console.log(process.env.QUIZMASTER_QUIZ);
   try {
-    const data = await fetch(
-      `${process.env.NEXT_PUBLIC_QUIZMASTER_QUIZ}/api/question`
-    )
+    const data = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`)
       .then((res) => res.json())
       .then((data) => {
         var questions: Question[];
@@ -25,7 +25,7 @@ export async function fetchQuestions() {
 export async function fetchCategories() {
   try {
     const data = await fetch(
-      `${process.env.NEXT_PUBLIC_QUIZMASTER_QUIZ}/api/question/category`
+      `${process.env.QUIZMASTER_QUIZ}/api/question/category`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -43,7 +43,7 @@ export async function fetchCategories() {
 export async function fetchDifficulties() {
   try {
     const data = await fetch(
-      `${process.env.NEXT_PUBLIC_QUIZMASTER_QUIZ}/api/question/difficulty`
+      `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -60,9 +60,7 @@ export async function fetchDifficulties() {
 
 export async function fetchTypes() {
   try {
-    const data = await fetch(
-      `${process.env.NEXT_PUBLIC_QUIZMASTER_QUIZ}/api/question/type`
-    )
+    const data = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question/type`)
       .then((res) => res.json())
       .then((data) => {
         var types: QuestionType[];
