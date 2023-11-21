@@ -52,9 +52,9 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				collection = collection
 					.Where(q =>
 					q.QStatement.ToLower().Replace(" ", "").Contains(query)
-					&& q.QCategory.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
-					&& q.QType.QTypeDesc.ToLower().Replace(" ", "").Contains(query)
-					&& q.QDifficulty.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
+					|| q.QCategory.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
+					|| q.QType.QTypeDesc.ToLower().Replace(" ", "").Contains(query)
+					|| q.QDifficulty.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
 					);
 
 			}
