@@ -21,7 +21,7 @@ const links = [
         links: [
             {
                 label: "Questions",
-                href: "/dashboard/questions",
+                href: "/questions",
             },
             {
                 label: "Question Set",
@@ -39,12 +39,12 @@ const links = [
     },
     {
         label: "Quiz Rooms",
-        href: "/dashboard/create-question",
+        href: "/quiz-rooms",
         icon: CircleStackIcon,
     },
     {
         label: "Reports",
-        href: "/dashboard/create-question",
+        href: "/reports",
         icon: DocumentTextIcon,
     },
 ];
