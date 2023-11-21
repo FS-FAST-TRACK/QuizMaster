@@ -1,20 +1,34 @@
 import {
+    PaginationMetadata,
     Question,
     QuestionCategory,
     QuestionDifficulty,
+    QuestionResourceParameter,
     QuestionType,
 } from "./definitions";
 
-export async function fetchQuestions() {
+export async function fetchQuestions({
+    questionResourceParameter,
+}: {
+    questionResourceParameter: QuestionResourceParameter;
+}) {
     try {
-        const data = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`)
-            .then((res) => res.json())
-            .then((data) => {
-                var questions: Question[];
-                questions = data;
-                return questions;
-            });
-        return data;
+        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
+
+        const { data, paginationMetadata } = await fetch(apiUrl).then(
+            async (res) => {
+                var data: Question[];
+                var paginationMetadata: PaginationMetadata;
+                paginationMetadata = JSON.parse(
+                    res.headers.get("x-pagination") || ""
+                );
+                data = await res.json();
+
+                return { data, paginationMetadata };
+            }
+        );
+
+        return { data, paginationMetadata };
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch question data.");
