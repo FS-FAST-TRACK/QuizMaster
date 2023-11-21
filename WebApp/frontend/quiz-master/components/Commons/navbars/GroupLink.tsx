@@ -10,7 +10,7 @@ type GroupLink = {
     label: string;
     href?: string;
     initiallyOpened?: boolean;
-    links?: { label: string; href: string }[];
+    links?: { label: string; href: string; key: string }[];
 };
 
 export default function GroupLink({
@@ -26,13 +26,13 @@ export default function GroupLink({
 
     const items = (hasLinks ? links : []).map((link) => (
         <Link
-            key={link.label}
+            key={link.key}
             href={link.href}
             className={clsx(
                 "ml-5 flex h-[48px] transition-all duration-300 items-center gap-3 rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] justify-start px-3",
                 {
                     "text-[--primary]  hover:bg-[--primary-200]":
-                        pathname === link.href,
+                        pathname.includes(link.href),
                 }
             )}
         >
@@ -46,9 +46,10 @@ export default function GroupLink({
                 className={clsx(
                     "flex justify-between h-[48px] transition-all duration-300 items-center  rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] px-3",
                     {
-                        "bg-[--primary] text-white  hover:bg-[--primary]": links
-                            ?.map((link2) => link2.href)
-                            .includes(pathname),
+                        "bg-[--primary] text-white  hover:bg-[--primary]":
+                            links?.findIndex((link) =>
+                                pathname.includes(link.href)
+                            ) != -1,
                     }
                 )}
                 onClick={() => setOpened(!opened)}
