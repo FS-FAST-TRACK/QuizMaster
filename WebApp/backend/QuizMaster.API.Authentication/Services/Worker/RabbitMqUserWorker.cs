@@ -36,7 +36,7 @@ namespace QuizMaster.API.Authentication.Services.Worker
             rabbitMqRepository = repository;
         }
 
-        public RabbitMQ_AccountPayload RequestUserCredentials(AuthRequest authRequest)
+        public async Task<RabbitMQ_AccountPayload> RequestUserCredentials(AuthRequest authRequest)
         {
 
             // create the RabbitMQ connection factory
@@ -75,6 +75,7 @@ namespace QuizMaster.API.Authentication.Services.Worker
                 }
             };
 
+            await Task.Delay(200);
             return rabbitMqRepository.TryGetCache(authRequest);
         }
     }
