@@ -35,7 +35,16 @@ export type QuestionType = {
     id: number;
     qTypeDesc: string;
 };
-
+export type QuestionCreateDto = {
+    qAudio: string;
+    qCategoryId: number;
+    qDifficultyId: number;
+    qTypeId: number;
+    qImage: string;
+    qStatement: string;
+    qTime: number;
+    questionDetailCreateDtos: QuestionDetailCreateDto[];
+};
 export type QuestionCreateValues = {
     qAudio: string;
     qCategoryId: string;
@@ -45,6 +54,15 @@ export type QuestionCreateValues = {
     qStatement: string;
     qTime: string;
     questionDetailCreateDtos: QuestionDetailCreateDto[];
+    options: { value: string; isAnswer: boolean }[];
+    trueOrFalseAnswer: boolean;
+    minimum?: number;
+    maximum?: number;
+    interval?: number;
+    sliderAnswer?: number;
+    textToAudio?: string;
+    language?: string;
+    typeAnswer?: string;
 };
 
 export type QuestionDetailCreateDto = {
