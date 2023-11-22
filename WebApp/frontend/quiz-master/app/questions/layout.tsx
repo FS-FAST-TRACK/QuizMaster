@@ -2,14 +2,28 @@
 
 import PageHeader from "@/components/Commons/headers/PageHeader";
 import SideNav from "@/components/Commons/navbars/sidenav";
+import { fetchCategories, fetchDifficulties, fetchTypes } from "@/lib/quizData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
+import { useEffect } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { setQuestionCategories } = useQuestionCategoriesStore();
     const { setQuestionDifficulties } = useQuestionDifficultiesStore();
     const { setQuestionTypes } = useQuestionTypesStore();
+
+    useEffect(() => {
+        fetchCategories().then((res) => {
+            setQuestionCategories(res);
+        });
+        fetchDifficulties().then((res) => {
+            setQuestionDifficulties(res);
+        });
+        fetchTypes().then((res) => {
+            setQuestionTypes(res);
+        });
+    }, []);
 
     return (
         <div className="flex h-screen flex-row md:overflow-hidden">

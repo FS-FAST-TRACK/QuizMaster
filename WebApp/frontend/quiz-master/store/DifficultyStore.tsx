@@ -6,14 +6,19 @@ interface IDifficultiesStore {
     setQuestionDifficulties: (
         fetchedDifficulties: QuestionDifficulty[]
     ) => void;
+    getQuestionDifficultyDescription: (id: number) => string | undefined;
 }
 
 export const useQuestionDifficultiesStore = create<IDifficultiesStore>(
-    (set) => ({
+    (set, get) => ({
         questionDifficulties: [],
         setQuestionDifficulties: (fetchedDifficulties: QuestionDifficulty[]) =>
             set({
                 questionDifficulties: fetchedDifficulties,
             }),
+        getQuestionDifficultyDescription(id) {
+            return get().questionDifficulties.find((dif) => dif.id === id)
+                ?.qDifficultyDesc;
+        },
     })
 );

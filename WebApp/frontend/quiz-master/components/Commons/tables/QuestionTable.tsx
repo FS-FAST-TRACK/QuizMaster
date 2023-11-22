@@ -1,6 +1,9 @@
 import { Question } from "@/lib/definitions";
 import { fetchQuestions } from "@/lib/quizData";
 import { questionTableColumns } from "@/lib/tableColumns";
+import { useQuestionCategoriesStore } from "@/store/CategoryStore";
+import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
+import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Table } from "@mantine/core";
 import { useEffect, useState } from "react";
@@ -10,6 +13,10 @@ export default function QuestionTable({
 }: {
     questions: Question[];
 }) {
+    const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
+    const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
+    const { getQuestionTypeDescription } = useQuestionTypesStore();
+
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
     const rows = questions.map((question) => (
@@ -38,9 +45,13 @@ export default function QuestionTable({
                 />
             </Table.Td>
             <Table.Td>{question.qStatement}</Table.Td>
-            <Table.Td>{question.qTypeId}</Table.Td>
-            <Table.Td>{question.qCategoryId}</Table.Td>
-            <Table.Td>{question.qDifficultyId}</Table.Td>
+            <Table.Td>{getQuestionTypeDescription(question.qTypeId)}</Table.Td>
+            <Table.Td>
+                {getQuestionCategoryDescription(question.qCategoryId)}
+            </Table.Td>
+            <Table.Td>
+                {getQuestionDifficultyDescription(question.qDifficultyId)}
+            </Table.Td>
             <Table.Td>
                 <EllipsisVerticalIcon className="w-6" />
             </Table.Td>

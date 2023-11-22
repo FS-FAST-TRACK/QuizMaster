@@ -61,7 +61,7 @@ export default function Page() {
     }, [searchQuery]);
 
     return (
-        <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 bg-[#D9D9D9] grow">
+        <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 bg-[#F8F9FA] grow">
             <Breadcrumbs>{items}</Breadcrumbs>
             <div className="flex">
                 <Link
@@ -78,6 +78,9 @@ export default function Page() {
                     value={searchQuery}
                     onChange={(e) => {
                         setSearchQuery(e.target.value);
+                        if (e.target.value === "") {
+                            handleSearch();
+                        }
                     }}
                     onKeyDown={(e) => {
                         if (e.code === "Enter") {
