@@ -24,7 +24,7 @@ namespace QuizMaster.API.Authentication.Controllers
         public async Task<IActionResult> Login([FromBody] AuthenticationRequestDTO requestModel)
         {
             // generate the token by calling the authentication service
-            var tokenHolder = _authenticationServices.Authenticate(requestModel.GetAuthRequest());
+            var tokenHolder = await _authenticationServices.Authenticate(requestModel.GetAuthRequest());
 
             // if no token is generated, it is an invalid credentials
             if(tokenHolder.Token == null) {
@@ -74,13 +74,13 @@ namespace QuizMaster.API.Authentication.Controllers
             return Ok(new { Message = "Info", authStore });
         }
 
-        [Authorize]
-        [HttpPost]
-        [Route("set_admin/{Username}")]
-        public IActionResult SetAdmin(string Username)
-        {
-            var response = _authenticationServices.UpdateRole(new AuthRequest { Username = Username });
-            return Ok(response);
-        }
+        //[Authorize]
+        //[HttpPost]
+        //[Route("set_admin/{Username}")]
+        //public async Task<IActionResult> SetAdmin(string Username, [FromQuery] bool isAdmin = false)
+        //{
+        //    var response = await _authenticationServices.UpdateRole(new AuthRequest { Username = Username }, isAdmin);
+        //    return Ok(response);
+        //}
     }
 }

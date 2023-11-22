@@ -115,14 +115,14 @@ namespace QuizMaster.API.Gateway.Controllers
         [QuizMasterAdminAuthorization]
         [HttpPost]
         [Route("set_admin/{username}")]
-        public IActionResult SetAdmin(string username)
+        public async Task<IActionResult> SetAdmin(string username)
         {
             var request = new SetAdminRequest()
             {
                 Username = username
             };
 
-            var response = _channelClient.SetAdmin(request);
+            var response = await _channelClient.SetAdminAsync(request);
             var info = JsonConvert.DeserializeObject<ResponseDto>(response.Response);
             return Ok(info);
         }
