@@ -3,6 +3,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
@@ -218,6 +219,31 @@ namespace QuizMaster.API.Gatewway.Controllers
             }
 
             return NoContent();
+        }
+
+        //[QuizMasterAdminAuthorization]
+        [HttpPost]
+        [Route("account/set_admin/{username}")]
+        public async Task<IActionResult> SetAdmin(string username, [FromQuery] bool setAdmin = false)
+        {
+            var request = new SetAccountAdminRequest
+            {
+                Username = username,
+                SetAdmin = setAdmin
+            };
+
+            var response = await _channelClient.SetAdminAccountAsync(request);
+
+            if(response.Code == 404)
+            {
+                return NotFound(new {response.Message });
+            }
+            if(response.Code == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,new { response.Message });
+            }
+
+            return Ok(new { response.Message });
         }
 
         // Check if model is valid
