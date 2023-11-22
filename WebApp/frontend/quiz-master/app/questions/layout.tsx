@@ -30,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex-none transition w-64 hidden md:block">
                 <SideNav />
             </div>
-            <div className="grow md:overflow-y-auto flex flex-col">
+            <div className="grow md:overflow-y-auto flex flex-col bg-[#F8F9FA]">
                 <PageHeader>Questions</PageHeader>
                 {children}
             </div>
