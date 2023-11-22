@@ -197,5 +197,69 @@ namespace QuizMaster.API.Account.Service
 
             return await Task.FromResult(reply);
         }
+
+        public override async Task<SetAccountAdminResponse> SetAdminAccount(SetAccountAdminRequest request, ServerCallContext context)
+        {
+            var reply = new SetAccountAdminResponse();
+
+            var userAccount = await _userManager.FindByNameAsync(request.Username);
+
+            if(userAccount == null) 
+            {
+                reply.Code = 404;
+                reply.Message = "User not found";
+                return await Task.FromResult(reply);
+            }
+
+            IList<string> roles = await _userManager.GetRolesAsync(userAccount);
+
+            if (roles.Contains("Administrator")) 
+            {
+                if(request.SetAdmin)
+                {
+                    reply.Code = 200;
+                    reply.Message = "This user is already an administrator";
+                    return await Task.FromResult(reply);
+                }
+                else
+                {
+                    var result = await _userManager.RemoveFromRoleAsync(userAccount, "Administrator");
+                    if(result.Succeeded)
+                    {
+                        reply.Code = 200;
+                        reply.Message = "User was removed from admin role";
+                        return await Task.FromResult(reply);
+                    }
+                    else
+                    {
+                        reply.Code = 500;
+                        reply.Message = "Failed to update user role";
+                        return await Task.FromResult(reply);
+                    }
+                }
+            }
+            if(request.SetAdmin)
+            {
+                var result = await _userManager.AddToRoleAsync(userAccount, "Administrator");
+                if (result.Succeeded)
+                {
+                    reply.Code = 200;
+                    reply.Message = "User was set to admin role";
+                    return await Task.FromResult(reply);
+                }
+                else
+                {
+                    reply.Code = 500;
+                    reply.Message = "Failed to update user role";
+                    return await Task.FromResult(reply);
+                }
+            }
+            else
+            {
+                reply.Code = 200;
+                reply.Message = "This user is not an administrator";
+                return await Task.FromResult(reply);
+            }
+        }
     }
 }
