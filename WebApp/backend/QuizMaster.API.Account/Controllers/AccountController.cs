@@ -7,6 +7,7 @@ using QuizMaster.API.Account.Models;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Roles;
 using QuizMaster.Library.Common.Models;
+using QuizMaster.Library.Common.Models.Services;
 
 namespace QuizMaster.API.Account.Controllers
 {
@@ -192,7 +193,57 @@ namespace QuizMaster.API.Account.Controllers
 
 		}
 
-		private IActionResult ReturnModelStateErrors()
+        [HttpPost]
+        [Route("set_admin/{Username}")]
+        public async Task<IActionResult> SetAdmin(string Username, [FromQuery] bool SetAdmin = false)
+        {
+            var userAccount = await _userManager.FindByNameAsync(Username);
+
+			if (userAccount == null)
+			{
+				return NotFound(new {Message = "User not found"});
+			}
+
+			IList<string> roles = await _userManager.GetRolesAsync(userAccount);
+
+			if (roles.Contains("Administrator"))
+			{
+				if(SetAdmin)
+				{
+					return Ok(new { Message = "This user is already an administrator" });
+				}
+				else
+				{
+					var result = await _userManager.RemoveFromRoleAsync(userAccount, "Administrator");
+					if (result.Succeeded)
+					{
+                        return Ok(new { Message = "User was removed from admin role" });
+					}
+					else
+					{
+						return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to update user role" });
+					}
+				}
+			}
+            if (SetAdmin)
+            {
+                var result = await _userManager.AddToRoleAsync(userAccount, "Administrator");
+                if (result.Succeeded)
+                {
+                    return Ok(new { Message = "User was set to admin role" });
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to update user role" });
+                }
+            }
+            else
+            {
+                return Ok(new { Message = "This user is not an administrator" });
+            }
+        }
+
+        private IActionResult ReturnModelStateErrors()
 		{
 			var errorList = ModelState.Values
 				.SelectMany(v => v.Errors)

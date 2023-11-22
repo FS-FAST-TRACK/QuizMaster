@@ -151,6 +151,16 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<IEnumerable<DetailType>> GetDetailTypesAsync(IEnumerable<string> detailTypes)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<Dictionary<string, DetailType>> GetDetailTypesDictAsync()
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<QuestionDifficulty?> GetDifficultyAsync(int id)
 		{
 			throw new NotImplementedException();
@@ -172,6 +182,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId, int id)
 		{
 			throw new NotImplementedException();
 		}
@@ -217,6 +232,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<QuestionType?> GetTypeAsync(string description)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> RemoveQuestionDetailTypesOfQuestionDetailByIdAsync(int qDetailId)
 		{
 			throw new NotImplementedException();
 		}

@@ -153,7 +153,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 				if (isQuestionAddedSuccessfully)
 				{
-					isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetail(questionFromRepo, question.questionDetailCreateDtos);
+					isDetailAddedSuccessfully = await _questionDetailManager.AddQuestionDetailAsync(questionFromRepo, question.questionDetailCreateDtos);
 				}
 
 				isSuccess = isDetailAddedSuccessfully && isQuestionAddedSuccessfully;
@@ -174,7 +174,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		}
 		#endregion
 
-		#region Http Patch
+		#region Patch Question
 		// PATCH api/question/5
 		[HttpPatch("{id}")]
 		public async Task<ActionResult<QuestionDto>> Put(int id, JsonPatchDocument<QuestionCreateDto> patch)

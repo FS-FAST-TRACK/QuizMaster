@@ -175,19 +175,31 @@ namespace QuizMaster.API.Account.Service.Worker
                 // get the user roles
                 roles = await userManager.GetRolesAsync(userAccount);
 
-                // if no administrator found, add user to administrator
-                // if already admin, remove the role
+                // set the user roles
                 try
                 {
-                    if (await userManager.IsInRoleAsync(userAccount, "Administrator"))
+                    if (request.IsAdmin)
                     {
-                        await userManager.RemoveFromRoleAsync(userAccount, "Administrator");
+                        // set to admin
+                        if (!await userManager.IsInRoleAsync(userAccount, "Administrator"))
+                        {
+                            await userManager.AddToRoleAsync(userAccount, "Administrator");
+                            // remove the user role
+                            await userManager.RemoveFromRoleAsync(userAccount, "User");
+                        }
+                            
                     }
                     else
                     {
-                        await userManager.AddToRoleAsync(userAccount, "Administrator");
+                        // revoke from admin
+                        if (await userManager.IsInRoleAsync(userAccount, "Administrator"))
+                        {
+                            await userManager.RemoveFromRoleAsync(userAccount, "Administrator");
+                            // add the user role
+                            await userManager.AddToRoleAsync(userAccount, "User");
+                        }
+                            
                     }
-                    
                 }
                 catch { }
             }
