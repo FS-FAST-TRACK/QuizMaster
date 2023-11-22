@@ -1,5 +1,5 @@
 import { QuestionCreateValues } from "@/lib/definitions";
-import { NumberInput, TextInput } from "@mantine/core";
+import { NumberInput } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 
 export default function SliderQuestionDetails({

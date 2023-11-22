@@ -2,15 +2,7 @@
 
 import { QuestionCreateValues } from "@/lib/definitions";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import {
-    Button,
-    Checkbox,
-    Group,
-    Input,
-    InputLabel,
-    Text,
-    TextInput,
-} from "@mantine/core";
+import { Button, Checkbox, Input, InputLabel, Text } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
 import styles from "./MultipleChoice.module.css";

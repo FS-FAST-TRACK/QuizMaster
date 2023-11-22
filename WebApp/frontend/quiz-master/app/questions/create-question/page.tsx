@@ -1,29 +1,15 @@
 "use client";
 
-import QuestionCreate from "@/components/Commons/QuestionCreate";
 import QuestionDetails from "@/components/Commons/QuestionDetails";
-import {
-    QuestionCategory,
-    QuestionCreateDto,
-    QuestionCreateValues,
-    QuestionDifficulty,
-    QuestionType,
-} from "@/lib/definitions";
-import { fetchCategories, fetchDifficulties, fetchTypes } from "@/lib/quizData";
+import { QuestionCreateDto, QuestionCreateValues } from "@/lib/definitions";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
-import {
-    PhotoIcon,
-    PlusCircleIcon,
-    SpeakerWaveIcon,
-} from "@heroicons/react/24/outline";
+import { PhotoIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
 import {
     Anchor,
     Breadcrumbs,
     Button,
-    Checkbox,
-    Input,
     InputLabel,
     Select,
     TextInput,
@@ -229,8 +215,7 @@ export default function Page() {
                 </div>
 
                 <QuestionDetails form={form} />
-                {/* Page Content */}
-                {/* <QuestionCreate /> */}
+
                 <div className="flex justify-end">
                     <Button variant="transparent" color="gray">
                         Cancel

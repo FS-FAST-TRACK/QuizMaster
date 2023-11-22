@@ -1,5 +1,5 @@
 import { QuestionCreateValues } from "@/lib/definitions";
-import { Checkbox, Input, InputLabel, Text } from "@mantine/core";
+import { Checkbox, InputLabel, Text } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 
 export default function TrueOrFalseQuestionDetail({

@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         fetchTypes().then((res) => {
             setQuestionTypes(res);
         });
-    }, []);
+    }, [setQuestionCategories, setQuestionDifficulties, setQuestionTypes]);
 
     return (
         <div className="flex h-screen flex-row md:overflow-hidden">

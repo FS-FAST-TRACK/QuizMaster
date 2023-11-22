@@ -1,25 +1,7 @@
 "use client";
 
-import {
-    QuestionCategory,
-    QuestionCreateValues,
-    QuestionDifficulty,
-    QuestionType,
-} from "@/lib/definitions";
-import { fetchCategories, fetchDifficulties, fetchTypes } from "@/lib/quizData";
-import {
-    Box,
-    Button,
-    Combobox,
-    Input,
-    InputLabel,
-    Select,
-    TextInput,
-    Textarea,
-} from "@mantine/core";
-import { UseFormReturnType, useForm } from "@mantine/form";
-import { Children, useCallback, useEffect, useState } from "react";
-import QuestionOption from "../QuestionOption";
+import { QuestionCreateValues } from "@/lib/definitions";
+import { UseFormReturnType } from "@mantine/form";
 import MultipleChoiceQuestionDetail from "./MultipleChoice";
 import MultipleChoicePlusAudioQuestionDetail from "./MultipleChoicePlusAudio";
 import TrueOrFalseQuestionDetail from "./TrueOrFalse";

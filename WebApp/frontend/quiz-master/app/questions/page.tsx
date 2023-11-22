@@ -1,7 +1,6 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
-import PageHeader from "@/components/Commons/headers/PageHeader";
 import QuestionFilter from "@/components/Commons/popover/QuestionFilter";
 import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import {
@@ -10,14 +9,8 @@ import {
     QuestionResourceParameter,
 } from "@/lib/definitions";
 import { fetchQuestions } from "@/lib/quizData";
-import { FunnelIcon, PlusIcon } from "@heroicons/react/24/outline";
-import {
-    Anchor,
-    Breadcrumbs,
-    Collapse,
-    Popover,
-    TextInput,
-} from "@mantine/core";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { Anchor, Breadcrumbs } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -58,7 +51,7 @@ export default function Page() {
 
     const handleSearch = useCallback(() => {
         form.setFieldValue("searchQuery", searchQuery);
-    }, [searchQuery]);
+    }, [searchQuery, form]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
