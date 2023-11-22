@@ -15,10 +15,14 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         [Required]
         public string QDetailDesc { get; set; }
 
-        [Required]
+        [ForeignKey(nameof(Question))]
+        public int QuestionId { get; set; }
         public Question Question { get; set; }
 
-        [Required]
+
+		public IEnumerable<DetailType> DetailTypes { get; set; }
+
+		[Required]
         public bool ActiveData { get; set; } = true;
 
         [Required]
@@ -27,8 +31,8 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         [AllowNull]
         public DateTime DateUpdated { get; set; }
 
-		[Required]
-		public int CreatedByUserId { get; set; }
+        [Required]
+        public int CreatedByUserId { get; set; } = 1; 
 
 		public int? UpdatedByUserId { get; set; }
 	}

@@ -4,6 +4,7 @@ namespace QuizMaster.API.Quiz.SeedData
 {
 	public static class QuestionTypes
 	{
+		public const int MultipleChoiceSeedDataId = 1; 
 		public static QuestionType MultipleChoiceSeedData = new QuestionType()
 		{
 			Id = 1,
@@ -12,6 +13,7 @@ namespace QuizMaster.API.Quiz.SeedData
 			CreatedByUserId = 1,
 		};
 
+		public const int MultipleChoicePlusAudioSeedDataId =2;
 		public static QuestionType MultipleChoicePlusAudioSeedData = new QuestionType()
 		{
 			Id = 2,
@@ -20,6 +22,7 @@ namespace QuizMaster.API.Quiz.SeedData
 			CreatedByUserId = 1,
 		};
 
+		public const int TrueOrFalseSeedDataId = 3;
 		public static QuestionType TrueOrFalseSeedData = new QuestionType()
 		{
 			Id = 3,
@@ -28,6 +31,7 @@ namespace QuizMaster.API.Quiz.SeedData
 			CreatedByUserId = 1,
 		};
 
+		public const int TypeAnswerSeedDataId = 4;
 		public static QuestionType TypeAnswerSeedData = new QuestionType()
 		{
 			Id = 4,
@@ -36,6 +40,7 @@ namespace QuizMaster.API.Quiz.SeedData
 			CreatedByUserId = 1,
 		};
 
+		public const int SliderSeedDataId  = 5;
 		public static QuestionType SliderSeedData = new QuestionType()
 		{
 			Id = 5,
@@ -44,6 +49,7 @@ namespace QuizMaster.API.Quiz.SeedData
 			CreatedByUserId = 1,
 		};
 
+		public const int PuzzleSeedDataId = 6; 
 		public static QuestionType PuzzleSeedData = new QuestionType()
 		{
 			Id = 6,

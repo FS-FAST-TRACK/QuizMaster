@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Protos\quiz.proto" />
     <None Remove="Protos\quiz_category.proto" />
+    <None Remove="Protos\quiz_difficulty.proto" />
+    <None Remove="Protos\quiz_type.proto" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,8 +35,10 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
 	  <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.16" />
+	  <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    <PackageReference Include="System.Text.Json" Version="7.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,7 +46,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\quiz.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\quiz_category.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\quiz_difficulty.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\quiz_type.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

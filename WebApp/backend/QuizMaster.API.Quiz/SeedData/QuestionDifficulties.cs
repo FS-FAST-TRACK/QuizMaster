@@ -8,10 +8,10 @@ namespace QuizMaster.API.Quiz.SeedData
 		private static readonly IEnumerable<string> _difficulties = new string[] { "Easy", "Average", "Difficult"};
 
 		public static IEnumerable<QuestionDifficulty> Difficulties = _difficulties
-			.Select((category, index) => new QuestionDifficulty
+			.Select((difficulty, index) => new QuestionDifficulty
 			{
 				Id = index + 1,
-				QDifficultyDesc = category,
+				QDifficultyDesc = difficulty,
 				CreatedByUserId = 1,
 			}).ToList();
 	}

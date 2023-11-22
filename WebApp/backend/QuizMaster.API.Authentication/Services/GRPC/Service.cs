@@ -26,7 +26,7 @@ namespace QuizMaster.API.Authentication.Services.GRPC
                 Password = request.Password,
             };
 
-            var tokenHolder = _authenticationServices.Authenticate(requestModel);
+            var tokenHolder = await _authenticationServices.Authenticate(requestModel);
 
             try 
             {
@@ -55,6 +55,16 @@ namespace QuizMaster.API.Authentication.Services.GRPC
                 reply.AuthStore = JsonConvert.SerializeObject(authStore);
             }
             return Task.FromResult(reply);
+        }
+
+        public override async Task<SetAdminReply> SetAdmin(SetAdminRequest request, ServerCallContext context)
+        {
+            var reply = new SetAdminReply();
+            // todo harold
+            //var response = await _authenticationServices.UpdateRole(new AuthRequest { Username = request.Username }, isAdmin=true or false);
+            //reply.Response = JsonConvert.SerializeObject(response);
+
+            return await Task.FromResult(reply);
         }
     }
 }

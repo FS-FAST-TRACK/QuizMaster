@@ -1,6 +1,8 @@
-﻿using QuizMaster.API.Quiz.SeedData;
+﻿using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.Quiz.Tests.Services
 {
@@ -10,12 +12,16 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		private readonly IEnumerable<QuestionCategory> _categories;
 		private readonly IEnumerable<QuestionType> _types;
 		private readonly IEnumerable<QuestionDifficulty> _difficulties;
+		private readonly IEnumerable<Question> _questions;
+		private readonly IEnumerable<QuestionDetail> _questionsDetails;
 
 		public QuizTestDataRepository()
 		{
 			_categories = QuestionCategories.Categories;
 			_types = QuestionTypes.Types;
 			_difficulties = QuestionDifficulties.Difficulties;
+			_questions = new List<Question>();
+			_questionsDetails = new List<QuestionDetail>();
 		}
 
 		public async Task<bool> AddCategoryAsync(QuestionCategory category)
@@ -51,7 +57,27 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail)
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes)
 		{
 			throw new NotImplementedException();
 		}
@@ -80,9 +106,25 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			return await Task.FromResult(_difficulties);
 		}
 
-		public Task<IEnumerable<Question>> GetAllQuestionsAsync()
+        public Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<QuestionDetailType>> GetAllQuestionDetailTypesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Question>> GetAllQuestionsAsync()
 		{
 			throw new NotImplementedException();
+		}
+
+		public async Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
+		{
+			var collection = _questions.AsQueryable();
+			return await Task.FromResult(PagedList<Question>.Create(collection, resourceParameter.PageNumber, resourceParameter.PageSize));
 		}
 
 		public Task<IEnumerable<QuestionType>> GetAllTypesAsync()
@@ -96,6 +138,25 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<QuestionCategory?> GetCategoryAsync(string description)
+		{
+			throw new NotImplementedException();
+		}
+		public Task<DetailType?> GetDetailTypeAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<DetailType>> GetDetailTypesAsync()
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<DetailType>> GetDetailTypesAsync(IEnumerable<string> detailTypes)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<Dictionary<string, DetailType>> GetDetailTypesDictAsync()
 		{
 			throw new NotImplementedException();
 		}
@@ -125,6 +186,31 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId, int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<QuestionDetailType?> GetQuestionDetailTypeAsync(int id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IEnumerable<QuestionDetailType>> GetQuestionDetailTypesAsync()
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<int> GetQuestionUseCategoryCount(int categoryId)
 		{
 			throw new NotImplementedException();
@@ -146,6 +232,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<QuestionType?> GetTypeAsync(string description)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> RemoveQuestionDetailTypesOfQuestionDetailByIdAsync(int qDetailId)
 		{
 			throw new NotImplementedException();
 		}

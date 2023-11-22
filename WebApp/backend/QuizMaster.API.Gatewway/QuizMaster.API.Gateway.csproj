@@ -20,7 +20,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
+	  
+	  <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
 	  <!-- If mo error ang inyoha dri nga part change lang ang version to 6.2.3 -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
@@ -43,8 +44,17 @@
     <Protobuf Include="..\QuizMaster.API.Media\Proto\media.proto" GrpcServices="Client">
       <Link>Protos\media.proto</Link>
     </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz.proto" GrpcServices="Client">
+      <Link>Protos\quiz.proto</Link>
+    </Protobuf>
     <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_category.proto" GrpcServices="Client">
       <Link>Protos\quiz_category.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_difficulty.proto" GrpcServices="Client">
+      <Link>Protos\quiz_difficulty.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz_type.proto" GrpcServices="Client">
+      <Link>Protos\quiz_type.proto</Link>
     </Protobuf>
   </ItemGroup>
 

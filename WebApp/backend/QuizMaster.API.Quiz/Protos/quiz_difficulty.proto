@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuizDifficultyService{
+	rpc GetDificulties(EmptyDifficultyRequest) returns (stream DificultiesReply);
+	rpc GetDificulty(GetDificultyRequest) returns (DifficultyOrNotFound);
+	rpc	GetDifficultyByDesc(GetDifficultyByDescRequest) returns (DifficultyByDescResponse);
+	rpc CreateDifficulty(CreateDifficultyRequest) returns (CreateDifficultyResponse);
+	rpc DeleteDifficulty(GetDificultyRequest) returns (DeleteDifficultyReply);
+	rpc	UpdateDifficulty(UpdateDifficultyRequest) returns (UpdateDifficultyResponse);
+}
+
+message EmptyDifficultyRequest{}
+
+message DificultiesReply{
+	int32 id = 1;
+	string qDifficultyDesc =2;
+}
+
+message GetDificultyRequest{
+	int32 id = 1;
+}
+
+message NotFoundDifficulty{
+	int32 code = 1;
+	string message = 2;
+}
+
+message DifficultyOrNotFound{
+	oneof response{
+		DificultiesReply dificultiesReply = 1;
+		NotFoundDifficulty notFoundDifficulty = 2;
+	}
+}
+
+message GetDifficultyByDescRequest{
+	string desc = 1;
+}
+
+message DifficultyByDescResponse{
+	int32 code = 1;
+	int32 id = 2;
+}
+
+message CreateDifficultyRequest{
+	string qDifficultyDesc = 1;
+}
+
+message CreateDifficultyResponse{
+	int32 code = 1;
+	int32 id = 2;
+	string qDifficultyDesc = 3;
+}
+
+message DeleteDifficultyReply{
+	int32 code = 1;
+}
+
+message UpdateDifficultyRequest{
+	int32  id = 1;
+	string patch = 2;
+}
+
+message UpdateDifficultyResponse{
+	int32 code = 1;
+	int32 id = 2;
+	string qDifficultyDesc = 3;
+}

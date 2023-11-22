@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Quiz.DbContexts;
+using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.Quiz.Services.Repositories
 {
@@ -23,26 +26,72 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		{
 			return await _context.Questions
 				.Where(q => q.ActiveData)
-				.Include(q=>q.QCategory)
-				.Include(q=>q.QDifficulty)
-				.Include(q=>q.QType)
+				.Include(q => q.QCategory)
+				.Include(q => q.QDifficulty)
+				.Include(q => q.QType)
+				.Include(q => q.Details)
 				.ToListAsync();
+
+		}
+		public async Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter)
+		{
+			var collection = _context.Questions as IQueryable<Question>;
+
+			if (resourceParameter.IsOnlyActiveData)
+			{
+				collection = collection.Where(q => q.ActiveData);
+			}
+			collection = collection
+				.Include(q => q.QCategory)
+				.Include(q => q.QDifficulty)
+				.Include(q => q.QType);
+
+			if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
+			{
+				var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
+				collection = collection
+					.Where(q =>
+					q.QStatement.ToLower().Replace(" ", "").Contains(query)
+					&& q.QCategory.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
+					&& q.QType.QTypeDesc.ToLower().Replace(" ", "").Contains(query)
+					&& q.QDifficulty.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
+					);
+
+			}
+
+			return await PagedList<Question>.CreateAsync(collection,
+				resourceParameter.PageNumber,
+				resourceParameter.PageSize);
 		}
 
 		public async Task<Question?> GetQuestionAsync(int id)
 		{
-			return await _context.Questions
+			var question = await _context.Questions
 				.Where(q => q.Id == id)
 				.Include(q => q.QCategory)
 				.Include(q => q.QDifficulty)
 				.Include(q => q.QType)
+				.Include(q => q.Details)
 				.FirstOrDefaultAsync();
+
+			if (question != null)
+			{
+				question.Details.ToList().ForEach(qDetail =>
+				{
+					qDetail.DetailTypes = _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetail.Id).Select((qDetailType) =>
+					 qDetailType.DetailType).ToList();
+				});
+			}
+
+			return question;
+
+
 		}
 
 		public async Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId)
 		{
-			return await _context.Questions.Where(q => 
-				q.QDifficulty.Id == difficultyId 
+			return await _context.Questions.Where(q =>
+				q.QDifficulty.Id == difficultyId
 				&& q.QType.Id == typeId
 				&& q.QCategory.Id == categoryId
 				&& q.QStatement.Trim().ToLower().Replace(" ", "") == qStatement.Trim().ToLower().Replace(" ", ""))
@@ -80,7 +129,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 
 		#region Category Methods
 		public async Task<IEnumerable<QuestionCategory>> GetAllCategoriesAsync()
-		{	
+		{
 			return await _context.Categories.Where(c => c.ActiveData).ToListAsync();
 		}
 
@@ -91,7 +140,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 
 		public async Task<QuestionCategory?> GetCategoryAsync(string description)
 		{
-			return await _context.Categories.Where(c => c.QCategoryDesc.Trim().ToLower().Replace(" ","") == description.Trim().ToLower().Replace(" ", "")).FirstOrDefaultAsync();
+			return await _context.Categories.Where(c => c.QCategoryDesc.Trim().ToLower().Replace(" ", "") == description.Trim().ToLower().Replace(" ", "")).FirstOrDefaultAsync();
 		}
 
 
@@ -108,8 +157,8 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				return false;
 			}
 		}
-		
-		public  bool UpdateCategory(QuestionCategory category)
+
+		public bool UpdateCategory(QuestionCategory category)
 		{
 			try
 			{
@@ -133,7 +182,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 
 		public async Task<QuestionDifficulty?> GetDifficultyAsync(int id)
 		{
-			return await _context.Difficulties.Where(d =>d.Id == id).FirstOrDefaultAsync();
+			return await _context.Difficulties.Where(d => d.Id == id).FirstOrDefaultAsync();
 		}
 
 		public async Task<QuestionDifficulty?> GetDifficultyAsync(string description)
@@ -217,56 +266,203 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		}
 		#endregion
 
-
 		#region Question Detail Methods
-		public async Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
+		public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailsAsync(int qId)
 		{
-			return await _context.Details.Where(d => d.Question.Id == qId).FirstOrDefaultAsync();
+			var details = await _context.QuestionDetails
+				.Where(qDetail => qDetail.Question.Id == qId && qDetail.ActiveData)
+				.Include(qDetail => qDetail.DetailTypes)
+				.ToListAsync();
+			details.ToList().ForEach(qDetail =>
+			{
+				qDetail.DetailTypes = _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetail.Id).Select((qDetailType) =>
+				 qDetailType.DetailType).ToList();
+			});
+			return details;
 		}
-		public async Task<bool> AddQuestionDetailsAsync(QuestionDetail detail)
+
+		public async Task<QuestionDetail?> GetQuestionDetailAsync(int qId, int id)
+		{
+			var qDetail = await _context.QuestionDetails
+				.Where(qDetail => qDetail.Question.Id == qId && qDetail.Id == id)
+				.Include(qDetail => qDetail.DetailTypes)
+				.SingleOrDefaultAsync();
+
+			if (qDetail != null)
+			{
+				qDetail.DetailTypes = _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetail.Id).Select((qDetailType) => qDetailType.DetailType).ToList();
+			}
+			return qDetail;
+		}
+
+        public async Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync()
+        {
+			return await _context.QuestionDetails.ToListAsync();
+        }
+
+        public async Task<IEnumerable<QuestionDetail>> GetQuestionDetailByDetailTypeAsync(int qId, int detailTypeId)
+		{
+			return await _context.QuestionDetails
+				.Where(qDetail => qDetail.QuestionId == qId)
+				.Include(qDetail => qDetail.DetailTypes.Where(dType => dType.Id == detailTypeId))
+				.ToListAsync();
+		}
+
+		public async Task<bool> AddQuestionDetailAsync(QuestionDetail questionDetail)
 		{
 			try
 			{
-				await _context.Details.AddAsync(detail);
+				
+				await _context.QuestionDetails.AddAsync(questionDetail);
 				return true;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError("Add Type Failed", ex);
+				_logger.LogError("Adding Detail Failed", ex);
 				return false;
 			}
 		}
-		public bool UpdateQuestionDetail(QuestionDetail detail)
+
+		public async Task<bool> AddQuestionDetailsAsync(IEnumerable<QuestionDetail> questionDetails)
 		{
 			try
 			{
-				_context.Details.Update(detail);
+				await _context.QuestionDetails.AddRangeAsync(questionDetails);
 				return true;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError("Update Type Failed", ex);
+				_logger.LogError("Adding Detail Failed", ex);
+				return false;
+			}
+		}
+
+
+		public bool UpdateQuestionDetail(QuestionDetail questionDetail)
+		{
+			try
+			{
+				_context.QuestionDetails.Update(questionDetail);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Adding Detail Failed", ex);
 				return false;
 			}
 		}
 		#endregion
 
-		// Returns how many question used a question category
-		public async Task<int> GetQuestionUseCategoryCount(int categoryId)
+		#region Detail Type Methods
+		public async Task<IEnumerable<DetailType>> GetDetailTypesAsync()
 		{
-			return await _context.Questions.Where(q=> q.QCategory.Id  == categoryId).CountAsync();
+			return await _context.DetailTypes.Where(dType => dType.ActiveData).ToListAsync();
 		}
 
-		// Returns how many question used a question difficulty
+		public async Task<DetailType?> GetDetailTypeAsync(int id)
+		{
+			return await _context.DetailTypes.Where(dType => dType.Id == id && dType.ActiveData).FirstOrDefaultAsync();
+		}
+
+		public async Task<Dictionary<string, DetailType>> GetDetailTypesDictAsync()
+		{
+			var detailTypesDict = new Dictionary<string, DetailType>();
+			var detailTypes = await _context.DetailTypes.ToListAsync();
+
+			DetailTypes.keyValuePairs.ToList().ForEach(kv =>
+			{
+				var detailType = detailTypes.Where(dType => dType.Id == kv.Value).FirstOrDefault();
+				if (detailType != null)
+				{
+					detailTypesDict.Add(kv.Key, detailType);
+				}
+			});
+			return detailTypesDict;
+		}
+
+
+		public async Task<IEnumerable<DetailType>> GetDetailTypesAsync(IEnumerable<string> detailTypes)
+		{
+			var detailTypeIds = new List<int>();
+			detailTypes.ToList().ForEach(dT =>
+				detailTypeIds.Add(DetailTypes.keyValuePairs[dT]
+			));
+
+
+			var detailTypesDb = _context.DetailTypes;
+			var query = detailTypesDb.Where(detailTypeDb => detailTypeIds.Contains(detailTypeDb.Id));
+			return await query.ToListAsync();
+
+		}
+
+		#endregion
+
+		#region Question - Detail Type Methods
+		public async Task<bool> AddQuestionDetailTypesAsync(IEnumerable<QuestionDetailType> questionDetailTypes)
+		{
+			try
+			{
+				await _context.QuestionDetailTypes.AddRangeAsync(questionDetailTypes);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add QuestionDetailTypes Failed", ex);
+				return false;
+			}
+		}
+
+		public async Task<bool> AddQuestionDetailTypeAsync(QuestionDetailType questionDetailType)
+		{
+			try
+			{
+				await _context.QuestionDetailTypes.AddAsync(questionDetailType);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add QuestionDetailTypes Failed", ex);
+				return false;
+			}
+		}
+
+		public async Task<bool> RemoveQuestionDetailTypesOfQuestionDetailByIdAsync(int qDetailId){
+			try
+			{
+				var questionDetailTypes = await _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetailId).ToListAsync();
+				_context.QuestionDetailTypes.RemoveRange(questionDetailTypes);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Add QuestionDetailTypes Failed", ex);
+				return false;
+			}
+		}
+		public async Task<IEnumerable<QuestionDetailType>> GetAllQuestionDetailTypesAsync()
+		{
+			return await _context.QuestionDetailTypes.ToListAsync();
+		}
+
+        #endregion
+
+
+        // Returns how many active questions used a question category
+        public async Task<int> GetQuestionUseCategoryCount(int categoryId)
+		{
+			return await _context.Questions.Where(q => q.ActiveData && q.QCategory.Id == categoryId).CountAsync();
+		}
+
+		// Returns how many questions used a question difficulty
 		public async Task<int> GetQuestionUseDifficultyCount(int difficultyId)
 		{
-			return await _context.Questions.Where(q => q.QCategory.Id == difficultyId).CountAsync();
+			return await _context.Questions.Where(q => q.ActiveData && q.QDifficulty.Id == difficultyId).CountAsync();
 		}
 
-		// Returns how many question used a question type
+		// Returns how many active questions used a question type
 		public async Task<int> GetQuestionUseTypeCount(int typeId)
 		{
-			return await _context.Questions.Where(q => q.QCategory.Id == typeId).CountAsync();
+			return await _context.Questions.Where(q => q.ActiveData && q.QType.Id == typeId).CountAsync();
 		}
 
 		public async Task<bool> SaveChangesAsync()
@@ -275,5 +471,6 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return result != 0;
 		}
 
-	}
+        
+    }
 }

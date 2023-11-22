@@ -5,6 +5,7 @@ option csharp_namespace = "QuizMaster.API.Authentication.Proto";
 service AuthService{
 	rpc GetAuthentication(AuthenticationRequest) returns (AuthenticationReply);
 	rpc ValidateAuthentication(ValidationRequest) returns (ValidationReply);
+	rpc SetAdmin(SetAdminRequest) returns (SetAdminReply);
 }
 
 message AuthenticationRequest{
@@ -23,4 +24,12 @@ message ValidationRequest{
 
 message ValidationReply{
 	string authStore = 1;
+}
+
+message SetAdminRequest{
+	string username = 1;
+}
+
+message SetAdminReply{
+	string response = 1;
 }

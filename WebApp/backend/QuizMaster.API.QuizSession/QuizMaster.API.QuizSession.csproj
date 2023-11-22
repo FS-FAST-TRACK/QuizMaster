@@ -7,8 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuizMaster.Library.Common\QuizMaster.Library.Common.csproj" />
   </ItemGroup>
 
 </Project>

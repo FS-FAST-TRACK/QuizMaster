@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using QuizMaster.API.Quiz.Configuration;
 using QuizMaster.API.Quiz.DbContexts;
+using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.GRPC;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.API.Quiz.Services.Workers;
 
 namespace QuizMaster.API.Quiz
 {
@@ -21,14 +24,22 @@ namespace QuizMaster.API.Quiz
 				dbContextOptions => dbContextOptions.UseSqlServer(
 					builder.Configuration["ConnectionStrings:QuizMasterQuestionDBConnectionString"]));
 
+			// Configure strongly typed app settings object
+			builder.Services.Configure<QuizApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
+
 
 			builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+
+			builder.Services.AddScoped<IQuestionDetailManager, QuestionDetailManager>();
 
 			builder.Services.AddLogging();
 
 			builder.Services.AddControllers().AddNewtonsoftJson();
 
 			builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+			// Register worker services
+			builder.Services.AddHostedService<QuizDataSynchronizationWorker>();
 
 			var app = builder.Build();
 
@@ -44,6 +55,9 @@ namespace QuizMaster.API.Quiz
 			app.UseAuthorization();
 
 			app.MapGrpcService<Service>();
+			app.MapGrpcService<QuestionService>();
+			app.MapGrpcService<DifficultyService>();
+			app.MapGrpcService<TypeService>();
 			app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 			app.MapControllers();
