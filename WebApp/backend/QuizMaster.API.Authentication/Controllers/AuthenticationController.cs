@@ -74,13 +74,13 @@ namespace QuizMaster.API.Authentication.Controllers
             return Ok(new { Message = "Info", authStore });
         }
 
-        [Authorize]
-        [HttpPost]
-        [Route("set_admin/{Username}")]
-        public async Task<IActionResult> SetAdmin(string Username, [FromQuery] bool isAdmin = false)
-        {
-            var response = await _authenticationServices.UpdateRole(new AuthRequest { Username = Username }, isAdmin);
-            return Ok(response);
-        }
+        //[Authorize]
+        //[HttpPost]
+        //[Route("set_admin/{Username}")]
+        //public async Task<IActionResult> SetAdmin(string Username, [FromQuery] bool isAdmin = false)
+        //{
+        //    var response = await _authenticationServices.UpdateRole(new AuthRequest { Username = Username }, isAdmin);
+        //    return Ok(response);
+        //}
     }
 }
