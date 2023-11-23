@@ -3,7 +3,7 @@
 	public class QuestionResourceParameter : IResourceParameter
 	{
 		public int maxPageSize => 50;
-		public bool IsOnlyActiveData { get; set; } = false;
+		public bool IsOnlyActiveData { get; set; } = true;
 		public bool IncludeDetails { get; set; } = true;
 		public string? SearchQuery { get; set; }
 		public int PageNumber { get; set; } = 1;
