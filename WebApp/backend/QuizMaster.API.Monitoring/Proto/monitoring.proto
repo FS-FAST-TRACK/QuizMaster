@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Monitoring.Proto";
+
+package audit;
+
+import "google/protobuf/empty.proto";
+
+service AuditService {
+  rpc LogRegistrationEvent (LogRegistrationEventRequest) returns (google.protobuf.Empty);
+  rpc LogPartialRegistrationEvent (LogPartialRegistrationEventRequest) returns (google.protobuf.Empty);
+  rpc LogPasswordChangeEvent (LogPasswordChangeEventRequest) returns (google.protobuf.Empty);
+  rpc LogDeleteEvent (LogDeleteEventRequest) returns (google.protobuf.Empty);
+  rpc LogUpdateEvent (LogUpdateEventRequest) returns (google.protobuf.Empty);
+  rpc LogSetAdminEvent (LogSetAdminEventRequest) returns (google.protobuf.Empty);
+}
+
+message RegistrationEvent {
+  int32 userId = 1;
+  string action = 2;
+  string timestamp = 3;
+  string details = 4;
+  string userrole = 5;
+  string oldValues = 6;
+  string newValues = 7;
+}
+message PartialRegistrationEvent {
+  int32 userId = 1;
+  string action = 2;
+  string timestamp = 3;
+  string details = 4;
+  string userrole = 5;
+  string oldValues = 6;
+  string newValues = 7;
+}
+message SetAdminEvent {
+  int32 userId = 1;
+  string action = 2;
+  string timestamp = 3;
+  string details = 4;
+  string userrole = 5;
+  string oldValues = 6;
+  string newValues = 7;
+}
+message PasswordChangeEvent {
+  int32 userId = 1;
+  string action = 2;
+  string timestamp = 3;
+  string details = 4;
+  string oldPassword = 5;
+  string newPassword = 6;
+  string userrole = 7;
+}
+message DeleteEvent {
+  int32 userId = 1;
+  string action = 2;
+  string timestamp = 3;
+  string details = 4;
+  string userrole = 5;
+  string oldValues = 6;
+  string newValues = 7;
+}
+message UpdateEvent {
+  int32 userId = 1;
+  string action = 2;
+  string timestamp = 3;
+  string details = 4;
+  string userrole = 5;
+  string oldValues = 6;
+  string newValues = 7;
+}
+
+message LogRegistrationEventRequest {
+  RegistrationEvent event = 1;
+}
+message LogPartialRegistrationEventRequest {
+  PartialRegistrationEvent event = 1;
+}
+message LogPasswordChangeEventRequest {
+  PasswordChangeEvent event = 1;
+}
+message LogDeleteEventRequest {
+  DeleteEvent event = 1;
+}
+message LogUpdateEventRequest {
+  UpdateEvent event = 1;
+}
+message LogSetAdminEventRequest {
+	SetAdminEvent event = 1;
+}

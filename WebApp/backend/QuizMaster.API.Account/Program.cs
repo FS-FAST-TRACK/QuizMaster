@@ -1,9 +1,11 @@
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Account.Configuration;
 using QuizMaster.API.Account.DbContext;
 using QuizMaster.API.Account.Service;
 using QuizMaster.API.Account.Service.Worker;
+using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Roles;
 
@@ -18,9 +20,13 @@ namespace QuizMaster.API.Account
 			// Add services to the container.
 			builder.Services.AddGrpc();
 			builder.Services.AddControllers();
-
-			// configure strongly typed app settings object
-			builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
+            builder.Services.AddScoped(sp =>
+            {
+                var channel = GrpcChannel.ForAddress("https://localhost:7065");
+                return new AuditService.AuditServiceClient(channel);
+            });
+            // configure strongly typed app settings object
+            builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();

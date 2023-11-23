@@ -25,13 +25,13 @@ namespace QuizMaster.API.Authentication.Services.Auth
             this._logger = _logger;
         }
 
-        public AuthResponse Authenticate(AuthRequest authRequest)
+        public async Task<AuthResponse> Authenticate(AuthRequest authRequest)
         {
             RabbitMQ_AccountPayload retrieveUserInformation = new() { Account = new UserAccount{ Id = -1 }, Roles = new List<string>() };
             int tries = 1;
             while(retrieveUserInformation.Account.Id == -1 && (tries++ < 15))
             {
-                retrieveUserInformation = rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
+                retrieveUserInformation = await rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
             }
             /*
             UserAccount userAccount = repository.GetUserByUsername(authRequest.Username);
@@ -82,17 +82,27 @@ namespace QuizMaster.API.Authentication.Services.Auth
             return JsonConvert.DeserializeObject<AuthStore>(authStoreJson);
         }
 
-        public ResponseDto UpdateRole(AuthRequest authRequest)
+        public async Task<ResponseDto> UpdateRole(AuthRequest authRequest, bool SetAdmin)
         {
             RabbitMQ_AccountPayload retrieveUserInformation = new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
             int tries = 1;
 
-            while (retrieveUserInformation.Account.Id == -1 && (tries++ < 15))
+            // flush data
+            for(int it = 0; it < 3; it++, await rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Type = "RoleUpdate", Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password, IsAdmin = SetAdmin }));
+
+            // retrieve from message bus
+            while (retrieveUserInformation.Account.Id == -1 && (tries++ < 5))
             {
-                retrieveUserInformation = rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Type = "RoleUpdate", Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password });
+                retrieveUserInformation = await rabbitMqUserWorker.RequestUserCredentials(new Library.Common.Models.Services.AuthRequest { Type = "RoleUpdate", Username = authRequest.Username, Email = authRequest.Email, Password = authRequest.Password, IsAdmin= SetAdmin });
             }
 
-            _logger.LogInformation(JsonConvert.SerializeObject(retrieveUserInformation));
+            _logger.LogInformation("New Data: " + JsonConvert.SerializeObject(retrieveUserInformation));
+            
+            // if not found
+            if(retrieveUserInformation.Account.Id == -1)
+            {
+                return new ResponseDto { Message = $"Failed to update user admin credentials, not found in database... Please try again", Type = "Role Update" };
+            }
 
             if (retrieveUserInformation.Roles.Contains("Administrator"))
             {
