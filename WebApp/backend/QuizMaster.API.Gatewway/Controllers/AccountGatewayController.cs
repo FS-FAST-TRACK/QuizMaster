@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.Library.Common.Entities.Accounts;
@@ -21,12 +23,17 @@ namespace QuizMaster.API.Gatewway.Controllers
     {
         private readonly GrpcChannel _channel;
         private readonly AccountService.AccountServiceClient _channelClient;
+        private readonly GrpcChannel _authChannel;
+        private readonly AuthService.AuthServiceClient _authChannelClient;
+
         private readonly IMapper _mapper;
 
         public AccountGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Account_Service);
             _channelClient = new AccountService.AccountServiceClient(_channel);
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
             _mapper = mapper;
         }
 
@@ -45,11 +52,11 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
             var response = await _channelClient.GetAccountByIdAsync(request);
-            if(response.UserNotFound != null)
+            if (response.UserNotFound != null)
             {
                 return NotFound(response.UserNotFound);
             }
-            
+
             var account = JsonConvert.DeserializeObject<UserAccount>(response.GetAccountByIdReply.Account);
 
             return Ok(_mapper.Map<AccountDto>(account));
@@ -100,19 +107,19 @@ namespace QuizMaster.API.Gatewway.Controllers
             {
                 return ReturnUserNameAlreadyExist();
             }
-			var checkEmail = new CheckEmailRequest
-			{
-				Email = account.Email
-			};
+            var checkEmail = new CheckEmailRequest
+            {
+                Email = account.Email
+            };
 
-			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+            var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
 
-			if (!emailResponse.IsAvailable)
-			{
-				return ReturnEmailAlreadyExist();
-			}
+            if (!emailResponse.IsAvailable)
+            {
+                return ReturnEmailAlreadyExist();
+            }
 
-			var request = _mapper.Map<CreateAccountRequest>(account);
+            var request = _mapper.Map<CreateAccountRequest>(account);
 
             var reply = await _channelClient.CreateAccountAsync(request);
 
@@ -121,8 +128,8 @@ namespace QuizMaster.API.Gatewway.Controllers
 
         [HttpPost("account/create_partial")]
         public async Task<IActionResult> CreatePartial(AccountCreatePartialDto account)
-        { 
-            if(!ModelState.IsValid)
+        {
+            if (!ModelState.IsValid)
             {
                 return ReturnModelStateErrors();
             }
@@ -144,16 +151,16 @@ namespace QuizMaster.API.Gatewway.Controllers
                 Email = account.Email
             };
 
-			var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+            var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
 
-			if (!emailResponse.IsAvailable)
-			{
-				return ReturnEmailAlreadyExist();
-			}
+            if (!emailResponse.IsAvailable)
+            {
+                return ReturnEmailAlreadyExist();
+            }
 
 
 
-			var request = _mapper.Map<CreateAccountPartialRquest>(account);
+            var request = _mapper.Map<CreateAccountPartialRquest>(account);
             var reply = await _channelClient.CreateAccountPartialAsync(request);
 
             return Ok(reply);
@@ -163,32 +170,129 @@ namespace QuizMaster.API.Gatewway.Controllers
         [HttpDelete("account/delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
             var request = new DeleteAccountRequest
             {
                 Id = id
             };
 
-            var reply = await _channelClient.DeleteAccountAsync(request);
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
 
-            if(reply.StatusCode == 500)
+
+            var reply = await _channelClient.DeleteAccountAsync(request, headers);
+
+            if (reply.StatusCode == 500)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to delete user." });
             }
-            else if(reply.StatusCode == 404)
+            else if (reply.StatusCode == 404)
             {
-                return NotFound("Account does not exists");
+                return NotFound("Account does not exist");
             }
 
             return NoContent();
         }
+        private async Task<AuthStore> ValidateUserTokenAndGetInfo()
+        {
+            string token = GetUserToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            var info = await GetAuthStoreInfo(token);
+
+            if (info == null || info.UserData == null)
+            {
+                return null;
+            }
+
+            return info;
+        }
+
+        private string GetUserToken()
+        {
+            var tokenClaim = User.Claims.FirstOrDefault(e => e.Type == "token");
+
+            if (tokenClaim != null)
+            {
+                return tokenClaim.Value;
+            }
+
+            try
+            {
+                return HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<AuthStore> GetAuthStoreInfo(string token)
+        {
+            var requestValidation = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(requestValidation);
+
+            return !string.IsNullOrEmpty(authStore?.AuthStore) ? JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore) : null;
+        }
+
+
 
         [QuizMasterAuthorization]
         [HttpPatch("account/update/{id}")]
         public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
             var request = new GetAccountByIdRequest
             {
                 Id = id
+            };
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
             };
 
             var response = await _channelClient.GetAccountByIdAsync(request);
@@ -212,7 +316,7 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
 
-            var updateReply = await _channelClient.UpdateAccountAsync(update);
+            var updateReply = await _channelClient.UpdateAccountAsync(update, headers);
             if (updateReply.StatusCode == 500)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update user." });
@@ -226,13 +330,36 @@ namespace QuizMaster.API.Gatewway.Controllers
         [Route("account/set_admin/{username}")]
         public async Task<IActionResult> SetAdmin(string username, [FromQuery] bool setAdmin = false)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
+
             var request = new SetAccountAdminRequest
             {
                 Username = username,
                 SetAdmin = setAdmin
             };
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
 
-            var response = await _channelClient.SetAdminAccountAsync(request);
+            var response = await _channelClient.SetAdminAccountAsync(request, headers);
 
             if(response.Code == 404)
             {
@@ -262,7 +389,7 @@ namespace QuizMaster.API.Gatewway.Controllers
                 Message = errorString
             });
         }
-        
+
         // Return id username already exist
         private ActionResult ReturnUserNameAlreadyExist()
         {
@@ -285,13 +412,13 @@ namespace QuizMaster.API.Gatewway.Controllers
         }
 
         // Return if email already exist
-		private ActionResult ReturnEmailAlreadyExist()
-		{
-			return BadRequest(new ResponseDto
-			{
-				Type = "Error",
-				Message = "Email already exist."
-			});
-		}
-	}
+        private ActionResult ReturnEmailAlreadyExist()
+        {
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = "Email already exist."
+            });
+        }
+    }
 }
