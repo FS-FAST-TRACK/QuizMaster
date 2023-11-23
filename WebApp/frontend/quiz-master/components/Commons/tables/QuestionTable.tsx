@@ -3,7 +3,7 @@ import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Checkbox, Table } from "@mantine/core";
+import { Box, Checkbox, Loader, Table } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 export default function QuestionTable({
@@ -88,7 +88,19 @@ export default function QuestionTable({
                         <Table.Th>Difficulty</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
-                <Table.Tbody>{rows}</Table.Tbody>
+                <Table.Tbody>
+                    {questions.length === 0 ? (
+                        <Table.Tr>
+                            <Table.Td colSpan={99} rowSpan={10}>
+                                <div className="flex grow justify-center">
+                                    <Loader size={50} color="green" />
+                                </div>
+                            </Table.Td>
+                        </Table.Tr>
+                    ) : (
+                        rows
+                    )}
+                </Table.Tbody>
             </Table>
         </div>
     );
