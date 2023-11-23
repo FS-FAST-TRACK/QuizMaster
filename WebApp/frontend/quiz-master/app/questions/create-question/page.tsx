@@ -22,10 +22,12 @@ import {
     Breadcrumbs,
     Button,
     InputLabel,
+    LoadingOverlay,
     Select,
     TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -46,6 +48,7 @@ export default function Page() {
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
     const router = useRouter();
+    const [visible, { toggle }] = useDisclosure(false);
 
     // const [categories, setCategories] = useState<QuestionCategory[]>([]);
     // const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
@@ -183,6 +186,7 @@ export default function Page() {
         }
         const questionCreateDto = mapData(form);
         console.log(questionCreateDto);
+        toggle();
         const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
             method: "POST",
             mode: "cors",
@@ -205,12 +209,17 @@ export default function Page() {
                 <h3>Create New Question</h3>
             </div>
             <form
-                className="flex flex-col gap-8"
+                className="flex flex-col gap-8 relative"
                 onSubmit={form.onSubmit((values) => {
                     console.log(values);
                     handelSubmit();
                 })}
             >
+                <LoadingOverlay
+                    visible={visible}
+                    zIndex={1000}
+                    overlayProps={{ radius: "sm", blur: 2 }}
+                />
                 <TextInput
                     label="Statement"
                     variant="filled"
