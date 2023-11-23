@@ -1,12 +1,10 @@
 import { Question } from "@/lib/definitions";
-import { fetchQuestions } from "@/lib/quizData";
-import { questionTableColumns } from "@/lib/tableColumns";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Table } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function QuestionTable({
     questions,

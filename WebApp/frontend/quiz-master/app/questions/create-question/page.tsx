@@ -1,7 +1,18 @@
 "use client";
 
 import QuestionDetails from "@/components/Commons/QuestionDetails";
-import { QuestionCreateDto, QuestionCreateValues } from "@/lib/definitions";
+import {
+    QuestionCreateDto,
+    QuestionCreateValues,
+    QuestionDetailCreateDto,
+} from "@/lib/definitions";
+import { mapData } from "@/lib/helpers";
+import {
+    MultipleChoiceData,
+    MultipleChoicePlusAudioData,
+    PuzzleData,
+    SliderData,
+} from "@/lib/questionTypeData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
@@ -15,12 +26,13 @@ import {
     TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const timeLimits = [10, 30, 60, 120];
 
 const items = [
-    { label: "All", href: "/question" },
+    { label: "All", href: "/questions" },
     { label: "Create a Question", href: "#" },
     { label: "", href: "#" },
 ].map((item, index) => (
@@ -33,6 +45,8 @@ export default function Page() {
     const { questionCategories } = useQuestionCategoriesStore();
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
+    const router = useRouter();
+
     // const [categories, setCategories] = useState<QuestionCategory[]>([]);
     // const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
     // const [types, setTypes] = useState<QuestionType[]>([]);
@@ -61,7 +75,7 @@ export default function Page() {
             questionDetailCreateDtos: [],
             options: [],
             trueOrFalseAnswer: true,
-            minimum: 0,
+            minimum: 1,
             maximum: 1,
             sliderAnswer: 1,
             interval: 1,
@@ -75,34 +89,99 @@ export default function Page() {
                 value.length < 1
                     ? "Question Statement must not be empty."
                     : null,
-            qCategoryId: (value) =>
+            qCategoryId: (value, values) =>
                 value?.length === 0 ? "Question Category is required." : null,
-            interval: (value) => (value ? null : "Provide interval"),
-            minimum: (value) => (value ? null : "Provide minimum"),
+            interval: (value, values) => {
+                if (parseInt(values.qTypeId) !== SliderData.id) {
+                    return null;
+                }
+                if (!value) {
+                    return "Provide interval";
+                }
+                return values.sliderAnswer &&
+                    values.minimum &&
+                    (values.sliderAnswer - values.minimum) % value !== 0
+                    ? "Answer can't be hit with the given interval."
+                    : null;
+            },
+            minimum: (value, values) => {
+                if (parseInt(values.qTypeId) !== SliderData.id) {
+                    return null;
+                }
+                if (!value) {
+                    return "Provide minimum";
+                }
+                return values.maximum && value > values.maximum
+                    ? "Minimum must not be larger than maximum"
+                    : null;
+            },
+            maximum: (value, values) => {
+                if (parseInt(values.qTypeId) !== SliderData.id) {
+                    return null;
+                }
+                if (!value) {
+                    return "Provide maximum";
+                }
+                return values.minimum && value < values.minimum
+                    ? "Maximum must not be smaller than the minimum"
+                    : null;
+            },
+            sliderAnswer: (value, values) => {
+                if (parseInt(values.qTypeId) !== SliderData.id) {
+                    return null;
+                }
+                if (!value) {
+                    return "Provide answer";
+                }
+                if (values.minimum && values.minimum > value) {
+                    return "Answer must not be smaller than the minimum.";
+                }
+
+                if (values.maximum && values.maximum < value) {
+                    return "Answer must not be larger than the maximum.";
+                }
+                return values.minimum &&
+                    values.interval &&
+                    (value - values.minimum) % values.interval !== 0
+                    ? "Answer cannot be hit with the given interval"
+                    : null;
+            },
+            options: {
+                value: (value, values, path) => {
+                    if (
+                        !value &&
+                        (parseInt(values.qTypeId) === MultipleChoiceData.id ||
+                            parseInt(values.qTypeId) ===
+                                MultipleChoicePlusAudioData.id)
+                    ) {
+                        return "Provide option";
+                    }
+
+                    return values.options.findIndex((op, i) => {
+                        return (
+                            op.value === value && path !== `options.${i}.value`
+                        );
+                    }) >= 0
+                        ? "Duplicated Choice"
+                        : null;
+                },
+            },
         },
     });
 
     const handelSubmit = useCallback(async () => {
         const data = JSON.stringify(form.values);
-        var questionCreateDto: QuestionCreateDto = {
-            qAudio: "nothing",
-            qImage: "nothing",
-            qStatement: form.values.qStatement,
-            qTime: parseInt(form.values.qTime),
-            qCategoryId: parseInt(form.values.qCategoryId),
-            qDifficultyId: parseInt(form.values.qDifficultyId),
-            qTypeId: parseInt(form.values.qTypeId),
-            questionDetailCreateDtos: form.values.options.map((op) => {
-                var dTypes = ["option"];
-                if (op.isAnswer) {
-                    dTypes = dTypes.concat(["answer"]);
-                }
-                return {
-                    qDetailDesc: op.value,
-                    detailTypes: dTypes,
-                };
-            }),
-        };
+        if (
+            form.values.options.length === 0 &&
+            (parseInt(form.values.qTypeId) === MultipleChoiceData.id ||
+                parseInt(form.values.qTypeId) ===
+                    MultipleChoicePlusAudioData.id ||
+                parseInt(form.values.qTypeId) === PuzzleData.id)
+        ) {
+            form.setFieldError("options", "Provide options");
+            return;
+        }
+        const questionCreateDto = mapData(form);
         console.log(questionCreateDto);
         const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
             method: "POST",
@@ -112,7 +191,11 @@ export default function Page() {
                 "Content-Type": "application/json",
             },
         });
+
         console.log(res);
+        if (res.status === 201) {
+            router.push("/questions");
+        }
     }, [form.values]);
 
     return (

@@ -9,8 +9,8 @@ export default function TypeAnswerQuestionDetails({
 }) {
     return (
         <div>
-            <InputLabel>Short Answer</InputLabel>
             <TextInput
+                label="Short Anwer"
                 variant="filled"
                 withAsterisk
                 {...form.getInputProps("typeAnswer")}

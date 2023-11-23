@@ -1,8 +1,15 @@
 "use client";
 
 import { QuestionCreateValues } from "@/lib/definitions";
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { Button, Checkbox, Input, InputLabel, Text } from "@mantine/core";
+import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+    Button,
+    Checkbox,
+    Input,
+    InputLabel,
+    Text,
+    Tooltip,
+} from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
 import styles from "./MultipleChoice.module.css";
@@ -27,19 +34,6 @@ export default function MultipleChoiceQuestionDetail({
                 style={{
                     flex: 1,
                 }}
-                error={() => (
-                    <div className="text-sm text-[var(--error)]">
-                        {form.values.options.findIndex((op, i) => {
-                            return (
-                                op.value === item.value &&
-                                index !== i &&
-                                index > i
-                            );
-                        }) >= 0
-                            ? "Duplicated Choice"
-                            : null}
-                    </div>
-                )}
                 leftSection={
                     <Checkbox
                         size="sm"
@@ -49,7 +43,7 @@ export default function MultipleChoiceQuestionDetail({
                         {...form.getInputProps(`options.${index}.isAnswer`)}
                     />
                 }
-                rightSectionWidth={120}
+                rightSectionWidth={item.isAnswer ? 120 : 40}
                 rightSection={
                     item.isAnswer ? (
                         <Text
@@ -61,19 +55,23 @@ export default function MultipleChoiceQuestionDetail({
                             Correct Answer
                         </Text>
                     ) : (
-                        ""
+                        <Tooltip label="Remove">
+                            <TrashIcon
+                                className="w-6 cursor-pointer"
+                                onClick={() =>
+                                    form.removeListItem("options", index)
+                                }
+                            />
+                        </Tooltip>
                     )
                 }
                 leftSectionPointerEvents="visible"
+                rightSectionPointerEvents="visible"
                 {...form.getInputProps(`options.${index}.value`)}
             />
-            <div className="text-sm text-[var(--error)]">
-                {form.values.options.findIndex((op, i) => {
-                    return op.value === item.value && index !== i && index > i;
-                }) >= 0
-                    ? "Duplicated Choice"
-                    : null}
-            </div>
+            <Input.Error>
+                {form.getInputProps(`options.${index}.value`).error}
+            </Input.Error>
         </div>
     ));
 
@@ -97,6 +95,7 @@ export default function MultipleChoiceQuestionDetail({
                     <PlusCircleIcon className="w-6" />
                 </Button>
             </div>
+            <Input.Error>{form.getInputProps("options").error}</Input.Error>
         </div>
     );
 }

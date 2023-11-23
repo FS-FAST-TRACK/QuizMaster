@@ -35,7 +35,7 @@ export default function SliderQuestionDetails({
                 label="Answer"
                 withAsterisk
                 hideControls
-                {...form.getInputProps("answer")}
+                {...form.getInputProps("sliderAnswer")}
             />
         </div>
     );
