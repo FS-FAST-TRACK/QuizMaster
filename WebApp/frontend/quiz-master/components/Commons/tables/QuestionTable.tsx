@@ -4,7 +4,7 @@ import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Table } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function QuestionTable({
     questions,
@@ -16,6 +16,9 @@ export default function QuestionTable({
     const { getQuestionTypeDescription } = useQuestionTypesStore();
 
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    useEffect(() => {
+        setSelectedRows([]);
+    }, [questions]);
 
     const rows = questions.map((question) => (
         <Table.Tr
