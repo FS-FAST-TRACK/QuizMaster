@@ -3,8 +3,11 @@ import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Box, Checkbox, Loader, Table } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Box, Checkbox, Loader, Table, Text } from "@mantine/core";
+import { useCallback, useEffect, useState } from "react";
+import QuesitonAction from "../popover/QuestionAction";
+import PromptModal from "../modals/PromptModal";
+import QuesitonCard from "../cards/QuestionCard";
 
 export default function QuestionTable({
     questions,
@@ -15,10 +18,20 @@ export default function QuestionTable({
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
     const { getQuestionTypeDescription } = useQuestionTypesStore();
 
+    const [deleteQuestion, setDeleteQuestion] = useState<Question>();
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     useEffect(() => {
         setSelectedRows([]);
     }, [questions]);
+
+    const handelDelete = useCallback(async () => {
+        const res = await fetch(
+            `${process.env.QUIZMASTER_QUIZ}/api/question/${deleteQuestion?.id}`,
+            {
+                method: "DELETE",
+            }
+        );
+    }, [deleteQuestion]);
 
     const rows = questions.map((question) => (
         <Table.Tr
@@ -54,7 +67,12 @@ export default function QuestionTable({
                 {getQuestionDifficultyDescription(question.qDifficultyId)}
             </Table.Td>
             <Table.Td>
-                <EllipsisVerticalIcon className="w-6" />
+                <QuesitonAction
+                    questionId={question.id}
+                    onDelete={() => {
+                        setDeleteQuestion(question);
+                    }}
+                />
             </Table.Td>
         </Table.Tr>
     ));
@@ -102,6 +120,21 @@ export default function QuestionTable({
                     )}
                 </Table.Tbody>
             </Table>
+            <PromptModal
+                body={
+                    <div>
+                        <Text>Are you sure want to delete.</Text>
+                        <QuesitonCard question={deleteQuestion} />
+                    </div>
+                }
+                action="Delete"
+                onConfirm={handelDelete}
+                opened={deleteQuestion ? true : false}
+                onClose={() => {
+                    setDeleteQuestion(undefined);
+                }}
+                title="Delete Question"
+            />
         </div>
     );
 }
