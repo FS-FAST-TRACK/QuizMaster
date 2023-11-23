@@ -77,8 +77,8 @@ export type QuestionResourceParameter = {
 };
 
 export type PaginationMetadata = {
-    TotalCount: number;
-    PageSize: number;
-    CurrentPage: number;
-    TotalPages: number;
+    totalCount: number;
+    pageSize: number;
+    currentPage: number;
+    totalPages: number;
 };

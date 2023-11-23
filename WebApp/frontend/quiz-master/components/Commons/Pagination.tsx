@@ -30,7 +30,7 @@ export default function CustomPagination({
                 />
             </div>
             <Pagination
-                total={metadata?.TotalPages || 1}
+                total={metadata?.totalPages || 1}
                 siblings={1}
                 {...form.getInputProps("pageNumber")}
             />
