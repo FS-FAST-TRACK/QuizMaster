@@ -1,16 +1,145 @@
 import { QuestionCreateValues } from "@/lib/definitions";
-import { InputLabel } from "@mantine/core";
+import {
+    Bars4Icon,
+    PlusCircleIcon,
+    TrashIcon,
+} from "@heroicons/react/24/outline";
+import { Button, Input, InputLabel, Text, Tooltip } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
+import { useState } from "react";
+import {
+    DragDropContext,
+    Draggable,
+    DraggableProvided,
+    DraggableProvidedDraggableProps,
+    DraggingStyle,
+    DropResult,
+    Droppable,
+    NotDraggingStyle,
+} from "react-beautiful-dnd";
+
+const getListStyle = (isDraggingOver: boolean) => ({
+    background: isDraggingOver ? "var(--primary-100)" : "white",
+    padding: 8,
+    width: "100%",
+    borderRadius: 8,
+});
 
 export default function PuzzleQuestionDetails({
     form,
 }: {
     form: UseFormReturnType<QuestionCreateValues>;
 }) {
+    const [columns, setColumns] = useState({
+        [1]: {
+            title: "To-do",
+            items: [],
+        },
+    });
+
+    const onDragEnd = (result: DropResult) => {
+        // dropped outside the list'
+
+        if (!result.destination) {
+            return;
+        }
+
+        form.reorderListItem("options", {
+            from: result.source.index,
+            to: result.destination.index,
+        });
+        console.log(result);
+    };
     return (
-        <div>
+        <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
-            <div draggable>helo</div>
+            <DragDropContext onDragEnd={(result) => onDragEnd(result)}>
+                <Droppable droppableId="droppable">
+                    {(provided, snapshot) => (
+                        <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                            style={getListStyle(snapshot.isDraggingOver)}
+                        >
+                            {form.values.options.map((option, index) => (
+                                <Draggable
+                                    key={index}
+                                    draggableId={index + "id"}
+                                    index={index}
+                                >
+                                    {(provided, snapshot) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            style={{
+                                                userSelect: "none",
+                                                margin: `0 0 8px 0`,
+                                                ...provided.draggableProps
+                                                    .style,
+                                            }}
+                                        >
+                                            <Input
+                                                size="lg"
+                                                leftSection={
+                                                    <Bars4Icon className="w-6" />
+                                                }
+                                                rightSectionWidth={
+                                                    option.isAnswer ? 120 : 40
+                                                }
+                                                rightSection={
+                                                    option.isAnswer ? (
+                                                        <Text
+                                                            size="sm"
+                                                            style={{
+                                                                color: "var(--primary)",
+                                                            }}
+                                                        >
+                                                            Correct Answer
+                                                        </Text>
+                                                    ) : (
+                                                        <Tooltip label="Remove">
+                                                            <TrashIcon
+                                                                className="w-6 cursor-pointer"
+                                                                onClick={() =>
+                                                                    form.removeListItem(
+                                                                        "options",
+                                                                        index
+                                                                    )
+                                                                }
+                                                            />
+                                                        </Tooltip>
+                                                    )
+                                                }
+                                                leftSectionPointerEvents="visible"
+                                                rightSectionPointerEvents="visible"
+                                                {...form.getInputProps(
+                                                    `options.${index}.value`
+                                                )}
+                                            />
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+                <Button
+                    variant="outline"
+                    color="gray"
+                    size="lg"
+                    className="border-4 outline-2 outline-gray-800 w-full"
+                    onClick={() =>
+                        form.insertListItem("options", {
+                            value: "",
+                            isAnswer: false,
+                        })
+                    }
+                >
+                    <PlusCircleIcon className="w-6" />
+                </Button>
+            </DragDropContext>
         </div>
     );
 }
