@@ -214,6 +214,7 @@ export default function Page() {
                     console.log(values);
                     handelSubmit();
                 })}
+                onReset={() => form.reset()}
             >
                 <LoadingOverlay
                     visible={visible}
@@ -309,7 +310,7 @@ export default function Page() {
                 <QuestionDetails form={form} />
 
                 <div className="flex justify-end">
-                    <Button variant="transparent" color="gray">
+                    <Button variant="transparent" color="gray" type="reset">
                         Cancel
                     </Button>
                     <Button variant="filled" color="green" type="submit">
