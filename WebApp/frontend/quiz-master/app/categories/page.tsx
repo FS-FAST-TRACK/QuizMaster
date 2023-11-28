@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
+import CreateCategoryModal from "@/components/Commons/modals/CreateCategoryModal";
 import CategoriesTable from "@/components/Commons/tables/CategoriesTable";
 import {
     PaginationMetadata,
@@ -9,7 +10,7 @@ import {
 } from "@/lib/definitions";
 import { fetchCategories } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { Anchor, Breadcrumbs } from "@mantine/core";
+import { Anchor, Breadcrumbs, Button } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -24,6 +25,7 @@ const items = [
 ));
 
 export default function Page() {
+    const [createCategory, setCreateCategory] = useState(false);
     const [categories, setCategories] = useState<QuestionCategory[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [paginationMetadata, setPaginationMetadata] = useState<
@@ -53,13 +55,14 @@ export default function Page() {
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
             <div className="flex">
-                <Link
-                    href="questions/create-question"
+                <Button
                     className="flex h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
+                    color="green"
+                    onClick={() => setCreateCategory(true)}
                 >
                     <PlusIcon className="w-6" />
                     <p className="block">Create Category</p>
-                </Link>
+                </Button>
                 <div className="grow"></div>
 
                 <input
@@ -77,6 +80,10 @@ export default function Page() {
             </div>
             <CategoriesTable categories={categories} />
             <Pagination form={form} metadata={paginationMetadata} />
+            <CreateCategoryModal
+                opened={createCategory}
+                onClose={() => setCreateCategory(false)}
+            />
         </div>
     );
 }
