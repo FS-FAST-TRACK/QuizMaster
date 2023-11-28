@@ -17,6 +17,7 @@ import {
     Droppable,
     NotDraggingStyle,
 } from "react-beautiful-dnd";
+import styles from "@/styles/input.module.css";
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "var(--primary-100)" : "white",
@@ -30,13 +31,6 @@ export default function PuzzleQuestionDetails({
 }: {
     form: UseFormReturnType<QuestionCreateValues>;
 }) {
-    const [columns, setColumns] = useState({
-        [1]: {
-            title: "To-do",
-            items: [],
-        },
-    });
-
     const onDragEnd = (result: DropResult) => {
         // dropped outside the list'
 
@@ -48,13 +42,12 @@ export default function PuzzleQuestionDetails({
             from: result.source.index,
             to: result.destination.index,
         });
-        console.log(result);
     };
     return (
         <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
             <DragDropContext onDragEnd={(result) => onDragEnd(result)}>
-                <Droppable droppableId="droppable">
+                <Droppable droppableId="droppableID">
                     {(provided, snapshot) => (
                         <div
                             {...provided.droppableProps}
@@ -84,32 +77,20 @@ export default function PuzzleQuestionDetails({
                                                 leftSection={
                                                     <Bars4Icon className="w-6" />
                                                 }
-                                                rightSectionWidth={
-                                                    option.isAnswer ? 120 : 40
-                                                }
+                                                classNames={styles}
+                                                rightSectionWidth={40}
                                                 rightSection={
-                                                    option.isAnswer ? (
-                                                        <Text
-                                                            size="sm"
-                                                            style={{
-                                                                color: "var(--primary)",
-                                                            }}
-                                                        >
-                                                            Correct Answer
-                                                        </Text>
-                                                    ) : (
-                                                        <Tooltip label="Remove">
-                                                            <TrashIcon
-                                                                className="w-6 cursor-pointer"
-                                                                onClick={() =>
-                                                                    form.removeListItem(
-                                                                        "options",
-                                                                        index
-                                                                    )
-                                                                }
-                                                            />
-                                                        </Tooltip>
-                                                    )
+                                                    <Tooltip label="Remove">
+                                                        <TrashIcon
+                                                            className="w-6 cursor-pointer"
+                                                            onClick={() =>
+                                                                form.removeListItem(
+                                                                    "options",
+                                                                    index
+                                                                )
+                                                            }
+                                                        />
+                                                    </Tooltip>
                                                 }
                                                 leftSectionPointerEvents="visible"
                                                 rightSectionPointerEvents="visible"

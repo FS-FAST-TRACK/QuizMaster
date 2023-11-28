@@ -30,6 +30,7 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import styles from "@/styles/input.module.css";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -225,6 +226,7 @@ export default function Page() {
                     label="Statement"
                     variant="filled"
                     withAsterisk
+                    classNames={styles}
                     {...form.getInputProps("qStatement")}
                 />
                 <div className="flex flex-col md:flex-row gap-5 md:gap-10 [&>*]:grow">
@@ -241,6 +243,7 @@ export default function Page() {
                         {...form.getInputProps("qCategoryId")}
                         clearable
                         required
+                        classNames={styles}
                     />
                     <Select
                         variant="filled"
@@ -252,6 +255,7 @@ export default function Page() {
                                 label: dif.qDifficultyDesc,
                             };
                         })}
+                        classNames={styles}
                         {...form.getInputProps("qDifficultyId")}
                         clearable
                         required
@@ -267,6 +271,7 @@ export default function Page() {
                             };
                         })}
                         {...form.getInputProps("qTypeId")}
+                        classNames={styles}
                         clearable
                         required
                     />
@@ -281,6 +286,7 @@ export default function Page() {
                     {...form.getInputProps("qTime")}
                     clearable
                     required
+                    classNames={styles}
                 />
 
                 <div>
