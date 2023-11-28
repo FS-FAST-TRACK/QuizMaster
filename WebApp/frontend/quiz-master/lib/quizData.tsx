@@ -66,6 +66,7 @@ export async function fetchDifficulties() {
             .then((data) => {
                 var difficulties: QuestionDifficulty[];
                 difficulties = data;
+                console.log(difficulties);
                 return difficulties;
             });
         return data;
