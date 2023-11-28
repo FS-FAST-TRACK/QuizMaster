@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         fetchCategories().then((res) => {
-            setQuestionCategories(res);
+            setQuestionCategories(res.data);
         });
         fetchDifficulties().then((res) => {
             setQuestionDifficulties(res);
