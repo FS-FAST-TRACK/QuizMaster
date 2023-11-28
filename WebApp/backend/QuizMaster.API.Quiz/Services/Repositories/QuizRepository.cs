@@ -134,16 +134,39 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return await _context.Categories.Where(c => c.ActiveData).ToListAsync();
 		}
 
-		public async Task<IEnumerable<CategoryDto>> GetAllCategoriesWithQuestionCountAsync()
+		public async Task<PagedList<CategoryDto>> GetAllCategoriesAsync(CategoryResourceParameter resourceParameter)
 		{
-			return await _context.Categories.Where(c => c.ActiveData).Select(c => new CategoryDto
+			var collection = _context.Categories as IQueryable<QuestionCategory>;
+			if (resourceParameter.IsOnlyActiveData)
+			{
+				collection = collection.Where(c => c.ActiveData);
+			}
+			
+
+			if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
+			{
+				var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
+				collection = collection
+					.Where(c =>
+					c.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
+					
+					);
+
+			}
+			var collection2 = collection.Select(c => new CategoryDto
 			{
 				Id = c.Id,
 				QCategoryDesc = c.QCategoryDesc,
-				QuestionCounts = _context.Questions.Where(q => q.QCategoryId == c.Id).Count(),
 				DateCreated = c.DateCreated,
 				DateUpdated = c.DateUpdated,
-			}).ToListAsync();
+				QuestionCounts = _context.Questions.Where(q => q.ActiveData && q.QCategoryId == c.Id).Count()
+			})as IQueryable<CategoryDto>;
+
+
+			return await PagedList<CategoryDto>.CreateAsync(collection2,
+				resourceParameter.PageNumber,
+				resourceParameter.PageSize);
+
 		}
 
 		public async Task<QuestionCategory?> GetCategoryAsync(int id)
