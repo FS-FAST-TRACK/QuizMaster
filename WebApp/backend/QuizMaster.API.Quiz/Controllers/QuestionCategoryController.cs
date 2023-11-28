@@ -28,8 +28,8 @@ namespace QuizMaster.API.Quiz.Controllers
 		public async Task<ActionResult<IEnumerable<CategoryDto>>> Get()
 		{
 			// Get all active categories asynchronously
-			var categories = await _quizRepository.GetAllCategoriesAsync();
-			return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categories));
+			var categories = await _quizRepository.GetAllCategoriesWithQuestionCountAsync();
+			return Ok(categories);
 		}
 
 		// GET api/question/category/5

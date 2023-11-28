@@ -6,5 +6,6 @@ namespace QuizMaster.API.Quiz.Models
 	{
 		public int Id { get; set; }
 		public string QCategoryDesc { get; set; }
+		public int QuestionCounts { get; set; }
 	}
 }

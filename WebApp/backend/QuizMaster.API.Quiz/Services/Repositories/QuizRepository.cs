@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Quiz.DbContexts;
+using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -131,6 +132,16 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		public async Task<IEnumerable<QuestionCategory>> GetAllCategoriesAsync()
 		{
 			return await _context.Categories.Where(c => c.ActiveData).ToListAsync();
+		}
+
+		public async Task<IEnumerable<CategoryDto>> GetAllCategoriesWithQuestionCountAsync()
+		{
+			return await _context.Categories.Where(c => c.ActiveData).Select(c => new CategoryDto
+			{
+				Id = c.Id,
+				QCategoryDesc = c.QCategoryDesc,
+				QuestionCounts = _context.Questions.Where(q => q.QCategoryId == c.Id).Count(),
+			}).ToListAsync();
 		}
 
 		public async Task<QuestionCategory?> GetCategoryAsync(int id)

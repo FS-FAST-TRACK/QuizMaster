@@ -1,4 +1,5 @@
-﻿using QuizMaster.API.Quiz.ResourceParameters;
+﻿using QuizMaster.API.Quiz.Models;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Helpers.Quiz;
 
@@ -15,6 +16,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 
 
 		Task<IEnumerable<QuestionCategory>> GetAllCategoriesAsync();
+		Task<IEnumerable<CategoryDto>> GetAllCategoriesWithQuestionCountAsync();
 		Task<QuestionCategory?> GetCategoryAsync(int id);
 		Task<QuestionCategory?> GetCategoryAsync(string description);
 		Task<bool> AddCategoryAsync(QuestionCategory category);
