@@ -141,6 +141,8 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				Id = c.Id,
 				QCategoryDesc = c.QCategoryDesc,
 				QuestionCounts = _context.Questions.Where(q => q.QCategoryId == c.Id).Count(),
+				DateCreated = c.DateCreated,
+				DateUpdated = c.DateUpdated,
 			}).ToListAsync();
 		}
 
