@@ -66,9 +66,13 @@ export async function fetchDifficulties() {
             .then((data) => {
                 var difficulties: QuestionDifficulty[];
                 difficulties = data;
-                console.log(difficulties);
+                difficulties.forEach((dif) => {
+                    dif.dateCreated = new Date(dif.dateCreated);
+                    dif.dateUpdated = new Date(dif.dateUpdated);
+                });
                 return difficulties;
             });
+            console.log(data);
         return data;
     } catch (error) {
         console.error("Database Error:", error);

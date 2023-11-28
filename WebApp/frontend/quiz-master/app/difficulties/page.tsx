@@ -4,7 +4,7 @@ import Pagination from "@/components/Commons/Pagination";
 import DifficultiesTable from "@/components/Commons/tables/DifficultiesTable";
 import {
     PaginationMetadata,
-    QuestionCategory,
+    QuestionDifficulty,
     QuestionResourceParameter,
 } from "@/lib/definitions";
 import { fetchDifficulties } from "@/lib/quizData";
@@ -24,7 +24,7 @@ const items = [
 ));
 
 export default function Page() {
-    const [categories, setCategories] = useState<QuestionCategory[]>([]);
+    const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
@@ -41,7 +41,7 @@ export default function Page() {
     useEffect(() => {
         var questionsFetch = fetchDifficulties();
         questionsFetch.then((res) => {
-            setCategories(res);
+            setDifficulties(res);
         });
     }, [form.values]);
 
@@ -75,7 +75,7 @@ export default function Page() {
                     }}
                 />
             </div>
-            <DifficultiesTable categories={categories} />
+            <DifficultiesTable difficulties={difficulties} />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>
     );

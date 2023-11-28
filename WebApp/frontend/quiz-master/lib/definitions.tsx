@@ -32,6 +32,8 @@ export type QuestionCategory = {
 export type QuestionDifficulty = {
     id: number;
     qDifficultyDesc: string;
+    dateCreated: Date;
+    dateUpdated: Date;
 };
 
 export type QuestionType = {
