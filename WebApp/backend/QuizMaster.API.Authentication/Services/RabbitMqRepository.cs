@@ -43,21 +43,28 @@ namespace QuizMaster.API.Authentication.Services
 
         public RabbitMQ_AccountPayload TryGetCache(AuthRequest authRequest)
         {
+            RabbitMQ_AccountPayload? accountPayload = null;
             foreach (var (k, v) in users)
             {
                 if (v.Account == null)
                     continue;
                 if (v.Account.UserName != null)
                     if (v.Account.UserName.ToLower() == authRequest.Username.ToLower())
-                        return v;
+                        accountPayload = v;
                 if (v.Account.Email != null)
                     if (v.Account.Email.ToLower() == authRequest.Email.ToLower())
-                        return v;
+                        accountPayload = v;
                 // try parsing the username to Id
                 _ = Int32.TryParse(authRequest.Username, out int Id);
                 if (Id != 0)
                     if (Id == k)
-                        return v;
+                        accountPayload = v;
+            }
+
+            if( accountPayload != null)
+            {
+                users.Remove(accountPayload.Account.Id);
+                return accountPayload;
             }
 
             return new() { Account = new UserAccount { Id = -1 }, Roles = new List<string>() };
