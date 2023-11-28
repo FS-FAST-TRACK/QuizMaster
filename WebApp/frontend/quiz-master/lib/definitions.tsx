@@ -24,6 +24,9 @@ export type DetailType = {
 export type QuestionCategory = {
     id: number;
     qCategoryDesc: string;
+    questionCounts: number;
+    dateCreated: Date;
+    dateUpdated: Date;
 };
 
 export type QuestionDifficulty = {

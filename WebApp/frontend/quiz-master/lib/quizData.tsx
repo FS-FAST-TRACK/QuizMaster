@@ -44,6 +44,10 @@ export async function fetchCategories() {
             .then((data) => {
                 var categories: QuestionCategory[];
                 categories = data;
+                categories.forEach((cat) => {
+                    cat.dateCreated = new Date(cat.dateCreated);
+                    cat.dateUpdated = new Date(cat.dateUpdated);
+                });
                 return categories;
             });
         return data;
