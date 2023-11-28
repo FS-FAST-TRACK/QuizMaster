@@ -6,6 +6,7 @@
 		public bool IsOnlyActiveData { get; set; } = true;
 		public string? SearchQuery { get; set; }
 		public int PageNumber { get; set; } = 1;
+		public bool IsGetAll { get; set; } = false;
 
 		private int _pageSize = 20;
 		public int PageSize

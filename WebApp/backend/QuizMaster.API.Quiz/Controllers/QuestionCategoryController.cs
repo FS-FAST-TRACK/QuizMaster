@@ -30,6 +30,12 @@ namespace QuizMaster.API.Quiz.Controllers
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<CategoryDto>>> Get([FromQuery] CategoryResourceParameter resourceParameter)
 		{
+			if (resourceParameter.IsGetAll)
+			{
+				var categoriesFromDb = await _quizRepository.GetAllCategoriesAsync();
+
+				return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categoriesFromDb));
+			}
 			// Get all active categories asynchronously
 			var categories = await _quizRepository.GetAllCategoriesAsync(resourceParameter);
 

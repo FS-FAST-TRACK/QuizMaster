@@ -4,6 +4,7 @@ import Pagination from "@/components/Commons/Pagination";
 import CreateCategoryModal from "@/components/Commons/modals/CreateCategoryModal";
 import CategoriesTable from "@/components/Commons/tables/CategoriesTable";
 import {
+    CategoryResourceParameter,
     PaginationMetadata,
     QuestionCategory,
     QuestionResourceParameter,
@@ -32,7 +33,7 @@ export default function Page() {
         PaginationMetadata | undefined
     >();
 
-    const form = useForm<QuestionResourceParameter>({
+    const form = useForm<CategoryResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",
@@ -41,9 +42,10 @@ export default function Page() {
     });
 
     useEffect(() => {
-        var questionsFetch = fetchCategories();
-        questionsFetch.then((res) => {
-            setCategories(res);
+        var categoriesFetch = fetchCategories(form.values);
+        categoriesFetch.then((res) => {
+            setCategories(res.data);
+            setPaginationMetadata(res.paginationMetadata);
         });
     }, [form.values]);
 
