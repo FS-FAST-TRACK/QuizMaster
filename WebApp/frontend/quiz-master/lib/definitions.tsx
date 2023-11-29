@@ -34,6 +34,7 @@ export type QuestionDifficulty = {
     qDifficultyDesc: string;
     dateCreated: Date;
     dateUpdated: Date;
+    questionCounts: number;
 };
 
 export type QuestionType = {
@@ -81,6 +82,12 @@ export type QuestionResourceParameter = {
     pageNumber: number;
 };
 export type CategoryResourceParameter = {
+    pageSize: string;
+    searchQuery?: string;
+    pageNumber: number;
+    isGetAll?: boolean;
+};
+export type DifficultyResourceParameter = {
     pageSize: string;
     searchQuery?: string;
     pageNumber: number;

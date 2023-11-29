@@ -41,6 +41,7 @@ export default function DifficultiesTable({
             <Table.Td>{difficulty.qDifficultyDesc}</Table.Td>
             <Table.Td>{difficulty.dateCreated.toDateString()}</Table.Td>
             <Table.Td>{difficulty.dateUpdated.toDateString()}</Table.Td>
+            <Table.Td>{difficulty.questionCounts}</Table.Td>
             <Table.Td>
                 <div className="cursor-pointer flex items-center justify-center aspect-square">
                     <EllipsisVerticalIcon className="w-6" />
@@ -75,6 +76,7 @@ export default function DifficultiesTable({
                         <Table.Th>Difficulty</Table.Th>
                         <Table.Th>Created on</Table.Th>
                         <Table.Th>Updated on</Table.Th>
+                        <Table.Th>Questions</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>

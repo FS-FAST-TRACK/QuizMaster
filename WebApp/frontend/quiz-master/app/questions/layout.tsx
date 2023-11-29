@@ -18,7 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             setQuestionCategories(res.data);
         });
         fetchDifficulties().then((res) => {
-            setQuestionDifficulties(res);
+            setQuestionDifficulties(res.data);
         });
         fetchTypes().then((res) => {
             setQuestionTypes(res);

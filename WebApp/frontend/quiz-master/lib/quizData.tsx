@@ -6,6 +6,7 @@ import {
     QuestionResourceParameter,
     QuestionType,
     CategoryResourceParameter,
+    DifficultyResourceParameter,
 } from "./definitions";
 
 export async function fetchQuestions({
@@ -67,21 +68,29 @@ export async function fetchCategories(
     }
 }
 
-export async function fetchDifficulties() {
+export async function fetchDifficulties(difficultyResourceParameter?: DifficultyResourceParameter ) {
     try {
-        const data = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`
-        )
-            .then((res) => res.json())
-            .then((data) => {
-                var difficulties: QuestionDifficulty[];
-                difficulties = data;
-                difficulties.forEach((dif) => {
-                    dif.dateCreated = new Date(dif.dateCreated);
-                    dif.dateUpdated = new Date(dif.dateUpdated);
-                });
-                return difficulties;
+        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`;
+        if (difficultyResourceParameter) {
+            apiUrl = apiUrl.concat(
+                `?pageSize=${difficultyResourceParameter.pageSize}&pageNumber=${difficultyResourceParameter.pageNumber}&searchQuery=${difficultyResourceParameter.searchQuery}`
+            );
+        }
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionDifficulty[];
+            var paginationMetadata: PaginationMetadata;
+            paginationMetadata = JSON.parse(
+                res.headers.get("x-pagination") || ""
+            );
+            data = await res.json();
+            data.forEach((dif) => {
+                dif.dateCreated = new Date(dif.dateCreated);
+                dif.dateUpdated = new Date(dif.dateUpdated);
             });
+
+            return { data, paginationMetadata };
+        });
+
         console.log(data);
         return data;
     } catch (error) {

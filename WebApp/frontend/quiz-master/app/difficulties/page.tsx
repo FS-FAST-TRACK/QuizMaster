@@ -41,9 +41,10 @@ export default function Page() {
     });
 
     useEffect(() => {
-        var questionsFetch = fetchDifficulties();
+        var questionsFetch = fetchDifficulties(form.values);
         questionsFetch.then((res) => {
-            setDifficulties(res);
+            setDifficulties(res.data);
+            setPaginationMetadata(res.paginationMetadata);
         });
     }, [form.values, createDifficulty]);
 
