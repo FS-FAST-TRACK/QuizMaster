@@ -22,7 +22,10 @@ namespace QuizMaster.API.Quiz.Tests
 			var questionCategoryController = new QuestionCategoryController(quizTestDataRepository, mapper);
 
 			// Act
-			var result =await  questionCategoryController.Get();
+			var result =await  questionCategoryController.Get(new ResourceParameters.CategoryResourceParameter
+			{
+
+			});
 
 			// Assert
 			Assert.NotNull(result.Result);

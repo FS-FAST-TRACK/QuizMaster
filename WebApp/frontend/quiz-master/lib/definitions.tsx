@@ -80,7 +80,12 @@ export type QuestionResourceParameter = {
     searchQuery?: string;
     pageNumber: number;
 };
-
+export type CategoryResourceParameter = {
+    pageSize: string;
+    searchQuery?: string;
+    pageNumber: number;
+    isGetAll?: boolean;
+};
 export type PaginationMetadata = {
     totalCount: number;
     pageSize: number;

@@ -5,6 +5,7 @@ import {
     QuestionDifficulty,
     QuestionResourceParameter,
     QuestionType,
+    CategoryResourceParameter,
 } from "./definitions";
 
 export async function fetchQuestions({
@@ -35,21 +36,30 @@ export async function fetchQuestions({
     }
 }
 
-export async function fetchCategories() {
+export async function fetchCategories(
+    questionResourceParameter?: CategoryResourceParameter
+) {
     try {
-        const data = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/category`
-        )
-            .then((res) => res.json())
-            .then((data) => {
-                var categories: QuestionCategory[];
-                categories = data;
-                categories.forEach((cat) => {
-                    cat.dateCreated = new Date(cat.dateCreated);
-                    cat.dateUpdated = new Date(cat.dateUpdated);
-                });
-                return categories;
+        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/category`;
+        if (questionResourceParameter) {
+            apiUrl = apiUrl.concat(
+                `?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}&isGetAll=${questionResourceParameter.isGetAll}`
+            );
+        }
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionCategory[];
+            var paginationMetadata: PaginationMetadata;
+            paginationMetadata = JSON.parse(
+                res.headers.get("x-pagination") || ""
+            );
+            data = await res.json();
+            data.forEach((cat) => {
+                cat.dateCreated = new Date(cat.dateCreated);
+                cat.dateUpdated = new Date(cat.dateUpdated);
             });
+
+            return { data, paginationMetadata };
+        });
         return data;
     } catch (error) {
         console.error("Database Error:", error);
@@ -72,7 +82,7 @@ export async function fetchDifficulties() {
                 });
                 return difficulties;
             });
-            console.log(data);
+        console.log(data);
         return data;
     } catch (error) {
         console.error("Database Error:", error);

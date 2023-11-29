@@ -16,7 +16,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 
 
 		Task<IEnumerable<QuestionCategory>> GetAllCategoriesAsync();
-		Task<IEnumerable<CategoryDto>> GetAllCategoriesWithQuestionCountAsync();
+		Task<PagedList<CategoryDto>> GetAllCategoriesAsync(CategoryResourceParameter resourceParameter);
 		Task<QuestionCategory?> GetCategoryAsync(int id);
 		Task<QuestionCategory?> GetCategoryAsync(string description);
 		Task<bool> AddCategoryAsync(QuestionCategory category);
