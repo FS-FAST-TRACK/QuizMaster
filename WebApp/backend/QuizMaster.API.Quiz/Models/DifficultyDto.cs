@@ -12,5 +12,7 @@ namespace QuizMaster.API.Quiz.Models
         public DateTime DateCreated { get; set; }
 
         public DateTime? DateUpdated { get; set; }
+
+		public int QuestionCounts { get; set; }
     }
 }

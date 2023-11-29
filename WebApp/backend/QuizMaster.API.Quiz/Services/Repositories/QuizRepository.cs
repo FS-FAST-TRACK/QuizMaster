@@ -216,7 +216,42 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return await _context.Difficulties.Where(d => d.ActiveData).ToListAsync();
 		}
 
-		public async Task<QuestionDifficulty?> GetDifficultyAsync(int id)
+        public async Task<PagedList<DifficultyDto>> GetAllDifficultiesAsync(DifficultyResourceParameter resourceParameter)
+		{
+            var collection = _context.Difficulties as IQueryable<QuestionDifficulty>;
+            if (resourceParameter.IsOnlyActiveData)
+            {
+                collection = collection.Where(c => c.ActiveData);
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
+            {
+                var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
+                collection = collection
+                    .Where(c =>
+                    c.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
+
+                    );
+
+            }
+            var collection2 = collection.Select(c => new DifficultyDto
+            {
+                Id = c.Id,
+                QDifficultyDesc = c.QDifficultyDesc,
+                DateCreated = c.DateCreated,
+                DateUpdated = c.DateUpdated,
+                QuestionCounts = _context.Questions.Where(q => q.ActiveData && q.QCategoryId == c.Id).Count()
+            }) as IQueryable<DifficultyDto>;
+
+
+            return await PagedList<DifficultyDto>.CreateAsync(collection2,
+                resourceParameter.PageNumber,
+                resourceParameter.PageSize);
+
+        }
+
+        public async Task<QuestionDifficulty?> GetDifficultyAsync(int id)
 		{
 			return await _context.Difficulties.Where(d => d.Id == id).FirstOrDefaultAsync();
 		}
