@@ -32,6 +32,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
+import { notifications } from '@mantine/notifications';
+import notificationStyles from './page.module.css';
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -50,7 +52,7 @@ export default function Page() {
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
     const router = useRouter();
-    const [visible, { toggle }] = useDisclosure(false);
+    const [visible, { toggle, close }] = useDisclosure(false);
     const [fileImage, setFileImage] = useState<File | null>(null);
     const [fileAudio, setFileAudio] = useState<File | null>(null);
 
@@ -228,7 +230,7 @@ export default function Page() {
             }
         }
 
-        toggle();
+        toggle(); 
         const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
             method: "POST",
             mode: "cors",
@@ -238,9 +240,18 @@ export default function Page() {
             },
         });
 
-        console.log(res);
         if (res.status === 201) {
             router.push("/questions");
+        }
+        else {
+            console.log(res);
+            close();
+            notifications.show({
+                color: 'red',
+                title: 'Question with the same type already exist.',
+                message: 'Duplicate Data',
+                classNames: notificationStyles
+              })
         }
     }, [form.values, fileAudio, fileImage]);
 

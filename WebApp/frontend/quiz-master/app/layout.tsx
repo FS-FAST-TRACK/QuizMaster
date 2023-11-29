@@ -11,6 +11,7 @@ import {
 import { AuthProvider } from "./providers";
 import { getServerSession } from "next-auth";
 import toast, { Toaster } from "react-hot-toast";
+import { Notifications } from "@mantine/notifications";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default async function RootLayout({
             <body className={inter.className}>
                 <MantineProvider>
                     <Toaster />
+                    <Notifications className="absolute top-1 right-1" position="top-right"/>
                     <AuthProvider session={session}>
                         {children}
                     </AuthProvider>{" "}
