@@ -245,7 +245,8 @@ export default function Page() {
                 color: 'green',
                 title: 'Question created successfully',
                 message: '',
-                classNames: notificationStyles
+                classNames: notificationStyles,
+                className: ''
               })
             router.push("/questions");
         }

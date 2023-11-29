@@ -56,7 +56,7 @@ export default function Page() {
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
-            <div className="flex">
+            <div className="flex flex-col md:flex-row gap-3">
                 <Link
                     href="questions/create-question"
                     className="flex h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
@@ -66,20 +66,22 @@ export default function Page() {
                 </Link>
                 <div className="grow"></div>
 
-                <input
-                    className="h-[40px] rounded-lg px-5 focus:outline-green-500"
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.code === "Enter") {
-                            handleSearch();
-                        }
-                    }}
-                />
+                <div className="flex">
+                    <input
+                        className="h-[40px] rounded-lg px-5 focus:outline-green-500"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.code === "Enter") {
+                                handleSearch();
+                            }
+                        }}
+                    />
 
                 <QuestionFilter />
+                </div>
             </div>
             <QuestionTable questions={questions} />
             <Pagination form={form} metadata={paginationMetadata} />
