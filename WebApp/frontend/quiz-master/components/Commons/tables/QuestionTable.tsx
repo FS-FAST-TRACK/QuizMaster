@@ -11,8 +11,10 @@ import QuesitonCard from "../cards/QuestionCard";
 
 export default function QuestionTable({
     questions,
+    message,
 }: {
     questions: Question[];
+    message?: string;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
@@ -111,7 +113,11 @@ export default function QuestionTable({
                         <Table.Tr>
                             <Table.Td colSpan={99} rowSpan={10}>
                                 <div className="flex grow justify-center">
-                                    <Loader size={50} color="green" />
+                                    {message ? (
+                                        message
+                                    ) : (
+                                        <Loader size={50} color="green" />
+                                    )}
                                 </div>
                             </Table.Td>
                         </Table.Tr>

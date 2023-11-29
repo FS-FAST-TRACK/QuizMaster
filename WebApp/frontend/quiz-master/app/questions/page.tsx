@@ -83,7 +83,16 @@ export default function Page() {
                     <QuestionFilter />
                 </div>
             </div>
-            <QuestionTable questions={questions} />
+            <QuestionTable
+                questions={questions}
+                message={
+                    form.values.searchQuery
+                        ? `No questions match \"${form.values.searchQuery}\"`
+                        : questions.length === 0
+                          ? "No Questions"
+                          : undefined
+                }
+            />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>
     );
