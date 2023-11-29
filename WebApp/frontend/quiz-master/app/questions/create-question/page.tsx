@@ -6,7 +6,7 @@ import {
     QuestionCreateValues,
     QuestionDetailCreateDto,
 } from "@/lib/definitions";
-import { mapData } from "@/lib/helpers";
+import { humanFileSize, mapData } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
@@ -21,6 +21,7 @@ import {
     Anchor,
     Breadcrumbs,
     Button,
+    FileInput,
     InputLabel,
     LoadingOverlay,
     Select,
@@ -50,6 +51,8 @@ export default function Page() {
     const { questionTypes } = useQuestionTypesStore();
     const router = useRouter();
     const [visible, { toggle }] = useDisclosure(false);
+    const [fileImage, setFileImage] = useState<File | null>(null);
+    const [fileAudio, setFileAudio] = useState<File | null>(null);
 
     // const [categories, setCategories] = useState<QuestionCategory[]>([]);
     // const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
@@ -186,7 +189,45 @@ export default function Page() {
             return;
         }
         const questionCreateDto = mapData(form);
-        console.log(questionCreateDto);
+        if (fileImage) {
+            console.log(fileImage);
+            var imageForm = new FormData();
+            imageForm.append("file", fileImage);
+            const imageRes = await fetch(
+                `${process.env.QUIZMASTER_MEDIA}/api/media`,
+                {
+                    method: "POST",
+                    mode: "cors",
+                    body: imageForm,
+                }
+            );
+            if (imageRes.ok) {
+                // Parse the response body as JSON
+                const responseBody = await imageRes.json();
+                console.log(responseBody);
+                questionCreateDto.qImage = responseBody.fileInformation.id;
+            }
+        }
+        if (fileAudio) {
+            console.log(fileAudio);
+            var audioForm = new FormData();
+            audioForm.append("file", fileAudio);
+            const audioRes = await fetch(
+                `${process.env.QUIZMASTER_MEDIA}/api/media`,
+                {
+                    method: "POST",
+                    mode: "cors",
+                    body: audioForm,
+                }
+            )
+            if (audioRes.ok) {
+                // Parse the response body as JSON
+                const responseBody = await audioRes.json();
+                console.log(responseBody);
+                questionCreateDto.qAudio = responseBody.fileInformation.id;
+            }
+        }
+
         toggle();
         const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
             method: "POST",
@@ -201,7 +242,7 @@ export default function Page() {
         if (res.status === 201) {
             router.push("/questions");
         }
-    }, [form.values]);
+    }, [form.values, fileAudio, fileImage]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -291,25 +332,43 @@ export default function Page() {
 
                 <div>
                     <InputLabel>Media</InputLabel>
-                    <div className="flex gap-4 justify-between sm:justify-start [&>*]:flex [&>*]:gap-4 [&>*]:border [&>*]:text-[#706E6D] [&>*]:bg-[#D9D9D9] [&>*]:px-4 [&>*]:py-3 [&>*]:rounded [&>*]:text-sm [&>*]:cursor-pointer">
-                        <label htmlFor="question-image" className="">
+                    <div className="flex flex-col gap-4 justify-between sm:justify-start ">
+                        <label
+                            htmlFor="question-image"
+                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
+                        >
                             <PhotoIcon className="w-5" />
                             <p>Insert Image</p>
                         </label>
-                        <label htmlFor="question-audio" className="">
+                        <div>
+                            <div>{fileImage?.name}</div>
+                            <div>{humanFileSize(fileImage?.size)}</div>
+                        </div>
+                        <label
+                            htmlFor="question-audio"
+                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
+                        >
                             <SpeakerWaveIcon className="w-5" />
                             Insert Audio
                         </label>
+                        <div>
+                            <div>{fileAudio?.name}</div>
+                            <div>{humanFileSize(fileAudio?.size)}</div>
+                        </div>
                     </div>
-                    <TextInput
+                    <FileInput
                         id="question-image"
-                        type="file"
+                        accept="image/png,image/jpeg"
                         className="hidden"
+                        value={fileImage}
+                        onChange={setFileImage}
                     />
-                    <TextInput
+                    <FileInput
                         id="question-audio"
-                        type="file"
                         className="hidden"
+                        accept="audio/*"
+                        value={fileAudio}
+                        onChange={setFileAudio}
                     />
                 </div>
 
