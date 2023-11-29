@@ -62,3 +62,4 @@ packages/
 /WebApp/backend/QuizMaster.API.QuizSession/QuizSession.db
 /WebApp/backend/QuizMaster.API.QuizSession/QuizSession.db-shm
 /WebApp/backend/QuizMaster.API.QuizSession/QuizSession.db-wal
+/WebApp/backend/QuizMaster.API.Media/wwwroot/Images
