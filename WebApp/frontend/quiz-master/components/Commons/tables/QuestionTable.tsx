@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from "react";
 import QuesitonAction from "../popover/QuestionAction";
 import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
+import QuestionModal from "../modals/ViewQuestionModal";
+import ViewQuestionModal from "../modals/ViewQuestionModal";
 
 export default function QuestionTable({
     questions,
@@ -22,6 +24,8 @@ export default function QuestionTable({
 
     const [deleteQuestion, setDeleteQuestion] = useState<Question>();
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [viewQuestion, setViewQuestion] = useState<Question | undefined>();
+
     useEffect(() => {
         setSelectedRows([]);
     }, [questions]);
@@ -60,7 +64,12 @@ export default function QuestionTable({
                     }
                 />
             </Table.Td>
-            <Table.Td>{question.qStatement}</Table.Td>
+            <Table.Td
+                className="cursor-pointer"
+                onClick={() => setViewQuestion(question)}
+            >
+                {question.qStatement}
+            </Table.Td>
             <Table.Td>{getQuestionTypeDescription(question.qTypeId)}</Table.Td>
             <Table.Td>
                 {getQuestionCategoryDescription(question.qCategoryId)}
@@ -140,6 +149,14 @@ export default function QuestionTable({
                     setDeleteQuestion(undefined);
                 }}
                 title="Delete Question"
+            />
+
+            <ViewQuestionModal
+                opened={viewQuestion !== undefined}
+                onClose={() => {
+                    setViewQuestion(undefined);
+                }}
+                question={viewQuestion}
             />
         </div>
     );
