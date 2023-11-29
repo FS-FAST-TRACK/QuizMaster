@@ -241,15 +241,21 @@ export default function Page() {
         });
 
         if (res.status === 201) {
+            notifications.show({
+                color: 'green',
+                title: 'Question created successfully',
+                message: '',
+                classNames: notificationStyles
+              })
             router.push("/questions");
         }
         else {
-            console.log(res);
+            const error = await res.json();
             close();
             notifications.show({
                 color: 'red',
-                title: 'Question with the same type already exist.',
-                message: 'Duplicate Data',
+                title: 'Failed to create question',
+                message: error.message,
                 classNames: notificationStyles
               })
         }
