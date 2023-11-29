@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Quiz.Models;
@@ -23,12 +25,16 @@ namespace QuizMaster.API.Gateway.Controllers
     {
         private readonly GrpcChannel _channel;
         private readonly QuizCategoryService.QuizCategoryServiceClient _channelClient;
+        private readonly GrpcChannel _authChannel;
+        private readonly AuthService.AuthServiceClient _authChannelClient;
         private readonly IMapper _mapper;
 
         public QuizCategoryGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Quiz_Category_Service);
             _channelClient = new QuizCategoryService.QuizCategoryServiceClient(_channel);
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
             _mapper = mapper;
         }
 
@@ -91,14 +97,36 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPost("create_category")]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryCreateDto category)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
             // create the request
             var request = new CreateCategoryRequest
             {
                 QuizCategoryDesc = category.QCategoryDesc
             };
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
 
             // check if category already exist
-            var response = await _channelClient.CreateCategoryAsync(request);
+            var response = await _channelClient.CreateCategoryAsync(request, headers);
 
             // if the server response is other than 200
             if (response.CreateCategoryFail != null)
@@ -129,6 +157,29 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
             // create the request to check if category exist
             var request = new DeleteCategoryRequest
             {
@@ -136,7 +187,7 @@ namespace QuizMaster.API.Gateway.Controllers
             };
 
             // call the service to check if category exist
-            var response = await _channelClient.DeleteCategoryAsync(request);
+            var response = await _channelClient.DeleteCategoryAsync(request, headers);
 
             // if category does not exist
             if (response.Response == 404)
@@ -172,6 +223,27 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPatch("update_category/{id}")]
         public async Task<IActionResult> UpdateCategory(int id, JsonPatchDocument<CategoryCreateDto> patch)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
             // create the request to check if category exist
             var request = new CheckCategoryOrActiveRequest
             {
@@ -218,11 +290,11 @@ namespace QuizMaster.API.Gateway.Controllers
             // create request to update category
             var update = new UpdateCategoryRequest
             {
-                Category = JsonConvert.SerializeObject(categoryFromRepo)
+                Category = JsonConvert.SerializeObject(categoryFromRepo),
             };
 
             // call service to update category
-            var updateResult = await _channelClient.UpdateCategoryAsync(update);
+            var updateResult = await _channelClient.UpdateCategoryAsync(update,headers);
 
             // if service failed to update category
             if(updateResult.StatusCode == 500)
@@ -272,5 +344,55 @@ namespace QuizMaster.API.Gateway.Controllers
                 Message = "Category already exist."
             });
         }
+        private async Task<AuthStore> ValidateUserTokenAndGetInfo()
+        {
+            string token = GetUserToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            var info = await GetAuthStoreInfo(token);
+
+            if (info == null || info.UserData == null)
+            {
+                return null;
+            }
+
+            return info;
+        }
+
+        private string GetUserToken()
+        {
+            var tokenClaim = User.Claims.FirstOrDefault(e => e.Type == "token");
+
+            if (tokenClaim != null)
+            {
+                return tokenClaim.Value;
+            }
+
+            try
+            {
+                return HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<AuthStore> GetAuthStoreInfo(string token)
+        {
+            var requestValidation = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(requestValidation);
+
+            return !string.IsNullOrEmpty(authStore?.AuthStore) ? JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore) : null;
+        }
+
     }
 }
