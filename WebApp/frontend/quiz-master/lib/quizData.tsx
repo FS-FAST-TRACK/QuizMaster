@@ -44,7 +44,7 @@ export async function fetchCategories(
         var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/category`;
         if (questionResourceParameter) {
             apiUrl = apiUrl.concat(
-                `?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}&isGetAll=${questionResourceParameter.isGetAll}`
+                `?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`
             );
         }
         const data = await fetch(apiUrl).then(async (res) => {
