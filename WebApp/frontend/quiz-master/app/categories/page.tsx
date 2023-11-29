@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
+import SearchField from "@/components/Commons/SearchField";
 import CreateCategoryModal from "@/components/Commons/modals/CreateCategoryModal";
 import CategoriesTable from "@/components/Commons/tables/CategoriesTable";
 import {
@@ -67,8 +68,7 @@ export default function Page() {
                 </Button>
                 <div className="grow"></div>
 
-                <input
-                    className="h-[40px] rounded-lg px-5 focus:outline-green-500"
+                <SearchField
                     value={searchQuery}
                     onChange={(e) => {
                         setSearchQuery(e.target.value);

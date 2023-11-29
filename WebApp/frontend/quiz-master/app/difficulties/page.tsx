@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
+import SearchField from "@/components/Commons/SearchField";
 import CreateDifficultyModal from "@/components/Commons/modals/CreateDifficultyModal";
 import DifficultiesTable from "@/components/Commons/tables/DifficultiesTable";
 import {
@@ -66,8 +67,7 @@ export default function Page() {
                 </Button>
                 <div className="grow"></div>
 
-                <input
-                    className="h-[40px] rounded-lg px-5 focus:outline-green-500"
+                <SearchField
                     value={searchQuery}
                     onChange={(e) => {
                         setSearchQuery(e.target.value);
