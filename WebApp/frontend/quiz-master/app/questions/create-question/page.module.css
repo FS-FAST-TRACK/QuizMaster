@@ -1,17 +1,19 @@
 .root {
-    background-color: var(--notification-color, var(--mantine-primary-color-filled));
-  
+    background-color: var(
+        --notification-color,
+        var(--mantine-primary-color-filled)
+    );
+
     &::before {
-      background-color: var(--mantine-color-white);
+        background-color: var(--mantine-color-white);
     }
-  }
-  
-  .description,
-  .title {
+}
+
+.description,
+.title {
     color: var(--mantine-color-white);
-  }
-  
-  .closeButton {
+}
+
+.closeButton {
     color: var(--mantine-color-white);
-  
-  }
+}

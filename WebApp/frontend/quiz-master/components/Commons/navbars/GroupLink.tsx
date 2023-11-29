@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Button, Collapse, UnstyledButton } from "@mantine/core";
+import { Button, Collapse, Popover, UnstyledButton } from "@mantine/core";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -42,9 +42,35 @@ export default function GroupLink({
 
     return (
         <>
+            <div className="md:hidden">
+                <Popover
+                    width={300}
+                    trapFocus
+                    position="bottom"
+                    withArrow
+                    shadow="md"
+                >
+                    <Popover.Target>
+                        <button
+                            className={clsx(
+                                "justify-between h-[48px] transition-all duration-300 items-center  rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] px-3",
+                                {
+                                    "bg-[--primary] text-white  hover:bg-[--primary]":
+                                        links?.findIndex((link) =>
+                                            pathname.includes(link.href)
+                                        ) != -1,
+                                }
+                            )}
+                        >
+                            <Icon className="w-6" />
+                        </button>
+                    </Popover.Target>
+                    <Popover.Dropdown>{items}</Popover.Dropdown>
+                </Popover>
+            </div>
             <button
                 className={clsx(
-                    "flex justify-between h-[48px] transition-all duration-300 items-center  rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] px-3",
+                    "hidden md:flex justify-between h-[48px] transition-all duration-300 items-center  rounded-md py-3 text-sm font-medium hover:bg-[--primary-200] px-3",
                     {
                         "bg-[--primary] text-white  hover:bg-[--primary]":
                             links?.findIndex((link) =>
@@ -69,7 +95,9 @@ export default function GroupLink({
                     </div>
                 )}
             </button>
-            <Collapse in={opened}>{items}</Collapse>
+            <Collapse className="hidden md:block" in={opened}>
+                {items}
+            </Collapse>
         </>
     );
 }

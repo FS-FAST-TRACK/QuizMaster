@@ -32,8 +32,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
-import { notifications } from '@mantine/notifications';
-import notificationStyles from './page.module.css';
+import { notifications } from "@mantine/notifications";
+import notificationStyles from "./page.module.css";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -221,7 +221,7 @@ export default function Page() {
                     mode: "cors",
                     body: audioForm,
                 }
-            )
+            );
             if (audioRes.ok) {
                 // Parse the response body as JSON
                 const responseBody = await audioRes.json();
@@ -230,7 +230,7 @@ export default function Page() {
             }
         }
 
-        toggle(); 
+        toggle();
         const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
             method: "POST",
             mode: "cors",
@@ -242,23 +242,22 @@ export default function Page() {
 
         if (res.status === 201) {
             notifications.show({
-                color: 'green',
-                title: 'Question created successfully',
-                message: '',
+                color: "green",
+                title: "Question created successfully",
+                message: "",
                 classNames: notificationStyles,
-                className: ''
-              })
+                className: "",
+            });
             router.push("/questions");
-        }
-        else {
+        } else {
             const error = await res.json();
             close();
             notifications.show({
-                color: 'red',
-                title: 'Failed to create question',
+                color: "red",
+                title: "Failed to create question",
                 message: error.message,
-                classNames: notificationStyles
-              })
+                classNames: notificationStyles,
+            });
         }
     }, [form.values, fileAudio, fileImage]);
 

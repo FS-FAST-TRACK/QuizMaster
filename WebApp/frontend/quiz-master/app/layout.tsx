@@ -36,13 +36,14 @@ export default async function RootLayout({
                     content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
                 />
             </head>
-            <body className={inter.className} style={{overflow:'hidden'}}>
+            <body className={inter.className} style={{ overflow: "hidden" }}>
                 <MantineProvider>
                     <Toaster />
-                    <Notifications className="absolute top-1 right-5" position="top-right"/>
-                    <AuthProvider session={session}>
-                        {children}
-                    </AuthProvider>{" "}
+                    <Notifications
+                        className="absolute top-1 right-5"
+                        position="top-right"
+                    />
+                    <AuthProvider session={session}>{children}</AuthProvider>{" "}
                 </MantineProvider>
             </body>
         </html>
