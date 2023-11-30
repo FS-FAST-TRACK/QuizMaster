@@ -84,6 +84,34 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
            
         }
 
+        public override  async Task<QuizSetMessage> GetQuizSet(GetQuizSetRequest request, ServerCallContext context)
+        {
+            var reply = new QuizSetMessage();
+            try
+            {
+                var data = await _quizSetManager.QuestionSets.FirstOrDefaultAsync(x => x.SetId == request.Id);
+                if(data == null)
+                {
+                    reply.Code = 404;
+                    reply.Message = $"Quiz Set with id of {request.Id} does not exist";
+                    return await Task.FromResult(reply); 
+                }
+
+                reply.Code = 200;
+                reply.Data= JsonConvert.SerializeObject(data);
+
+                return await Task.FromResult(reply);
+
+            }
+            catch(Exception ex) 
+            {
+                reply.Code = 500;
+                reply.Message= ex.Message;
+
+                return await Task.FromResult(reply);
+            }
+        }
+
         private async Task<int> CheckForQuestionIdAsync(IEnumerable<int> questionIds)
         {
             var questionIdsArray = _quizSetManager.Questions.Select(x => x.Id).ToArray();

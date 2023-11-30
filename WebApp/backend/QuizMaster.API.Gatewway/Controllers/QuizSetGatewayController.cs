@@ -56,7 +56,16 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSet(int id)
         {
-            throw new NotImplementedException();
+            var request = new GetQuizSetRequest { Id = id };
+            var reply = await _channelClient.GetQuizSetAsync(request);
+
+            if(reply.Code == 404)
+            { return NotFound(reply.Message);}
+
+            if(reply.Code == 500)
+            { return BadRequest(reply.Message); }
+
+            return Ok(JsonConvert.DeserializeObject<QuestionSet>( reply.Data));
         }
 
         [HttpPut("update_set/{id}")]
