@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Protos;
@@ -59,6 +60,28 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
             
 
+        }
+
+        public override async Task<QuizSetMessage> GetAllQuizSet(QuizSetEmpty request, ServerCallContext context)
+        {
+            var reply = new QuizSetMessage();
+            try 
+            {
+                var data = await _quizSetManager.QuestionSets.ToArrayAsync();
+
+                reply.Code = 200;
+                reply.Data = JsonConvert.SerializeObject(data);
+
+                return await Task.FromResult(reply);
+            }
+            catch(Exception ex) 
+            {
+                reply.Code=500;
+                reply.Message = ex.Message;
+
+                return await Task.FromResult(reply);
+            }
+           
         }
 
         private async Task<int> CheckForQuestionIdAsync(IEnumerable<int> questionIds)

@@ -19,7 +19,7 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly GrpcChannel _channel;
         private readonly QuizSetService.QuizSetServiceClient _channelClient;
 
-        public QuizSetGatewayController(GrpcChannel channel, IOptions<GrpcServerConfiguration> options)
+        public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizSetService.QuizSetServiceClient(_channel);
@@ -43,7 +43,14 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpGet("all_question_set")]
         public async Task<IActionResult> GetAllSet()
         {
-            throw new NotImplementedException();
+            var response = await _channelClient.GetAllQuizSetAsync(new QuizSetEmpty());
+            
+            if(response.Code == 500)
+            {
+                return BadRequest(response.Message);
+            }
+
+            return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(response.Data));
         }
 
         [HttpGet("{id}")]
