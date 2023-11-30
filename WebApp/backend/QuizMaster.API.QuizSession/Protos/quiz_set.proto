@@ -6,6 +6,8 @@ service QuizSetService{
 	rpc AddQuizSet(QuizSetRequest) returns (QuizSetMessage);
 	rpc GetAllQuizSet(QuizSetEmpty) returns (QuizSetMessage);
 	rpc GetQuizSet(GetQuizSetRequest) returns (QuizSetMessage);
+	rpc DeleteQuizSet(GetQuizSetRequest) returns (QuizSetMessage);
+	rpc UpdateQuizSet(QuizSetRequest) returns (QuizSetMessage);
 }
 
 

@@ -77,7 +77,16 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpDelete("delete_set/{id}")]
         public async Task<IActionResult> DeleteSet(int id)
         {
-            throw new NotImplementedException();
+            var request = new GetQuizSetRequest { Id = id };
+            var reply = await _channelClient.DeleteQuizSetAsync(request);
+
+            if (reply.Code == 404)
+            { return NotFound(reply.Message); }
+
+            if (reply.Code == 500)
+            { return BadRequest(reply.Message); }
+
+            return Ok(reply.Message);
         }
     }
 }
