@@ -5,6 +5,8 @@ option csharp_namespace = "QuizMaster.API.QuizSession.Protos";
 service QuizSetService{
 	rpc AddQuizSet(QuizSetRequest) returns (QuizSetMessage);
 	rpc GetAllQuizSet(QuizSetEmpty) returns (QuizSetMessage);
+	rpc GetAllQuestionSet(QuizSetEmpty) returns (QuizSetMessage);
+	rpc GetQuestionSet(GetQuizSetRequest) returns (QuizSetMessage);
 	rpc GetQuizSet(GetQuizSetRequest) returns (QuizSetMessage);
 	rpc DeleteQuizSet(GetQuizSetRequest) returns (QuizSetMessage);
 	rpc UpdateQuizSet(QuizSetRequest) returns (QuizSetMessage);
@@ -12,7 +14,8 @@ service QuizSetService{
 
 
 message QuizSetRequest{
-	string quizSet = 1;
+	int32 id  = 1;
+	string quizSet = 2;
 }
 
 message QuizSetMessage{

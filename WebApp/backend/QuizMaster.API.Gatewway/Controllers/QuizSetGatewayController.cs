@@ -13,7 +13,7 @@ using System.Threading.Channels;
 namespace QuizMaster.API.Gateway.Controllers
 {
     [ApiController]
-    [Route("gateway/api/question_set")]
+    [Route("gateway/api/set")]
     public class QuizSetGatewayController : Controller
     {
         private readonly GrpcChannel _channel;
@@ -40,7 +40,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<Set>( response.Data));
         }
 
-        [HttpGet("all_question_set")]
+        [HttpGet("all_set")]
         public async Task<IActionResult> GetAllSet()
         {
             var response = await _channelClient.GetAllQuizSetAsync(new QuizSetEmpty());
@@ -50,7 +50,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(response.Message);
             }
 
-            return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(response.Data));
+            return Ok(JsonConvert.DeserializeObject<Set[]>(response.Data));
         }
 
         [HttpGet("{id}")]
@@ -65,13 +65,48 @@ namespace QuizMaster.API.Gateway.Controllers
             if(reply.Code == 500)
             { return BadRequest(reply.Message); }
 
-            return Ok(JsonConvert.DeserializeObject<QuestionSet>( reply.Data));
+            return Ok(JsonConvert.DeserializeObject<Set>(reply.Data));
+        }
+
+        [HttpGet("all_question_set")]
+        public async Task<IActionResult> GetAllQuestionSet()
+        {
+            var response = await _channelClient.GetAllQuestionSetAsync(new QuizSetEmpty());
+
+            if(response.Code == 500)
+            { return BadRequest(response.Message); }
+
+            return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(response.Data));
+        }
+
+        [HttpGet("get_question_set/{id}")]
+        public async Task<IActionResult> GetQuestionSet(int id)
+        {
+            var request = new GetQuizSetRequest { Id = id };
+            var reply  = await _channelClient.GetQuestionSetAsync(request);
+
+            if (reply.Code == 404)
+            { return NotFound(reply.Message); }
+
+            if (reply.Code == 500)
+            { return BadRequest(reply.Message); }
+
+            return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(reply.Data));
         }
 
         [HttpPut("update_set/{id}")]
         public async Task<IActionResult> UpdateSet(int id, [FromBody] SetDTO setDTO)
         {
-            throw new NotImplementedException();
+            var request = new QuizSetRequest { Id = id, QuizSet = JsonConvert.SerializeObject(setDTO) };
+            var reply = await _channelClient.UpdateQuizSetAsync(request);
+
+            if(reply.Code == 404)
+            { return NotFound(reply.Message); }
+
+            if(reply.Code == 500)
+            { return BadRequest(reply.Message); }
+
+            return Ok(JsonConvert.DeserializeObject<Set>(reply.Data));
         }
 
         [HttpDelete("delete_set/{id}")]
