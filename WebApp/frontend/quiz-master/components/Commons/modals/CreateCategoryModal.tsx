@@ -2,6 +2,8 @@ import { Box, Button, Modal, TextInput } from "@mantine/core";
 import { ReactNode, useCallback, useState } from "react";
 import style from "@/styles/input.module.css";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
+import notificationStyles from "../../../styles/notification.module.css";
 
 export type CategoryCreateDto = {
     qCategoryDesc: string;
@@ -33,7 +35,23 @@ export default function CreateCategoryModal({
 
         console.log(res);
         if (res.status === 201) {
+            onClose();
+            notifications.show({
+                color: "green",
+                title: "Category created successfully",
+                message: "",
+                classNames: notificationStyles,
+                className: "",
+            });
             router.push("/categories");
+        } else {
+            const error = await res.json();
+            notifications.show({
+                color: "red",
+                title: "Failed to create category",
+                message: error.message,
+                classNames: notificationStyles,
+            });
         }
     }, [category]);
     return (
