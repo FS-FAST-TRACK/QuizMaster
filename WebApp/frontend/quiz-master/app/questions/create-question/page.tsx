@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
 import { notifications } from "@mantine/notifications";
-import notificationStyles from "./page.module.css";
+import notificationStyles from "../../../styles/notification.module.css";
 
 const timeLimits = [10, 30, 60, 120];
 
