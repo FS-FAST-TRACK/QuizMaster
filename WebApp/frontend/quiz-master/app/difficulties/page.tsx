@@ -79,7 +79,16 @@ export default function Page() {
                     }}
                 />
             </div>
-            <DifficultiesTable difficulties={difficulties} />
+            <DifficultiesTable
+                difficulties={difficulties}
+                message={
+                    form.values.searchQuery
+                        ? `No difficulties match \"${form.values.searchQuery}\"`
+                        : difficulties.length === 0
+                          ? "No Difficulties"
+                          : undefined
+                }
+            />
             <Pagination form={form} metadata={paginationMetadata} />
             <CreateDifficultyModal
                 opened={createDifficulty}

@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 
 export default function DifficultiesTable({
     difficulties,
+    message,
 }: {
     difficulties: QuestionDifficulty[];
+    message?: string;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     useEffect(() => {
@@ -84,7 +86,11 @@ export default function DifficultiesTable({
                         <Table.Tr>
                             <Table.Td colSpan={99} rowSpan={10}>
                                 <div className="flex grow justify-center">
-                                    <Loader size={50} color="green" />
+                                    {message ? (
+                                        message
+                                    ) : (
+                                        <Loader size={50} color="green" />
+                                    )}
                                 </div>
                             </Table.Td>
                         </Table.Tr>
