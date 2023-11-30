@@ -49,15 +49,20 @@ namespace QuizMaster.API.Quiz
 			{
 				app.UseSwagger();
 				app.UseSwaggerUI();
+
+				// add the cors policy to the app
+				// allow any origin to access api endpoints on development mode
+				app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
 			}
 
 			app.UseHttpsRedirection();
 
 			app.UseAuthorization();
 
-			app.UseCors(p => p.WithOrigins("http://localhost:3000")
-	.AllowAnyHeader()
-	.AllowAnyMethod().WithHeaders());
+			//		app.UseCors(p => p.WithOrigins("http://localhost:3000")
+			//.AllowAnyHeader()
+			//.AllowAnyMethod().WithHeaders());
+			
 
 
 			app.MapGrpcService<Service>();
