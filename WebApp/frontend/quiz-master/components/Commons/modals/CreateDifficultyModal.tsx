@@ -2,6 +2,8 @@ import { Box, Button, Modal, TextInput } from "@mantine/core";
 import { ReactNode, useCallback, useState } from "react";
 import style from "@/styles/input.module.css";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
+import notificationStyles from "../../../styles/notification.module.css";
 
 export type DifficultyCreateDto = {
     qDifficultyDesc: string;
@@ -34,8 +36,23 @@ export default function CreateDifficultyModal({
 
         console.log(res);
         if (res.status === 201) {
-            router.push("/difficulties");
             onClose();
+            notifications.show({
+                color: "green",
+                title: "Difficulty created successfully",
+                message: "",
+                classNames: notificationStyles,
+                className: "",
+            });
+            router.push("/difficulties");
+        } else {
+            const error = await res.json();
+            notifications.show({
+                color: "red",
+                title: "Failed to create difficulty",
+                message: error.message,
+                classNames: notificationStyles,
+            });
         }
     }, [difficulty]);
     return (
