@@ -80,7 +80,16 @@ export default function Page() {
                     }}
                 />
             </div>
-            <CategoriesTable categories={categories} />
+            <CategoriesTable
+                categories={categories}
+                message={
+                    form.values.searchQuery
+                        ? `No categories match \"${form.values.searchQuery}\"`
+                        : categories.length === 0
+                          ? "No Categories"
+                          : undefined
+                }
+            />
             <Pagination form={form} metadata={paginationMetadata} />
             <CreateCategoryModal
                 opened={createCategory}
