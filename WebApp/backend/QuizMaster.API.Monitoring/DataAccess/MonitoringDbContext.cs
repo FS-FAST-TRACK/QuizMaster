@@ -12,6 +12,8 @@ namespace QuizMaster.API.Monitoring.DataAccess
         // Define DbSet for the AuditTrail entity
         public DbSet<UserAuditTrail> UserAuditTrails { get; set; }
         public DbSet<QuizAuditTrail> QuizAuditTrails { get; set; }
+        public DbSet<QuizDifficultyAuditTrail> QuizDifficultyAuditTrails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure the AuditTrail entity, including its properties
@@ -25,6 +27,11 @@ namespace QuizMaster.API.Monitoring.DataAccess
             modelBuilder.Entity<QuizAuditTrail>().Property(a => a.Action).IsRequired();
             modelBuilder.Entity<QuizAuditTrail>().Property(a => a.Timestamp).IsRequired();
             modelBuilder.Entity<QuizAuditTrail>().Property(a => a.Details).HasMaxLength(255);
+
+            modelBuilder.Entity<QuizDifficultyAuditTrail>().HasKey(a => a.QuizDiffAuditTrailId);
+            modelBuilder.Entity<QuizDifficultyAuditTrail>().Property(a => a.Action).IsRequired();
+            modelBuilder.Entity<QuizDifficultyAuditTrail>().Property(a => a.Timestamp).IsRequired();
+            modelBuilder.Entity<QuizDifficultyAuditTrail>().Property(a => a.Details).HasMaxLength(255);
 
             base.OnModelCreating(modelBuilder);
         }
