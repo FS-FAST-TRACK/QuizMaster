@@ -1,19 +1,23 @@
 ﻿using Azure;
 using Grpc.Core;
 using Newtonsoft.Json;
+using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers;
 
 namespace QuizMaster.API.Quiz.Services.GRPC
 {
     public class Service : QuizCategoryService.QuizCategoryServiceBase
     {
         private readonly IQuizRepository _quizRepository;
+        private readonly QuizAuditService.QuizAuditServiceClient _quizAuditServiceClient;
 
-        public Service(IQuizRepository quizRepository)
+        public Service(IQuizRepository quizRepository, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient)
         {
             _quizRepository = quizRepository;
+            _quizAuditServiceClient = quizAuditServiceClient;
         }
 
         /// <summary>
@@ -71,20 +75,22 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<CreateCategoryOrFail> CreateCategory(CreateCategoryRequest request, ServerCallContext context)
+         public override async Task<CreateCategoryOrFail> CreateCategory(CreateCategoryRequest request, ServerCallContext context)
         {
             var success = new CreatedCategoryReply();
             var fail = new CreateCategoryFail();
             var response = new CreateCategoryOrFail();
 
+
+
             // check if category already exist
             var categoryFromRepo = await _quizRepository.GetCategoryAsync(request.QuizCategoryDesc);
 
-            if(categoryFromRepo != null && categoryFromRepo.ActiveData)
+            if (categoryFromRepo != null && categoryFromRepo.ActiveData)
             {
-                // if category already exist  and active return fail
+                // if category already exist and active return fail
                 fail.Type = "409";
-                fail.Message = $"Category with description {request.QuizCategoryDesc} already exist.";
+                fail.Message = $"Category with description {request.QuizCategoryDesc} already exists.";
                 response.CreateCategoryFail = fail;
                 return await Task.FromResult(response);
             }
@@ -92,26 +98,29 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             bool isSuccess;
 
             // If category is not null and not active, we set active to true and update the category
-            if(categoryFromRepo != null && !categoryFromRepo.ActiveData)
+            if (categoryFromRepo != null && !categoryFromRepo.ActiveData)
             {
                 categoryFromRepo.ActiveData = true;
                 isSuccess = _quizRepository.UpdateCategory(categoryFromRepo);
             }
             else
             {
-                // else, we create new category
+                // else, we create a new category
                 categoryFromRepo = new QuestionCategory { QCategoryDesc = request.QuizCategoryDesc };
                 isSuccess = await _quizRepository.AddCategoryAsync(categoryFromRepo);
+
+                // Log the create category event
+                LogCreateQuizCategoryEvent(categoryFromRepo, request, context);
             }
 
-            // if update or create is not success
-            if (!isSuccess) 
+            // if update or create is not successful
+            if (!isSuccess)
             {
                 fail.Type = "500";
                 fail.Message = $"Failed to create category with description {request.QuizCategoryDesc}.";
                 response.CreateCategoryFail = fail;
             }
-            else 
+            else
             {
                 // else, we save the changes
                 await _quizRepository.SaveChangesAsync();
@@ -124,6 +133,47 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             return await Task.FromResult(response);
         }
 
+        private void LogCreateQuizCategoryEvent(QuestionCategory category, CreateCategoryRequest request, ServerCallContext context)
+        {
+            // Capture the details of the user being deleted, including who deleted it
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            var createEvent = new CreateQuizCategoryEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Create Category",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Category {category.QCategoryDesc} created by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = "",
+                NewValues = JsonConvert.SerializeObject(category),
+            };
+
+            var logRequest = new LogCreateQuizCategoryEventRequest
+            {
+                Event = createEvent
+            };
+            createEvent.NewValues = JsonConvert.SerializeObject(new
+            {
+                category.QCategoryDesc,
+            });
+
+
+            try
+            {
+                // Make the gRPC call to log the create category event
+                _quizAuditServiceClient.LogCreateQuizCategoryEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during the gRPC call and log them
+                //logger.LogError($"Error while logging create category event: {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// Delete category
         /// </summary>
@@ -133,6 +183,11 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         public override async Task<DeleteCategoryReply> DeleteCategory(DeleteCategoryRequest request, ServerCallContext context)
         {
             var reply = new DeleteCategoryReply() { Response = 203 };
+
+            // Capture the details of the user deleting the category
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
 
             // get the category
             var category = await _quizRepository.GetCategoryAsync(request.Id);
@@ -148,6 +203,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             category.ActiveData = false;
             var result = _quizRepository.UpdateCategory(category);
             await _quizRepository.SaveChangesAsync();
+            LogDeleteQuizCategoryEvent(category, userRoles!, userNameClaim!, userId!);
 
             // if update is not success
             if (!result)
@@ -156,6 +212,42 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             }
             return await Task.FromResult(reply);
         }
+
+        private void LogDeleteQuizCategoryEvent(QuestionCategory category, string userRoles, string userName, string userId)
+        {
+            // Construct the delete event
+            var deleteEvent = new DeleteQuizCategoryEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userName,
+                Action = "Delete Category",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Category {category.QCategoryDesc} deleted by: {userName}",
+                Userrole = userRoles,
+                OldValues = JsonConvert.SerializeObject(category),
+                NewValues = "",
+            };
+
+            var logRequest = new LogDeleteQuizCategoryEventRequest
+            {
+                Event = deleteEvent
+            };
+            deleteEvent.OldValues = JsonConvert.SerializeObject(new
+            {
+                category.Id,
+                category.QCategoryDesc
+            });
+            try
+            {
+                // Make the gRPC call to log the delete category event
+                _quizAuditServiceClient.LogDeleteQuizCategoryEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during the gRPC call
+            }
+        }
+
 
         /// <summary>
         /// Check if category ecist and is active
@@ -220,8 +312,9 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             var category = JsonConvert.DeserializeObject<QuestionCategory>(request.Category);
 
             // update category
+         
+            var oldCategory = await _quizRepository.GetCategoryAsync(category.Id);
             var result = _quizRepository.UpdateCategory(category);
-
             // if update is not success
             if (!result)
             {
@@ -232,12 +325,62 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             }
 
             // else, we save the changes
-            await _quizRepository.SaveChangesAsync();
-            reply.StatusCode = 200;
-            reply.Id = category.Id;
-            reply.QuizCategoryDesc = category.QCategoryDesc;
+                await _quizRepository.SaveChangesAsync();
+                LogUpdateQuizCategoryEvent(oldCategory, category, context);
 
-            return await Task.FromResult(reply);  
+                reply.StatusCode = 200;
+                reply.Id = category.Id;
+                reply.QuizCategoryDesc = category.QCategoryDesc;
+
+            return await Task.FromResult(reply);
+        }
+      
+
+        private void LogUpdateQuizCategoryEvent(QuestionCategory oldCategory, QuestionCategory newCategory, ServerCallContext context)
+        {
+            // Capture the details of the user updating the category
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            // Construct the update event
+            var updateEvent = new UpdateQuizCategoryEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Update Category",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Category updated by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = JsonConvert.SerializeObject(oldCategory),
+                NewValues = JsonConvert.SerializeObject(newCategory),
+            };
+
+            var logRequest = new LogUpdateQuizCategoryEventRequest
+            {
+                Event = updateEvent
+            };
+            updateEvent.NewValues = JsonConvert.SerializeObject(new
+            {
+                newCategory.Id,
+                newCategory.QCategoryDesc,
+            });
+            updateEvent.OldValues = JsonConvert.SerializeObject(new
+            {
+                oldCategory.Id,
+                oldCategory.QCategoryDesc,
+            });
+
+            try
+            {
+                // Make the gRPC call to log the update category event
+                 _quizAuditServiceClient.LogUpdateQuizCategoryEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during the gRPC call
+    
+            }
         }
     }
 }

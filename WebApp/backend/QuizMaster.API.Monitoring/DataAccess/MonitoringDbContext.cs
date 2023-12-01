@@ -22,7 +22,6 @@ namespace QuizMaster.API.Monitoring.DataAccess
             modelBuilder.Entity<UserAuditTrail>().Property(a => a.Details).HasMaxLength(255);
 
             modelBuilder.Entity<QuizAuditTrail>().HasKey(a => a.QuizAuditTrailId);
-            modelBuilder.Entity<QuizAuditTrail>().Property(a => a.QuizId).IsRequired();
             modelBuilder.Entity<QuizAuditTrail>().Property(a => a.Action).IsRequired();
             modelBuilder.Entity<QuizAuditTrail>().Property(a => a.Timestamp).IsRequired();
             modelBuilder.Entity<QuizAuditTrail>().Property(a => a.Details).HasMaxLength(255);
