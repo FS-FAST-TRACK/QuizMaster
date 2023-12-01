@@ -100,3 +100,7 @@ export type QuestionSet = {
     dateCreated: Date;
     dateUpdated: Date;
 };
+export type SetQuestions = {
+    id: number;
+    setId: number;
+}
