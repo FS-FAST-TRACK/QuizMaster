@@ -27,6 +27,10 @@ namespace QuizMaster.API.Monitoring
             builder.Services.AddScoped<IQuizCategoryAuditTrailRepository, QuizCategoryAuditTrailRepository>();
             builder.Services.AddScoped<IQuizCategoryAuditTrailService, QuizCategoryAuditTrailService>();
             builder.Services.AddScoped<QuizCategoryAuditTrailRepository>();
+            builder.Services.AddScoped<IQuizDifficultyAuditTrailRepository, QuizDifficultyAuditTrailRepository>();
+            builder.Services.AddScoped<IQuizDifficultyAuditTrailService, QuizDifficultyAuditTrailService>();
+            builder.Services.AddScoped<QuizDifficultyAuditTrailRepository>();
+
             builder.Services.AddGrpc();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             //add console logging

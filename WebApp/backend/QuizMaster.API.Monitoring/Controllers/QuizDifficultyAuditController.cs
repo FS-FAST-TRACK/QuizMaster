@@ -1,26 +1,25 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Monitoring.Services.QuizAudit;
-using QuizMaster.Library.Common.Entities.Audits;
-using System;
 
 namespace QuizMaster.API.Monitoring.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class QuizAuditController : ControllerBase
+    public class QuizDifficultyAuditController : ControllerBase
     {
-        private readonly IQuizCategoryAuditTrailService _quizCategoryAuditTrailService;
-        public QuizAuditController(IQuizCategoryAuditTrailService quizCategoryAuditTrailService)
+        private readonly IQuizDifficultyAuditTrailService _quizDifficultyAuditTrailService;
+        public QuizDifficultyAuditController(IQuizDifficultyAuditTrailService quizDifficultyAuditTrailService)
         {
-            _quizCategoryAuditTrailService = quizCategoryAuditTrailService;
+            _quizDifficultyAuditTrailService = quizDifficultyAuditTrailService;
         }
+
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllQuizCategoryAuditTrailsAsync()
+        public async Task<IActionResult> GetAllQuizDifficultyAuditTrailsAsync()
         {
-            try 
+            try
             {
-                var auditTrails = await _quizCategoryAuditTrailService.GetAllQuizCategoryAuditTrailsAsync();
+                var auditTrails = await _quizDifficultyAuditTrailService.GetAllQuizDifficultyAuditTrailsAsync();
                 return Ok(auditTrails);
             }
             catch (Exception ex)
@@ -29,11 +28,11 @@ namespace QuizMaster.API.Monitoring.Controllers
             }
         }
         [HttpGet("{quizAuditTrailId}")]
-        public async Task<IActionResult> GetQuizCategoryAuditTrailByIdAsync(int quizAuditTrailId)
+        public async Task<IActionResult> GetQuizDifficultyAuditTrailByIdAsync(int quizAuditTrailId)
         {
-            try 
+            try
             {
-                var auditTrail = await _quizCategoryAuditTrailService.GetQuizCategoryAuditTrailByIdAsync(quizAuditTrailId);
+                var auditTrail = await _quizDifficultyAuditTrailService.GetQuizDifficultyAuditTrailByIdAsync(quizAuditTrailId);
                 if (auditTrail == null)
                 {
                     return NotFound($"Audit trail with ID {quizAuditTrailId} not found.");
@@ -47,11 +46,11 @@ namespace QuizMaster.API.Monitoring.Controllers
             }
         }
         [HttpGet("action")]
-        public async Task<IActionResult> GetQuizCategoryAuditTrailsByActionAsync([FromQuery] string action = "")
+        public async Task<IActionResult> GetQuizDifficultyAuditTrailsByActionAsync([FromQuery] string action = "")
         {
             try
             {
-                var auditTrails = await _quizCategoryAuditTrailService.GetQuizCategoryAuditTrailsByActionAsync(action);
+                var auditTrails = await _quizDifficultyAuditTrailService.GetQuizDifficultyAuditTrailsByActionAsync(action);
                 return Ok(auditTrails);
             }
             catch (Exception ex)
@@ -61,11 +60,11 @@ namespace QuizMaster.API.Monitoring.Controllers
             }
         }
         [HttpGet("username")]
-        public async Task<IActionResult> GetQuizCategoryAuditTrailsByUsernameAsync([FromQuery] string username = "")
+        public async Task<IActionResult> GetQuizDifficultyAuditTrailsByUsernameAsync([FromQuery] string username = "")
         {
             try
             {
-                var auditTrails = await _quizCategoryAuditTrailService.GetQuizCategoryAuditTrailsByUsernameAsync(username);
+                var auditTrails = await _quizDifficultyAuditTrailService.GetQuizDifficultyAuditTrailsByUsernameAsync(username);
                 return Ok(auditTrails);
             }
             catch (Exception ex)
@@ -78,11 +77,11 @@ namespace QuizMaster.API.Monitoring.Controllers
 
 
         [HttpGet("userrole")]
-        public async Task<IActionResult> GetQuizCategoryAuditTrailsByUserRoleAsync(string userRole)
+        public async Task<IActionResult> GetQuizDifficultyAuditTrailsByUserRoleAsync(string userRole)
         {
             try
             {
-                var auditTrails = await _quizCategoryAuditTrailService.GetQuizCategoryAuditTrailsByUserRoleAsync(userRole);
+                var auditTrails = await _quizDifficultyAuditTrailService.GetQuizDifficultyAuditTrailsByUserRoleAsync(userRole);
                 return Ok(auditTrails);
             }
             catch (Exception ex)
@@ -93,11 +92,11 @@ namespace QuizMaster.API.Monitoring.Controllers
 
         }
         [HttpGet("date-range")]
-        public async Task<IActionResult> GetQuizCategoryAuditTrailsWithinDateRangeAsync([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        public async Task<IActionResult> GetQuizDifficultyAuditTrailsWithinDateRangeAsync([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             try
             {
-                var auditTrails = await _quizCategoryAuditTrailService.GetQuizCategoryAuditTrailsWithinDateRangeAsync(startDate, endDate);
+                var auditTrails = await _quizDifficultyAuditTrailService.GetQuizDifficultyAuditTrailsWithinDateRangeAsync(startDate, endDate);
                 return Ok(auditTrails);
             }
             catch (Exception ex)
@@ -106,6 +105,5 @@ namespace QuizMaster.API.Monitoring.Controllers
                 return StatusCode(500, $"Failed to retrieve audit trails within date range: {ex.Message}");
             }
         }
-
     }
 }
