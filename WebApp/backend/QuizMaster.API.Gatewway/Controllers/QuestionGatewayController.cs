@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿ using AutoMapper;
 using Azure;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.JsonPatch;
