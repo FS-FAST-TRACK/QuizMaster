@@ -52,7 +52,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     await _context.SaveChangesAsync();
                 }
 
-                
+
+                await _context.QuizRooms.AddAsync(quizRoom);
+                await _context.SaveChangesAsync();
 
                 reply.Code = 200;
                 reply.Data = JsonConvert.SerializeObject(quizRoom);
@@ -89,7 +91,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
         }
 
-
+            
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
             var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();

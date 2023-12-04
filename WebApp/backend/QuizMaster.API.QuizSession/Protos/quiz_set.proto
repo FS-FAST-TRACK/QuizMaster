@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.QuizSession.Protos";
+
+service QuizSetService{
+	rpc AddQuizSet(QuizSetRequest) returns (QuizSetMessage);
+	rpc GetAllQuizSet(QuizSetEmpty) returns (QuizSetMessage);
+	rpc GetAllQuestionSet(QuizSetEmpty) returns (QuizSetMessage);
+	rpc GetQuestionSet(GetQuizSetRequest) returns (QuizSetMessage);
+	rpc GetQuizSet(GetQuizSetRequest) returns (QuizSetMessage);
+	rpc DeleteQuizSet(GetQuizSetRequest) returns (QuizSetMessage);
+	rpc UpdateQuizSet(QuizSetRequest) returns (QuizSetMessage);
+}
+
+
+message QuizSetRequest{
+	int32 id  = 1;
+	string quizSet = 2;
+}
+
+message QuizSetMessage{
+	int32 code = 1;
+	string data = 2;
+	string message =3;
+}
+
+message QuizSetEmpty{}
+
+message GetQuizSetRequest{
+	int32 id = 1;
+}

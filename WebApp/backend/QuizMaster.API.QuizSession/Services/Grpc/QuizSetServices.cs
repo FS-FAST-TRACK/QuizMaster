@@ -25,8 +25,6 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
         {
             var reply = new QuizSetMessage();
 
-            var questionsList = _quizSetManager.Questions.ToList();
-
             var quizSet = JsonConvert.DeserializeObject<SetDTO>(request.QuizSet)!;
 
             var checkQuestion =  CheckForQuistionId(quizSet.questions);

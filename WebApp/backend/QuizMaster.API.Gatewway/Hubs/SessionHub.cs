@@ -81,7 +81,7 @@ namespace QuizMaster.API.Gateway.Hubs
                     }
                     //await Clients.All.SendAsync("QuizRooms", quizRooms);
                 }
-            }
+        }
             catch (Exception ex)
             {
                 Console.Write(ex.ToString());

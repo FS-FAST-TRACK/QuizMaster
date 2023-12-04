@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace QuizMaster.Library.Common.Entities.Audits
 {
-    public class QuizAuditTrail
+    public class QuizDifficultyAuditTrail
     {
-        public int QuizAuditTrailId { get; set; }
+        public int QuizDiffAuditTrailId { get; set; }
         public int UserId { get; set; }
         public string UserName { get; set; }
         public string Action { get; set; } = string.Empty;
@@ -18,6 +18,5 @@ namespace QuizMaster.Library.Common.Entities.Audits
 
         public string OldValues { get; set; } = string.Empty;
         public string NewValues { get; set; } = string.Empty;
-
     }
 }

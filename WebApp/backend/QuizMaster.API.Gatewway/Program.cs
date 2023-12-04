@@ -9,6 +9,7 @@ using QuizMaster.API.Authentication.Services.GRPC;
 using QuizMaster.API.Authentication.Services.Temp;
 using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,11 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 builder.Services.AddLogging();
+builder.Services.AddSignalR();
+builder.Services.AddCors(o => 
+    o.AddDefaultPolicy(builder => 
+    builder.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -106,6 +112,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseCors();
+
 app.MapControllers();
+app.MapHub<SessionHub>("/gateway/hub/session");
 
 app.Run();

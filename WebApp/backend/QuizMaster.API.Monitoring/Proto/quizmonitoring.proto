@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Monitoring.Proto";
+
+package audit;
+
+import "google/protobuf/empty.proto";
+
+
+service QuizAuditService {
+	rpc LogCreateQuizCategoryEvent (LogCreateQuizCategoryEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuizCategoryEvent (LogDeleteQuizCategoryEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuizCategoryEvent (LogUpdateQuizCategoryEventRequest) returns (google.protobuf.Empty);
+	rpc LogCreateQuizDifficultyEvent (LogCreateQuizDifficultyEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuizDifficultyEvent (LogUpdateQuizDifficultyEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuizDifficultyEvent (LogDeleteQuizDifficultyEventRequest) returns (google.protobuf.Empty);
+}
+
+message CreateQuizCategoryEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message DeleteQuizCategoryEvent{
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message UpdateQuizCategoryEvent{
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+message CreateQuizDifficultyEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message UpdateQuizDifficultyEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+message DeleteQuizDifficultyEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message LogCreateQuizCategoryEventRequest {
+  CreateQuizCategoryEvent event = 1;
+}
+
+message LogDeleteQuizCategoryEventRequest {
+  DeleteQuizCategoryEvent event = 1;	
+}
+
+message LogUpdateQuizCategoryEventRequest {
+  UpdateQuizCategoryEvent event = 1;
+}
+
+message LogCreateQuizDifficultyEventRequest {
+  CreateQuizDifficultyEvent event = 1;
+}
+
+message LogUpdateQuizDifficultyEventRequest {
+  UpdateQuizDifficultyEvent event = 1;
+}
+message LogDeleteQuizDifficultyEventRequest {
+  DeleteQuizDifficultyEvent event = 1;
+}

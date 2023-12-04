@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.QuizSession.Protos";
+
+service QuizRoomService{
+	rpc CreateRoom (CreateRoomRequest) returns (RoomResponse);
+	rpc GetAllRoom (RoomsEmptyRequest) returns (RoomResponse);
+}
+
+message CreateRoomRequest{
+	string room  = 1;
+}
+
+message RoomResponse{
+	int32 code = 1;
+	string data  =2;
+	string message = 3;
+}
+
+message RoomsEmptyRequest{}

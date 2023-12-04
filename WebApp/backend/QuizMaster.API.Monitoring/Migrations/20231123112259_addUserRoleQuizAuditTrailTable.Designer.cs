@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuizMaster.API.Monitoring.DataAccess;
 
@@ -11,9 +12,11 @@ using QuizMaster.API.Monitoring.DataAccess;
 namespace QuizMaster.API.Monitoring.Migrations
 {
     [DbContext(typeof(MonitoringDbContext))]
-    partial class MonitoringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231123112259_addUserRoleQuizAuditTrailTable")]
+    partial class addUserRoleQuizAuditTrailTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,15 +50,14 @@ namespace QuizMaster.API.Monitoring.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserRole")
                         .IsRequired()
@@ -64,50 +66,6 @@ namespace QuizMaster.API.Monitoring.Migrations
                     b.HasKey("QuizAuditTrailId");
 
                     b.ToTable("QuizAuditTrails");
-                });
-
-            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.QuizDifficultyAuditTrail", b =>
-                {
-                    b.Property<int>("QuizDiffAuditTrailId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuizDiffAuditTrailId"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("NewValues")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OldValues")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserRole")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("QuizDiffAuditTrailId");
-
-                    b.ToTable("QuizDifficultyAuditTrails");
                 });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.UserAuditTrail", b =>

@@ -3,6 +3,7 @@ using QuizMaster.API.QuizSession.Configuration;
 using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Handlers;
 using QuizMaster.API.QuizSession.Hubs;
+using QuizMaster.API.QuizSession.Services.Grpc;
 using QuizMaster.API.QuizSession.Services.Repositories;
 using QuizMaster.API.QuizSession.Services.Workers;
 
@@ -15,7 +16,7 @@ namespace QuizMaster.API.QuizSession
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddGrpc();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -64,7 +65,9 @@ namespace QuizMaster.API.QuizSession
             {
                 endpoints.MapHub<SignalR_QuizSessionHub>("/quizmaster_ws");
             });
-
+            app.MapGrpcService<QuizSetServices>();
+            app.MapGrpcService<QuizRoomServices>();
+            app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 
             using(var scope = app.Services.CreateScope())
