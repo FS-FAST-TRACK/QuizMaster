@@ -67,6 +67,15 @@ namespace QuizMaster.API.QuizSession
 
             app.MapControllers();
 
+            using(var scope = app.Services.CreateScope())
+            {
+                var scopeProvider = scope.ServiceProvider;
+                var dbContext = scopeProvider.GetRequiredService<QuizSessionDbContext>();
+
+                if (dbContext != null)
+                    dbContext.Database.EnsureCreated();
+            }
+
             app.Run();
         }
     }
