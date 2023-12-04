@@ -6,7 +6,8 @@ import { fetchCategories, fetchDifficulties, fetchTypes } from "@/lib/quizData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import Loading from "./loading";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { setQuestionCategories } = useQuestionCategoriesStore();
@@ -30,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <SideNav />
             <div className="grow overflow-y-auto flex flex-col bg-[#F8F9FA]">
                 <PageHeader>Questions</PageHeader>
-                {children}
+                <Suspense fallback={<Loading />}>{children}</Suspense>
             </div>
         </div>
     );

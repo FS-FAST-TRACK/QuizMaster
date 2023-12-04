@@ -47,7 +47,7 @@ export default function MultipleChoiceQuestionDetail({
                                 if (e.target.checked) {
                                     form.setFieldValue(
                                         `questionDetailDtos.${index}.detailTypes`,
-                                        ["option", "answer"]
+                                        ["answer", "option"]
                                     );
                                 } else {
                                     form.setFieldValue(

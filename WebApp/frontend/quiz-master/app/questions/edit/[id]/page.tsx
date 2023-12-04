@@ -1,17 +1,11 @@
 "use client";
 
 import QuestionDetailsEdit from "@/components/Commons/QuestionDetailsEdit";
-import {
-    QuestionCreateDto,
-    QuestionCreateValues,
-    QuestionDetailCreateDto,
-    QuestionValues,
-} from "@/lib/definitions";
-import { humanFileSize, mapData } from "@/lib/helpers";
+import { QuestionValues } from "@/lib/definitions";
+import { humanFileSize } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
-    PuzzleData,
     SliderData,
 } from "@/lib/questionTypeData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
@@ -33,8 +27,6 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
-import { notifications } from "@mantine/notifications";
-import notificationStyles from "@/styles/notification.module.css";
 import { fetchQuestion } from "@/lib/quizData";
 
 const timeLimits = [10, 30, 60, 120];
@@ -208,8 +200,92 @@ export default function Page({ params }: { params: { id: number } }) {
                     ? "Answer cannot be hit with the given interval"
                     : null;
             },
-            options: {
-                value: (value, values, path) => {
+            questionDetailDtos: {
+                qDetailDesc: (value, values, path) => {
+                    if (!value) {
+                        return "Provide content.";
+                    }
+
+                    if (
+                        parseInt(values.qTypeId) === MultipleChoiceData.id ||
+                        parseInt(values.qTypeId) ===
+                            MultipleChoicePlusAudioData.id
+                    ) {
+                        return values.questionDetailDtos.findIndex((op, i) => {
+                            return (
+                                op.qDetailDesc === value &&
+                                path !== `questionDetailDtos.${i}.qDetailDesc`
+                            );
+                        }) >= 0
+                            ? "Duplicated Choice"
+                            : null;
+                    }
+
+                    if (parseInt(values.qTypeId) === SliderData.id) {
+                        var min = values.questionDetailDtos.find((qDetail) =>
+                            qDetail.detailTypes.includes("minimum")
+                        );
+                        var max = values.questionDetailDtos.find((qDetail) =>
+                            qDetail.detailTypes.includes("maximum")
+                        );
+                        var interval = values.questionDetailDtos.find(
+                            (qDetail) =>
+                                qDetail.detailTypes.includes("interval")
+                        );
+                        var answer = values.questionDetailDtos.find((qDetail) =>
+                            qDetail.detailTypes.includes("answer")
+                        );
+
+                        if (
+                            values.questionDetailDtos.find(
+                                (qDetail, i) =>
+                                    qDetail.detailTypes.includes("minimum") &&
+                                    path ===
+                                        `questionDetailDtos.${i}.qDetailDesc`
+                            )
+                        ) {
+                            if (!value) return "Provide minimmum";
+                            return max?.qDetailDesc &&
+                                parseInt(value) > parseInt(max?.qDetailDesc)
+                                ? "Minimum must not be larger than maximum"
+                                : null;
+                        }
+
+                        if (
+                            values.questionDetailDtos.find(
+                                (qDetail, i) =>
+                                    qDetail.detailTypes.includes("maximum") &&
+                                    path ===
+                                        `questionDetailDtos.${i}.qDetailDesc`
+                            )
+                        ) {
+                            if (!value) return "Provide maximum";
+                            return min?.qDetailDesc &&
+                                parseInt(value) < parseInt(min?.qDetailDesc)
+                                ? "Maximuam must not be smaller than minimim"
+                                : null;
+                        }
+
+                        if (
+                            values.questionDetailDtos.find(
+                                (qDetail, i) =>
+                                    qDetail.detailTypes.includes("interval") &&
+                                    path ===
+                                        `questionDetailDtos.${i}.qDetailDesc`
+                            )
+                        ) {
+                            if (!value) return "Provide interval";
+                            return answer?.qDetailDesc &&
+                                min?.qDetailDesc &&
+                                (parseInt(answer.qDetailDesc) -
+                                    parseInt(min.qDetailDesc)) %
+                                    parseInt(value) !==
+                                    0
+                                ? "Answer can't be hit with the given interval."
+                                : null;
+                        }
+                    }
+
                     if (
                         !value &&
                         (parseInt(values.qTypeId) === MultipleChoiceData.id ||
@@ -226,6 +302,9 @@ export default function Page({ params }: { params: { id: number } }) {
                     }) >= 0
                         ? "Duplicated Choice"
                         : null;
+                },
+                detailTypes: (value, values) => {
+                    return null;
                 },
             },
         },
@@ -303,6 +382,7 @@ export default function Page({ params }: { params: { id: number } }) {
                         })}
                         {...form.getInputProps("qTypeId")}
                         classNames={styles}
+                        disabled
                         clearable
                         required
                     />
