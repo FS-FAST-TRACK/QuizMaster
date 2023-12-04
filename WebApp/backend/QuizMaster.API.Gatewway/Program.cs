@@ -23,7 +23,7 @@ builder.Services.AddLogging();
 builder.Services.AddSignalR();
 builder.Services.AddCors(o => 
     o.AddDefaultPolicy(builder => 
-    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+    builder.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -111,6 +111,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors();
 
 app.MapControllers();
 app.MapHub<SessionHub>("/gateway/hub/session");
