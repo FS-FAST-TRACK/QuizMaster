@@ -7,6 +7,7 @@ import {
     QuestionType,
     CategoryResourceParameter,
     DifficultyResourceParameter,
+    QuestionDetail,
 } from "./definitions";
 
 export async function fetchQuestions({
@@ -68,7 +69,9 @@ export async function fetchCategories(
     }
 }
 
-export async function fetchDifficulties(difficultyResourceParameter?: DifficultyResourceParameter ) {
+export async function fetchDifficulties(
+    difficultyResourceParameter?: DifficultyResourceParameter
+) {
     try {
         var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`;
         if (difficultyResourceParameter) {
@@ -114,5 +117,45 @@ export async function fetchTypes() {
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch types data.");
+    }
+}
+
+export async function fetchQuestion({ questionId }: { questionId: number }) {
+    try {
+        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}`;
+
+        const { data } = await fetch(apiUrl).then(async (res) => {
+            var data: Question;
+
+            data = await res.json();
+
+            return { data };
+        });
+
+        return { data };
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question data.");
+    }
+}
+
+export async function fetchQuestionDetails({
+    questionId,
+}: {
+    questionId: number;
+}) {
+    try {
+        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail`;
+
+        const { data } = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionDetail[];
+            data = await res.json();
+            return { data };
+        });
+
+        return { data };
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question details.");
     }
 }

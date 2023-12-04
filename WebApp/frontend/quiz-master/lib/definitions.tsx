@@ -13,7 +13,16 @@ export type Question = {
 export type QuestionDetail = {
     id: number;
     qDetailDesc: string;
-    detailTypes: DetailType[];
+    detailTypes: (
+        | "answer"
+        | "option"
+        | "minimum"
+        | "maximum"
+        | "language"
+        | "interval"
+        | "range"
+        | "textToAudio"
+    )[];
 };
 
 export type DetailType = {
@@ -70,6 +79,11 @@ export type QuestionCreateValues = {
     language?: string;
     typeAnswer?: string;
 };
+
+export interface QuestionValues extends QuestionCreateValues {
+    id: number;
+    questionDetailDtos: QuestionDetail[];
+}
 
 export type QuestionDetailCreateDto = {
     qDetailDesc: string;

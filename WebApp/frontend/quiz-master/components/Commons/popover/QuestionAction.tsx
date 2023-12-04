@@ -30,7 +30,7 @@ export default function QuesitonAction({
                     <div>Remove</div>
                 </button>
                 <Link
-                    href={`question/edit/${questionId}`}
+                    href={`questions/edit/${questionId}`}
                     className="flex gap-2 p-2 text-[var(--success)] rounded-lg hover:text-white hover:bg-[var(--success)] "
                 >
                     <PencilIcon className="w-6 " />
