@@ -9,6 +9,10 @@
 		public int PageNumber { get; set; } = 1;
 
 		private int _pageSize = 40;
+		public int? QCategoryId { get; set; }
+		public int? QTypeId { get; set; }
+		public int? QDifficultyId { get; set; }
+
 		public int PageSize
 		{
 			get => _pageSize;

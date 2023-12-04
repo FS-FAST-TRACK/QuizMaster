@@ -42,11 +42,27 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			{
 				collection = collection.Where(q => q.ActiveData);
 			}
+
+			if (resourceParameter.QCategoryId != null)
+			{
+				collection = collection.Where(q => q.QCategoryId == resourceParameter.QCategoryId);
+			}
+
+			if(resourceParameter.QDifficultyId != null)
+			{
+				collection = collection.Where(q => q.QDifficultyId == resourceParameter.QDifficultyId);
+			}
+
+			if (resourceParameter.QTypeId != null)
+			{
+				collection = collection.Where(q => q.QTypeId == resourceParameter.QTypeId);
+			}
 			collection = collection
 				.Include(q => q.QCategory)
 				.Include(q => q.QDifficulty)
 				.Include(q => q.QType);
 
+			
 			if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
 			{
 				var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
