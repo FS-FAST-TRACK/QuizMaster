@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
@@ -17,12 +18,13 @@ namespace QuizMaster.API.Gateway.Hubs
     {
         private GrpcChannel _channel;
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
-        private IDictionary<string, string> ConnectionIdAndGroupPair = new Dictionary<string, string>();
+        private SessionHandler SessionHandler;
 
-        public SessionHub(IOptions<GrpcServerConfiguration> options)
+        public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel); 
+            SessionHandler = sessionHandler;
         }
 
         public async Task CreateRoom(CreateRoomDTO roomDTO)
@@ -38,6 +40,25 @@ namespace QuizMaster.API.Gateway.Hubs
                 await Clients.Group(quizRoom.QRoomDesc).SendAsync("NewQuizRooms", new[] { quizRoom });
             }
             // TODO: Reply 500 status
+        }
+
+
+        public async Task DeleteRoom(int roomId)
+        {
+            var request = new ModifyRoomRequest { Room = roomId };
+
+            var reply = await _channelClient.DeleteRoomAsync(request);
+
+            if (reply.Code == 204)
+            {
+                await Clients.Caller.SendAsync("notif", "Room was deleted");
+                await Clients.Group(reply.Data).SendAsync("notif", "[System] You have been removed from the room");
+                await SessionHandler.RemoveGroup(this, reply.Data);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("notif", reply.Message);
+            }
         }
 
 
@@ -76,7 +97,7 @@ namespace QuizMaster.API.Gateway.Hubs
                     if (containsId)
                     {
                         await Groups.AddToGroupAsync(connectionId, $"{RoomPin}");
-                        ConnectionIdAndGroupPair.Add(connectionId, roomName);
+                        await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("notif",$"{connectionId} has joined Room {roomName}");
                     }
                     //await Clients.All.SendAsync("QuizRooms", quizRooms);

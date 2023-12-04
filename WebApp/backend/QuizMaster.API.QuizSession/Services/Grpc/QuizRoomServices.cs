@@ -52,10 +52,6 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     await _context.SaveChangesAsync();
                 }
 
-
-                await _context.QuizRooms.AddAsync(quizRoom);
-                await _context.SaveChangesAsync();
-
                 reply.Code = 200;
                 reply.Data = JsonConvert.SerializeObject(quizRoom);
 
@@ -75,7 +71,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             try
             {
-                var allRooms = _context.QuizRooms.ToArray();
+                var allRooms = _context.QuizRooms.Where(a=>a.ActiveData).ToArray();
 
                 reply.Code = 200;
                 reply.Data = JsonConvert.SerializeObject(allRooms);
@@ -91,7 +87,40 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
         }
 
-            
+        public override async Task<RoomResponse> DeleteRoom(ModifyRoomRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+
+            var room = _context.QuizRooms.FirstOrDefault(r => r.Id == request.Room);
+            if (room == null)
+            {
+                reply.Code = 404;
+                reply.Message = $"Room with Id {request.Room} does not exist";
+                return await Task.FromResult(reply);
+            }
+            if (!room.ActiveData)
+            {
+                reply.Code = 200;
+                reply.Message = $"Room with Id '{request.Room}' ({room.QRoomDesc}) was already deleted";
+                return await Task.FromResult(reply);
+            }
+            room.ActiveData = false;
+            await _context.SaveChangesAsync();
+
+            reply.Code = 204;
+            reply.Message = $"Successfully deleted '{room.QRoomDesc}'";
+            reply.Data = room.QRoomPin+"";
+
+
+            return await Task.FromResult(reply);
+        }
+
+        public override Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
+        {
+            return base.UpdateRoom(request, context);
+        }
+
+
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
             var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
