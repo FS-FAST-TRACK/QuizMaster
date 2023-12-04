@@ -47,18 +47,7 @@ namespace QuizMaster.API.Account.Service.Worker
         {
             logger.LogInformation("RabbitMQ: Account Worker service is now running...");
 
-            using (var connection = connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                // declare an exchange
-                channel.ExchangeDeclare(appSettings.RabbitMq_Account_ExchangeName, ExchangeType.Direct);
-
-                // Declare a request queue for recieving messages
-                channel.QueueDeclare(appSettings.RabbitMq_Account_RequestQueueName, false, false, false, null);
-                channel.QueueBind(appSettings.RabbitMq_Account_RequestQueueName, appSettings.RabbitMq_Account_ExchangeName, "");
-
-                // Declare a response queue for sending responses
-                channel.QueueDeclare(appSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
+            bool running = false;
 
                 // Setup consumer to listen for upcoming messages
                 var consumer = new EventingBasicConsumer(channel);
@@ -95,8 +84,10 @@ namespace QuizMaster.API.Account.Service.Worker
                 channel.BasicConsume(appSettings.RabbitMq_Account_RequestQueueName, true, consumer);
 
                 while(!stoppingToken.IsCancellationRequested)
+
                 {
-                    await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(3000, stoppingToken);
+                    logger.LogInformation($"RabbitMQ: Error... Retrying service\nError Info: {err.Message}\n\n");
                 }
             }
         }
