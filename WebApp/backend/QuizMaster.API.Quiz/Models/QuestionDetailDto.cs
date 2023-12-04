@@ -4,6 +4,6 @@
 	{
 		public int Id { get; set; }
 		public string QDetailDesc { get; set; }
-		public IEnumerable<DetailTypeDto> DetailTypes { get; set; }
+		public IEnumerable<string> DetailTypes { get; set; }
 	}
 }
