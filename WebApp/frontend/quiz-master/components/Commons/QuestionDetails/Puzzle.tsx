@@ -6,17 +6,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, Input, InputLabel, Text, Tooltip } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
-import { useState } from "react";
-import {
-    DragDropContext,
-    Draggable,
-    DraggableProvided,
-    DraggableProvidedDraggableProps,
-    DraggingStyle,
-    DropResult,
-    Droppable,
-    NotDraggingStyle,
-} from "react-beautiful-dnd";
+import React, { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from "@/styles/input.module.css";
 
 const getListStyle = (isDraggingOver: boolean) => ({
@@ -31,7 +22,7 @@ export default function PuzzleQuestionDetails({
 }: {
     form: UseFormReturnType<QuestionCreateValues>;
 }) {
-    const onDragEnd = (result: DropResult) => {
+    const onDragEnd = (result: any) => {
         // dropped outside the list'
 
         if (!result.destination) {
@@ -43,11 +34,19 @@ export default function PuzzleQuestionDetails({
             to: result.destination.index,
         });
     };
+    const [droppableID, setDroppableId] = useState("droppable");
+    useEffect(() => {
+        return () => {
+            setDroppableId("droppableID");
+        };
+    }, []);
+
     return (
         <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
+
             <DragDropContext onDragEnd={(result) => onDragEnd(result)}>
-                <Droppable droppableId="droppableID">
+                <Droppable droppableId={droppableID}>
                     {(provided, snapshot) => (
                         <div
                             {...provided.droppableProps}
