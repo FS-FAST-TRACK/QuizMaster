@@ -27,7 +27,9 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
-import { fetchQuestion } from "@/lib/quizData";
+import { fetchMedia, fetchQuestion } from "@/lib/quizData";
+import ImageInput from "@/components/Commons/inputs/ImageInput";
+import AudioInput from "@/components/Commons/inputs/AudioInput";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -214,7 +216,9 @@ export default function Page({ params }: { params: { id: number } }) {
                         return values.questionDetailDtos.findIndex((op, i) => {
                             return (
                                 op.qDetailDesc === value &&
-                                path !== `questionDetailDtos.${i}.qDetailDesc`
+                                path !==
+                                    `questionDetailDtos.${i}.qDetailDesc` &&
+                                op.detailTypes.includes("option")
                             );
                         }) >= 0
                             ? "Duplicated Choice"
@@ -323,6 +327,7 @@ export default function Page({ params }: { params: { id: number } }) {
             <form
                 className="flex flex-col gap-8 relative"
                 onSubmit={form.onSubmit(() => {
+                    console.log(form.values);
                     handelSubmit();
                 })}
                 onReset={() => form.reset()}
@@ -403,43 +408,25 @@ export default function Page({ params }: { params: { id: number } }) {
                 <div>
                     <InputLabel>Media</InputLabel>
                     <div className="flex flex-col gap-4 justify-between sm:justify-start ">
-                        <label
-                            htmlFor="question-image"
-                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
-                        >
-                            <PhotoIcon className="w-5" />
-                            <p>Insert Image</p>
-                        </label>
-                        <div>
-                            <div>{fileImage?.name}</div>
-                            <div>{humanFileSize(fileImage?.size)}</div>
-                        </div>
-                        <label
-                            htmlFor="question-audio"
-                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
-                        >
-                            <SpeakerWaveIcon className="w-5" />
-                            Insert Audio
-                        </label>
-                        <div>
-                            <div>{fileAudio?.name}</div>
-                            <div>{humanFileSize(fileAudio?.size)}</div>
-                        </div>
+                        <ImageInput
+                            fileImage={fileImage}
+                            setFileImage={setFileImage}
+                            qImageId={
+                                form.values.qImage.length > 15
+                                    ? form.values.qImage
+                                    : undefined
+                            }
+                        />
+                        <AudioInput
+                            fileAudio={fileAudio}
+                            setFileAudio={setFileAudio}
+                            qAudioId={
+                                form.values.qAudio.length > 15
+                                    ? form.values.qAudio
+                                    : undefined
+                            }
+                        />
                     </div>
-                    <FileInput
-                        id="question-image"
-                        accept="image/png,image/jpeg"
-                        className="hidden"
-                        value={fileImage}
-                        onChange={setFileImage}
-                    />
-                    <FileInput
-                        id="question-audio"
-                        className="hidden"
-                        accept="audio/*"
-                        value={fileAudio}
-                        onChange={setFileAudio}
-                    />
                 </div>
 
                 <QuestionDetailsEdit form={form} />
@@ -453,6 +440,7 @@ export default function Page({ params }: { params: { id: number } }) {
                         color="green"
                         type="submit"
                         disabled={!form.isDirty()}
+                        onClick={() => console.log(form.errors)}
                     >
                         Update
                     </Button>

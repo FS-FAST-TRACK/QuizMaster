@@ -159,3 +159,19 @@ export async function fetchQuestionDetails({
         throw new Error("Failed to fetch question details.");
     }
 }
+
+export async function fetchMedia(id: string) {
+    try {
+        const data = await fetch(
+            `${process.env.QUIZMASTER_MEDIA}/api/Media/download/${id}`
+        )
+            .then(async (res) => {
+                return await res.blob();
+            })
+            .then((blob) => {
+                var url = URL.createObjectURL(blob);
+                return url;
+            });
+        return { data };
+    } catch (error) {}
+}

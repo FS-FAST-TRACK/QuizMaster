@@ -1,12 +1,8 @@
 "use client";
 
 import QuestionDetails from "@/components/Commons/QuestionDetails";
-import {
-    QuestionCreateDto,
-    QuestionCreateValues,
-    QuestionDetailCreateDto,
-} from "@/lib/definitions";
-import { humanFileSize, mapData } from "@/lib/helpers";
+import { QuestionCreateValues } from "@/lib/definitions";
+import { mapData } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
@@ -16,12 +12,10 @@ import {
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
-import { PhotoIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
 import {
     Anchor,
     Breadcrumbs,
     Button,
-    FileInput,
     InputLabel,
     LoadingOverlay,
     Select,
@@ -30,10 +24,13 @@ import {
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import styles from "@/styles/input.module.css";
 import { notifications } from "@mantine/notifications";
-import notificationStyles from "../../../styles/notification.module.css";
+import notificationStyles from "@/styles/notification.module.css";
+import ImageInput from "@/components/Commons/inputs/ImageInput";
+import AudioInput from "@/components/Commons/inputs/AudioInput";
+import { notification } from "@/lib/notifications";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -52,7 +49,7 @@ export default function Page() {
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
     const router = useRouter();
-    const [visible, { toggle, close }] = useDisclosure(false);
+    const [visible, { toggle, close, open }] = useDisclosure(false);
     const [fileImage, setFileImage] = useState<File | null>(null);
     const [fileAudio, setFileAudio] = useState<File | null>(null);
 
@@ -191,8 +188,8 @@ export default function Page() {
             return;
         }
         const questionCreateDto = mapData(form);
+        open();
         if (fileImage) {
-            console.log(fileImage);
             var imageForm = new FormData();
             imageForm.append("file", fileImage);
             const imageRes = await fetch(
@@ -203,15 +200,19 @@ export default function Page() {
                     body: imageForm,
                 }
             );
+            console.log("fileImage");
             if (imageRes.ok) {
                 // Parse the response body as JSON
                 const responseBody = await imageRes.json();
-                console.log(responseBody);
                 questionCreateDto.qImage = responseBody.fileInformation.id;
+            } else {
+                notification({ type: "error", title: "Failed Post Image." });
+                close();
+
+                return;
             }
         }
         if (fileAudio) {
-            console.log(fileAudio);
             var audioForm = new FormData();
             audioForm.append("file", fileAudio);
             const audioRes = await fetch(
@@ -225,12 +226,15 @@ export default function Page() {
             if (audioRes.ok) {
                 // Parse the response body as JSON
                 const responseBody = await audioRes.json();
-                console.log(responseBody);
                 questionCreateDto.qAudio = responseBody.fileInformation.id;
+            } else {
+                notification({ type: "error", title: "Failed Post Audio." });
+                close();
+
+                return;
             }
         }
 
-        toggle();
         const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
             method: "POST",
             mode: "cors",
@@ -269,8 +273,7 @@ export default function Page() {
             </div>
             <form
                 className="flex flex-col gap-8 relative"
-                onSubmit={form.onSubmit((values) => {
-                    console.log(values);
+                onSubmit={form.onSubmit(() => {
                     handelSubmit();
                 })}
                 onReset={() => form.reset()}
@@ -350,43 +353,15 @@ export default function Page() {
                 <div>
                     <InputLabel>Media</InputLabel>
                     <div className="flex flex-col gap-4 justify-between sm:justify-start ">
-                        <label
-                            htmlFor="question-image"
-                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
-                        >
-                            <PhotoIcon className="w-5" />
-                            <p>Insert Image</p>
-                        </label>
-                        <div>
-                            <div>{fileImage?.name}</div>
-                            <div>{humanFileSize(fileImage?.size)}</div>
-                        </div>
-                        <label
-                            htmlFor="question-audio"
-                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
-                        >
-                            <SpeakerWaveIcon className="w-5" />
-                            Insert Audio
-                        </label>
-                        <div>
-                            <div>{fileAudio?.name}</div>
-                            <div>{humanFileSize(fileAudio?.size)}</div>
-                        </div>
+                        <ImageInput
+                            fileImage={fileImage}
+                            setFileImage={setFileImage}
+                        />
+                        <AudioInput
+                            fileAudio={fileAudio}
+                            setFileAudio={setFileAudio}
+                        />
                     </div>
-                    <FileInput
-                        id="question-image"
-                        accept="image/png,image/jpeg"
-                        className="hidden"
-                        value={fileImage}
-                        onChange={setFileImage}
-                    />
-                    <FileInput
-                        id="question-audio"
-                        className="hidden"
-                        accept="audio/*"
-                        value={fileAudio}
-                        onChange={setFileAudio}
-                    />
                 </div>
 
                 <QuestionDetails form={form} />
