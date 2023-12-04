@@ -35,7 +35,7 @@ namespace QuizMaster.API.Gateway.Hubs
             if (reply.Code == 200)
             {
                 var quizRoom = JsonConvert.DeserializeObject<QuizRoom>(reply.Data);
-                await Groups.AddToGroupAsync(Context.ConnectionId, quizRoom.QRoomDesc);
+                await Groups.AddToGroupAsync(Context.ConnectionId, quizRoom.QRoomPin+"");
 
                 await Clients.Group(quizRoom.QRoomDesc).SendAsync("NewQuizRooms", new[] { quizRoom });
             }
@@ -54,6 +54,24 @@ namespace QuizMaster.API.Gateway.Hubs
                 await Clients.Caller.SendAsync("notif", "Room was deleted");
                 await Clients.Group(reply.Data).SendAsync("notif", "[System] You have been removed from the room");
                 await SessionHandler.RemoveGroup(this, reply.Data);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("notif", reply.Message);
+            }
+        }
+
+        public async Task UpdateRoom(UpdateRoomDTO updateRoomDTO)
+        {
+            var request = new CreateRoomRequest { Room = JsonConvert.SerializeObject(updateRoomDTO) };
+            var reply = await _channelClient.UpdateRoomAsync(request);
+
+            // TODO:
+            if (reply.Code == 200)
+            {
+                var quizRoom = JsonConvert.DeserializeObject<QuizRoom>(reply.Data);
+                await Clients.Caller.SendAsync("NewQuizRooms", new[] { quizRoom });
+                await Clients.Caller.SendAsync("notif", "Room was updated");
             }
             else
             {

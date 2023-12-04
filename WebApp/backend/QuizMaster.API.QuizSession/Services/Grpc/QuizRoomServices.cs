@@ -66,6 +66,58 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
         }
 
+        public override async Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var room = JsonConvert.DeserializeObject<UpdateRoomDTO>(request.Room);
+
+                // check if quiz set available
+                int invalidId = QuizSetAvailable(room.QuestionSets);
+                if (invalidId != -1)
+                {
+                    reply.Code = 400;
+                    reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
+                    return await Task.FromResult(reply);
+                }
+
+                var quizRoom = _context.QuizRooms.Where(q => q.Id == room.RoomId).FirstOrDefault();
+
+                while (quizRoom == null)
+                {
+                    reply.Code = 404;
+                    reply.Message = $"QuizRoom Id of {invalidId} does not exist.";
+                    return await Task.FromResult(reply);
+                }
+
+                quizRoom.RoomOptions = JsonConvert.SerializeObject(room.RoomOptions);
+                await _context.SaveChangesAsync();
+
+                var sets =  _context.SetQuizRooms.Where(r => r.QRoomId == quizRoom.Id).ToList();
+                _context.SetQuizRooms.RemoveRange(sets);
+                await _context.SaveChangesAsync();
+                
+                foreach (var id in room.QuestionSets)
+                {
+                    await _context.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = quizRoom.Id });
+                    await _context.SaveChangesAsync();
+                }
+
+                reply.Code = 200;
+                reply.Data = JsonConvert.SerializeObject(quizRoom);
+
+                return await Task.FromResult(reply);
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Message = ex.Message;
+
+                return await Task.FromResult(reply);
+            }
+        }
+
         public override async Task<RoomResponse> GetAllRoom(RoomsEmptyRequest request, ServerCallContext context)
         {
             var reply = new RoomResponse();
@@ -114,12 +166,6 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
             return await Task.FromResult(reply);
         }
-
-        public override Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
-        {
-            return base.UpdateRoom(request, context);
-        }
-
 
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {

@@ -29,4 +29,9 @@ namespace QuizMaster.Library.Common.Models.QuizSession
         [Required] 
         public IEnumerable<string> RoomOptions { get; set; } = new List<string>();
     }
+
+    public class UpdateRoomDTO : CreateRoomDTO
+    {
+        public int RoomId { get; set; }
+    }
 }
