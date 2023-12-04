@@ -71,6 +71,7 @@ builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<RabbitMqUserWorker>();
 builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
 builder.Services.AddSingleton<RabbitMqRepository>();
+builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
 
 
 // configure cookie authentication

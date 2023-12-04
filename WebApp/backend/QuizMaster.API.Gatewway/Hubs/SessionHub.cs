@@ -17,12 +17,13 @@ namespace QuizMaster.API.Gateway.Hubs
     {
         private GrpcChannel _channel;
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
-        private IDictionary<string, string> ConnectionIdAndGroupPair = new Dictionary<string, string>();
+        private readonly IDictionary<string, int> _connection;
 
-        public SessionHub(IOptions<GrpcServerConfiguration> options)
+        public SessionHub(IOptions<GrpcServerConfiguration> options, IDictionary<string, int> connection)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel); 
+            _connection = connection;
         }
 
         public async Task CreateRoom(CreateRoomDTO roomDTO)
@@ -32,11 +33,15 @@ namespace QuizMaster.API.Gateway.Hubs
 
             if (reply.Code == 200)
             {
+               
+
                 var quizRoom = JsonConvert.DeserializeObject<QuizRoom>(reply.Data);
                 await Groups.AddToGroupAsync(Context.ConnectionId, quizRoom.QRoomDesc);
 
-                await Clients.Group(quizRoom.QRoomDesc).SendAsync("NewQuizRooms", new[] { quizRoom });
+                await Clients.All.SendAsync("NewQuizRooms", new[] { quizRoom });
             }
+
+
             // TODO: Reply 500 status
         }
 
@@ -76,7 +81,7 @@ namespace QuizMaster.API.Gateway.Hubs
                     if (containsId)
                     {
                         await Groups.AddToGroupAsync(connectionId, $"{RoomPin}");
-                        ConnectionIdAndGroupPair.Add(connectionId, roomName);
+                        _connection[Context.ConnectionId] = RoomPin;
                         await Clients.Group($"{RoomPin}").SendAsync("notif",$"{connectionId} has joined Room {roomName}");
                     }
                     //await Clients.All.SendAsync("QuizRooms", quizRooms);
@@ -88,17 +93,15 @@ namespace QuizMaster.API.Gateway.Hubs
             }
         }
 
-        /* task harold
-        public override async Task OnDisconnectedAsync(Exception? exception)
+        public override Task OnDisconnectedAsync(Exception? exception)
         {
-            var clientConnectionId = Context.ConnectionId;
-
-            await Groups.RemoveFromGroupAsync(clientConnectionId, ConnectionIdAndGroupPair[clientConnectionId]);
-
-            // retrieve the clientConnectionId from participants list then send it to notif
-            // must check if what group does the user belong and send a notif there
-            await Clients.Group(ConnectionIdAndGroupPair[clientConnectionId]).SendAsync("notif", $"{clientConnectionId} has left");
-        }*/
+            if(_connection.TryGetValue(Context.ConnectionId, out int roomPin))
+            {
+                _connection.Remove(Context.ConnectionId);
+                Clients.Group($"{roomPin}").SendAsync("notif", $"{Context.ConnectionId} has left the room");
+            }
+            return base.OnDisconnectedAsync(exception);
+        }
 
         public async Task GetAllRooms() 
         {
@@ -118,6 +121,21 @@ namespace QuizMaster.API.Gateway.Hubs
                 Console.Write(ex.ToString());
             }
             
+        }
+
+        public async Task StartRoom()
+        {
+            try
+            {
+                if(_connection.TryGetValue(Context.ConnectionId,out int roomPin))
+                {
+                    await Clients.Group($"{roomPin}").SendAsync("start", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex?.ToString());
+            }
         }
     }
 }
