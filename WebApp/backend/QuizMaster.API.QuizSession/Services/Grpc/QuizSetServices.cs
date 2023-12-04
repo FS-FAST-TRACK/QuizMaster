@@ -270,7 +270,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
         private int CheckForQuistionId(IEnumerable<int> quistionID)
         {
-            var quistions = _quizSetManager.Questions.Select(x => x.Id).ToArray();
+            var quistions = _quizSetManager.Questions.Where(x => x.ActiveData).Select(x => x.Id).ToArray();
             foreach (var id in quistionID)
             {
                 if (!quistions.Contains(id))
