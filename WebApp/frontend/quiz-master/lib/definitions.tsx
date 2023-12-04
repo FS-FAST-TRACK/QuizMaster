@@ -9,7 +9,6 @@ export type Question = {
     qTime: number;
     details: QuestionDetail[];
 };
-
 export type QuestionDetail = {
     id: number;
     qDetailDesc: string;
@@ -29,7 +28,6 @@ export type DetailType = {
     id: number;
     detailDesc: string;
 };
-
 export type QuestionCategory = {
     id: number;
     qCategoryDesc: string;
@@ -37,7 +35,6 @@ export type QuestionCategory = {
     dateCreated: Date;
     dateUpdated: Date;
 };
-
 export type QuestionDifficulty = {
     id: number;
     qDifficultyDesc: string;
@@ -45,7 +42,6 @@ export type QuestionDifficulty = {
     dateUpdated: Date;
     questionCounts: number;
 };
-
 export type QuestionType = {
     id: number;
     qTypeDesc: string;
@@ -89,7 +85,6 @@ export type QuestionDetailCreateDto = {
     qDetailDesc: string;
     detailTypes: string[];
 };
-
 export type QuestionResourceParameter = {
     pageSize: string;
     searchQuery?: string;
@@ -112,4 +107,15 @@ export type PaginationMetadata = {
     pageSize: number;
     currentPage: number;
     totalPages: number;
+};
+export type QuestionSet = {
+    id: number;
+    setName: string;
+    questionCounts: number;
+    dateCreated: Date;
+    dateUpdated: Date;
+};
+export type SetQuestions = {
+    id: number;
+    setId: number;
 };
