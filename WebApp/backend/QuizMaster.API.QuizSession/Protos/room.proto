@@ -5,6 +5,12 @@ option csharp_namespace = "QuizMaster.API.QuizSession.Protos";
 service QuizRoomService{
 	rpc CreateRoom (CreateRoomRequest) returns (RoomResponse);
 	rpc GetAllRoom (RoomsEmptyRequest) returns (RoomResponse);
+	rpc DeleteRoom (ModifyRoomRequest) returns (RoomResponse);
+	rpc UpdateRoom (CreateRoomRequest) returns (RoomResponse);
+}
+
+message ModifyRoomRequest{
+	int32 room = 1;
 }
 
 message CreateRoomRequest{
