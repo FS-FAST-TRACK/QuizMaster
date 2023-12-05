@@ -169,6 +169,17 @@ export function GetPatches(
             : []
     );
 
+    // Patch for Question Time Limit
+    patches = patches.concat(
+        form.isDirty("qTime")
+            ? {
+                  path: "qTime",
+                  op: "replace",
+                  value: parseInt(form.values.qTime),
+              }
+            : []
+    );
+
     return patches;
 }
 

@@ -245,25 +245,6 @@ export default function Page({ params }: { params: { id: number } }) {
         },
     });
 
-    const handleQuestionDetailPatch = useCallback(() => {}, [
-        form.values,
-        fileAudio,
-        fileImage,
-    ]);
-
-    const handleQuestionPatch = useCallback(() => {
-        var questionPatches = GetPatches(form);
-        patchQuestion({
-            patches: questionPatches,
-            image: fileImage,
-            audio: fileAudio,
-        });
-    }, [form.values, fileAudio, fileImage]);
-
-    const handelSubmit = useCallback(async () => {
-        handleQuestionPatch();
-    }, [form.values, fileAudio, fileImage]);
-
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
@@ -272,9 +253,6 @@ export default function Page({ params }: { params: { id: number } }) {
             </div>
             <form
                 className="flex flex-col gap-8 relative"
-                onSubmit={form.onSubmit(() => {
-                    handelSubmit();
-                })}
                 onReset={() => form.reset()}
             >
                 <LoadingOverlay
@@ -306,23 +284,18 @@ export default function Page({ params }: { params: { id: number } }) {
                         classNames={styles}
                         onChange={(value) => {
                             if (value) {
-                                fetch(
-                                    `${process.env.QUIZMASTER_QUIZ}/api/question/${form.values.id}`,
-                                    {
-                                        method: "PATCH",
-                                        mode: "cors",
-                                        body: JSON.stringify([
-                                            {
-                                                path: "qCategoryId",
-                                                op: "replace",
-                                                value: parseInt(value),
-                                            },
-                                        ]),
-                                        headers: {
-                                            "Content-Type": "application/json",
+                                patchQuestion({
+                                    id: form.values.id,
+                                    patches: [
+                                        {
+                                            path: "qCategoryId",
+                                            op: "replace",
+                                            value: parseInt(value),
                                         },
-                                    }
-                                ).then(() => {
+                                    ],
+                                    image: null,
+                                    audio: null,
+                                }).then(() => {
                                     form.setFieldValue("qCategoryId", value);
                                 });
                             }
@@ -342,6 +315,24 @@ export default function Page({ params }: { params: { id: number } }) {
                         {...form.getInputProps("qDifficultyId")}
                         clearable
                         required
+                        onChange={(value) => {
+                            if (value) {
+                                patchQuestion({
+                                    id: form.values.id,
+                                    patches: [
+                                        {
+                                            path: "qDifficultyId",
+                                            op: "replace",
+                                            value: parseInt(value),
+                                        },
+                                    ],
+                                    image: null,
+                                    audio: null,
+                                }).then(() => {
+                                    form.setFieldValue("qDifficultyId", value);
+                                });
+                            }
+                        }}
                     />
                     <Select
                         variant="filled"
@@ -371,6 +362,24 @@ export default function Page({ params }: { params: { id: number } }) {
                     clearable
                     required
                     classNames={styles}
+                    onChange={(value) => {
+                        if (value) {
+                            patchQuestion({
+                                id: form.values.id,
+                                patches: [
+                                    {
+                                        path: "qTime",
+                                        op: "replace",
+                                        value: parseInt(value),
+                                    },
+                                ],
+                                image: null,
+                                audio: null,
+                            }).then(() => {
+                                form.setFieldValue("qTime", value);
+                            });
+                        }
+                    }}
                 />
 
                 <div>
@@ -398,21 +407,6 @@ export default function Page({ params }: { params: { id: number } }) {
                 </div>
 
                 <QuestionDetailsEdit form={form} />
-
-                <div className="flex justify-end">
-                    <Button variant="transparent" color="gray" type="reset">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="filled"
-                        color="green"
-                        type="submit"
-                        disabled={!form.isDirty()}
-                        onClick={() => console.log(form.errors)}
-                    >
-                        Update
-                    </Button>
-                </div>
             </form>
         </div>
     );

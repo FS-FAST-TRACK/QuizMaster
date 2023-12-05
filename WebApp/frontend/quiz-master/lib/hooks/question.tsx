@@ -127,10 +127,12 @@ export async function postQuestion({
 }
 
 export async function patchQuestion({
+    id,
     patches,
     image,
     audio,
 }: {
+    id: number;
     patches: PatchItem[];
     image: File | undefined | null;
     audio: File | undefined | null;
@@ -188,14 +190,17 @@ export async function patchQuestion({
         }
 
         // Post Question
-        const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
-            method: "PATCH",
-            mode: "cors",
-            body: JSON.stringify(patches),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const res = await fetch(
+            `${process.env.QUIZMASTER_QUIZ}/api/question/${id}`,
+            {
+                method: "PATCH",
+                mode: "cors",
+                body: JSON.stringify(patches),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
 
         if (res.status === 201) {
             return res;

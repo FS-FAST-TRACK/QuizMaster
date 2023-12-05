@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, Input, InputLabel, Text, Tooltip } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     DragDropContext,
     Draggable,
@@ -18,6 +18,7 @@ import {
     NotDraggingStyle,
 } from "react-beautiful-dnd";
 import styles from "@/styles/input.module.css";
+import { patchQuestionDetail } from "@/lib/hooks/questionDetails";
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "var(--primary-100)" : "white",
@@ -31,41 +32,21 @@ export default function PuzzleQuestionDetails({
 }: {
     form: UseFormReturnType<QuestionValues>;
 }) {
-    const optionFields = form.values.questionDetailDtos.map((item, index) => {
-        if (!item.detailTypes.includes("option")) {
-            return;
-        }
-        return (
-            <div key={index} className="h-[60px]">
-                <Input
-                    size="lg"
-                    leftSection={<Bars4Icon className="w-6" />}
-                    classNames={styles}
-                    rightSectionWidth={40}
-                    rightSection={
-                        <Tooltip label="Remove">
-                            <TrashIcon
-                                className="w-6 cursor-pointer"
-                                onClick={() =>
-                                    form.removeListItem("options", index)
-                                }
-                            />
-                        </Tooltip>
-                    }
-                    leftSectionPointerEvents="visible"
-                    rightSectionPointerEvents="visible"
-                    {...form.getInputProps(`options.${index}.value`)}
-                />
-                <Input.Error>
+    const patchtDetail = (id: number, desc: string) => {
+        if (desc !== "") {
+            patchQuestionDetail({
+                questionId: form.values.id,
+                id: id,
+                patchRequest: [
                     {
-                        form.getInputProps(
-                            `questionDetailDtos.${index}.qDetailDesc`
-                        ).error
-                    }
-                </Input.Error>
-            </div>
-        );
-    });
+                        path: "/qDetailDesc",
+                        op: "replace",
+                        value: desc,
+                    },
+                ],
+            });
+        }
+    };
 
     const onDragEnd = (result: DropResult) => {
         // dropped outside the list'
@@ -79,6 +60,14 @@ export default function PuzzleQuestionDetails({
             to: result.destination.index,
         });
     };
+
+    const [droppableID, setDroppableId] = useState("droppable");
+    useEffect(() => {
+        return () => {
+            setDroppableId("droppableID");
+        };
+    }, []);
+
     return (
         <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
@@ -139,6 +128,12 @@ export default function PuzzleQuestionDetails({
                                                         {...form.getInputProps(
                                                             `questionDetailDtos.${index}.qDetailDesc`
                                                         )}
+                                                        onBlur={() => {
+                                                            patchtDetail(
+                                                                item.id,
+                                                                item.qDetailDesc
+                                                            );
+                                                        }}
                                                     />
                                                 </div>
                                             )}
@@ -167,4 +162,14 @@ export default function PuzzleQuestionDetails({
             </DragDropContext>
         </div>
     );
+}
+
+function CustomDraggable({
+    index,
+    draggableId,
+}: {
+    index: number;
+    draggableId: string;
+}) {
+    return <></>;
 }
