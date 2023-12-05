@@ -3,7 +3,14 @@ import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Box, Checkbox, Loader, Table, Text } from "@mantine/core";
+import {
+    Box,
+    Checkbox,
+    Loader,
+    LoadingOverlay,
+    Table,
+    Text,
+} from "@mantine/core";
 import { useCallback, useEffect, useState } from "react";
 import QuesitonAction from "../popover/QuestionAction";
 import PromptModal from "../modals/PromptModal";
@@ -14,9 +21,11 @@ import ViewQuestionModal from "../modals/ViewQuestionModal";
 export default function QuestionTable({
     questions,
     message,
+    loading,
 }: {
     questions: Question[];
     message?: string;
+    loading: boolean;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
@@ -118,6 +127,15 @@ export default function QuestionTable({
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
+                    {loading && (
+                        <Table.Tr>
+                            <Table.Td colSpan={99} rowSpan={10}>
+                                <div className="relative h-60">
+                                    <LoadingOverlay visible={loading} />
+                                </div>
+                            </Table.Td>
+                        </Table.Tr>
+                    )}
                     {questions.length === 0 ? (
                         <Table.Tr>
                             <Table.Td colSpan={99} rowSpan={10}>

@@ -9,10 +9,11 @@ import {
     Question,
     QuestionResourceParameter,
 } from "@/lib/definitions";
-import { fetchQuestions } from "@/lib/quizData";
+import { fetchQuestions } from "@/lib/hooks/question";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Anchor, Breadcrumbs } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -31,6 +32,7 @@ export default function Page() {
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
+    const [visible, { close, open }] = useDisclosure(false);
 
     const form = useForm<QuestionResourceParameter>({
         initialValues: {
@@ -40,14 +42,19 @@ export default function Page() {
         },
     });
 
-    useEffect(() => {
-        var questionsFetch = fetchQuestions({
+    const getQuestions = useCallback(async () => {
+        var questionsFetch = await fetchQuestions({
             questionResourceParameter: form.values,
         });
-        questionsFetch.then((res) => {
-            setQuestions(res.data);
-            setPaginationMetadata(res.paginationMetadata);
-        });
+
+        setQuestions(questionsFetch.data);
+        setPaginationMetadata(questionsFetch.paginationMetadata);
+    }, [form.values]);
+
+    useEffect(() => {
+        open();
+        getQuestions();
+        close();
     }, [form.values]);
 
     const handleSearch = useCallback(() => {
@@ -93,6 +100,7 @@ export default function Page() {
                           ? "No Questions"
                           : undefined
                 }
+                loading={visible}
             />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>
