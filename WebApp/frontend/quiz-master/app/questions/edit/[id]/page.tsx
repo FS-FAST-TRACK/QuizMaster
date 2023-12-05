@@ -53,21 +53,6 @@ export default function Page({ params }: { params: { id: number } }) {
     const [fileAudio, setFileAudio] = useState<File | null>(null);
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
-    // const [categories, setCategories] = useState<QuestionCategory[]>([]);
-    // const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
-    // const [types, setTypes] = useState<QuestionType[]>([]);
-
-    // useEffect(() => {
-    //     fetchCategories().then((res) => {
-    //         setCategories(res);
-    //     });
-    //     fetchDifficulties().then((res) => {
-    //         setDifficulties(res);
-    //     });
-    //     fetchTypes().then((res) => {
-    //         setTypes(res);
-    //     });
-    // }, []);
     useEffect(() => {
         console.log(params.id);
         fetchQuestion({ questionId: params.id })
@@ -147,61 +132,6 @@ export default function Page({ params }: { params: { id: number } }) {
                     : null,
             qCategoryId: (value, values) =>
                 value?.length === 0 ? "Question Category is required." : null,
-            interval: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide interval";
-                }
-                return values.sliderAnswer &&
-                    values.minimum &&
-                    (values.sliderAnswer - values.minimum) % value !== 0
-                    ? "Answer can't be hit with the given interval."
-                    : null;
-            },
-            minimum: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide minimum";
-                }
-                return values.maximum && value > values.maximum
-                    ? "Minimum must not be larger than maximum"
-                    : null;
-            },
-            maximum: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide maximum";
-                }
-                return values.minimum && value < values.minimum
-                    ? "Maximum must not be smaller than the minimum"
-                    : null;
-            },
-            sliderAnswer: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide answer";
-                }
-                if (values.minimum && values.minimum > value) {
-                    return "Answer must not be smaller than the minimum.";
-                }
-
-                if (values.maximum && values.maximum < value) {
-                    return "Answer must not be larger than the maximum.";
-                }
-                return values.minimum &&
-                    values.interval &&
-                    (value - values.minimum) % values.interval !== 0
-                    ? "Answer cannot be hit with the given interval"
-                    : null;
-            },
             questionDetailDtos: {
                 qDetailDesc: (value, values, path) => {
                     if (!value) {
