@@ -88,7 +88,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				.Include(q => q.QCategory)
 				.Include(q => q.QDifficulty)
 				.Include(q => q.QType)
-				.Include(q => q.Details)
+				.Include(q => q.Details.Where(qDetail => qDetail.ActiveData))
 				.FirstOrDefaultAsync();
 
 			if (question != null)
