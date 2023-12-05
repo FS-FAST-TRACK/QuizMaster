@@ -1,0 +1,97 @@
+version: "3.2"
+
+services:
+  # ACCOUNT MICROSERVICE
+  quizmaster-api-account:
+    container_name: quizmaster-api-account
+    build:
+      context: WebApp/backend
+      dockerfile: QuizMaster.API.Account/Dockerfile
+    ports:
+      - 5052:80
+      - 6052:443
+    environment:
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    depends_on:
+      - rabbitmq
+      - mssql
+    networks:
+      - rabbitmq-net
+      - mssql-database-network
+      - internal-network
+
+  # AUTHENTICATION MICROSERVICE
+  quizmaster-api-authentication:
+    container_name: quizmaster-api-authentication
+    build:
+      context: WebApp/backend
+      dockerfile: QuizMaster.API.Authentication/Dockerfile
+    ports:
+      - 5053:80
+      - 6053:443
+    environment:
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    depends_on:
+      - quizmaster-api-account
+      - rabbitmq
+    networks:
+      - rabbitmq-net
+      - internal-network
+
+  # GATEWAY MICROSERVICE
+  quizmaster-api-gateway:
+    container_name: quizmaster-api-gateway
+    build:
+      context: WebApp/backend
+      dockerfile: QuizMaster.API.Gatewway/Dockerfile
+    ports:
+      - 5060:80
+      - 6060:443
+    environment:
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    depends_on:
+      - quizmaster-api-account
+      - quizmaster-api-authentication
+    networks:
+      - rabbitmq-net
+      - mssql-database-network
+      - internal-network
+
+  # DATABASE [MSSQL]
+  mssql:
+    container_name: mssql-database
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      - "SA_PASSWORD=P@ssw0rd"
+      - "ACCEPT_EULA=Y"
+    ports:
+      - "1433:1433"
+    hostname: mssql-database
+    networks:
+      - mssql-database-network
+
+  # RABBITMQ MESSAGE BUS
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: "rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    hostname: rabbitmq-bus
+    networks:
+      - rabbitmq-net
+
+# NETWORKS
+networks:
+  rabbitmq-net:
+    name: Message Bus Network
+    driver: bridge
+  mssql-database-network:
+    name: Database Network
+    driver: bridge
+  internal-network:
+    name: Services Internal Networl
+    driver: bridge
