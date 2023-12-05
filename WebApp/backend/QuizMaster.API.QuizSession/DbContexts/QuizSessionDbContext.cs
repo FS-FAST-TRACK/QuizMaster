@@ -18,6 +18,7 @@ namespace QuizMaster.API.QuizSession.DbContexts
 		public DbSet<Set> Sets { get; set; }
 		public DbSet<QuestionSet> QuestionSets { get; set; }
 		public DbSet<QuizRoom> QuizRooms { get; set; }
+		public DbSet<SetQuizRoom> SetQuizRooms { get; set; }
 
 
 		public QuizSessionDbContext(DbContextOptions<QuizSessionDbContext> options) : base(options) { }
