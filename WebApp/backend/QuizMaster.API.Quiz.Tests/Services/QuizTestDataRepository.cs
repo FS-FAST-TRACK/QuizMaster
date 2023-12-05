@@ -101,6 +101,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			return await Task.FromResult(_categories);
 		}
 
+		public Task<PagedList<QuestionCategory>> GetAllCategoriesAsync(CategoryResourceParameter resourceParameter)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<IEnumerable<QuestionDifficulty>> GetAllDifficultiesAsync()
 		{
 			return await Task.FromResult(_difficulties);

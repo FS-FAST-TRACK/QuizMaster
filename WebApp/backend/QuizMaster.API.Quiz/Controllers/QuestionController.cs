@@ -34,7 +34,8 @@ namespace QuizMaster.API.Quiz.Controllers
 		#region Get All Questions
 		// GET: api/question
 		[HttpGet(Name = "GetQuestions")]
-		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get([FromQuery] QuestionResourceParameter resourceParameter)
+		public async Task<ActionResult<IEnumerable<QuestionDto>>> Get([FromQuery] QuestionResourceParameter
+			resourceParameter)
 		{
 			// Get all active questions asynchronously
 			var questions = await _quizRepository.GetAllQuestionsAsync(resourceParameter);

@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Models;
+using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,12 +28,38 @@ namespace QuizMaster.API.Quiz.Controllers
 
 		// GET: api/question/difficulty
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<DifficultyDto>>> Get()
+		public async Task<ActionResult<IEnumerable<DifficultyDto>>> Get([FromQuery] DifficultyResourceParameter resourceParameter)
 		{
-			// Get all active difficulties asynchronously
-			var difficulties = await _quizRepository.GetAllDifficultiesAsync();
-			return Ok(_mapper.Map<IEnumerable<DifficultyDto>>(difficulties));
-		}
+            if (resourceParameter.IsGetAll)
+            {
+                var difficultiesFromDb = await _quizRepository.GetAllDifficultiesAsync();
+
+                return Ok(_mapper.Map<IEnumerable<DifficultyDto>>(difficultiesFromDb));
+            }
+            // Get all active difficulties asynchronously
+            var difficulties = await _quizRepository.GetAllDifficultiesAsync(resourceParameter);
+
+            var paginationMetadata = new Dictionary<string, object?>
+            {
+                    { "totalCount", difficulties.TotalCount },
+                    { "pageSize", difficulties.PageSize },
+                    { "currentPage", difficulties.CurrentPage },
+                    { "totalPages", difficulties.TotalPages },
+                    { "previousPageLink", difficulties.HasPrevious ?
+                        Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
+                    : null },
+                { "nextPageLink", difficulties.HasNext ?
+                        Url.Link("GetQuestions", resourceParameter.GetObject("next"))
+                        : null }
+                };
+
+            Response.Headers.Add("X-Pagination",
+                   JsonSerializer.Serialize(paginationMetadata));
+
+            Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
+
+            return Ok(difficulties);
+        }
 
 		// GET api/question/difficulty/5
 		[HttpGet("{id}", Name = "GetDifficulty")]

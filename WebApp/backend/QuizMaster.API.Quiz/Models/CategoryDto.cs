@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace QuizMaster.API.Quiz.Models
 {
@@ -6,5 +7,8 @@ namespace QuizMaster.API.Quiz.Models
 	{
 		public int Id { get; set; }
 		public string QCategoryDesc { get; set; }
+		public int QuestionCounts { get; set; }
+		public DateTime DateCreated { get; set; }
+		public DateTime? DateUpdated { get; set; }
 	}
 }

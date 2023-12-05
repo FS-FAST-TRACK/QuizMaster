@@ -53,13 +53,19 @@ namespace QuizMaster.API.Authentication
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
+            /*
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            */
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             //app.UseHttpsRedirection();
+
+            app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();

@@ -198,8 +198,8 @@ namespace QuizMaster.API.QuizSession.Services.Workers
             // Save the Details
             questionPayload.QuestionDetails.ToList().ForEach(detail =>
             {
-                detail.QuestionId = detail.Question.Id;
-                detail.Question = null;
+				detail.QuestionId = detail.Question != null ? detail.Question.Id : detail.QuestionId;
+				detail.Question = null;
                 var _item = context.QuestionDetails.FirstOrDefault(d => d.Id == detail.Id);
                 if (_item == null)
                     context.QuestionDetails.Add(detail);
