@@ -2,7 +2,7 @@
 
 import QuestionDetailsEdit from "@/components/Commons/QuestionDetailsEdit";
 import { QuestionValues } from "@/lib/definitions";
-import { humanFileSize } from "@/lib/helpers";
+import { GetPatches, humanFileSize } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
@@ -30,6 +30,7 @@ import styles from "@/styles/input.module.css";
 import { fetchMedia, fetchQuestion } from "@/lib/quizData";
 import ImageInput from "@/components/Commons/inputs/ImageInput";
 import AudioInput from "@/components/Commons/inputs/AudioInput";
+import { patchQuestion } from "@/lib/hooks/question";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -244,8 +245,23 @@ export default function Page({ params }: { params: { id: number } }) {
         },
     });
 
+    const handleQuestionDetailPatch = useCallback(() => {}, [
+        form.values,
+        fileAudio,
+        fileImage,
+    ]);
+
+    const handleQuestionPatch = useCallback(() => {
+        var questionPatches = GetPatches(form);
+        patchQuestion({
+            patches: questionPatches,
+            image: fileImage,
+            audio: fileAudio,
+        });
+    }, [form.values, fileAudio, fileImage]);
+
     const handelSubmit = useCallback(async () => {
-        console.log(form.isDirty("qStatement"));
+        handleQuestionPatch();
     }, [form.values, fileAudio, fileImage]);
 
     return (
@@ -257,7 +273,6 @@ export default function Page({ params }: { params: { id: number } }) {
             <form
                 className="flex flex-col gap-8 relative"
                 onSubmit={form.onSubmit(() => {
-                    console.log(form.values);
                     handelSubmit();
                 })}
                 onReset={() => form.reset()}
@@ -289,6 +304,29 @@ export default function Page({ params }: { params: { id: number } }) {
                         clearable
                         required
                         classNames={styles}
+                        onChange={(value) => {
+                            if (value) {
+                                fetch(
+                                    `${process.env.QUIZMASTER_QUIZ}/api/question/${form.values.id}`,
+                                    {
+                                        method: "PATCH",
+                                        mode: "cors",
+                                        body: JSON.stringify([
+                                            {
+                                                path: "qCategoryId",
+                                                op: "replace",
+                                                value: parseInt(value),
+                                            },
+                                        ]),
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                    }
+                                ).then(() => {
+                                    form.setFieldValue("qCategoryId", value);
+                                });
+                            }
+                        }}
                     />
                     <Select
                         variant="filled"

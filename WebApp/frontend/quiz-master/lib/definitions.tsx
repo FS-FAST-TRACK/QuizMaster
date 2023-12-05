@@ -119,3 +119,9 @@ export type SetQuestions = {
     id: number;
     setId: number;
 };
+
+export type PatchItem = {
+    path: string;
+    op: string;
+    value: any;
+};
