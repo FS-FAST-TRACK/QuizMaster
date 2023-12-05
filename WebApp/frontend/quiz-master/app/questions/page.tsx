@@ -32,7 +32,7 @@ export default function Page() {
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
-    const [visible, { close, open }] = useDisclosure(false);
+    const [visible, { close, open }] = useDisclosure(true);
 
     const form = useForm<QuestionResourceParameter>({
         initialValues: {

@@ -58,8 +58,8 @@ export async function postQuestion({
     audio,
 }: {
     question: QuestionCreateDto;
-    image?: File;
-    audio?: File;
+    image: File | undefined | null;
+    audio: File | undefined | null;
 }) {
     try {
         // Post Image

@@ -11,16 +11,25 @@ export function notification({
     message?: string;
 }) {
     var notifData = {
+        color: "green",
         title: title,
         message: message || "",
     };
-    if (type === "success") {
+
+    switch (type) {
+        case "success":
+            notifData.color = "green";
+            break;
+        case "error":
+            notifData.color = "red";
+            break;
+        case "info":
+            notifData.color = "blue";
+            break;
     }
 
     notifications.show({
-        color: "green",
-        title: "Question created successfully",
-        message: "",
+        ...notifData,
         classNames: styles,
     });
 }

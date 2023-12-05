@@ -127,7 +127,7 @@ export default function QuestionTable({
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                    {loading && (
+                    {loading ? (
                         <Table.Tr>
                             <Table.Td colSpan={99} rowSpan={10}>
                                 <div className="relative h-60">
@@ -135,8 +135,7 @@ export default function QuestionTable({
                                 </div>
                             </Table.Td>
                         </Table.Tr>
-                    )}
-                    {questions.length === 0 ? (
+                    ) : questions.length === 0 ? (
                         <Table.Tr>
                             <Table.Td colSpan={99} rowSpan={10}>
                                 <div className="flex grow justify-center">

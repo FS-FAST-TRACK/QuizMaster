@@ -31,6 +31,7 @@ import notificationStyles from "@/styles/notification.module.css";
 import ImageInput from "@/components/Commons/inputs/ImageInput";
 import AudioInput from "@/components/Commons/inputs/AudioInput";
 import { notification } from "@/lib/notifications";
+import { postQuestion } from "@/lib/hooks/question";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -49,25 +50,9 @@ export default function Page() {
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
     const router = useRouter();
-    const [visible, { toggle, close, open }] = useDisclosure(false);
+    const [visible, { close, open }] = useDisclosure(false);
     const [fileImage, setFileImage] = useState<File | null>(null);
     const [fileAudio, setFileAudio] = useState<File | null>(null);
-
-    // const [categories, setCategories] = useState<QuestionCategory[]>([]);
-    // const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
-    // const [types, setTypes] = useState<QuestionType[]>([]);
-
-    // useEffect(() => {
-    //     fetchCategories().then((res) => {
-    //         setCategories(res);
-    //     });
-    //     fetchDifficulties().then((res) => {
-    //         setDifficulties(res);
-    //     });
-    //     fetchTypes().then((res) => {
-    //         setTypes(res);
-    //     });
-    // }, []);
 
     const form = useForm<QuestionCreateValues>({
         initialValues: {
@@ -188,81 +173,38 @@ export default function Page() {
             return;
         }
         const questionCreateDto = mapData(form);
+
+        // Open the loading overlay
         open();
-        if (fileImage) {
-            var imageForm = new FormData();
-            imageForm.append("file", fileImage);
-            const imageRes = await fetch(
-                `${process.env.QUIZMASTER_MEDIA}/api/media`,
-                {
-                    method: "POST",
-                    mode: "cors",
-                    body: imageForm,
-                }
-            );
-            console.log("fileImage");
-            if (imageRes.ok) {
-                // Parse the response body as JSON
-                const responseBody = await imageRes.json();
-                questionCreateDto.qImage = responseBody.fileInformation.id;
-            } else {
-                notification({ type: "error", title: "Failed Post Image." });
+
+        // Post question
+        postQuestion({
+            question: questionCreateDto,
+            image: fileImage,
+            audio: fileAudio,
+        })
+            .then((res) => {
+                console.log(res, "hello");
+                // Notify for successful post
+                notification({
+                    type: "success",
+                    title: "Question Create Successfuly",
+                });
+                // redirect to qeustions page
+                router.push("/questions");
+            })
+            .catch((err) => {
+                console.log("EHE");
+                // notify for error
+                notification({
+                    type: "error",
+                    title: "Failed to create question",
+                });
+            })
+            .finally(() => {
+                // close loading overlay
                 close();
-
-                return;
-            }
-        }
-        if (fileAudio) {
-            var audioForm = new FormData();
-            audioForm.append("file", fileAudio);
-            const audioRes = await fetch(
-                `${process.env.QUIZMASTER_MEDIA}/api/media`,
-                {
-                    method: "POST",
-                    mode: "cors",
-                    body: audioForm,
-                }
-            );
-            if (audioRes.ok) {
-                // Parse the response body as JSON
-                const responseBody = await audioRes.json();
-                questionCreateDto.qAudio = responseBody.fileInformation.id;
-            } else {
-                notification({ type: "error", title: "Failed Post Audio." });
-                close();
-
-                return;
-            }
-        }
-
-        const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
-            method: "POST",
-            mode: "cors",
-            body: JSON.stringify(questionCreateDto),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (res.status === 201) {
-            notifications.show({
-                color: "green",
-                title: "Question created successfully",
-                message: "",
-                classNames: notificationStyles,
-                className: "",
             });
-            router.push("/questions");
-        } else {
-            const error = await res.json();
-            close();
-            notifications.show({
-                color: "red",
-                title: "Failed to create question",
-                message: error.message,
-                classNames: notificationStyles,
-            });
-        }
     }, [form.values, fileAudio, fileImage]);
 
     return (
