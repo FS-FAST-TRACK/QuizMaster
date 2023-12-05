@@ -10,7 +10,6 @@ import {
     Question,
     QuestionCategory,
     QuestionResourceParameter,
-    SetQuestions,
 } from "@/lib/definitions";
 import { fetchCategories, fetchQuestions } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -30,9 +29,10 @@ import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import QuestionTable from "@/components/Commons/tables/QuestionTable";
+import AddQuestionToSetModal from "@/components/Commons/modals/AddQuestionToSetModal";
 
 const items = [
-    { label: "All", href: "#" },
+    { label: "All", href: "/question-sets" },
     { label: "Create Set", href: "#" },
     { label: "", href: "#" },
 ].map((item, index) => (
@@ -43,8 +43,8 @@ const items = [
 
 export default function Page() {
     const [createSetQuestion, setCreateSetQuestions] = useState(false);
-    const [addQuestion, setAddQuestions] = useState(false);
-    const [setQuestions, setSetQuestions] = useState<Question[]>([]);
+    const [addQuestions, setAddQuestions] = useState(false);
+    const [questionSet, setQuestionSet] = useState<Question[]>([]);
     const [visible, { toggle, close }] = useDisclosure(false);
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
@@ -59,11 +59,15 @@ export default function Page() {
     });
 
     useEffect(() => {
+        setQuestionSet((prevQuestionSet) => prevQuestionSet.slice(0, 2));
+    }, [questionSet]);
+
+    useEffect(() => {
         var questionsFetch = fetchQuestions({
             questionResourceParameter: form.values,
         });
         questionsFetch.then((res) => {
-            setSetQuestions(res.data);
+            setQuestionSet(res.data);
             setPaginationMetadata(res.paginationMetadata);
         });
     }, [form.values]);
@@ -112,17 +116,17 @@ export default function Page() {
                 </div>
 
                 <QuestionTable
-                    questions={setQuestions}
+                    questions={questionSet}
                     message={
                         form.values.searchQuery
                             ? `No questions match \"${form.values.searchQuery}\"`
-                            : setQuestions.length === 0
+                            : questionSet.length === 0
                               ? "No Questions"
                               : undefined
                     }
                 />
                 <Pagination form={form} metadata={paginationMetadata} />
-                <div className="flex justify-end">
+                {/* <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
                         href="#"
@@ -137,10 +141,14 @@ export default function Page() {
                         <PlusIcon className="w-6" />
                         <p className="block">Add Question</p>
                     </Button>
-                </div>
+                </div> */}
             </form>
+            <AddQuestionToSetModal
+                onClose={() => setAddQuestions(false)}
+                opened={addQuestions}
+                setQuestions={setQuestionSet}
+                questions={questionSet}
+            />
         </div>
     );
 }
-
-//MOCK DATA

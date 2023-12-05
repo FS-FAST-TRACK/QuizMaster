@@ -1,4 +1,10 @@
-import { QuestionCategory, QuestionSet } from "@/lib/definitions";
+import {
+    Question,
+    QuestionCategory,
+    QuestionSet,
+    Set,
+} from "@/lib/definitions";
+import { fetchQuestionsInSet, fetchSetQuestions } from "@/lib/quizData";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Loader, Table } from "@mantine/core";
 import { useEffect, useState } from "react";
@@ -7,50 +13,61 @@ export default function QuestionSetsTable({
     questionSets,
     message,
 }: {
-    questionSets: QuestionSet[];
+    questionSets: Set[];
     message?: string;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [questionsSet, setQuestionsSet] = useState<QuestionSet[]>([]);
+
     useEffect(() => {
         setSelectedRows([]);
+
+        fetchSetQuestions().then((res) => {
+            setQuestionsSet(res);
+        });
     }, [questionSets]);
 
-    const rows = questionSets.map((questionSet) => (
-        <Table.Tr
-            key={questionSet.id}
-            bg={
-                selectedRows.includes(questionSet.id)
-                    ? "var(--primary-100)"
-                    : undefined
-            }
-        >
-            <Table.Td>
-                <Checkbox
-                    color="green"
-                    aria-label="Select row"
-                    checked={selectedRows.includes(questionSet.id)}
-                    onChange={(event) =>
-                        setSelectedRows(
-                            event.currentTarget.checked
-                                ? [...selectedRows, questionSet.id]
-                                : selectedRows.filter(
-                                      (id) => id !== questionSet.id
-                                  )
-                        )
-                    }
-                />
-            </Table.Td>
-            <Table.Td>{questionSet.setName}</Table.Td>
-            <Table.Td>{questionSet.dateCreated.toDateString()}</Table.Td>
-            <Table.Td>{questionSet.dateUpdated.toDateString()}</Table.Td>
-            <Table.Td>{questionSet.questionCounts}</Table.Td>
-            <Table.Td>
-                <div className="cursor-pointer flex items-center justify-center aspect-square">
-                    <EllipsisVerticalIcon className="w-6" />
-                </div>
-            </Table.Td>
-        </Table.Tr>
-    ));
+    const rows = questionSets.map((questionSet) => {
+        const count = questionsSet.filter(
+            (question) => question.setId === questionSet.id
+        );
+        return (
+            <Table.Tr
+                key={questionSet.id}
+                bg={
+                    selectedRows.includes(questionSet.id)
+                        ? "var(--primary-100)"
+                        : undefined
+                }
+            >
+                <Table.Td>
+                    <Checkbox
+                        color="green"
+                        aria-label="Select row"
+                        checked={selectedRows.includes(questionSet.id)}
+                        onChange={(event) =>
+                            setSelectedRows(
+                                event.currentTarget.checked
+                                    ? [...selectedRows, questionSet.id]
+                                    : selectedRows.filter(
+                                          (id) => id !== questionSet.id
+                                      )
+                            )
+                        }
+                    />
+                </Table.Td>
+                <Table.Td>{questionSet.qSetName}</Table.Td>
+                <Table.Td>{questionSet.dateCreated.toDateString()}</Table.Td>
+                <Table.Td>{questionSet.dateUpdated.toDateString()}</Table.Td>
+                <Table.Td>{count.length}</Table.Td>
+                <Table.Td>
+                    <div className="cursor-pointer flex items-center justify-center aspect-square">
+                        <EllipsisVerticalIcon className="w-6" />
+                    </div>
+                </Table.Td>
+            </Table.Tr>
+        );
+    });
 
     return (
         <div className="w-full border-2 rounded-xl overflow-x-auto grow bg-white">
