@@ -10,6 +10,8 @@ import {
     Question,
     QuestionCategory,
     QuestionResourceParameter,
+    QuestionSet,
+    QuestionSetDTO,
 } from "@/lib/definitions";
 import { fetchCategories, fetchQuestions } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -30,6 +32,8 @@ import styles from "@/styles/input.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import AddQuestionToSetModal from "@/components/Commons/modals/AddQuestionToSetModal";
+import { notifications } from "@mantine/notifications";
+import notificationStyles from "@/styles/notification.module.css";
 
 const items = [
     { label: "All", href: "/question-sets" },
@@ -45,6 +49,7 @@ export default function Page() {
     const [createSetQuestion, setCreateSetQuestions] = useState(false);
     const [addQuestions, setAddQuestions] = useState(false);
     const [questionSet, setQuestionSet] = useState<Question[]>([]);
+    const [qSetName, setQSetName] = useState("");
     const [visible, { toggle, close }] = useDisclosure(false);
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
@@ -58,19 +63,48 @@ export default function Page() {
         },
     });
 
-    useEffect(() => {
-        setQuestionSet((prevQuestionSet) => prevQuestionSet.slice(0, 2));
-    }, [questionSet]);
+    const handleSubmit = useCallback(async () => {
+        const questionSetIds = questionSet.map((question) => question.id);
 
-    useEffect(() => {
-        var questionsFetch = fetchQuestions({
-            questionResourceParameter: form.values,
-        });
-        questionsFetch.then((res) => {
-            setQuestionSet(res.data);
-            setPaginationMetadata(res.paginationMetadata);
-        });
-    }, [form.values]);
+        const questionSetCreateDto: QuestionSetDTO = {
+            qSetDesc: "",
+            qSetName: qSetName,
+            questions: questionSetIds,
+        };
+        console.log(questionSetIds);
+        console.log(qSetName);
+        console.log(JSON.stringify(questionSetCreateDto));
+        const res = await fetch(
+            `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/create`,
+            {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify(questionSetCreateDto),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        console.log(res);
+        if (res.status === 200) {
+            notifications.show({
+                color: "green",
+                title: "Question set created successfully",
+                message: "",
+                classNames: notificationStyles,
+                className: "",
+            });
+        } else {
+            const error = await res.json();
+            notifications.show({
+                color: "red",
+                title: "Failed to create question set",
+                message: error.message,
+                classNames: notificationStyles,
+            });
+        }
+    }, [questionSet]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -95,9 +129,9 @@ export default function Page() {
                     label="Set Name"
                     placeholder="Set Name"
                     variant="filled"
+                    onChange={(e) => setQSetName(e.target.value)}
                     withAsterisk
                     classNames={styles}
-                    {...form.getInputProps("qStatement")}
                 />
 
                 <div className="flex align-center">
@@ -124,9 +158,11 @@ export default function Page() {
                               ? "No Questions"
                               : undefined
                     }
+                    setSelectedRow={() => null}
+                    loading={visible}
                 />
                 <Pagination form={form} metadata={paginationMetadata} />
-                {/* <div className="flex justify-end">
+                <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
                         href="#"
@@ -136,12 +172,12 @@ export default function Page() {
                     <Button
                         className="flex ml-3 h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
                         color="green"
-                        onClick={() => setAddQuestions(true)}
+                        onClick={handleSubmit}
+                        disabled={qSetName === "" || questionSet.length === 0}
                     >
-                        <PlusIcon className="w-6" />
-                        <p className="block">Add Question</p>
+                        <p className="block">Create a set</p>
                     </Button>
-                </div> */}
+                </div>
             </form>
             <AddQuestionToSetModal
                 onClose={() => setAddQuestions(false)}

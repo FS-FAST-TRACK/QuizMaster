@@ -11,7 +11,13 @@ import {
     Table,
     Text,
 } from "@mantine/core";
-import { useCallback, useEffect, useState } from "react";
+import {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 import QuesitonAction from "../popover/QuestionAction";
 import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
@@ -21,10 +27,12 @@ import ViewQuestionModal from "../modals/ViewQuestionModal";
 export default function QuestionTable({
     questions,
     message,
+    setSelectedRow,
     loading,
 }: {
     questions: Question[];
     message?: string;
+    setSelectedRow: Dispatch<SetStateAction<number[]>>;
     loading: boolean;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
@@ -38,6 +46,10 @@ export default function QuestionTable({
     useEffect(() => {
         setSelectedRows([]);
     }, [questions]);
+
+    useEffect(() => {
+        setSelectedRow(selectedRows);
+    }, [selectedRows]);
 
     const handelDelete = useCallback(async () => {
         const res = await fetch(

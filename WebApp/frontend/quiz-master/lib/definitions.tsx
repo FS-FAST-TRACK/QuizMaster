@@ -122,6 +122,11 @@ export type QuestionSet = {
     questionId: number;
     setId: number;
 };
+export type QuestionSetDTO = {
+    qSetDesc: string;
+    qSetName: string;
+    questions: number[];
+};
 export type PatchItem = {
     path: string;
     op: string;

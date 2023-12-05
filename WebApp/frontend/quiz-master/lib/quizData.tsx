@@ -223,6 +223,7 @@ export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
         throw new Error("Failed to fetch question data.");
     }
 }
+
 export async function fetchMedia(id: string) {
     try {
         const data = await fetch(
