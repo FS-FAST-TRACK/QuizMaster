@@ -10,6 +10,7 @@ using QuizMaster.API.Authentication.Services.Temp;
 using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,9 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(o => 
     o.AddDefaultPolicy(builder => 
     builder.WithOrigins("http://localhost:5173", "http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
+builder.Services.AddScoped<SessionHub>();
+builder.Services.AddSingleton<SessionHandler>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

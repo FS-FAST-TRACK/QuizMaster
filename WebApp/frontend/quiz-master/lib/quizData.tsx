@@ -171,9 +171,9 @@ export async function fetchSets() {
                 var data: Set[];
                 data = await res.json();
                 data.forEach((set) => {
-                set.dateCreated = new Date(set.dateCreated);
-                set.dateUpdated = new Date(set.dateUpdated);
-            });
+                    set.dateCreated = new Date(set.dateCreated);
+                    set.dateUpdated = new Date(set.dateUpdated);
+                });
 
                 return data;
             }
@@ -204,7 +204,7 @@ export async function fetchSetQuestions() {
     }
 }
 
-export async function fetchQuestionsInSet({qSetId}:{qSetId: number}) {
+export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
     try {
         var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/get_question_set/${qSetId}`;
 
@@ -222,4 +222,19 @@ export async function fetchQuestionsInSet({qSetId}:{qSetId: number}) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch question data.");
     }
+}
+export async function fetchMedia(id: string) {
+    try {
+        const data = await fetch(
+            `${process.env.QUIZMASTER_MEDIA}/api/Media/download/${id}`
+        )
+            .then(async (res) => {
+                return await res.blob();
+            })
+            .then((blob) => {
+                var url = URL.createObjectURL(blob);
+                return url;
+            });
+        return { data };
+    } catch (error) { }
 }

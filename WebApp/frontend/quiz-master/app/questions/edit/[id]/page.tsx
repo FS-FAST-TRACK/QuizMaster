@@ -2,7 +2,7 @@
 
 import QuestionDetailsEdit from "@/components/Commons/QuestionDetailsEdit";
 import { QuestionValues } from "@/lib/definitions";
-import { humanFileSize } from "@/lib/helpers";
+import { GetPatches, humanFileSize } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
@@ -27,7 +27,10 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
-import { fetchQuestion } from "@/lib/quizData";
+import { fetchMedia, fetchQuestion } from "@/lib/quizData";
+import ImageInput from "@/components/Commons/inputs/ImageInput";
+import AudioInput from "@/components/Commons/inputs/AudioInput";
+import { patchQuestion } from "@/lib/hooks/question";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -51,21 +54,6 @@ export default function Page({ params }: { params: { id: number } }) {
     const [fileAudio, setFileAudio] = useState<File | null>(null);
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
-    // const [categories, setCategories] = useState<QuestionCategory[]>([]);
-    // const [difficulties, setDifficulties] = useState<QuestionDifficulty[]>([]);
-    // const [types, setTypes] = useState<QuestionType[]>([]);
-
-    // useEffect(() => {
-    //     fetchCategories().then((res) => {
-    //         setCategories(res);
-    //     });
-    //     fetchDifficulties().then((res) => {
-    //         setDifficulties(res);
-    //     });
-    //     fetchTypes().then((res) => {
-    //         setTypes(res);
-    //     });
-    // }, []);
     useEffect(() => {
         console.log(params.id);
         fetchQuestion({ questionId: params.id })
@@ -145,61 +133,6 @@ export default function Page({ params }: { params: { id: number } }) {
                     : null,
             qCategoryId: (value, values) =>
                 value?.length === 0 ? "Question Category is required." : null,
-            interval: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide interval";
-                }
-                return values.sliderAnswer &&
-                    values.minimum &&
-                    (values.sliderAnswer - values.minimum) % value !== 0
-                    ? "Answer can't be hit with the given interval."
-                    : null;
-            },
-            minimum: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide minimum";
-                }
-                return values.maximum && value > values.maximum
-                    ? "Minimum must not be larger than maximum"
-                    : null;
-            },
-            maximum: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide maximum";
-                }
-                return values.minimum && value < values.minimum
-                    ? "Maximum must not be smaller than the minimum"
-                    : null;
-            },
-            sliderAnswer: (value, values) => {
-                if (parseInt(values.qTypeId) !== SliderData.id) {
-                    return null;
-                }
-                if (!value) {
-                    return "Provide answer";
-                }
-                if (values.minimum && values.minimum > value) {
-                    return "Answer must not be smaller than the minimum.";
-                }
-
-                if (values.maximum && values.maximum < value) {
-                    return "Answer must not be larger than the maximum.";
-                }
-                return values.minimum &&
-                    values.interval &&
-                    (value - values.minimum) % values.interval !== 0
-                    ? "Answer cannot be hit with the given interval"
-                    : null;
-            },
             questionDetailDtos: {
                 qDetailDesc: (value, values, path) => {
                     if (!value) {
@@ -214,7 +147,9 @@ export default function Page({ params }: { params: { id: number } }) {
                         return values.questionDetailDtos.findIndex((op, i) => {
                             return (
                                 op.qDetailDesc === value &&
-                                path !== `questionDetailDtos.${i}.qDetailDesc`
+                                path !==
+                                    `questionDetailDtos.${i}.qDetailDesc` &&
+                                op.detailTypes.includes("option")
                             );
                         }) >= 0
                             ? "Duplicated Choice"
@@ -310,8 +245,23 @@ export default function Page({ params }: { params: { id: number } }) {
         },
     });
 
+    const handleQuestionDetailPatch = useCallback(() => {}, [
+        form.values,
+        fileAudio,
+        fileImage,
+    ]);
+
+    const handleQuestionPatch = useCallback(() => {
+        var questionPatches = GetPatches(form);
+        patchQuestion({
+            patches: questionPatches,
+            image: fileImage,
+            audio: fileAudio,
+        });
+    }, [form.values, fileAudio, fileImage]);
+
     const handelSubmit = useCallback(async () => {
-        console.log(form.isDirty("qStatement"));
+        handleQuestionPatch();
     }, [form.values, fileAudio, fileImage]);
 
     return (
@@ -354,6 +304,29 @@ export default function Page({ params }: { params: { id: number } }) {
                         clearable
                         required
                         classNames={styles}
+                        onChange={(value) => {
+                            if (value) {
+                                fetch(
+                                    `${process.env.QUIZMASTER_QUIZ}/api/question/${form.values.id}`,
+                                    {
+                                        method: "PATCH",
+                                        mode: "cors",
+                                        body: JSON.stringify([
+                                            {
+                                                path: "qCategoryId",
+                                                op: "replace",
+                                                value: parseInt(value),
+                                            },
+                                        ]),
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                    }
+                                ).then(() => {
+                                    form.setFieldValue("qCategoryId", value);
+                                });
+                            }
+                        }}
                     />
                     <Select
                         variant="filled"
@@ -403,43 +376,25 @@ export default function Page({ params }: { params: { id: number } }) {
                 <div>
                     <InputLabel>Media</InputLabel>
                     <div className="flex flex-col gap-4 justify-between sm:justify-start ">
-                        <label
-                            htmlFor="question-image"
-                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
-                        >
-                            <PhotoIcon className="w-5" />
-                            <p>Insert Image</p>
-                        </label>
-                        <div>
-                            <div>{fileImage?.name}</div>
-                            <div>{humanFileSize(fileImage?.size)}</div>
-                        </div>
-                        <label
-                            htmlFor="question-audio"
-                            className="w-[200px] flex gap-4 border text-[#706E6D] bg-[#D9D9D9] px-4 py-3 rounded text-sm cursor-pointer"
-                        >
-                            <SpeakerWaveIcon className="w-5" />
-                            Insert Audio
-                        </label>
-                        <div>
-                            <div>{fileAudio?.name}</div>
-                            <div>{humanFileSize(fileAudio?.size)}</div>
-                        </div>
+                        <ImageInput
+                            fileImage={fileImage}
+                            setFileImage={setFileImage}
+                            qImageId={
+                                form.values.qImage.length > 15
+                                    ? form.values.qImage
+                                    : undefined
+                            }
+                        />
+                        <AudioInput
+                            fileAudio={fileAudio}
+                            setFileAudio={setFileAudio}
+                            qAudioId={
+                                form.values.qAudio.length > 15
+                                    ? form.values.qAudio
+                                    : undefined
+                            }
+                        />
                     </div>
-                    <FileInput
-                        id="question-image"
-                        accept="image/png,image/jpeg"
-                        className="hidden"
-                        value={fileImage}
-                        onChange={setFileImage}
-                    />
-                    <FileInput
-                        id="question-audio"
-                        className="hidden"
-                        accept="audio/*"
-                        value={fileAudio}
-                        onChange={setFileAudio}
-                    />
                 </div>
 
                 <QuestionDetailsEdit form={form} />
@@ -453,6 +408,7 @@ export default function Page({ params }: { params: { id: number } }) {
                         color="green"
                         type="submit"
                         disabled={!form.isDirty()}
+                        onClick={() => console.log(form.errors)}
                     >
                         Update
                     </Button>

@@ -1,5 +1,6 @@
 import { UseFormReturnType, useForm } from "@mantine/form";
 import {
+    PatchItem,
     Question,
     QuestionCreateDto,
     QuestionCreateValues,
@@ -128,6 +129,47 @@ export function mapData(
             break;
     }
     return questionCreateDto;
+}
+
+export function GetPatches(
+    form: UseFormReturnType<QuestionValues>
+): PatchItem[] {
+    var patches: PatchItem[] = [];
+
+    // Patch for Question Statement
+    patches = patches.concat(
+        form.isDirty("qStatement")
+            ? {
+                  path: "qStatement",
+                  op: "replace",
+                  value: form.values.qStatement,
+              }
+            : []
+    );
+
+    // Patch for Question Category
+    patches = patches.concat(
+        form.isDirty("qCategoryId")
+            ? {
+                  path: "qCategoryId",
+                  op: "replace",
+                  value: parseInt(form.values.qCategoryId),
+              }
+            : []
+    );
+
+    // Patch for Question Difficulty
+    patches = patches.concat(
+        form.isDirty("qDifficultyId")
+            ? {
+                  path: "qDifficultyId",
+                  op: "replace",
+                  value: parseInt(form.values.qDifficultyId),
+              }
+            : []
+    );
+
+    return patches;
 }
 
 export function humanFileSize(bytes?: number, si = true, dp = 1) {

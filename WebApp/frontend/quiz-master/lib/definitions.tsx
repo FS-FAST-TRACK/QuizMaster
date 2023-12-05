@@ -121,4 +121,9 @@ export type Set = {
 export type QuestionSet = {
     questionId: number;
     setId: number;
-}
+};
+export type PatchItem = {
+    path: string;
+    op: string;
+    value: any;
+};

@@ -70,6 +70,15 @@ namespace QuizMaster.API.QuizSession
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 
+            using(var scope = app.Services.CreateScope())
+            {
+                var scopeProvider = scope.ServiceProvider;
+                var dbContext = scopeProvider.GetRequiredService<QuizSessionDbContext>();
+
+                if (dbContext != null)
+                    dbContext.Database.EnsureCreated();
+            }
+
             app.Run();
         }
     }
