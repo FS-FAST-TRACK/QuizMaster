@@ -108,14 +108,17 @@ export type PaginationMetadata = {
     currentPage: number;
     totalPages: number;
 };
-export type QuestionSet = {
+export type Set = {
     id: number;
-    setName: string;
-    questionCounts: number;
+    qSetName: string;
+    qSetDesc: string;
+    activeData: boolean;
     dateCreated: Date;
     dateUpdated: Date;
+    createdByUserId: number;
+    updatedByUserId: number;
 };
-export type SetQuestions = {
-    id: number;
+export type QuestionSet = {
+    questionId: number;
     setId: number;
-};
+}
