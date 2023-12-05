@@ -48,6 +48,7 @@ namespace QuizMaster.API.Quiz
 			// Register worker services
 			builder.Services.AddHostedService<QuizDataSynchronizationWorker>();
 
+
 			var app = builder.Build();
 
 			// Configure the HTTP request pipeline.
@@ -55,11 +56,21 @@ namespace QuizMaster.API.Quiz
 			{
 				app.UseSwagger();
 				app.UseSwaggerUI();
+
+				// add the cors policy to the app
+				// allow any origin to access api endpoints on development mode
+				
 			}
 
 			app.UseHttpsRedirection();
 
 			app.UseAuthorization();
+
+	//		app.UseCors(p => p.WithOrigins("http://localhost:3000")
+	//.AllowAnyHeader()
+	//.AllowAnyMethod().WithHeaders());
+			app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+
 
 			app.MapGrpcService<Service>();
 			app.MapGrpcService<QuestionService>();

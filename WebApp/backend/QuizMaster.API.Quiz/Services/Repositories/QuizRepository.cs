@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Quiz.DbContexts;
+using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -41,20 +42,36 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			{
 				collection = collection.Where(q => q.ActiveData);
 			}
+
+			if (resourceParameter.QCategoryId != null)
+			{
+				collection = collection.Where(q => q.QCategoryId == resourceParameter.QCategoryId);
+			}
+
+			if(resourceParameter.QDifficultyId != null)
+			{
+				collection = collection.Where(q => q.QDifficultyId == resourceParameter.QDifficultyId);
+			}
+
+			if (resourceParameter.QTypeId != null)
+			{
+				collection = collection.Where(q => q.QTypeId == resourceParameter.QTypeId);
+			}
 			collection = collection
 				.Include(q => q.QCategory)
 				.Include(q => q.QDifficulty)
 				.Include(q => q.QType);
 
+			
 			if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
 			{
 				var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
 				collection = collection
 					.Where(q =>
 					q.QStatement.ToLower().Replace(" ", "").Contains(query)
-					&& q.QCategory.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
-					&& q.QType.QTypeDesc.ToLower().Replace(" ", "").Contains(query)
-					&& q.QDifficulty.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
+					|| q.QCategory.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
+					|| q.QType.QTypeDesc.ToLower().Replace(" ", "").Contains(query)
+					|| q.QDifficulty.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
 					);
 
 			}
@@ -133,6 +150,41 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return await _context.Categories.Where(c => c.ActiveData).ToListAsync();
 		}
 
+		public async Task<PagedList<CategoryDto>> GetAllCategoriesAsync(CategoryResourceParameter resourceParameter)
+		{
+			var collection = _context.Categories as IQueryable<QuestionCategory>;
+			if (resourceParameter.IsOnlyActiveData)
+			{
+				collection = collection.Where(c => c.ActiveData);
+			}
+			
+
+			if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
+			{
+				var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
+				collection = collection
+					.Where(c =>
+					c.QCategoryDesc.ToLower().Replace(" ", "").Contains(query)
+					
+					);
+
+			}
+			var collection2 = collection.Select(c => new CategoryDto
+			{
+				Id = c.Id,
+				QCategoryDesc = c.QCategoryDesc,
+				DateCreated = c.DateCreated,
+				DateUpdated = c.DateUpdated,
+				QuestionCounts = _context.Questions.Where(q => q.ActiveData && q.QCategoryId == c.Id).Count()
+			})as IQueryable<CategoryDto>;
+
+
+			return await PagedList<CategoryDto>.CreateAsync(collection2,
+				resourceParameter.PageNumber,
+				resourceParameter.PageSize);
+
+		}
+
 		public async Task<QuestionCategory?> GetCategoryAsync(int id)
 		{
 			return await _context.Categories.Where(c => c.Id == id).FirstOrDefaultAsync();
@@ -180,7 +232,42 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 			return await _context.Difficulties.Where(d => d.ActiveData).ToListAsync();
 		}
 
-		public async Task<QuestionDifficulty?> GetDifficultyAsync(int id)
+        public async Task<PagedList<DifficultyDto>> GetAllDifficultiesAsync(DifficultyResourceParameter resourceParameter)
+		{
+            var collection = _context.Difficulties as IQueryable<QuestionDifficulty>;
+            if (resourceParameter.IsOnlyActiveData)
+            {
+                collection = collection.Where(c => c.ActiveData);
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(resourceParameter.SearchQuery))
+            {
+                var query = resourceParameter.SearchQuery.ToLower().Replace(" ", "");
+                collection = collection
+                    .Where(c =>
+                    c.QDifficultyDesc.ToLower().Replace(" ", "").Contains(query)
+
+                    );
+
+            }
+            var collection2 = collection.Select(c => new DifficultyDto
+            {
+                Id = c.Id,
+                QDifficultyDesc = c.QDifficultyDesc,
+                DateCreated = c.DateCreated,
+                DateUpdated = c.DateUpdated,
+                QuestionCounts = _context.Questions.Where(q => q.ActiveData && q.QCategoryId == c.Id).Count()
+            }) as IQueryable<DifficultyDto>;
+
+
+            return await PagedList<DifficultyDto>.CreateAsync(collection2,
+                resourceParameter.PageNumber,
+                resourceParameter.PageSize);
+
+        }
+
+        public async Task<QuestionDifficulty?> GetDifficultyAsync(int id)
 		{
 			return await _context.Difficulties.Where(d => d.Id == id).FirstOrDefaultAsync();
 		}
