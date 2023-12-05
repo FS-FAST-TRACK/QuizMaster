@@ -52,6 +52,7 @@ export default function Page() {
 
     const handleSearch = useCallback(() => {
         form.setFieldValue("searchQuery", searchQuery);
+        form.setFieldValue("pageNumber", 1);
     }, [searchQuery, form]);
 
     return (
