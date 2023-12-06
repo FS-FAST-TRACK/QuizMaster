@@ -10,10 +10,12 @@ namespace QuizMaster.API.Gateway.Services
     public class SessionHandler
     {
         private IDictionary<string, string> connectionGroupPair;
+        private Dictionary<string, QuizParticipant> participantLinkedConnectionId;
         private List<string> InSession;
         public SessionHandler()
         {
             connectionGroupPair = new Dictionary<string, string>();
+            participantLinkedConnectionId = new Dictionary<string, QuizParticipant>();
             InSession = new List<string>();
         }
 
@@ -48,6 +50,16 @@ namespace QuizMaster.API.Gateway.Services
         public string? GetConnectionGroup(string connectionId)
         {
             return connectionGroupPair[connectionId];
+        }
+
+        public void LinkParticipantConnectionId(string connectionId, QuizParticipant quizParticipant)
+        {
+            participantLinkedConnectionId[connectionId] = quizParticipant;
+        }
+
+        public QuizParticipant GetLinkedParticipantInConnectionId(string connectionId)
+        {
+            return participantLinkedConnectionId[connectionId];
         }
 
         public async Task StartQuiz(SessionHub hub, QuizRoomService.QuizRoomServiceClient grpcClient, string roomId)

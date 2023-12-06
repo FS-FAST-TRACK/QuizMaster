@@ -20,6 +20,7 @@ namespace QuizMaster.API.Gateway.Hubs
         private GrpcChannel _channel;
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
         private SessionHandler SessionHandler;
+        private List<string> NAMES = new List<string>() { "Harold", "Jay", "JM", "Ada", "Pia"," Bo", "Rodney", "Neal", "Jess", "Aly", "James", "Xerxes", "Wayne", "Ken"};
 
         public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
@@ -90,7 +91,7 @@ namespace QuizMaster.API.Gateway.Hubs
             string connectionId = Context.ConnectionId;
 
             // send chat only to group
-            await Clients.Group(roomId).SendAsync("chat", $"[{connectionId}]: {chat}");
+            await Clients.Group(roomId).SendAsync("chat", $"[{SessionHandler.GetLinkedParticipantInConnectionId(connectionId).QParticipantDesc}]: {chat}");
         }
 
 
@@ -119,9 +120,11 @@ namespace QuizMaster.API.Gateway.Hubs
 
                     if (containsId)
                     {
+                        string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
+                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name });
                         await Groups.AddToGroupAsync(connectionId, $"{RoomPin}");
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
-                        await Clients.Group($"{RoomPin}").SendAsync("notif",$"{connectionId} has joined Room {room.QRoomDesc}", room );
+                        await Clients.Group($"{RoomPin}").SendAsync("notif",$"{Name} has joined Room {room.QRoomDesc}", room );
                     }
                     //await Clients.All.SendAsync("QuizRooms", quizRooms);
                 }
@@ -153,13 +156,14 @@ namespace QuizMaster.API.Gateway.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{Context.ConnectionId} has been disconnected");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId).QParticipantDesc} has been disconnected");
         }
 
         public async Task LeaveRoom()
         {
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{Context.ConnectionId} has left the room");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId).QParticipantDesc} has left the room");
         }
+
         public async Task StartRoom(string roomPin)
         {
             try
