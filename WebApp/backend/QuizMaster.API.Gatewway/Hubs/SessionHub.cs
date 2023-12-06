@@ -211,10 +211,10 @@ namespace QuizMaster.API.Gateway.Hubs
 
                         if(questionReply.Code == 200) 
                         {
-                            var questionDetails = JsonConvert.DeserializeObject<Question>(questionReply.Data);
-                            var timout = questionDetails.QTime;
+                            var details = JsonConvert.DeserializeObject<QuestionsDTO>(questionReply.Data);
+                            var timout = details.question.QTime;
 
-                            await Clients.Group(roomPin).SendAsync("question", questionDetails.QStatement);
+                            await Clients.Group(roomPin).SendAsync("question", details);
                             await Task.Delay(timout*1000);
                         }
                     }

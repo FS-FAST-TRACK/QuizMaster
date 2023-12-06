@@ -211,6 +211,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var id = request.Id;
 
             var question = _context.Questions.FirstOrDefault(x => x.Id == id);
+            var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).ToList();
 
             if(question == null)
             {
@@ -221,7 +222,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
 
             reply.Code = 200;
-            reply.Data = JsonConvert.SerializeObject(question);
+            reply.Data = JsonConvert.SerializeObject(new QuestionsDTO { question=question, details=details});
             
             return await Task.FromResult(reply);    
 
