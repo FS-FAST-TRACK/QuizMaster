@@ -4,9 +4,12 @@ import { PatchItem } from "../definitions";
 export async function removeCategory({ id }: { id: number }) {
     try {
         const { res } = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/category/${id}`
+            `${process.env.QUIZMASTER_QUIZ}/api/question/category/${id}`,
+            {
+                method: "DELETE",
+            }
         ).then((res) => {
-            if (res.status === 404) {
+            if (res.status > 300) {
                 throw new Error("Failed to Delete category data.");
             }
             return { res };
