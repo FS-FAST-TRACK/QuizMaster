@@ -100,6 +100,7 @@ export default function Page() {
                           ? "No Questions"
                           : undefined
                 }
+                setSelectedRow={() => null}
                 loading={visible}
             />
             <Pagination form={form} metadata={paginationMetadata} />
