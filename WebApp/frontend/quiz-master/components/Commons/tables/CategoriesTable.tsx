@@ -2,6 +2,7 @@ import { QuestionCategory } from "@/lib/definitions";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Loader, Table } from "@mantine/core";
 import { useEffect, useState } from "react";
+import ViewCategoryModal from "../modals/ViewCategoryModal";
 
 export default function CategoriesTable({
     categories,
@@ -11,6 +12,10 @@ export default function CategoriesTable({
     message?: string;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [viewCategory, setViewCategory] = useState<
+        QuestionCategory | undefined
+    >();
+
     useEffect(() => {
         setSelectedRows([]);
     }, [categories]);
@@ -40,7 +45,12 @@ export default function CategoriesTable({
                     }
                 />
             </Table.Td>
-            <Table.Td>{category.qCategoryDesc}</Table.Td>
+            <Table.Td
+                className="cursor-pointer"
+                onClick={() => setViewCategory(category)}
+            >
+                {category.qCategoryDesc}
+            </Table.Td>
             <Table.Td>{category.dateCreated.toDateString()}</Table.Td>
             <Table.Td>{category.dateUpdated.toDateString()}</Table.Td>
             <Table.Td>{category.questionCounts}</Table.Td>
@@ -99,6 +109,13 @@ export default function CategoriesTable({
                     )}
                 </Table.Tbody>
             </Table>
+            <ViewCategoryModal
+                opened={viewCategory !== undefined}
+                onClose={() => {
+                    setViewCategory(undefined);
+                }}
+                category={viewCategory}
+            />
         </div>
     );
 }
