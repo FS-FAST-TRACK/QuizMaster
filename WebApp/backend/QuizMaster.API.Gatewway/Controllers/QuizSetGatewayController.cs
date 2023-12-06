@@ -34,7 +34,10 @@ namespace QuizMaster.API.Gateway.Controllers
             if(response.Code == 404)
             { return NotFound(response.Message); }
 
-            if(response.Code == 500)
+            if (response.Code == 409)
+            { return Conflict(response.Message); }
+
+            if (response.Code == 500)
             { return BadRequest(response.Message); }
 
             return Ok(JsonConvert.DeserializeObject<Set>( response.Data));
