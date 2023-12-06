@@ -11,7 +11,7 @@ import {
     QuestionCategory,
     QuestionResourceParameter,
 } from "@/lib/definitions";
-import { removeCategory } from "@/lib/hooks/category";
+import { patchCategory, removeCategory } from "@/lib/hooks/category";
 import { notification } from "@/lib/notifications";
 import { fetchCategories } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -94,6 +94,48 @@ export default function Page() {
         }
     }, [deleteCategory]);
 
+    const handleEdit = useCallback(
+        async (qCategoryDesc: string) => {
+            if (editCategory) {
+                patchCategory({
+                    id: editCategory?.id,
+                    patchRequest: [
+                        {
+                            path: "qCategoryDesc",
+                            op: "replace",
+                            value: qCategoryDesc,
+                        },
+                    ],
+                })
+                    .then(() => {
+                        setCategories((state) => {
+                            var copy = state;
+                            const index = copy.findIndex(
+                                (qCategory) => qCategory.id === editCategory.id
+                            );
+                            copy[index].qCategoryDesc = qCategoryDesc;
+
+                            return copy;
+                        });
+                        notification({
+                            type: "success",
+                            title: "Category succesfully updated.",
+                        });
+                    })
+                    .catch(() => {
+                        notification({
+                            type: "error",
+                            title: "Failed to update category.",
+                        });
+                    })
+                    .finally(() => {
+                        setEditCategory(undefined);
+                    });
+            }
+        },
+        [editCategory]
+    );
+
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
@@ -135,8 +177,13 @@ export default function Page() {
             />
             <Pagination form={form} metadata={paginationMetadata} />
             <CreateCategoryModal
-                opened={createCategory}
-                onClose={() => setCreateCategory(false)}
+                opened={createCategory || editCategory !== undefined}
+                onClose={() => {
+                    setCreateCategory(false);
+                    setEditCategory(undefined);
+                }}
+                category={editCategory}
+                onUpdate={handleEdit}
             />
             <PromptModal
                 body={
