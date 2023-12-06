@@ -1,15 +1,20 @@
 import { QuestionCategory } from "@/lib/definitions";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Loader, Table } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import ViewCategoryModal from "../modals/ViewCategoryModal";
+import CategoryAction from "../popover/CategoryAction";
 
 export default function CategoriesTable({
     categories,
     message,
+    onEdit,
+    onDelete,
 }: {
     categories: QuestionCategory[];
     message?: string;
+    onEdit?: (category: QuestionCategory) => void;
+    onDelete?: (category: QuestionCategory) => void;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [viewCategory, setViewCategory] = useState<
@@ -54,11 +59,14 @@ export default function CategoriesTable({
             <Table.Td>{category.dateCreated.toDateString()}</Table.Td>
             <Table.Td>{category.dateUpdated.toDateString()}</Table.Td>
             <Table.Td>{category.questionCounts}</Table.Td>
-            <Table.Td>
-                <div className="cursor-pointer flex items-center justify-center aspect-square">
-                    <EllipsisVerticalIcon className="w-6" />
-                </div>
-            </Table.Td>
+            {onDelete && onEdit && (
+                <Table.Td>
+                    <CategoryAction
+                        onDelete={() => onDelete(category)}
+                        onEdit={() => onEdit(category)}
+                    />
+                </Table.Td>
+            )}
         </Table.Tr>
     ));
 
