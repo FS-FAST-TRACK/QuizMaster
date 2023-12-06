@@ -167,6 +167,33 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);
         }
 
+        public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)
+        {
+            var repy = new RoomResponse();
+            var id = request.Id;
+
+
+            var quizSets = _context.SetQuizRooms.Where(x=> x.QRoomId == id).ToList();
+
+            repy.Code = 200;
+            repy.Data = JsonConvert.SerializeObject(quizSets);
+
+            return await Task.FromResult(repy);
+        }
+
+        public override async Task<RoomResponse> GetQuiz(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            var id = request.Id;
+
+            var qestions = _context.QuestionSets.Where(x=> x.SetId == id).ToList();
+
+            reply.Code = 200;
+            reply.Data = JsonConvert.SerializeObject(qestions);
+
+            return await Task.FromResult(reply);
+        }
+
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
             var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
@@ -176,6 +203,29 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return id;
             }
             return -1;
+        }
+
+        public override async Task<RoomResponse> GetQuestion(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            var id = request.Id;
+
+            var question = _context.Questions.FirstOrDefault(x => x.Id == id);
+            var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).ToList();
+
+            if(question == null)
+            {
+                reply.Code = 404;
+                reply.Message = $"Question with Id of {id} does not exist";
+
+                return await Task.FromResult(reply);
+            }
+
+            reply.Code = 200;
+            reply.Data = JsonConvert.SerializeObject(new QuestionsDTO { question=question, details=details});
+            
+            return await Task.FromResult(reply);    
+
         }
     }
 }
