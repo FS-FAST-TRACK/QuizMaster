@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Protos;
@@ -167,6 +168,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);
         }
 
+        // In room, get all the Sets
         public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)
         {
             var repy = new RoomResponse();
@@ -174,6 +176,11 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
 
             var quizSets = _context.SetQuizRooms.Where(x=> x.QRoomId == id).ToList();
+            
+            foreach( var quizSet in quizSets)
+            {
+                _ = await _context.QuizRooms.Where(r => r.Id == quizSet.QRoomId).FirstOrDefaultAsync();
+            }
 
             repy.Code = 200;
             repy.Data = JsonConvert.SerializeObject(quizSets);
@@ -181,6 +188,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(repy);
         }
 
+        // From all the QuestionSet
         public override async Task<RoomResponse> GetQuiz(SetRequest request, ServerCallContext context)
         {
             var reply = new RoomResponse();
@@ -205,6 +213,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return -1;
         }
 
+        // Get Question from a set Id in a list
         public override async Task<RoomResponse> GetQuestion(SetRequest request, ServerCallContext context)
         {
             var reply = new RoomResponse();

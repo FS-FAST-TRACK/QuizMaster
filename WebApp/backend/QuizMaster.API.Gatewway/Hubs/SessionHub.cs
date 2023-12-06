@@ -160,15 +160,37 @@ namespace QuizMaster.API.Gateway.Hubs
         {
             await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{Context.ConnectionId} has left the room");
         }
-        public async Task StartRoom()
+        public async Task StartRoom(string roomPin)
         {
             try
             {
-                var roomPin = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-                if (roomPin != null)
+                var reply = _channelClient.GetAllRoom(new RoomsEmptyRequest());
+                int roomId = -1;
+
+                if (reply.Code == 200)
                 {
-                    await Clients.Group(roomPin).SendAsync("start", true);
+                    var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(reply.Data);
+
+                    bool containsId = false;
+                    var room = new QuizRoom();
+                    foreach (QuizRoom rooms in quizRooms)
+                    {
+                        if (rooms.QRoomPin == Convert.ToInt32(roomPin))
+                        {
+                            room = rooms;
+                            containsId = true;
+                            break;
+                        }
+                    }
+
+                    if(containsId)
+                    {
+                        roomId = room.Id;
+                    }
                 }
+                await Clients.Group(roomPin).SendAsync("start", true);
+                // we will not use await, we will let the request pass
+                await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
             }
             catch (Exception ex)
             {
@@ -214,8 +236,12 @@ namespace QuizMaster.API.Gateway.Hubs
                             var details = JsonConvert.DeserializeObject<QuestionsDTO>(questionReply.Data);
                             var timout = details.question.QTime;
 
-                            await Clients.Group(roomPin).SendAsync("question", details);
-                            await Task.Delay(timout*1000);
+                            for(int time = timout; time > 0; time--)
+                            {
+                                details.RemainingTime = time;
+                                await Clients.Group(roomPin).SendAsync("question", details);
+                                await Task.Delay(1000);
+                            }
                         }
                     }
                 }
