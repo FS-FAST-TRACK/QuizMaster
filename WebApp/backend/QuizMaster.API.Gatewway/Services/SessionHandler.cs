@@ -1,4 +1,5 @@
-﻿using QuizMaster.API.Gateway.Hubs;
+﻿using Microsoft.AspNetCore.SignalR;
+using QuizMaster.API.Gateway.Hubs;
 
 namespace QuizMaster.API.Gateway.Services
 {
@@ -31,6 +32,17 @@ namespace QuizMaster.API.Gateway.Services
                 await hub.Groups.RemoveFromGroupAsync(connectionId, group);
                 connectionGroupPair.Remove(connectionId);
             }
+        }
+        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage)
+        {
+            await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
+            await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("chat", disconnectMessage);
+            connectionGroupPair.Remove(connectionId);
+        }
+
+        public string? GetConnectionGroup(string connectionId)
+        {
+            return connectionGroupPair[connectionId];
         }
     }
 }
