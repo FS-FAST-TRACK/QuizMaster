@@ -20,6 +20,14 @@ namespace QuizMaster.API.Gateway.Hubs
         private GrpcChannel _channel;
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
         private SessionHandler SessionHandler;
+        private List<string> NAMES = new List<string>() { "Harold", "Jay", "JM", "Ada", "Pia"," Bo", "Rodney", "Neal", "Jess", "Aly", "James", "Xerxes", "Wayne", "Ken"};
+        /*
+         * TODO
+         * - Create A QB Context for QuizParticipants
+         * - Link Participants to ConnectionId
+         * - Allow Submission of Answers based on running question [current displayed]
+         * - Implement the Authorization to link QuizParticipants and Account.API
+         */
 
         public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
@@ -90,7 +98,7 @@ namespace QuizMaster.API.Gateway.Hubs
             string connectionId = Context.ConnectionId;
 
             // send chat only to group
-            await Clients.Group(roomId).SendAsync("chat", $"[{connectionId}]: {chat}");
+            await Clients.Group(roomId).SendAsync("chat", $"[{SessionHandler.GetLinkedParticipantInConnectionId(connectionId).QParticipantDesc}]: {chat}");
         }
 
 
@@ -119,9 +127,10 @@ namespace QuizMaster.API.Gateway.Hubs
 
                     if (containsId)
                     {
-                        await Groups.AddToGroupAsync(connectionId, $"{RoomPin}");
+                        string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
+                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name });
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
-                        await Clients.Group($"{RoomPin}").SendAsync("notif",$"{connectionId} has joined Room {room.QRoomDesc}", room );
+                        await Clients.Group($"{RoomPin}").SendAsync("notif",$"{Name} has joined Room {room.QRoomDesc}", room );
                     }
                     //await Clients.All.SendAsync("QuizRooms", quizRooms);
                 }
@@ -153,22 +162,45 @@ namespace QuizMaster.API.Gateway.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{Context.ConnectionId} has been disconnected");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId).QParticipantDesc} has been disconnected");
         }
 
         public async Task LeaveRoom()
         {
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{Context.ConnectionId} has left the room");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId).QParticipantDesc} has left the room");
         }
-        public async Task StartRoom()
+
+        public async Task StartRoom(string roomPin)
         {
             try
             {
-                var roomPin = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-                if (roomPin != null)
+                var reply = _channelClient.GetAllRoom(new RoomsEmptyRequest());
+                int roomId = -1;
+
+                if (reply.Code == 200)
                 {
-                    await Clients.Group(roomPin).SendAsync("start", true);
+                    var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(reply.Data);
+
+                    bool containsId = false;
+                    var room = new QuizRoom();
+                    foreach (QuizRoom rooms in quizRooms)
+                    {
+                        if (rooms.QRoomPin == Convert.ToInt32(roomPin))
+                        {
+                            room = rooms;
+                            containsId = true;
+                            break;
+                        }
+                    }
+
+                    if(containsId)
+                    {
+                        roomId = room.Id;
+                    }
                 }
+                await Clients.Group(roomPin).SendAsync("start", true);
+                // we will not use await, we will let the request pass
+                await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
             }
             catch (Exception ex)
             {
@@ -214,13 +246,25 @@ namespace QuizMaster.API.Gateway.Hubs
                             var details = JsonConvert.DeserializeObject<QuestionsDTO>(questionReply.Data);
                             var timout = details.question.QTime;
 
-                            await Clients.Group(roomPin).SendAsync("question", details);
-                            await Task.Delay(timout*1000);
+                            for(int time = timout; time > 0; time--)
+                            {
+                                details.RemainingTime = time;
+                                await Clients.Group(roomPin).SendAsync("question", details);
+                                await Task.Delay(1000);
+                            }
                         }
                     }
                 }
             }
         }
+
+        public async Task GetRoomParticipants(string roomPin)
+        {
+            var participants = SessionHandler.ParticipantLinkedConnectionsInAGroup(roomPin);
+            await Clients.Group(roomPin).SendAsync("participants", participants);
+        }
+
+
 
     }
 }
