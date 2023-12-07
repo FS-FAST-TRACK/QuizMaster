@@ -1,22 +1,32 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.Net.Http;
 
 namespace QuizMaster.API.Gateway.Services
 {
     public class SessionHandler
     {
-        private IDictionary<string, string> connectionGroupPair;
+        private Dictionary<string, string> connectionGroupPair;
         private Dictionary<string, QuizParticipant> participantLinkedConnectionId;
+        private List<QuizParticipant> AbandonedParticipants;
         private List<string> InSession;
+        private Dictionary<string, string> AuthenticatedClientIds;
+        private List<string> AuthenticatedClientAdmins;
         public SessionHandler()
         {
             connectionGroupPair = new Dictionary<string, string>();
             participantLinkedConnectionId = new Dictionary<string, QuizParticipant>();
             InSession = new List<string>();
+            AuthenticatedClientIds= new Dictionary<string, string>();
+            AuthenticatedClientAdmins = new List<string>();
+            AbandonedParticipants = new();
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
@@ -54,12 +64,18 @@ namespace QuizMaster.API.Gateway.Services
 
         public void LinkParticipantConnectionId(string connectionId, QuizParticipant quizParticipant)
         {
-            participantLinkedConnectionId[connectionId] = quizParticipant;
+            var hasAbandonedParticipant = participantLinkedConnectionId.Where(kv => kv.Value.UserId == quizParticipant.UserId && kv.Value.QEndDate != null).Select(kv=>kv.Value).FirstOrDefault();
+
+            // Link back the disconnected connectionId to a participant that hasn't completed the session yet
+            if(hasAbandonedParticipant != null)
+                participantLinkedConnectionId.Add(connectionId, hasAbandonedParticipant);
+            else 
+                participantLinkedConnectionId.Add(connectionId, quizParticipant);
         }
 
-        public QuizParticipant GetLinkedParticipantInConnectionId(string connectionId)
+        public QuizParticipant? GetLinkedParticipantInConnectionId(string connectionId)
         {
-            return participantLinkedConnectionId[connectionId];
+            return participantLinkedConnectionId.GetValueOrDefault(connectionId);
         }
 
 
@@ -69,7 +85,8 @@ namespace QuizMaster.API.Gateway.Services
             List<QuizParticipant> participants = new List<QuizParticipant>();
             foreach (var connectionId in connectionIds)
             {
-                participants.Add(GetLinkedParticipantInConnectionId(connectionId));
+                var participant = GetLinkedParticipantInConnectionId(connectionId);
+                if(participant != null) { participants.Add(participant); }
             }
 
             return participants;
@@ -115,7 +132,10 @@ namespace QuizMaster.API.Gateway.Services
                     var questionSetReply = await grpcClient.GetQuestionAsync(questionRequest);
 
                     var details = JsonConvert.DeserializeObject<QuestionsDTO>(questionSetReply.Data);
-                    var timout = 5;///details.question.QTime - 1;
+
+                    if(details == null) continue;
+
+                    var timout = details.question.QTime;
 
                     for (int time = timout; time >= 0; time--)
                     {
@@ -127,6 +147,123 @@ namespace QuizMaster.API.Gateway.Services
             }
             await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended");
             InSession.Remove(roomId);
+        }
+
+        public async Task AuthenticateConnectionId(SessionHub hub, AuthService.AuthServiceClient _authChannelClient, string connectionId, string token)
+        {
+            if (string.IsNullOrEmpty(token)) return;
+
+            var request = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            // get the AuthStore based on token
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(request);
+
+            var info = JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore);
+
+            // check if auth store is not null
+            if (info == null)
+            {
+                await hub.Clients.Caller.SendAsync("notif", "Failed to authenticate");
+                return;
+            }
+
+
+            AuthenticatedClientIds[connectionId] = token;
+            if (info.Roles.Contains("Administrator"))
+            {
+                AuthenticatedClientAdmins.Add(connectionId);
+            }
+
+            await hub.Clients.Caller.SendAsync("notif", "Logged in successfully");
+        }
+
+        public bool IsAuthenticated(string connectionId)
+        {
+            return AuthenticatedClientIds.ContainsKey(connectionId);
+        }
+
+        public bool IsAdmin(string connectionId)
+        {
+            return AuthenticatedClientAdmins.Contains(connectionId);
+        }
+
+        public string? GetTokenConnectionOwner(string token)
+        {
+            return AuthenticatedClientIds.Where(kv => kv.Value == token).Select(k => k.Key).FirstOrDefault();
+        }
+
+        public string GetConnectionToken(string connectionId)
+        {
+            return AuthenticatedClientIds[connectionId];
+        }
+
+        public void UnbindConnectionId(string connectionId)
+        {
+            AuthenticatedClientAdmins.Remove(connectionId);
+            AuthenticatedClientIds.Remove(connectionId);
+            connectionGroupPair.Remove(connectionId);
+
+            var participant = GetLinkedParticipantInConnectionId(connectionId);
+            if(participant != null) AbandonedParticipants.Add(participant);
+            participantLinkedConnectionId.Remove(connectionId);
+        }
+
+        public async Task<AuthStore?> GetUserInformation(AuthService.AuthServiceClient _authChannelClient, string token)
+        {
+            /*
+             * string token = string.Empty;
+            if (hub.Context == null) return null;
+            if (hub.Context.User == null) return null;
+            // grab the claims identity
+            var tokenClaim = hub.Context.GetHttpContext().User.Claims.ToList().FirstOrDefault(e => e.Type == "token");
+            if (hub.Context.GetHttpContext().Request.Cookies.TryGetValue("aaa", out var cookieValues))
+            {
+                // Use the cookie value as needed
+            }
+
+            // Accessing all cookies
+            foreach (var cookie in hub.Context.GetHttpContext().Request.Cookies)
+            {
+                string cookieName = cookie.Key;
+                string cookieValue = cookie.Value;
+                // Process each cookie
+            }
+            var isAuth = hub.Context.User.Identity.IsAuthenticated;
+            if (tokenClaim == null)
+            {
+                // Check the request header if there is a JWT token
+                try
+                {
+                    if (hub.Context.GetHttpContext() != null)
+                        token = hub.Context.GetHttpContext().Request.Headers.Authorization.ToString().Split(" ")[1];
+                }
+                catch
+                {
+                    
+                }
+            }
+            else
+            {
+                token = tokenClaim.Value;
+            }
+             */
+
+            if (string.IsNullOrEmpty(token)) return null;
+
+            var request = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            // get the AuthStore based on token
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(request);
+
+            var info = JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore);
+
+            return info;
         }
     }
 }
