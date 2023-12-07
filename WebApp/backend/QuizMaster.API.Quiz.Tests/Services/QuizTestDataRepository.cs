@@ -1,4 +1,5 @@
-﻿using QuizMaster.API.Quiz.ResourceParameters;
+﻿using QuizMaster.API.Quiz.Models;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -110,6 +111,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		{
 			return await Task.FromResult(_difficulties);
 		}
+
+        public Task<PagedList<DifficultyDto>> GetAllDifficultiesAsync(DifficultyResourceParameter resourceParameter)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync()
         {
@@ -275,5 +281,10 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		{
 			throw new NotImplementedException();
 		}
-	}
+
+        Task<PagedList<CategoryDto>> IQuizRepository.GetAllCategoriesAsync(CategoryResourceParameter resourceParameter)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
