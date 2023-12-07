@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.Net.Http;
 
 namespace QuizMaster.API.Gateway.Services
 {
@@ -127,6 +131,61 @@ namespace QuizMaster.API.Gateway.Services
             }
             await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended");
             InSession.Remove(roomId);
+        }
+
+        public async Task<AuthStore?> GetUserInformation(SessionHub hub, AuthService.AuthServiceClient _authChannelClient, string token)
+        {
+            /*
+             * string token = string.Empty;
+            if (hub.Context == null) return null;
+            if (hub.Context.User == null) return null;
+            // grab the claims identity
+            var tokenClaim = hub.Context.GetHttpContext().User.Claims.ToList().FirstOrDefault(e => e.Type == "token");
+            if (hub.Context.GetHttpContext().Request.Cookies.TryGetValue("aaa", out var cookieValues))
+            {
+                // Use the cookie value as needed
+            }
+
+            // Accessing all cookies
+            foreach (var cookie in hub.Context.GetHttpContext().Request.Cookies)
+            {
+                string cookieName = cookie.Key;
+                string cookieValue = cookie.Value;
+                // Process each cookie
+            }
+            var isAuth = hub.Context.User.Identity.IsAuthenticated;
+            if (tokenClaim == null)
+            {
+                // Check the request header if there is a JWT token
+                try
+                {
+                    if (hub.Context.GetHttpContext() != null)
+                        token = hub.Context.GetHttpContext().Request.Headers.Authorization.ToString().Split(" ")[1];
+                }
+                catch
+                {
+                    
+                }
+            }
+            else
+            {
+                token = tokenClaim.Value;
+            }
+             */
+
+            if (string.IsNullOrEmpty(token)) return null;
+
+            var request = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            // get the AuthStore based on token
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(request);
+
+            var info = JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore);
+
+            return info;
         }
     }
 }

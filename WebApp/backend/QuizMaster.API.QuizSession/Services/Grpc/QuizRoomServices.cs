@@ -236,5 +236,20 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);    
 
         }
+
+        public override Task<RoomResponse> RegisterParticipant(Data request, ServerCallContext context)
+        {
+            return base.RegisterParticipant(request, context);
+        }
+
+        public override Task<RoomResponse> UpdateParticipant(Data request, ServerCallContext context)
+        {
+            return base.UpdateParticipant(request, context);
+        }
+
+        public override Task<RoomResponse> SubmitAnswer(Data request, ServerCallContext context)
+        {
+            return base.SubmitAnswer(request, context);
+        }
     }
 }

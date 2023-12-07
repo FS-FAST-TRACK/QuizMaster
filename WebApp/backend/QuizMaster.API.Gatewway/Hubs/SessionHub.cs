@@ -1,9 +1,13 @@
 ﻿using Grpc.Net.Client;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
@@ -15,10 +19,12 @@ using System.Threading.Channels;
 
 namespace QuizMaster.API.Gateway.Hubs
 {
+
     public class SessionHub : Hub
     {
         private GrpcChannel _channel;
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
+        private readonly AuthService.AuthServiceClient _authChannelClient;
         private SessionHandler SessionHandler;
         private List<string> NAMES = new List<string>() { "Harold", "Jay", "JM", "Ada", "Pia"," Bo", "Rodney", "Neal", "Jess", "Aly", "James", "Xerxes", "Wayne", "Ken"};
         /*
@@ -32,7 +38,9 @@ namespace QuizMaster.API.Gateway.Hubs
         public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
-            _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel); 
+            _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
+            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannelClient = new AuthService.AuthServiceClient(_channel);
             SessionHandler = sessionHandler;
         }
 
@@ -101,10 +109,17 @@ namespace QuizMaster.API.Gateway.Hubs
             await Clients.Group(roomId).SendAsync("chat", $"[{SessionHandler.GetLinkedParticipantInConnectionId(connectionId).QParticipantDesc}]: {chat}");
         }
 
-
-        public async Task JoinRoom(int RoomPin)
+        public async Task JoinRoom(int RoomPin, string token)
         {
             string connectionId = Context.ConnectionId;
+            // Grab the UserInformation
+            var userData = await SessionHandler.GetUserInformation(this, _authChannelClient, token);
+            if(userData == null)
+            {
+                await Clients.Caller.SendAsync("notif", $"Failed to join room, you are not authorized");
+                return;
+            }
+
             try
             {
                 var reply = _channelClient.GetAllRoom(new RoomsEmptyRequest());
@@ -127,16 +142,18 @@ namespace QuizMaster.API.Gateway.Hubs
 
                     if (containsId)
                     {
-                        string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
+                        //string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
+                        string Name = userData.UserData.UserName;
                         SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name });
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
-                        await Clients.Group($"{RoomPin}").SendAsync("notif",$"{Name} has joined Room {room.QRoomDesc}", room );
+                        await Clients.Group($"{RoomPin}").SendAsync("notif", $"{Name} has joined Room {room.QRoomDesc}", room);
                     }
                     //await Clients.All.SendAsync("QuizRooms", quizRooms);
                 }
         }
             catch (Exception ex)
             {
+                await Clients.Caller.SendAsync("notif", $"An error has occurred while trying to connect");
                 Console.Write(ex.ToString());
             }
         }
