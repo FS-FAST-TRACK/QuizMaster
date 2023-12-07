@@ -234,6 +234,12 @@ namespace QuizMaster.API.Gateway.Hubs
 
         public async Task StartRoom(string roomPin)
         {
+            string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAdmin(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "Please contact administrator");
+                return;
+            }
             try
             {
                 var reply = _channelClient.GetAllRoom(new RoomsEmptyRequest());
@@ -267,56 +273,6 @@ namespace QuizMaster.API.Gateway.Hubs
             catch (Exception ex)
             {
                 Console.Write(ex?.ToString());
-            }
-        }
-
-        public async Task GetQuestionSets(int id)
-        {
-            var set = new SetRequest() { Id = id };
-            var setReply = await _channelClient.GetQuizSetAsync(set);
-
-            if(setReply.Code == 200)
-            {
-                var quizSets = JsonConvert.DeserializeObject<List<SetQuizRoom>>(setReply.Data);
-
-                var roomPin = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-                if (roomPin != null)
-                {
-                    await Clients.Group(roomPin).SendAsync("questionSet", quizSets);
-                }
-            }
-        }
-
-        public async Task GetQuestions(int id)
-        {
-            var request = new SetRequest() { Id = id };
-            var reply = await _channelClient.GetQuizAsync(request);
-
-            if (reply.Code == 200)
-            {
-                var questions = JsonConvert.DeserializeObject<List<QuestionSet>>(reply.Data);
-                var roomPin = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-                if (roomPin != null)
-                {
-                    foreach(var question in questions)
-                    {
-                        var questionRequest = new SetRequest() { Id = question.QuestionId };
-                        var questionReply = _channelClient.GetQuestion(questionRequest);
-
-                        if(questionReply.Code == 200) 
-                        {
-                            var details = JsonConvert.DeserializeObject<QuestionsDTO>(questionReply.Data);
-                            var timout = details.question.QTime;
-
-                            for(int time = timout; time > 0; time--)
-                            {
-                                details.RemainingTime = time;
-                                await Clients.Group(roomPin).SendAsync("question", details);
-                                await Task.Delay(1000);
-                            }
-                        }
-                    }
-                }
             }
         }
 
