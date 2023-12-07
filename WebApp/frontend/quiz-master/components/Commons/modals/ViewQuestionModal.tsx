@@ -1,13 +1,11 @@
 import { Button, Chip, Modal } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Question } from "@/lib/definitions";
-import { useQuestionCategoriesStore } from "@/store/CategoryStore";
-import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
-import { useQuestionTypesStore } from "@/store/TypeStore";
 import Link from "next/link";
 import QuestionDetails from "../QuestionDetailsView";
 import { fetchMedia } from "@/lib/quizData";
 import Image from "next/image";
+import QuesitonCard from "../cards/QuestionCard";
 
 export default function ViewQuestionModal({
     question,
@@ -18,9 +16,6 @@ export default function ViewQuestionModal({
     opened: boolean;
     onClose: () => void;
 }) {
-    const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
-    const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
-    const { getQuestionTypeDescription } = useQuestionTypesStore();
     const [imageBlobUrl, setImageBlobUrl] = useState<null | string>(null);
     const [audioBlobUrl, setAudioBlobUrl] = useState<null | string>(null);
     useEffect(() => {
@@ -48,43 +43,8 @@ export default function ViewQuestionModal({
             centered
             size="lg"
         >
-            <div>
-                <div className="flex w-full justify-center">
-                    <Chip color="rgba(0, 0, 0, 1)" variant="filled" checked>
-                        {question &&
-                            getQuestionTypeDescription(question.qTypeId)}
-                    </Chip>
-                </div>
-            </div>
             <div className="space-y-8">
-                <div>
-                    <p>Question Statement</p>
-                    <p className="text-xl font-bold">{question?.qStatement}</p>
-                </div>
-                <div className="flex [&>*]:basis-1/3 ">
-                    <div>
-                        <p>Difficulty</p>
-                        <p className="text-xl font-bold">
-                            {question &&
-                                getQuestionDifficultyDescription(
-                                    question?.qDifficultyId
-                                )}
-                        </p>
-                    </div>
-                    <div>
-                        <p>Category</p>
-                        <p className="text-xl font-bold">
-                            {question &&
-                                getQuestionCategoryDescription(
-                                    question?.qCategoryId
-                                )}
-                        </p>
-                    </div>
-                    <div>
-                        <p>Time Limit</p>
-                        <p className="text-xl font-bold">{question?.qTime}</p>
-                    </div>
-                </div>
+                <QuesitonCard question={question} />
                 {imageBlobUrl && (
                     <div>
                         <p>Image</p>

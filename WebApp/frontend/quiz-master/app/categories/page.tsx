@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
+import { CategoryBody } from "@/components/Commons/cards/CategoryCard";
 import CreateCategoryModal from "@/components/Commons/modals/CreateCategoryModal";
 import PromptModal from "@/components/Commons/modals/PromptModal";
 import CategoryAction from "@/components/Commons/popover/CategoryAction";
@@ -189,7 +190,7 @@ export default function Page() {
                 body={
                     <div>
                         <Text>Are you sure want to delete.</Text>
-                        <div>{deleteCategory?.qCategoryDesc}</div>
+                        <CategoryBody category={deleteCategory} />
                     </div>
                 }
                 action="Delete"
@@ -198,7 +199,11 @@ export default function Page() {
                 onClose={() => {
                     setDeleteCategory(undefined);
                 }}
-                title="Delete Category"
+                title={
+                    <div className="font-bold text-3xl text-center">
+                        {`Delete \"${deleteCategory?.qCategoryDesc}\"?`}
+                    </div>
+                }
             />
         </div>
     );

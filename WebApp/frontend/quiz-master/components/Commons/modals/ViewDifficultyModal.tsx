@@ -1,6 +1,7 @@
 import { Button, Modal, Space } from "@mantine/core";
 import { QuestionCategory, QuestionDifficulty } from "@/lib/definitions";
 import Link from "next/link";
+import { DifficultyCardBody } from "../cards/DifficultyCard";
 
 export default function ViewDifficultyModal({
     difficulty,
@@ -25,27 +26,7 @@ export default function ViewDifficultyModal({
             size="lg"
         >
             <div className="space-y-8">
-                <div className="flex flex-col gap-5 md:flex-row md:[&>*]:basis-1/3 ">
-                    <div>
-                        <p>Date Created</p>
-                        <p className="text-xl font-bold">
-                            {difficulty?.dateCreated.toDateString()}
-                        </p>
-                    </div>
-                    <div>
-                        <p>Last Modified</p>
-                        <p className="text-xl font-bold">
-                            {difficulty?.dateUpdated.toDateString()}
-                        </p>
-                    </div>
-                    <div>
-                        <p>Questions</p>
-                        <p className="text-xl font-bold">
-                            {difficulty?.questionCounts}
-                        </p>
-                    </div>
-                </div>
-
+                <DifficultyCardBody difficulty={difficulty} />
                 <div className="flex justify-end">
                     <Button
                         variant="transparent"

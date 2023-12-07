@@ -2,6 +2,7 @@
 
 import Pagination from "@/components/Commons/Pagination";
 import SearchField from "@/components/Commons/SearchField";
+import { DifficultyCardBody } from "@/components/Commons/cards/DifficultyCard";
 import CreateDifficultyModal from "@/components/Commons/modals/CreateDifficultyModal";
 import PromptModal from "@/components/Commons/modals/PromptModal";
 import DifficultiesTable from "@/components/Commons/tables/DifficultiesTable";
@@ -189,7 +190,7 @@ export default function Page() {
                 body={
                     <div>
                         <Text>Are you sure want to delete.</Text>
-                        <div>{deleteDifficulty?.qDifficultyDesc}</div>
+                        <DifficultyCardBody difficulty={deleteDifficulty} />
                     </div>
                 }
                 action="Delete"
@@ -198,7 +199,11 @@ export default function Page() {
                 onClose={() => {
                     setDeleteDifficulty(undefined);
                 }}
-                title="Delete Difficulty"
+                title={
+                    <div className="font-bold text-3xl text-center">
+                        {`Delete \"${deleteDifficulty?.qDifficultyDesc}\"?`}
+                    </div>
+                }
             />
         </div>
     );
