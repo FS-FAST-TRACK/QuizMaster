@@ -21,6 +21,13 @@ namespace QuizMaster.API.Gateway.Hubs
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
         private SessionHandler SessionHandler;
         private List<string> NAMES = new List<string>() { "Harold", "Jay", "JM", "Ada", "Pia"," Bo", "Rodney", "Neal", "Jess", "Aly", "James", "Xerxes", "Wayne", "Ken"};
+        /*
+         * TODO
+         * - Create A QB Context for QuizParticipants
+         * - Link Participants to ConnectionId
+         * - Allow Submission of Answers based on running question [current displayed]
+         * - Implement the Authorization to link QuizParticipants and Account.API
+         */
 
         public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
@@ -122,7 +129,6 @@ namespace QuizMaster.API.Gateway.Hubs
                     {
                         string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
                         SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name });
-                        await Groups.AddToGroupAsync(connectionId, $"{RoomPin}");
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("notif",$"{Name} has joined Room {room.QRoomDesc}", room );
                     }

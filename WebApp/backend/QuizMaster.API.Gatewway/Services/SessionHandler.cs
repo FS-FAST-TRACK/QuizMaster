@@ -62,6 +62,19 @@ namespace QuizMaster.API.Gateway.Services
             return participantLinkedConnectionId[connectionId];
         }
 
+
+        public IEnumerable<QuizParticipant> ParticipantLinkedConnectionsInAGroup(string group)
+        {
+            var connectionIds = connectionGroupPair.Where(kv => kv.Value.Equals(group)).Select(kv => kv.Key).ToList();
+            List<QuizParticipant> participants = new List<QuizParticipant>();
+            foreach (var connectionId in connectionIds)
+            {
+                participants.Add(GetLinkedParticipantInConnectionId(connectionId));
+            }
+
+            return participants;
+        }
+
         public async Task StartQuiz(SessionHub hub, QuizRoomService.QuizRoomServiceClient grpcClient, string roomId)
         {
             if(InSession.Contains(roomId))
