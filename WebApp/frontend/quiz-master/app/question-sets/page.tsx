@@ -8,7 +8,9 @@ import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import {
     PaginationMetadata,
     Question,
+    QuestionFilterProps,
     QuestionResourceParameter,
+    ResourceParameter,
     Set,
 } from "@/lib/definitions";
 import { fetchQuestions, fetchSets } from "@/lib/quizData";
@@ -35,7 +37,7 @@ export default function Page() {
         PaginationMetadata | undefined
     >();
 
-    const form = useForm<QuestionResourceParameter>({
+    const form = useForm<ResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",
@@ -80,7 +82,7 @@ export default function Page() {
                         }}
                     />
 
-                    <QuestionFilter />
+                    <QuestionFilter setQuestionFilters={() => {}} />
                 </div>
             </div>
             <SetsTable
