@@ -26,7 +26,6 @@ namespace QuizMaster.API.Gateway.Hubs
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
         private readonly AuthService.AuthServiceClient _authChannelClient;
         private SessionHandler SessionHandler;
-        private List<string> NAMES = new List<string>() { "Harold", "Jay", "JM", "Ada", "Pia"," Bo", "Rodney", "Neal", "Jess", "Aly", "James", "Xerxes", "Wayne", "Ken"};
         /*
          * TODO
          * - Create A QB Context for QuizParticipants
@@ -44,8 +43,24 @@ namespace QuizMaster.API.Gateway.Hubs
             SessionHandler = sessionHandler;
         }
 
+        /*
+         * Login the User
+         */
+        public async Task Login(string token)
+        {
+            var connectionId = Context.ConnectionId;
+            await SessionHandler.AuthenticateConnectionId(this, _authChannelClient, connectionId, token);
+        }
+
         public async Task CreateRoom(CreateRoomDTO roomDTO)
         {
+            string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAdmin(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "Please contact administrator");
+                return;
+            }
+
             var request = new CreateRoomRequest { Room = JsonConvert.SerializeObject(roomDTO) };
             var reply = await _channelClient.CreateRoomAsync(request);
 
@@ -66,6 +81,13 @@ namespace QuizMaster.API.Gateway.Hubs
 
         public async Task DeleteRoom(int roomId)
         {
+            string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAdmin(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "Please contact administrator");
+                return;
+            }
+
             var request = new ModifyRoomRequest { Room = roomId };
 
             var reply = await _channelClient.DeleteRoomAsync(request);
@@ -84,6 +106,12 @@ namespace QuizMaster.API.Gateway.Hubs
 
         public async Task UpdateRoom(UpdateRoomDTO updateRoomDTO)
         {
+            string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAdmin(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "Please contact administrator");
+                return;
+            }
             var request = new CreateRoomRequest { Room = JsonConvert.SerializeObject(updateRoomDTO) };
             var reply = await _channelClient.UpdateRoomAsync(request);
 
@@ -105,18 +133,32 @@ namespace QuizMaster.API.Gateway.Hubs
         {
             string connectionId = Context.ConnectionId;
 
+            if (!SessionHandler.IsAuthenticated(connectionId))
+            {
+                await Clients.Caller.SendAsync("chat", "You need to login to join chat");
+                return;
+            }
+            var participantData = SessionHandler.GetLinkedParticipantInConnectionId(connectionId);
+            if(participantData == null) { return; }
             // send chat only to group
-            await Clients.Group(roomId).SendAsync("chat", $"[{SessionHandler.GetLinkedParticipantInConnectionId(connectionId).QParticipantDesc}]: {chat}");
+            if (SessionHandler.IsAdmin(connectionId))
+                await Clients.Group(roomId).SendAsync("chat", $"[{participantData.QParticipantDesc}(host)]: {chat}");
+            else await Clients.Group(roomId).SendAsync("chat", $"[{participantData.QParticipantDesc}]: {chat}");
         }
 
-        public async Task JoinRoom(int RoomPin, string token)
+        public async Task JoinRoom(int RoomPin)
         {
             string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAuthenticated(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "Failed to join room, you are not authorized");
+                return;
+            }
             // Grab the UserInformation
-            var userData = await SessionHandler.GetUserInformation(this, _authChannelClient, token);
+            var userData = await SessionHandler.GetUserInformation(_authChannelClient, SessionHandler.GetConnectionToken(connectionId));
             if(userData == null)
             {
-                await Clients.Caller.SendAsync("notif", $"Failed to join room, you are not authorized");
+                await Clients.Caller.SendAsync("notif", $"There was an issue authenticating your account");
                 return;
             }
 
@@ -144,7 +186,7 @@ namespace QuizMaster.API.Gateway.Hubs
                     {
                         //string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
                         string Name = userData.UserData.UserName;
-                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name });
+                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id });
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("notif", $"{Name} has joined Room {room.QRoomDesc}", room);
                     }
@@ -179,12 +221,15 @@ namespace QuizMaster.API.Gateway.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId).QParticipantDesc} has been disconnected");
+            await LeaveRoom();
         }
 
         public async Task LeaveRoom()
         {
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId).QParticipantDesc} has left the room");
+            var participantData = SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId);
+            if (participantData == null) { return; }
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room");
+            SessionHandler.UnbindConnectionId(Context.ConnectionId);
         }
 
         public async Task StartRoom(string roomPin)
