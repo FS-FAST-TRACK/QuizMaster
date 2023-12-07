@@ -1,6 +1,7 @@
 import {
     PaginationMetadata,
     QuestionResourceParameter,
+    ResourceParameter,
 } from "@/lib/definitions";
 import { Pagination, Select, Text } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
@@ -11,7 +12,7 @@ export default function CustomPagination({
     form,
     metadata,
 }: {
-    form: UseFormReturnType<QuestionResourceParameter>;
+    form: UseFormReturnType<ResourceParameter>;
     metadata: PaginationMetadata | undefined;
 }) {
     return (

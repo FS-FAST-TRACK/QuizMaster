@@ -6,6 +6,7 @@ import CreateDifficultyModal from "@/components/Commons/modals/CreateDifficultyM
 import PromptModal from "@/components/Commons/modals/PromptModal";
 import DifficultiesTable from "@/components/Commons/tables/DifficultiesTable";
 import {
+    DifficultyResourceParameter,
     PaginationMetadata,
     QuestionDifficulty,
     QuestionResourceParameter,
@@ -42,7 +43,7 @@ export default function Page() {
         PaginationMetadata | undefined
     >();
 
-    const form = useForm<QuestionResourceParameter>({
+    const form = useForm<DifficultyResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",

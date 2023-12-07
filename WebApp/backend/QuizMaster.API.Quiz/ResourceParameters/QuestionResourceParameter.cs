@@ -9,9 +9,9 @@
 		public int PageNumber { get; set; } = 1;
 
 		private int _pageSize = 40;
-		public int? QCategoryId { get; set; }
-		public int? QTypeId { get; set; }
-		public int? QDifficultyId { get; set; }
+		public string? FilterByCategoriesId { get; set; }
+		public string?  FilterByTypesId { get; set; }
+		public string? FilterByDifficultiesId { get; set; }
 
 		public int PageSize
 		{
@@ -30,7 +30,10 @@
 				pageSize = PageSize,
 				isOnlyActiveData = IsOnlyActiveData,
 				includeDetails = IncludeDetails,
-				searchQuery = SearchQuery
+				searchQuery = SearchQuery,
+				filterByCategories = FilterByCategoriesId,
+				filterByDifficulties = FilterByDifficultiesId,
+				filterByTypes = FilterByTypesId
 			};
 		}
 	}

@@ -85,23 +85,33 @@ export type QuestionDetailCreateDto = {
     qDetailDesc: string;
     detailTypes: string[];
 };
-export type QuestionResourceParameter = {
+
+export type ResourceParameter = {
     pageSize: string;
     searchQuery?: string;
     pageNumber: number;
 };
-export type CategoryResourceParameter = {
-    pageSize: string;
-    searchQuery?: string;
-    pageNumber: number;
+
+export interface QuestionResourceParameter extends ResourceParameter {
+    filterByCategories: number[];
+    filterByDifficulties: number[];
+    filterByTypes: number[];
+}
+
+export type QuestionFilterProps = {
+    filterByCategories: number[];
+    filterByDifficulties: number[];
+    filterByTypes: number[];
+}
+}
+export interface CategoryResourceParameter extends ResourceParameter {
+    
     isGetAll?: boolean;
-};
-export type DifficultyResourceParameter = {
-    pageSize: string;
-    searchQuery?: string;
-    pageNumber: number;
+}
+export interface DifficultyResourceParameter extends ResourceParameter {
+    
     isGetAll?: boolean;
-};
+}
 export type PaginationMetadata = {
     totalCount: number;
     pageSize: number;

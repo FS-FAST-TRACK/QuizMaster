@@ -13,7 +13,27 @@ export async function fetchQuestions({
 }) {
     try {
         var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
-
+        if (questionResourceParameter.filterByCategories.length !== 0) {
+            apiUrl = apiUrl.concat(
+                `&filterByCategoriesId=${JSON.stringify(
+                    questionResourceParameter.filterByCategories
+                )}`
+            );
+        }
+        if (questionResourceParameter.filterByTypes.length !== 0) {
+            apiUrl = apiUrl.concat(
+                `&filterByTypesId=${JSON.stringify(
+                    questionResourceParameter.filterByTypes
+                )}`
+            );
+        }
+        if (questionResourceParameter.filterByDifficulties.length !== 0) {
+            apiUrl = apiUrl.concat(
+                `&filterByDifficultiesId=${JSON.stringify(
+                    questionResourceParameter.filterByDifficulties
+                )}`
+            );
+        }
         const { data, paginationMetadata } = await fetch(apiUrl).then(
             async (res) => {
                 var data: Question[];
