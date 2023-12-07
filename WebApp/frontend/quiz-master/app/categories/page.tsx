@@ -65,7 +65,6 @@ export default function Page() {
     }, [searchQuery, form]);
 
     const handleDelete = useCallback(() => {
-        console.log("HEHE");
         if (deleteCategory) {
             removeCategory({ id: deleteCategory?.id })
                 .then(() => {

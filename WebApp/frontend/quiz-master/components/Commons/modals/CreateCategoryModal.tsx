@@ -47,7 +47,7 @@ export default function CreateCategoryModal({
             .finally(() => {
                 onClose();
             });
-    }, [category]);
+    }, [category, categoryDesc]);
 
     return (
         <Modal

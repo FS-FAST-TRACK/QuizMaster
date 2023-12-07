@@ -26,7 +26,7 @@ const LoginForm = () => {
     const login = async (username: string, password: string) => {
         console.log(process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY}/auth/login`,
+            `${process.env.QUIZMASTER_GATEWAY}/auth/login`,
             {
                 method: "POST",
                 body: JSON.stringify({ username, password }),
