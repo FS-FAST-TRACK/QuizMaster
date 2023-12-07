@@ -77,3 +77,24 @@ export async function deleteQuestionDetail({
         throw new Error("Failed to delete Question Detail");
     }
 }
+
+export async function getQuestionDetails({
+    questionId,
+}: {
+    questionId: number;
+}) {
+    try {
+        const { data } = await fetch(
+            `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail`
+        ).then(async (res) => {
+            var data: QuestionDetail[];
+
+            data = await res.json();
+
+            return { data };
+        });
+        return data;
+    } catch (error) {
+        throw new Error("Failed to get Question Details");
+    }
+}

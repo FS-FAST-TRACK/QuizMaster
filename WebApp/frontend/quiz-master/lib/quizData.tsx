@@ -166,18 +166,16 @@ export async function fetchSets() {
     try {
         var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_set`;
 
-        const data = await fetch(apiUrl).then(
-            async (res) => {
-                var data: Set[];
-                data = await res.json();
-                data.forEach((set) => {
-                    set.dateCreated = new Date(set.dateCreated);
-                    set.dateUpdated = new Date(set.dateUpdated);
-                });
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: Set[];
+            data = await res.json();
+            data.forEach((set) => {
+                set.dateCreated = new Date(set.dateCreated);
+                set.dateUpdated = new Date(set.dateUpdated);
+            });
 
-                return data;
-            }
-        );
+            return data;
+        });
         return data;
     } catch (error) {
         console.error("Database Error:", error);
@@ -189,14 +187,12 @@ export async function fetchSetQuestions() {
     try {
         var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_question_set`;
 
-        const data = await fetch(apiUrl).then(
-            async (res) => {
-                var data: QuestionSet[];
-                data = await res.json();
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionSet[];
+            data = await res.json();
 
-                return data;
-            }
-        );
+            return data;
+        });
         return data;
     } catch (error) {
         console.error("Database Error:", error);
@@ -208,14 +204,12 @@ export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
     try {
         var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/get_question_set/${qSetId}`;
 
-        const data = await fetch(apiUrl).then(
-            async (res) => {
-                var data: QuestionSet[];
-                data = await res.json();
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionSet[];
+            data = await res.json();
 
-                return data;
-            }
-        );
+            return data;
+        });
         console.log(data);
         return data;
     } catch (error) {
@@ -230,12 +224,21 @@ export async function fetchMedia(id: string) {
             `${process.env.QUIZMASTER_MEDIA}/api/Media/download/${id}`
         )
             .then(async (res) => {
+                if (res.status === 404) {
+                    throw new Error(`Media with id ${id} not found`);
+                }
                 return await res.blob();
             })
             .then((blob) => {
                 var url = URL.createObjectURL(blob);
                 return url;
+            })
+            .catch((error) => {
+                console.warn(error);
+                return null;
             });
         return { data };
-    } catch (error) { }
+    } catch (error) {
+        throw new Error("Failed to fetch media.");
+    }
 }

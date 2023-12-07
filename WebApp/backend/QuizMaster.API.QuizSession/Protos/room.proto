@@ -7,6 +7,16 @@ service QuizRoomService{
 	rpc GetAllRoom (RoomsEmptyRequest) returns (RoomResponse);
 	rpc DeleteRoom (ModifyRoomRequest) returns (RoomResponse);
 	rpc UpdateRoom (CreateRoomRequest) returns (RoomResponse);
+	rpc GetQuizSet (SetRequest) returns (RoomResponse);
+	rpc GetQuiz (SetRequest) returns (RoomResponse);
+	rpc GetQuestion(SetRequest) returns (RoomResponse);
+	rpc RegisterParticipant(Data) returns (RoomResponse);
+	rpc UpdateParticipant(Data) returns (RoomResponse);
+	rpc SubmitAnswer(Data) returns (RoomResponse);
+}
+
+message Data{
+	string value = 1;
 }
 
 message ModifyRoomRequest{
@@ -24,3 +34,7 @@ message RoomResponse{
 }
 
 message RoomsEmptyRequest{}
+
+message SetRequest{
+	int32 id=1;
+}

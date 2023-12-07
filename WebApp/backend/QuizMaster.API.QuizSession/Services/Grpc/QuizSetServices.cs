@@ -37,7 +37,17 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     reply.Message = $"Question with id {checkQuestion} does not exist";
 
                     return await Task.FromResult(reply);
-                } 
+                }
+
+                var setWithNameExists = _quizSetManager.Sets.Where(s => s.QSetName.ToLower() == quizSet.QSetName.ToLower()).FirstOrDefault();
+
+                if(setWithNameExists != null)
+                {
+                    reply.Code = 409;
+                    reply.Message = $"There is a QuestionSet of name '{quizSet.QSetName}' exists in the database.";
+
+                    return await Task.FromResult(reply);
+                }
 
                 var set = new Set { QSetName = quizSet.QSetName, QSetDesc = quizSet.QSetDesc, ActiveData = true };
                 await _quizSetManager.Sets.AddAsync(set);
