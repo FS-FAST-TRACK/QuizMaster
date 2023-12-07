@@ -258,5 +258,13 @@ namespace QuizMaster.API.Gateway.Hubs
             }
         }
 
+        public async Task GetRoomParticipants(string roomPin)
+        {
+            var participants = SessionHandler.ParticipantLinkedConnectionsInAGroup(roomPin);
+            await Clients.Group(roomPin).SendAsync("participants", participants);
+        }
+
+
+
     }
 }
