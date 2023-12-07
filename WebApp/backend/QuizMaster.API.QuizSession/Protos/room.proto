@@ -10,6 +10,13 @@ service QuizRoomService{
 	rpc GetQuizSet (SetRequest) returns (RoomResponse);
 	rpc GetQuiz (SetRequest) returns (RoomResponse);
 	rpc GetQuestion(SetRequest) returns (RoomResponse);
+	rpc RegisterParticipant(Data) returns (RoomResponse);
+	rpc UpdateParticipant(Data) returns (RoomResponse);
+	rpc SubmitAnswer(Data) returns (RoomResponse);
+}
+
+message Data{
+	string value = 1;
 }
 
 message ModifyRoomRequest{

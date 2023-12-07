@@ -28,7 +28,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
 		public DateTime QStartDate { get; set; }
 
 		[AllowNull]
-		public DateTime QEndDate { get; set; }
+		public DateTime? QEndDate { get; set; } = null;
 
 		[Required]
 		public bool QStatus { get; set; } = false;
