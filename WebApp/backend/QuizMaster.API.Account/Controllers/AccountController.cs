@@ -8,6 +8,7 @@ using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Roles;
 using QuizMaster.Library.Common.Models;
 using QuizMaster.Library.Common.Models.Services;
+using System.Text.RegularExpressions;
 
 namespace QuizMaster.API.Account.Controllers
 {
@@ -69,6 +70,11 @@ namespace QuizMaster.API.Account.Controllers
 			if (await _userManager.FindByNameAsync(account.UserName) != null)
 			{
 				return ReturnUserNameAlreadyExist();
+			}
+
+			if(!new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").IsMatch(account.Email))
+			{
+				return ReturnInvalidEmail();
 			}
 
 			// Check if email is already taken
@@ -286,6 +292,15 @@ namespace QuizMaster.API.Account.Controllers
 				Message = "Email already exist."
 			});
 		}
+
+		private ActionResult ReturnInvalidEmail()
+		{
+            return BadRequest(new ResponseDto
+            {
+                Type = "Error",
+                Message = "Invalid Email"
+            });
+        }
 
 	}
 }
