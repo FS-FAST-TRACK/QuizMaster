@@ -219,7 +219,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 
 			// Check if question description already exist
-			if (await _quizRepository.GetQuestionAsync(questionFromRepo.QStatement, questionFromRepo.QDifficultyId, questionFromRepo.QTypeId, questionFromRepo.QCategoryId) != null)
+			if (await _quizRepository.GetQuestionAsync(questionFromRepo) != null)
 			{
 				return ReturnQuestionAlreadyExist();
 			}
