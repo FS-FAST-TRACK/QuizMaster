@@ -12,6 +12,7 @@ using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace QuizMaster.API.Gateway.Hubs
         private  QuizRoomService.QuizRoomServiceClient _channelClient;
         private readonly AuthService.AuthServiceClient _authChannelClient;
         private SessionHandler SessionHandler;
+        private QuizHandler QuizHandler;
         /*
          * TODO
          * - Create A QB Context for QuizParticipants
@@ -34,13 +36,14 @@ namespace QuizMaster.API.Gateway.Hubs
          * - Implement the Authorization to link QuizParticipants and Account.API
          */
 
-        public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
+        public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler, QuizHandler quizHandler)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
             _authChannelClient = new AuthService.AuthServiceClient(_channel);
             SessionHandler = sessionHandler;
+            QuizHandler = quizHandler;
         }
 
         /*
@@ -126,6 +129,31 @@ namespace QuizMaster.API.Gateway.Hubs
             {
                 await Clients.Caller.SendAsync("chat", reply.Message);
             }
+        }
+
+        public async Task GetConnectionId()
+        {
+            string connectionId = Context.ConnectionId;
+            await Clients.Caller.SendAsync("connId", connectionId);
+        }
+
+        /*
+         * Unused SignalR connection, use the QuizSetGatewayController's SubmitAnswer route
+         */
+        public async Task SubmitAnswer(string questionId, string answer)
+        {
+            string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAuthenticated(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "You need to login to submit an answer");
+                return;
+            }
+            try
+            {
+                await Clients.Caller.SendAsync("notif", $"Submitting: {answer}");
+                await SessionHandler.SubmitAnswer(this, _channelClient, connectionId, Convert.ToInt32(questionId), answer);
+            }
+            catch { await Clients.Caller.SendAsync("notif",$"Failed to submit answer: {answer}"); }
         }
 
 
@@ -266,9 +294,11 @@ namespace QuizMaster.API.Gateway.Hubs
                         roomId = room.Id;
                     }
                 }
-                await Clients.Group(roomPin).SendAsync("start", true);
+
                 // we will not use await, we will let the request pass
-                await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
+                await Clients.Group(roomPin).SendAsync("start", true);
+                //await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
+                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, roomId.ToString());
             }
             catch (Exception ex)
             {
@@ -278,7 +308,7 @@ namespace QuizMaster.API.Gateway.Hubs
 
         public async Task GetRoomParticipants(string roomPin)
         {
-            var participants = SessionHandler.ParticipantLinkedConnectionsInAGroup(roomPin);
+            var participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(roomPin);
             await Clients.Group(roomPin).SendAsync("participants", participants);
         }
 

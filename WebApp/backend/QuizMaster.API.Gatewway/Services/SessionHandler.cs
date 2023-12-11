@@ -16,17 +16,18 @@ namespace QuizMaster.API.Gateway.Services
         private Dictionary<string, string> connectionGroupPair;
         private Dictionary<string, QuizParticipant> participantLinkedConnectionId;
         private List<QuizParticipant> AbandonedParticipants;
-        private List<string> InSession;
+        
         private Dictionary<string, string> AuthenticatedClientIds;
         private List<string> AuthenticatedClientAdmins;
+        private Dictionary<string, int> RoomCurrentQuestionDisplayed;
         public SessionHandler()
         {
-            connectionGroupPair = new Dictionary<string, string>();
-            participantLinkedConnectionId = new Dictionary<string, QuizParticipant>();
-            InSession = new List<string>();
-            AuthenticatedClientIds= new Dictionary<string, string>();
-            AuthenticatedClientAdmins = new List<string>();
+            connectionGroupPair = new();
+            participantLinkedConnectionId = new();
+            AuthenticatedClientIds= new();
+            AuthenticatedClientAdmins = new();
             AbandonedParticipants = new();
+            RoomCurrentQuestionDisplayed = new();
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
@@ -78,8 +79,13 @@ namespace QuizMaster.API.Gateway.Services
             return participantLinkedConnectionId.GetValueOrDefault(connectionId);
         }
 
+        public bool RemoveLinkedParticipantInConnectionId(string connectionId)
+        {
+            return participantLinkedConnectionId.Remove(connectionId);
+        }
 
-        public IEnumerable<QuizParticipant> ParticipantLinkedConnectionsInAGroup(string group)
+
+        public IEnumerable<QuizParticipant> GetParticipantLinkedConnectionsInAGroup(string group)
         {
             var connectionIds = connectionGroupPair.Where(kv => kv.Value.Equals(group)).Select(kv => kv.Key).ToList();
             List<QuizParticipant> participants = new List<QuizParticipant>();
@@ -92,62 +98,88 @@ namespace QuizMaster.API.Gateway.Services
             return participants;
         }
 
-        public async Task StartQuiz(SessionHub hub, QuizRoomService.QuizRoomServiceClient grpcClient, string roomId)
+        public void ResetParticipantLinkedConnectionsInAGroup(string group)
         {
-            if(InSession.Contains(roomId))
+            var connectionIds = connectionGroupPair.Where(kv => kv.Value.Equals(group)).Select(kv => kv.Key).ToList();
+            foreach (var connectionId in connectionIds)
             {
-                await hub.Clients.Caller.SendAsync("notif", "Room has already started");
-                return;
-            }
-            InSession.Add(roomId);
-            string roomPin = "";
-            // Get the SetQuizRoom
-            var set = new SetRequest() { Id = Convert.ToInt32(roomId) };
-            var qsetReply = await grpcClient.GetQuizSetAsync(set);
-            var quizSets = JsonConvert.DeserializeObject<List<SetQuizRoom>>(qsetReply.Data);
-
-            if(quizSets == null) { await hub.Clients.Caller.SendAsync("notif", "Failed to start a room, SetQuizRoom is not available"); return; }
-            if(quizSets.Count == 0)
-            {
-                await hub.Clients.Caller.SendAsync("notif", "Failed to start a room, There is no question sets available");
-                return;
-            }
-
-            foreach (var Qset in quizSets)
-            {
-                // Get the Sets
-                var setRequest = new SetRequest() { Id = Qset.QSetId };
-                var setReply = await grpcClient.GetQuizAsync(setRequest);
-
-                var Setquestions = JsonConvert.DeserializeObject<List<QuestionSet>>(setReply.Data);
-
-                if (Setquestions == null) continue;
-                
-
-                foreach(var questionSet in Setquestions)
-                {
-                    roomPin = Qset.QRoom.QRoomPin + "";
-                    await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying a question");
-                    var questionRequest = new SetRequest() { Id = questionSet.QuestionId };
-                    var questionSetReply = await grpcClient.GetQuestionAsync(questionRequest);
-
-                    var details = JsonConvert.DeserializeObject<QuestionsDTO>(questionSetReply.Data);
-
-                    if(details == null) continue;
-
-                    var timout = details.question.QTime;
-
-                    for (int time = timout; time >= 0; time--)
-                    {
-                        details.RemainingTime = time;
-                        await hub.Clients.Group(roomPin).SendAsync("question", details);
-                        await Task.Delay(1000);
-                    }
+                var participant = GetLinkedParticipantInConnectionId(connectionId);
+                if (participant != null) {
+                    var p = new QuizParticipant { UserId =  participant.UserId, QParticipantDesc = participant.QParticipantDesc };
+                    RemoveLinkedParticipantInConnectionId(connectionId);
+                    LinkParticipantConnectionId(connectionId, p);
                 }
             }
-            await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended");
-            InSession.Remove(roomId);
+
         }
+
+        public void SetCurrentQuestionDisplayed(string roomPin, int questinId)
+        {
+            RoomCurrentQuestionDisplayed[roomPin] = questinId;
+        }
+
+        public void RemoveRoomDataCurrentDisplayed(string roomPin)
+        {
+            RoomCurrentQuestionDisplayed.Remove(roomPin);
+        }
+
+        public async Task SubmitAnswer(SessionHub hub, QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string answer)
+        {
+            /*
+             * If the current displayed questionId is not the same as passed questionId
+             * deny the request and do not update the participant score
+             */
+
+            // retrieve the current group of the user
+            string? userGroup = GetConnectionGroup(connectionId);
+            if (userGroup == null) return;
+
+            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return;
+
+            int? currentQuestionIdDisplayed = RoomCurrentQuestionDisplayed.GetValueOrDefault(userGroup);
+            if (currentQuestionIdDisplayed == null) return;
+            if (questionId != currentQuestionIdDisplayed)
+            {
+                //await hub.Clients.Client(connectionId).SendAsync("notif", "Question expired, your current answer is declined");
+                return;
+            }
+            //await hub.Clients.Client(connectionId).SendAsync("notif", "Answer Submitted");
+            // get the question data
+            #region GettingQuestionData
+            var gRpcRequest = new SetRequest() { Id = questionId };
+            var gRpcReply = await grpcClient.GetQuestionAsync(gRpcRequest);
+            if (gRpcReply == null) return;
+
+            // parse the data
+            var questionData = JsonConvert.DeserializeObject<QuestionsDTO>(gRpcReply.Data); 
+            if (questionData == null) return;
+
+            // check if user has the correct answer
+            var answers = questionData.details.Where(a => a.DetailTypes.Where(dt => dt.DTypeDesc.ToLower() == "answer").Select(Dt => Dt.DTypeDesc).ToList().Count > 0).Select(d => d.QDetailDesc).ToList();
+
+            bool correct = false;
+            foreach(string Qanswer in answers)
+            {
+                if(Qanswer.ToLower() == answer.ToLower())
+                {
+                    correct = true;
+                    break;
+                }
+            }
+
+            if (correct)
+            {
+                // get the participant data
+                var participantData = GetLinkedParticipantInConnectionId(connectionId);
+                if (participantData == null) return;
+
+                // increment score by 1
+                participantData.Score += 1;
+            }
+            #endregion
+        }
+
+        
 
         public async Task AuthenticateConnectionId(SessionHub hub, AuthService.AuthServiceClient _authChannelClient, string connectionId, string token)
         {
