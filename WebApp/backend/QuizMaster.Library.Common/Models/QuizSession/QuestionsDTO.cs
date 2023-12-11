@@ -12,5 +12,8 @@ namespace QuizMaster.Library.Common.Models.QuizSession
         public Question question { get; set; }
         public List<QuestionDetail> details { get; set; }
         public int RemainingTime { get; set; } = -1;
+        public string CurrentSetDesc { get; set; }
+        public string CurrentSetName { get; set; }
+
     }
 }
