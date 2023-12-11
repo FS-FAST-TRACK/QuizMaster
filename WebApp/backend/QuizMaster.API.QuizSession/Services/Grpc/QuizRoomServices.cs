@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Protos;
@@ -167,6 +168,40 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);
         }
 
+        // In room, get all the Sets
+        public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)
+        {
+            var repy = new RoomResponse();
+            var id = request.Id;
+
+
+            var quizSets = _context.SetQuizRooms.Where(x=> x.QRoomId == id).ToList();
+            
+            foreach( var quizSet in quizSets)
+            {
+                _ = await _context.QuizRooms.Where(r => r.Id == quizSet.QRoomId).FirstOrDefaultAsync();
+            }
+
+            repy.Code = 200;
+            repy.Data = JsonConvert.SerializeObject(quizSets);
+
+            return await Task.FromResult(repy);
+        }
+
+        // From all the QuestionSet
+        public override async Task<RoomResponse> GetQuiz(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            var id = request.Id;
+
+            var qestions = _context.QuestionSets.Where(x=> x.SetId == id).ToList();
+
+            reply.Code = 200;
+            reply.Data = JsonConvert.SerializeObject(qestions);
+
+            return await Task.FromResult(reply);
+        }
+
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
             var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
@@ -176,6 +211,45 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return id;
             }
             return -1;
+        }
+
+        // Get Question from a set Id in a list
+        public override async Task<RoomResponse> GetQuestion(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            var id = request.Id;
+
+            var question = _context.Questions.FirstOrDefault(x => x.Id == id);
+            var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).ToList();
+
+            if(question == null)
+            {
+                reply.Code = 404;
+                reply.Message = $"Question with Id of {id} does not exist";
+
+                return await Task.FromResult(reply);
+            }
+
+            reply.Code = 200;
+            reply.Data = JsonConvert.SerializeObject(new QuestionsDTO { question=question, details=details});
+            
+            return await Task.FromResult(reply);    
+
+        }
+
+        public override Task<RoomResponse> RegisterParticipant(Data request, ServerCallContext context)
+        {
+            return base.RegisterParticipant(request, context);
+        }
+
+        public override Task<RoomResponse> UpdateParticipant(Data request, ServerCallContext context)
+        {
+            return base.UpdateParticipant(request, context);
+        }
+
+        public override Task<RoomResponse> SubmitAnswer(Data request, ServerCallContext context)
+        {
+            return base.SubmitAnswer(request, context);
         }
     }
 }
