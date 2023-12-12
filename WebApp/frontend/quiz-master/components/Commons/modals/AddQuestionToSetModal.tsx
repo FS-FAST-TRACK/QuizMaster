@@ -11,7 +11,12 @@ import style from "@/styles/input.module.css";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import notificationStyles from "../../../styles/notification.module.css";
-import { Question, QuestionResourceParameter } from "@/lib/definitions";
+import {
+    Question,
+    QuestionFilterProps,
+    QuestionResourceParameter,
+    ResourceParameter,
+} from "@/lib/definitions";
 import QuestionTable from "../tables/QuestionTable";
 import { fetchQuestion, fetchQuestions } from "@/lib/quizData";
 import { useForm } from "@mantine/form";
@@ -37,8 +42,15 @@ export default function AddQuestionToSetModal({
     >([]);
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [visible, { close, open }] = useDisclosure(true);
+    const [questionFilters, setQuestionFilters] = useState<QuestionFilterProps>(
+        {
+            filterByCategories: [],
+            filterByDifficulties: [],
+            filterByTypes: [],
+        }
+    );
 
-    const form = useForm<QuestionResourceParameter>({
+    const form = useForm<ResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",
@@ -52,7 +64,10 @@ export default function AddQuestionToSetModal({
         if (opened) {
             console.log(questions);
             const fetchQuestion = fetchQuestions({
-                questionResourceParameter: form.values,
+                questionResourceParameter: {
+                    ...form.values,
+                    ...questionFilters,
+                },
             });
             fetchQuestion.then((res) => {
                 const notYetAddedQuestions = res.data.filter((question) => {
@@ -71,7 +86,6 @@ export default function AddQuestionToSetModal({
     const handelSubmit = useCallback(async () => {
         selectedRows.map(async (row) => {
             await fetchQuestion({ questionId: row }).then((res) => {
-                console.log(res.data);
                 setQuestions((prev) => [...prev, res.data]);
             });
         });
