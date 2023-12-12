@@ -5,6 +5,7 @@ import {
     QuestionCreateDto,
     QuestionCreateValues,
     QuestionDetailCreateDto,
+    QuestionSetDTO,
     QuestionValues,
 } from "./definitions";
 import {
@@ -208,4 +209,18 @@ export function humanFileSize(bytes?: number, si = true, dp = 1) {
     );
 
     return bytes.toFixed(dp) + " " + units[u];
+}
+
+export function mapDataQuestionSet(
+    form: UseFormReturnType<QuestionSetDTO>
+): QuestionSetDTO {
+    var setCreateDto: QuestionSetDTO = {
+        qSetName: form.values.qSetName || "nothing",
+        qSetDesc: form.values.qSetName || "nothing",
+        questions: form.values.questions,
+        dateCreated: form.values.dateCreated,
+        dateUpdated: form.values.dateUpdated,
+    };
+
+    return setCreateDto;
 }
