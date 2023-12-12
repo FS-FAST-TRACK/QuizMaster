@@ -55,7 +55,7 @@ export default function Page() {
     const [createSetQuestion, setCreateSetQuestions] = useState(false);
     const [addQuestions, setAddQuestions] = useState(false);
     const [questionSet, setQuestionSet] = useState<Question[]>([]);
-    const [visible, { toggle, close }] = useDisclosure(false);
+    const [visible, { close, open }] = useDisclosure(false);
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
@@ -84,9 +84,6 @@ export default function Page() {
         formValues.values.dateCreated = new Date();
         formValues.values.dateUpdated = new Date(1, 0, 1);
 
-        console.log(formValues);
-        console.log(formValues.getInputProps("qSetName"));
-
         const questionSetCreateDto: QuestionSetDTO = {
             qSetDesc: formValues.values.qSetName,
             qSetName: formValues.values.qSetName,
@@ -94,10 +91,8 @@ export default function Page() {
             dateCreated: formValues.values.dateCreated,
             dateUpdated: formValues.values.dateUpdated,
         };
-        // const questionSetCreateDto = mapDataQuestionSet(formValues);
 
         open();
-        console.log(questionSetCreateDto);
 
         postQuestionSet({ questionSet: questionSetCreateDto })
             .then((res) => {
@@ -111,9 +106,6 @@ export default function Page() {
                 router.push("/question-sets");
             })
             .catch((err) => {
-                console.log("EHE");
-                console.log(err);
-                console.log(err.message);
                 // notify for error
                 notification({
                     type: "error",
