@@ -3,7 +3,7 @@ name: QuizMaster - Account API
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   build:

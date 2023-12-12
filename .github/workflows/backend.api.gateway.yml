@@ -1,4 +1,4 @@
-name: QuizMaster - Auth API
+name: QuizMaster - Quiz Session API
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: WebApp/backend/QuizMaster.API.Authentication
+        working-directory: WebApp/backend/QuizMaster.API.Gatewway
 
     steps:
       - name: Checkout repo

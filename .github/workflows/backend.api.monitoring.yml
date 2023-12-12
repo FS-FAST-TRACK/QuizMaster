@@ -3,7 +3,7 @@ name: QuizMaster - Monitoring API
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   build:
