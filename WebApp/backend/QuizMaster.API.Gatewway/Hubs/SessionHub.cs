@@ -151,7 +151,7 @@ namespace QuizMaster.API.Gateway.Hubs
             try
             {
                 await Clients.Caller.SendAsync("notif", $"Submitting: {answer}");
-                await SessionHandler.SubmitAnswer(this, _channelClient, connectionId, Convert.ToInt32(questionId), answer);
+                await SessionHandler.SubmitAnswer(_channelClient, connectionId, Convert.ToInt32(questionId), answer);
             }
             catch { await Clients.Caller.SendAsync("notif",$"Failed to submit answer: {answer}"); }
         }

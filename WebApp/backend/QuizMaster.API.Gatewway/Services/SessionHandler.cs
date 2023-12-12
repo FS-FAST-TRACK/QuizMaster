@@ -20,6 +20,7 @@ namespace QuizMaster.API.Gateway.Services
         private Dictionary<string, string> AuthenticatedClientIds;
         private List<string> AuthenticatedClientAdmins;
         private Dictionary<string, int> RoomCurrentQuestionDisplayed;
+        private List<string> ClientsSubmittedAnswers;
         public SessionHandler()
         {
             connectionGroupPair = new();
@@ -28,6 +29,7 @@ namespace QuizMaster.API.Gateway.Services
             AuthenticatedClientAdmins = new();
             AbandonedParticipants = new();
             RoomCurrentQuestionDisplayed = new();
+            ClientsSubmittedAnswers = new();
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
@@ -61,6 +63,21 @@ namespace QuizMaster.API.Gateway.Services
         public string? GetConnectionGroup(string connectionId)
         {
             return connectionGroupPair[connectionId];
+        }
+
+        public void HoldClientAnswerSubmission(string connectionId)
+        {
+            ClientsSubmittedAnswers.Add(connectionId);
+        }
+
+        public bool ClientOnHoldAnswerSubmission(string connectionId)
+        {
+            return ClientsSubmittedAnswers.Contains(connectionId);
+        }
+
+        public bool RemoveHoldOnAnswerSubmission(string connectionId)
+        {
+            return ClientsSubmittedAnswers.Remove(connectionId);
         }
 
         public void LinkParticipantConnectionId(string connectionId, QuizParticipant quizParticipant)
@@ -123,7 +140,7 @@ namespace QuizMaster.API.Gateway.Services
             RoomCurrentQuestionDisplayed.Remove(roomPin);
         }
 
-        public async Task SubmitAnswer(SessionHub hub, QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string answer)
+        public async Task<string> SubmitAnswer(QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string answer)
         {
             /*
              * If the current displayed questionId is not the same as passed questionId
@@ -132,27 +149,28 @@ namespace QuizMaster.API.Gateway.Services
 
             // retrieve the current group of the user
             string? userGroup = GetConnectionGroup(connectionId);
-            if (userGroup == null) return;
+            if (userGroup == null) return "Not in session";
+            if (ClientOnHoldAnswerSubmission(connectionId)) return "Already Submitted";
 
-            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return;
+            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return "Not in session";
 
             int? currentQuestionIdDisplayed = RoomCurrentQuestionDisplayed.GetValueOrDefault(userGroup);
-            if (currentQuestionIdDisplayed == null) return;
+            if (currentQuestionIdDisplayed == null) return "Not in session";
             if (questionId != currentQuestionIdDisplayed)
             {
                 //await hub.Clients.Client(connectionId).SendAsync("notif", "Question expired, your current answer is declined");
-                return;
+                return "Question Expired, your answer is declined";
             }
             //await hub.Clients.Client(connectionId).SendAsync("notif", "Answer Submitted");
             // get the question data
             #region GettingQuestionData
             var gRpcRequest = new SetRequest() { Id = questionId };
             var gRpcReply = await grpcClient.GetQuestionAsync(gRpcRequest);
-            if (gRpcReply == null) return;
+            if (gRpcReply == null) return "Failed to retrieve question information";
 
             // parse the data
             var questionData = JsonConvert.DeserializeObject<QuestionsDTO>(gRpcReply.Data); 
-            if (questionData == null) return;
+            if (questionData == null) return "Failed to retrieve question information";
 
             // check if user has the correct answer
             var answers = questionData.details.Where(a => a.DetailTypes.Where(dt => dt.DTypeDesc.ToLower() == "answer").Select(Dt => Dt.DTypeDesc).ToList().Count > 0).Select(d => d.QDetailDesc).ToList();
@@ -171,12 +189,17 @@ namespace QuizMaster.API.Gateway.Services
             {
                 // get the participant data
                 var participantData = GetLinkedParticipantInConnectionId(connectionId);
-                if (participantData == null) return;
+                if (participantData == null) return "Participant data not found";
 
                 // increment score by 1
                 participantData.Score += 1;
+
+                
             }
+            // Hold Submission of Answer
+            HoldClientAnswerSubmission(connectionId);
             #endregion
+            return "Answer submitted";
         }
 
         
