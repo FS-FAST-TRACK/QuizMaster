@@ -103,7 +103,6 @@ export type QuestionFilterProps = {
     filterByDifficulties: number[];
     filterByTypes: number[];
 }
-}
 export interface CategoryResourceParameter extends ResourceParameter {
     
     isGetAll?: boolean;
@@ -136,6 +135,8 @@ export type QuestionSetDTO = {
     qSetDesc: string;
     qSetName: string;
     questions: number[];
+    dateCreated: Date;
+    dateUpdated: Date;
 };
 export type PatchItem = {
     path: string;

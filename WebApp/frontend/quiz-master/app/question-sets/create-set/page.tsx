@@ -12,6 +12,7 @@ import {
     QuestionResourceParameter,
     QuestionSet,
     QuestionSetDTO,
+    ResourceParameter,
 } from "@/lib/definitions";
 import { fetchCategories, fetchQuestions } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -34,6 +35,10 @@ import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import AddQuestionToSetModal from "@/components/Commons/modals/AddQuestionToSetModal";
 import { notifications } from "@mantine/notifications";
 import notificationStyles from "@/styles/notification.module.css";
+import { mapData, mapDataQuestionSet } from "@/lib/helpers";
+import { postQuestionSet } from "@/lib/hooks/set";
+import { notification } from "@/lib/notifications";
+import { useRouter } from "next/navigation";
 
 const items = [
     { label: "All", href: "/question-sets" },
@@ -46,16 +51,25 @@ const items = [
 ));
 
 export default function Page() {
+    const router = useRouter();
     const [createSetQuestion, setCreateSetQuestions] = useState(false);
     const [addQuestions, setAddQuestions] = useState(false);
     const [questionSet, setQuestionSet] = useState<Question[]>([]);
-    const [qSetName, setQSetName] = useState("");
     const [visible, { toggle, close }] = useDisclosure(false);
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
+    const formValues = useForm<QuestionSetDTO>({
+        initialValues: {
+            qSetName: "",
+            qSetDesc: "",
+            questions: [],
+            dateCreated: new Date(),
+            dateUpdated: new Date(1, 0, 1),
+        },
+    });
 
-    const form = useForm<CategoryResourceParameter>({
+    const form = useForm<ResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",
@@ -64,47 +78,53 @@ export default function Page() {
     });
 
     const handleSubmit = useCallback(async () => {
-        const questionSetIds = questionSet.map((question) => question.id);
+        formValues.values.questions = questionSet.map(
+            (question) => question.id
+        );
+        formValues.values.dateCreated = new Date();
+        formValues.values.dateUpdated = new Date(1, 0, 1);
+
+        console.log(formValues);
+        console.log(formValues.getInputProps("qSetName"));
 
         const questionSetCreateDto: QuestionSetDTO = {
-            qSetDesc: "",
-            qSetName: qSetName,
-            questions: questionSetIds,
+            qSetDesc: formValues.values.qSetName,
+            qSetName: formValues.values.qSetName,
+            questions: formValues.values.questions,
+            dateCreated: formValues.values.dateCreated,
+            dateUpdated: formValues.values.dateUpdated,
         };
-        console.log(questionSetIds);
-        console.log(qSetName);
-        console.log(JSON.stringify(questionSetCreateDto));
-        const res = await fetch(
-            `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/create`,
-            {
-                method: "POST",
-                mode: "cors",
-                body: JSON.stringify(questionSetCreateDto),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        // const questionSetCreateDto = mapDataQuestionSet(formValues);
 
-        console.log(res);
-        if (res.status === 200) {
-            notifications.show({
-                color: "green",
-                title: "Question set created successfully",
-                message: "",
-                classNames: notificationStyles,
-                className: "",
+        open();
+        console.log(questionSetCreateDto);
+
+        postQuestionSet({ questionSet: questionSetCreateDto })
+            .then((res) => {
+                console.log(res, "hello");
+                // Notify for successful post
+                notification({
+                    type: "success",
+                    title: "Question Set created successfuly",
+                });
+                // redirect to questions set page
+                router.push("/question-sets");
+            })
+            .catch((err) => {
+                console.log("EHE");
+                console.log(err);
+                console.log(err.message);
+                // notify for error
+                notification({
+                    type: "error",
+                    title: "Failed to create Question Set",
+                });
+            })
+            .finally(() => {
+                // close loading overlay
+                close();
             });
-        } else {
-            const error = await res.json();
-            notifications.show({
-                color: "red",
-                title: "Failed to create question set",
-                message: error.message,
-                classNames: notificationStyles,
-            });
-        }
-    }, [questionSet]);
+    }, [formValues.values]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -129,9 +149,9 @@ export default function Page() {
                     label="Set Name"
                     placeholder="Set Name"
                     variant="filled"
-                    onChange={(e) => setQSetName(e.target.value)}
                     withAsterisk
                     classNames={styles}
+                    {...formValues.getInputProps("qSetName")}
                 />
 
                 <div className="flex align-center">
@@ -173,7 +193,10 @@ export default function Page() {
                         className="flex ml-3 h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
                         color="green"
                         onClick={handleSubmit}
-                        disabled={qSetName === "" || questionSet.length === 0}
+                        disabled={
+                            formValues.values.qSetName === "" ||
+                            questionSet.length === 0
+                        }
                     >
                         <p className="block">Create a set</p>
                     </Button>
