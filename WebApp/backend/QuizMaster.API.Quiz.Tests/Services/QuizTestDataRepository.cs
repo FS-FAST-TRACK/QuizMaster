@@ -192,6 +192,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			throw new NotImplementedException();
 		}
 
+		public Task<Question?> GetQuestionAsync(Question question)
+		{
+			throw new NotImplementedException();
+		}
+
 		public Task<QuestionDetail?> GetQuestionDetailAsync(int qId)
 		{
 			throw new NotImplementedException();

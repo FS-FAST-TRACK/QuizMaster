@@ -11,6 +11,7 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 		Task<PagedList<Question>> GetAllQuestionsAsync(QuestionResourceParameter resourceParameter);
 		Task<Question?> GetQuestionAsync(int id);
 		Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId);
+		Task<Question?> GetQuestionAsync(Question question);
 		Task<bool> AddQuestionAsync(Question question);
 		bool UpdateQuestion(Question question);
 

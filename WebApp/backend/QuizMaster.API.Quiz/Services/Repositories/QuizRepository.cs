@@ -123,6 +123,16 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				&& q.QStatement.Trim().ToLower().Replace(" ", "") == qStatement.Trim().ToLower().Replace(" ", ""))
 				.FirstOrDefaultAsync();
 		}
+		public async Task<Question?> GetQuestionAsync(Question question)
+		{
+			return await _context.Questions.Where(q => q.Id != question.Id &&
+				q.QDifficulty.Id == question.QDifficultyId
+				&& q.QType.Id == question.QTypeId
+				&& q.QCategory.Id == question.QCategoryId
+				&& q.QStatement.Trim().ToLower().Replace(" ", "") == question.QStatement.Trim().ToLower().Replace(" ", "")
+				&& q.QTime == question.QTime)
+				.FirstOrDefaultAsync();
+		}
 
 		public async Task<bool> AddQuestionAsync(Question question)
 		{

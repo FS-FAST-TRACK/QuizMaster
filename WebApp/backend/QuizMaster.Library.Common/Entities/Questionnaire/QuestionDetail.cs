@@ -1,4 +1,5 @@
-﻿using QuizMaster.Library.Common.Entities.Accounts;
+﻿using Newtonsoft.Json;
+using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,7 +20,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public int QuestionId { get; set; }
         public Question Question { get; set; }
 
-
+        [JsonIgnore]
 		public IEnumerable<DetailType> DetailTypes { get; set; }
 
 		[Required]
