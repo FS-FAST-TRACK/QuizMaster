@@ -194,7 +194,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             var id = request.Id;
 
-            var qestions = _context.QuestionSets.Where(x=> x.SetId == id).ToList();
+            var qestions = _context.QuestionSets.Where(x=> x.SetId == id).Include(s => s.Set).ToList();
 
             reply.Code = 200;
             reply.Data = JsonConvert.SerializeObject(qestions);
@@ -220,9 +220,14 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var id = request.Id;
 
             var question = _context.Questions.FirstOrDefault(x => x.Id == id);
-            var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).ToList();
-
-            if(question == null)
+            //_ = _context.DetailTypes.ToList();
+            //var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).Include(qD => qD.DetailTypes).ToList();
+            var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).Include(qD => qD.DetailTypes).ToList();
+            details.ToList().ForEach(qDetail =>
+            {
+                qDetail.DetailTypes = _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetail.Id).Select((qDetailType) => qDetailType.DetailType).ToList();
+            });
+            if (question == null)
             {
                 reply.Code = 404;
                 reply.Message = $"Question with Id of {id} does not exist";

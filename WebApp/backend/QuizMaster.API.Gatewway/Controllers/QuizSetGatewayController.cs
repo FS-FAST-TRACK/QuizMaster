@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.QuizSession.Protos;
+using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.Threading.Channels;
@@ -18,11 +21,18 @@ namespace QuizMaster.API.Gateway.Controllers
     {
         private readonly GrpcChannel _channel;
         private readonly QuizSetService.QuizSetServiceClient _channelClient;
+        private readonly QuizRoomService.QuizRoomServiceClient roomChannelClient;
+        private SessionHandler SessionHandler;
+        private readonly SessionHub sessionHub;
 
-        public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options)
+        public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler, SessionHub sessionHub)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizSetService.QuizSetServiceClient(_channel);
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            roomChannelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
+            SessionHandler = sessionHandler;
+            this.sessionHub = sessionHub;
         }
 
         [HttpPost("create")]
@@ -41,6 +51,13 @@ namespace QuizMaster.API.Gateway.Controllers
             { return BadRequest(response.Message); }
 
             return Ok(JsonConvert.DeserializeObject<Set>( response.Data));
+        }
+
+        [HttpPost("submitAnswer")]
+        public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerDTO answerDTO)
+        {
+            await SessionHandler.SubmitAnswer(sessionHub, roomChannelClient, answerDTO.ConnectionId, answerDTO.QuestionId, answerDTO.Answer);
+            return Ok(new {  Message = "Answer Submitted" });
         }
 
         [HttpGet("all_set")]
