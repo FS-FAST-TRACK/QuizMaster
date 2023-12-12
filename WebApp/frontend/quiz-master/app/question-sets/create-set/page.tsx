@@ -1,29 +1,18 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
-import SearchField from "@/components/Commons/SearchField";
-import CreateCategoryModal from "@/components/Commons/modals/CreateCategoryModal";
-import CategoriesTable from "@/components/Commons/tables/CategoriesTable";
 import {
-    CategoryResourceParameter,
     PaginationMetadata,
     Question,
-    QuestionCategory,
-    QuestionResourceParameter,
-    QuestionSet,
     QuestionSetDTO,
     ResourceParameter,
 } from "@/lib/definitions";
-import { fetchCategories, fetchQuestions } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import {
     Anchor,
     Breadcrumbs,
     Button,
-    FileInput,
-    InputLabel,
     LoadingOverlay,
-    Select,
     TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -33,9 +22,6 @@ import styles from "@/styles/input.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import AddQuestionToSetModal from "@/components/Commons/modals/AddQuestionToSetModal";
-import { notifications } from "@mantine/notifications";
-import notificationStyles from "@/styles/notification.module.css";
-import { mapData, mapDataQuestionSet } from "@/lib/helpers";
 import { postQuestionSet } from "@/lib/hooks/set";
 import { notification } from "@/lib/notifications";
 import { useRouter } from "next/navigation";

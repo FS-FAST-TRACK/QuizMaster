@@ -29,11 +29,13 @@ export default function QuestionTable({
     message,
     setSelectedRow,
     loading,
+    callInQuestionsPage,
 }: {
     questions: Question[];
     message?: string;
     setSelectedRow: Dispatch<SetStateAction<number[]>>;
     loading: boolean;
+    callInQuestionsPage: boolean | false;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
@@ -98,14 +100,16 @@ export default function QuestionTable({
             <Table.Td>
                 {getQuestionDifficultyDescription(question.qDifficultyId)}
             </Table.Td>
-            <Table.Td>
-                <QuesitonAction
-                    questionId={question.id}
-                    onDelete={() => {
-                        setDeleteQuestion(question);
-                    }}
-                />
-            </Table.Td>
+            {callInQuestionsPage && (
+                <Table.Td>
+                    <QuesitonAction
+                        questionId={question.id}
+                        onDelete={() => {
+                            setDeleteQuestion(question);
+                        }}
+                    />
+                </Table.Td>
+            )}
         </Table.Tr>
     ));
 
@@ -186,6 +190,7 @@ export default function QuestionTable({
                     setViewQuestion(undefined);
                 }}
                 question={viewQuestion}
+                callInQuestionsPage={callInQuestionsPage}
             />
         </div>
     );

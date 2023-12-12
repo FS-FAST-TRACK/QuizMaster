@@ -11,10 +11,12 @@ export default function ViewQuestionModal({
     question,
     onClose,
     opened,
+    callInQuestionsPage,
 }: {
     question?: Question;
     opened: boolean;
     onClose: () => void;
+    callInQuestionsPage: boolean;
 }) {
     const [imageBlobUrl, setImageBlobUrl] = useState<null | string>(null);
     const [audioBlobUrl, setAudioBlobUrl] = useState<null | string>(null);
@@ -68,21 +70,23 @@ export default function ViewQuestionModal({
                     questionId={question?.id}
                     questionTypeId={question?.qTypeId}
                 />
-                <div className="flex justify-end">
-                    <Button
-                        variant="transparent"
-                        color="gray"
-                        onClick={onClose}
-                    >
-                        Cancel
-                    </Button>
-                    <Link
-                        href={`questions/edit/${question?.id}`}
-                        className="flex h-[48px] transition-all duration-300 items-center gap-3 rounded-md py-1 text-sm font-medium hover:bg-[--primary-200] justify-start px-3 bg-[--primary] text-white "
-                    >
-                        Edit Question
-                    </Link>
-                </div>
+                {callInQuestionsPage && (
+                    <div className="flex justify-end">
+                        <Button
+                            variant="transparent"
+                            color="gray"
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </Button>
+                        <Link
+                            href={`questions/edit/${question?.id}`}
+                            className="flex h-[48px] transition-all duration-300 items-center gap-3 rounded-md py-1 text-sm font-medium hover:bg-[--primary-200] justify-start px-3 bg-[--primary] text-white "
+                        >
+                            Edit Question
+                        </Link>
+                    </div>
+                )}
             </div>
         </Modal>
     );
