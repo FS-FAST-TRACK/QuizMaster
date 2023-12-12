@@ -20,8 +20,8 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         [JsonIgnore]
         public IEnumerable<QuestionDetail> Details { get; set; }
 
-        [Required]
-        public string QImage { get; set; }
+		[AllowNull]
+		public string QImage { get; set; }
 
         [AllowNull]
         public string QAudio { get; set; }

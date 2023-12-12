@@ -42,7 +42,6 @@ namespace QuizMaster.API.Quiz.Models
         [Required]
 		public string QStatement { get; set; }
 
-		[Required]
 		public string QImage { get; set; }
 
 		public string? QAudio { get; set; }
