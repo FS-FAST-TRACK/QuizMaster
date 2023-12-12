@@ -17,9 +17,6 @@ export default function DifficultiesTable({
     onDelete?: (category: QuestionDifficulty) => void;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
-    const [viewDifficulty, setViewDifficulty] = useState<
-        QuestionDifficulty | undefined
-    >();
 
     useEffect(() => {
         setSelectedRows([]);
@@ -50,12 +47,7 @@ export default function DifficultiesTable({
                     }
                 />
             </Table.Td>
-            <Table.Td
-                className="cursor-pointer"
-                onClick={() => setViewDifficulty(difficulty)}
-            >
-                {difficulty.qDifficultyDesc}
-            </Table.Td>
+            <Table.Td>{difficulty.qDifficultyDesc}</Table.Td>
             <Table.Td>{difficulty.dateCreated.toDateString()}</Table.Td>
             <Table.Td>{difficulty.dateUpdated.toDateString()}</Table.Td>
             <Table.Td>{difficulty.questionCounts}</Table.Td>
@@ -117,13 +109,6 @@ export default function DifficultiesTable({
                     )}
                 </Table.Tbody>
             </Table>
-            <ViewDifficultyModal
-                opened={viewDifficulty !== undefined}
-                onClose={() => {
-                    setViewDifficulty(undefined);
-                }}
-                difficulty={viewDifficulty}
-            />
         </div>
     );
 }

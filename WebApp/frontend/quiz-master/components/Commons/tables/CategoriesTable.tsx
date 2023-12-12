@@ -17,9 +17,6 @@ export default function CategoriesTable({
     onDelete?: (category: QuestionCategory) => void;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
-    const [viewCategory, setViewCategory] = useState<
-        QuestionCategory | undefined
-    >();
 
     useEffect(() => {
         setSelectedRows([]);
@@ -50,12 +47,7 @@ export default function CategoriesTable({
                     }
                 />
             </Table.Td>
-            <Table.Td
-                className="cursor-pointer"
-                onClick={() => setViewCategory(category)}
-            >
-                {category.qCategoryDesc}
-            </Table.Td>
+            <Table.Td>{category.qCategoryDesc}</Table.Td>
             <Table.Td>{category.dateCreated.toDateString()}</Table.Td>
             <Table.Td>{category.dateUpdated.toDateString()}</Table.Td>
             <Table.Td>{category.questionCounts}</Table.Td>
@@ -117,13 +109,6 @@ export default function CategoriesTable({
                     )}
                 </Table.Tbody>
             </Table>
-            <ViewCategoryModal
-                opened={viewCategory !== undefined}
-                onClose={() => {
-                    setViewCategory(undefined);
-                }}
-                category={viewCategory}
-            />
         </div>
     );
 }
