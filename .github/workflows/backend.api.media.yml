@@ -3,7 +3,7 @@ name: QuizMaster - Media API
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   build:
