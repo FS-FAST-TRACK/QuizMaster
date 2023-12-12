@@ -266,6 +266,22 @@ export default function Page({ params }: { params: { id: number } }) {
                     withAsterisk
                     classNames={styles}
                     {...form.getInputProps("qStatement")}
+                    onBlur={() => {
+                        if (form.values.qStatement !== "") {
+                            patchQuestion({
+                                id: form.values.id,
+                                patches: [
+                                    {
+                                        path: "qStatement",
+                                        op: "replace",
+                                        value: form.values.qStatement,
+                                    },
+                                ],
+                                image: null,
+                                audio: null,
+                            });
+                        }
+                    }}
                 />
                 <div className="flex flex-col md:flex-row gap-5 md:gap-10 [&>*]:grow">
                     <Select

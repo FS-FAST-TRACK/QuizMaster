@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuizMaster.API.Quiz.DbContexts;
 
@@ -11,9 +12,11 @@ using QuizMaster.API.Quiz.DbContexts;
 namespace QuizMaster.API.Quiz.Migrations
 {
     [DbContext(typeof(QuestionDbContext))]
-    partial class QuestionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231212075127_QuizDbAllowNulQImage")]
+    partial class QuizDbAllowNulQImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
