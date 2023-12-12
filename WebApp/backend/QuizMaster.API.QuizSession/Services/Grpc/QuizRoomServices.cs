@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Protos;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.Collections.Immutable;
 
 namespace QuizMaster.API.QuizSession.Services.Grpc
 {
@@ -242,19 +244,76 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
         }
 
-        public override Task<RoomResponse> RegisterParticipant(Data request, ServerCallContext context)
+        public override Task<RoomResponse> GetRoomData(Data request, ServerCallContext context)
         {
-            return base.RegisterParticipant(request, context);
+            return base.GetRoomData(request, context);
         }
 
-        public override Task<RoomResponse> UpdateParticipant(Data request, ServerCallContext context)
+        public override async Task<RoomResponse> SaveRoomData(Data request, ServerCallContext context)
         {
-            return base.UpdateParticipant(request, context);
+            var response = new RoomResponse();
+            var quizRoomData = JsonConvert.DeserializeObject<QuizRoomData>(request.Value);
+
+            if(quizRoomData == null) 
+            {
+                response.Code = 400;
+                response.Message = "Failed to save data";
+                return await Task.FromResult(response);
+            }
+
+            await _context.QuizRoomDatas.AddAsync(quizRoomData);
+            await _context.SaveChangesAsync();
+
+            response.Code = 200;
+            return await Task.FromResult(response);
         }
 
-        public override Task<RoomResponse> SubmitAnswer(Data request, ServerCallContext context)
+        public override async Task<RoomResponse> GetAllRoomData(Data request, ServerCallContext context)
         {
-            return base.SubmitAnswer(request, context);
+            var response = new RoomResponse();
+
+            response.Code = 200;
+            IEnumerable<QuizRoomData> data = _context.QuizRoomDatas.ToImmutableList();
+            response.Data = JsonConvert.SerializeObject(data);
+            return await Task.FromResult<RoomResponse>(response);
         }
+
+        public override async Task<RoomResponse> SaveParticipants(Data request, ServerCallContext context)
+        {
+            var response = new RoomResponse();
+            var participants = JsonConvert.DeserializeObject<IEnumerable<QuizParticipant>>(request.Value);
+
+            if(participants == null)
+            {
+                response.Code = 400;
+                response.Message = "Error, Participants is null";
+                return await Task.FromResult(response);
+            }
+
+            List<QuizParticipant> Entries = new();
+            foreach(var participant in participants)
+            {
+                var p = new QuizParticipant
+                {
+                    QParticipantDesc = participant.QParticipantDesc,
+                    QRoomId = participant.QRoomId,
+                    UserId = participant.UserId,
+                    Score = participant.Score,
+                    QStartDate = participant.QStartDate,
+                    QEndDate = participant.QEndDate,
+                    QStatus = participant.QStatus,
+                };
+                var entry = _context.QuizParticipants.Add(p);
+                var entity = entry.Entity;
+                _context.SaveChanges();
+                if (entry == null) continue;
+                Entries.Add(entity);
+                
+            }
+            response.Code = 200;
+            response.Data = JsonConvert.SerializeObject(Entries);
+            return await Task.FromResult(response);
+        }
+
     }
 }

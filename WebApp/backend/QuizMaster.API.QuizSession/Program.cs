@@ -75,8 +75,7 @@ namespace QuizMaster.API.QuizSession
                 var scopeProvider = scope.ServiceProvider;
                 var dbContext = scopeProvider.GetRequiredService<QuizSessionDbContext>();
 
-                if (dbContext != null)
-                    dbContext.Database.EnsureCreated();
+                dbContext?.Database.EnsureCreated();
             }
 
             app.Run();

@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Grpc.Net.Client;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
@@ -10,13 +13,19 @@ namespace QuizMaster.API.Gateway.Services
 {
     public class QuizHandler
     {
+        private GrpcChannel _channel;
+        private QuizRoomService.QuizRoomServiceClient _channelClient;
         private List<string> InSession;
-        public QuizHandler()
+        public QuizHandler(IOptions<GrpcServerConfiguration> options)
         {
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             InSession = new();
         }
         public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, string roomId)
         {
+            string hostConnectionId = hub.Context.ConnectionId;
+            DateTime startTime = DateTime.UtcNow;
             // Check if the current session is started, otherwise don't proceed
             if (InSession.Contains(roomId))
             {
@@ -52,6 +61,9 @@ namespace QuizMaster.API.Gateway.Services
                 foreach (var questionSet in Setquestions)
                 {
                     roomPin = Qset.QRoom.QRoomPin + "";
+                    // update the participant start-time if haven't, for late joiners
+                    UpdateParticipantsStartTime(handler, roomPin);
+                    AcceptParticipantsAnswerSubmission(handler, roomPin, Qset.QRoom);
                     //await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying a question");
                     var questionRequest = new SetRequest() { Id = questionSet.QuestionId };
                     var questionSetReply = await grpcClient.GetQuestionAsync(questionRequest);
@@ -62,7 +74,7 @@ namespace QuizMaster.API.Gateway.Services
                     if (details == null) continue;
 
                     handler.SetCurrentQuestionDisplayed(roomPin, details.question.Id);// Save the current displayed Question
-                    var timout = details.question.QTime;
+                    var timout = 5;//details.question.QTime;
 
                     // setting the current set info
                     details.CurrentSetName = questionSet.Set.QSetName;
@@ -77,17 +89,97 @@ namespace QuizMaster.API.Gateway.Services
                 }
             }
             await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
-            // send scores
-            var participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin);
-            foreach (var participant in participants)
-                await hub.Clients.Group(roomPin).SendAsync("notif", $"Score: {participant.Score} | Name: {participant.QParticipantDesc}");
+            
+            EndParticipantsStartTime(handler, roomPin); // End participant time
+            await SendParticipantsScoresAsync(hub, handler, roomPin); // send scores
             handler.RemoveRoomDataCurrentDisplayed(roomPin); // clear the last question
             InSession.Remove(roomId); // Quiz ended, can restart
 
             // TODO: Save the Participant's Scores and reset their data's
-
+            await SaveQuizRoomDataAsync(handler, hostConnectionId, Convert.ToInt32(roomId), roomPin, startTime, quizSets);
             // Clear
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
+            await hub.Clients.Group(roomPin).SendAsync("notif", "Quiz Data: "+JsonConvert.SerializeObject(await GetQuizRoomDatasAsync()));
+        }
+
+        public void AcceptParticipantsAnswerSubmission(SessionHandler handler, string roomPin, QuizRoom room)
+        {
+            var participantsConnectionIds = handler.GetConnectionIdsInAGroup(roomPin);
+            foreach (var participantConnectionId in participantsConnectionIds)
+            {
+                handler.RemoveHoldOnAnswerSubmission(participantConnectionId);
+                var participant = handler.GetLinkedParticipantInConnectionId(participantConnectionId);
+                if (participant != null) participant.QRoomId = room.Id;
+            }
+        }
+
+        public void UpdateParticipantsStartTime(SessionHandler handler, string roomPin)
+        {
+            var participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin);
+            foreach (var participant in participants)
+            {
+                // Only update the participant qStartTime if it is null
+                if(participant.QStartDate == null) { 
+                    participant.QStartDate = DateTime.Now;
+                }
+            }
+        }
+
+        public void EndParticipantsStartTime(SessionHandler handler, string roomPin)
+        {
+            var participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin);
+            foreach (var participant in participants)
+            {
+                // Only update the participant qEndTime if it is null
+                if (participant.QEndDate == null)
+                {
+                    participant.QEndDate = DateTime.Now;
+                }
+            }
+        }
+
+        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin)
+        {
+            var participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin);
+            foreach (var participant in participants)
+                await hub.Clients.Group(roomPin).SendAsync("notif", $"Score: {participant.Score} | Name: {participant.QParticipantDesc}");
+        }
+
+        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions)
+        {
+            var host = handler.GetLinkedParticipantInConnectionId(hostConnectionId);
+            if (host == null) return;
+
+            // get all participants and serialize it
+            IEnumerable<QuizParticipant> participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin);
+            var rpcPayloadSaveParticipants = new Data{ Value = JsonConvert.SerializeObject(participants) };
+            var rpcResponse = await _channelClient.SaveParticipantsAsync(rpcPayloadSaveParticipants);
+
+            if (rpcResponse == null) return;
+            var participantData = JsonConvert.DeserializeObject<List<QuizParticipant>>(rpcResponse.Data);
+
+            if(participantData == null) return;
+
+            QuizRoomData quizRoomData = new QuizRoomData();
+            quizRoomData.QRoomId = roomId;
+            quizRoomData.HostId = host.UserId;
+            quizRoomData.SetQuizRoomJSON = JsonConvert.SerializeObject(Setquestions);
+            quizRoomData.ParticipantsJSON = JsonConvert.SerializeObject(participants);
+            quizRoomData.StartedDateTime = startTime;
+            quizRoomData.EndedDateTime = DateTime.Now;
+            quizRoomData.CreatedByUserId = host.UserId;
+
+            var rpcPayloadSaveQuizRoomData = new Data { Value = JsonConvert.SerializeObject(quizRoomData) };
+            await _channelClient.SaveRoomDataAsync(rpcPayloadSaveQuizRoomData);
+        }
+
+        public async Task<IEnumerable<QuizRoomData>> GetQuizRoomDatasAsync()
+        {
+            var rpcData = new Data { };
+            var rpcResponse = await _channelClient.GetAllRoomDataAsync(rpcData);
+
+            if(rpcResponse == null) return new List<QuizRoomData>();
+            return JsonConvert.DeserializeObject<IEnumerable<QuizRoomData>>(rpcResponse.Data) ?? new List<QuizRoomData>();
         }
     }
 }

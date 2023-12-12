@@ -101,6 +101,12 @@ namespace QuizMaster.API.Gateway.Services
             return participantLinkedConnectionId.Remove(connectionId);
         }
 
+        public IEnumerable<string> GetConnectionIdsInAGroup(string group)
+        {
+            var connectionIds = connectionGroupPair.Where(kv => kv.Value.Equals(group)).Select(kv => kv.Key).ToList();
+            return connectionIds ?? new List<string>();
+        }
+
 
         public IEnumerable<QuizParticipant> GetParticipantLinkedConnectionsInAGroup(string group)
         {
