@@ -102,7 +102,7 @@ export default function Page() {
                 // close loading overlay
                 close();
             });
-    }, [formValues.values]);
+    }, [formValues.values, questionSet]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -158,6 +158,7 @@ export default function Page() {
                     }
                     setSelectedRow={() => null}
                     loading={visible}
+                    callInQuestionsPage={false}
                 />
                 <Pagination form={form} metadata={paginationMetadata} />
                 <div className="flex justify-end">

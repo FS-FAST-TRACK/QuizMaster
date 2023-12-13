@@ -111,6 +111,7 @@ export default function AddQuestionToSetModal({
                     }
                     setSelectedRow={setSelectedRows}
                     loading={visible}
+                    callInQuestionsPage={false}
                 />
                 <div className="flex justify-end">
                     <Button
