@@ -8,6 +8,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
     public class QuizRoomData : IEntity
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         // Quiz Room

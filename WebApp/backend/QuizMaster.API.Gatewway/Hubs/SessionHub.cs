@@ -214,7 +214,17 @@ namespace QuizMaster.API.Gateway.Hubs
                     {
                         //string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
                         string Name = userData.UserData.UserName;
-                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id });
+                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id, QRoomId = room.Id });
+
+                        // get the linked participant and check if eliminated
+                        var ParticipantData = SessionHandler.GetLinkedParticipantInConnectionId(connectionId);
+                        if (ParticipantData == null) return;
+                        if (SessionHandler.IsParticipantEliminated(RoomPin, ParticipantData)) 
+                        {
+                            await Clients.Caller.SendAsync("notif", "You are eliminated on this quiz, you cannot join");
+                            return;
+                        }
+
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("notif", $"{Name} has joined Room {room.QRoomDesc}", room);
                     }
@@ -271,34 +281,32 @@ namespace QuizMaster.API.Gateway.Hubs
             try
             {
                 var reply = _channelClient.GetAllRoom(new RoomsEmptyRequest());
-                int roomId = -1;
+                QuizRoom? quizRoom = null;
 
                 if (reply.Code == 200)
                 {
                     var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(reply.Data);
 
-                    bool containsId = false;
                     var room = new QuizRoom();
                     foreach (QuizRoom rooms in quizRooms)
                     {
                         if (rooms.QRoomPin == Convert.ToInt32(roomPin))
                         {
-                            room = rooms;
-                            containsId = true;
+                            quizRoom = rooms;
                             break;
                         }
                     }
-
-                    if(containsId)
-                    {
-                        roomId = room.Id;
-                    }
                 }
 
+                if(quizRoom == null)
+                {
+                    await Clients.Caller.SendAsync("notif", "Failed to start a session");
+                    return;
+                }
                 // we will not use await, we will let the request pass
                 await Clients.Group(roomPin).SendAsync("start", true);
                 //await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
-                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, roomId.ToString());
+                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, quizRoom);
             }
             catch (Exception ex)
             {
