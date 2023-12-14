@@ -2,6 +2,9 @@
 using Newtonsoft.Json;
 using QuizMaster.API.Media.Models;
 using QuizMaster.API.Media.Proto;
+using QuizMaster.API.Monitoring.Proto;
+using QuizMaster.Library.Common.Helpers;
+using static QuizMaster.API.Monitoring.Proto.AuditService;
 
 namespace QuizMaster.API.Media.Services.GRPC
 {
@@ -10,12 +13,14 @@ namespace QuizMaster.API.Media.Services.GRPC
         private readonly IFileRepository _fileRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger _logger;
+        private readonly MediaAuditService.MediaAuditServiceClient _mediaAuditServiceClient;
 
-        public Service(IFileRepository fileRepository, IWebHostEnvironment webHostEnvironment, ILogger<Service> logger)
+        public Service(IFileRepository fileRepository, IWebHostEnvironment webHostEnvironment, ILogger<Service> logger, MediaAuditService.MediaAuditServiceClient mediaAuditServiceClient)
         {
             _fileRepository = fileRepository;
             _webHostEnvironment = webHostEnvironment;
             _logger = logger;
+            _mediaAuditServiceClient = mediaAuditServiceClient;
         }
 
         /// <summary>
@@ -30,6 +35,30 @@ namespace QuizMaster.API.Media.Services.GRPC
             // deserialize the request
             var fileInformation = JsonConvert.DeserializeObject<FileInformation>(request.Media);
 
+            // Capture the details of the user uploading the media
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            // Construct the upload media event
+            var uploadMediaEvent = new UploadMediaEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Upload Media",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Media uploaded by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = "",
+                NewValues = JsonConvert.SerializeObject(fileInformation),
+            };
+
+            var logRequest = new LogUploadMediaEventRequest
+            {
+                Event = uploadMediaEvent
+            };
+
+
             try
             {
                 // save media
@@ -41,8 +70,16 @@ namespace QuizMaster.API.Media.Services.GRPC
                 reply.StatusCode = 500;
                 return await Task.FromResult(reply);
             }
-            
-
+            try
+            {
+                // Make the gRPC call to log the upload media event
+                _mediaAuditServiceClient.LogUploadMediaEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                
+            }
             reply.StatusCode = 200;
             return await Task.FromResult(reply);
         }
@@ -110,21 +147,58 @@ namespace QuizMaster.API.Media.Services.GRPC
                 return Task.FromResult(reply);
             }
 
+            // Capture the details of the user deleting the media
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            // Construct the delete media event
+            var deleteMediaEvent = new DeleteMediaEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Delete Media",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Media deleted by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = JsonConvert.SerializeObject(fileInformation),
+                NewValues = "",
+            };
+
+            var logRequest = new LogDeleteMediaEventRequest
+            {
+                Event = deleteMediaEvent
+            };
+
             try
             {
-                // delete the media information
-                _fileRepository.Remove(Guid.Parse(request.Id));
+                // Make the gRPC call to log the delete media event
+                _mediaAuditServiceClient.LogDeleteMediaEvent(logRequest);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 reply.StatusCode = 500;
                 return Task.FromResult(reply);
             }
+
+            try
+            {
+                // delete the media information
+                _fileRepository.Remove(Guid.Parse(request.Id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                reply.StatusCode = 500;
+                return Task.FromResult(reply);
+            }
+
             reply.StatusCode = 200;
             // serialize the media
             reply.Media = JsonConvert.SerializeObject(fileInformation);
             return Task.FromResult(reply);
         }
+
     }
 }

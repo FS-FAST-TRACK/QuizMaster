@@ -23,16 +23,14 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly QuizSetService.QuizSetServiceClient _channelClient;
         private readonly QuizRoomService.QuizRoomServiceClient roomChannelClient;
         private SessionHandler SessionHandler;
-        private readonly SessionHub sessionHub;
 
-        public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler, SessionHub sessionHub)
+        public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizSetService.QuizSetServiceClient(_channel);
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             roomChannelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             SessionHandler = sessionHandler;
-            this.sessionHub = sessionHub;
         }
 
         [HttpPost("create")]
@@ -56,8 +54,8 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPost("submitAnswer")]
         public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerDTO answerDTO)
         {
-            await SessionHandler.SubmitAnswer(sessionHub, roomChannelClient, answerDTO.ConnectionId, answerDTO.QuestionId, answerDTO.Answer);
-            return Ok(new {  Message = "Answer Submitted" });
+            string Message = await SessionHandler.SubmitAnswer(roomChannelClient, answerDTO.ConnectionId, answerDTO.QuestionId, answerDTO.Answer);
+            return Ok(new {  Message });
         }
 
         [HttpGet("all_set")]

@@ -2,10 +2,12 @@ using Grpc.Net.Client;
 using Microsoft.EntityFrameworkCore;
 using MonitoringService.DataAccess;
 using QuizMaster.API.Monitoring.DataAccess;
+using QuizMaster.API.Monitoring.DataAccess.Media;
 using QuizMaster.API.Monitoring.DataAccess.Quiz;
 using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.API.Monitoring.Services;
 using QuizMaster.API.Monitoring.Services.Audit;
+using QuizMaster.API.Monitoring.Services.Media;
 using QuizMaster.API.Monitoring.Services.QuizAudit;
 
 namespace QuizMaster.API.Monitoring
@@ -36,6 +38,9 @@ namespace QuizMaster.API.Monitoring
             builder.Services.AddScoped<IQuestionTypeAuditTrailRepository, QuestionTypeAuditTrailRepository>();
             builder.Services.AddScoped<IQuestionTypeAuditTrailService, QuestionTypeAuditTrailService>();
             builder.Services.AddScoped<QuestionTypeAuditTrailRepository>();
+            builder.Services.AddScoped<IMediaAuditTrailRepository, MediaAuditTrailRepository>();
+            builder.Services.AddScoped<IMediaAuditTrailService, MediaAuditTrailService>();
+            builder.Services.AddScoped<MediaAuditTrailRepository>();
 
             builder.Services.AddGrpc();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -68,6 +73,7 @@ namespace QuizMaster.API.Monitoring
             app.UseAuthorization();
             app.MapGrpcService<MonitoringInfoService>();
             app.MapGrpcService<QuizMonitoringService>();
+            app.MapGrpcService<MediaMonitoringInfoService>();
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 
