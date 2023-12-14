@@ -25,11 +25,18 @@ namespace QuizMaster.API.Gateway.Services
         {
             int roomId = room.Id;
             string hostConnectionId = hub.Context.ConnectionId;
+            var adminData = handler.GetLinkedParticipantInConnectionId(hostConnectionId);
             DateTime startTime = DateTime.UtcNow;
             // Check if the current session is started, otherwise don't proceed
             if (handler.IsRoomActive(room.QRoomPin))
             {
                 await hub.Clients.Caller.SendAsync("notif", "Room has already started");
+                return;
+            }
+
+            if(adminData == null)
+            {
+                await hub.Clients.Caller.SendAsync("notif", "Could not start, admin data is not valid");
                 return;
             }
 
@@ -75,7 +82,7 @@ namespace QuizMaster.API.Gateway.Services
                     if (details == null) continue;
 
                     handler.SetCurrentQuestionDisplayed(roomPin, details.question.Id);// Save the current displayed Question
-                    var timout = 5;// details.question.QTime;
+                    var timout = details.question.QTime;
 
                     // setting the current set info
                     details.CurrentSetName = questionSet.Set.QSetName;
@@ -91,16 +98,22 @@ namespace QuizMaster.API.Gateway.Services
                 }
 
                 // before going to new set, do some elimination if toggled
-                if (room.IsEliminationRound() && setIndex++ < quizSets.Count)
+                if (room.IsEliminationRound() && ++setIndex < quizSets.Count)
                 {
-                    await EliminateParticipantsAsync(hub, handler, roomPin);
+                    if (room.ShowLeaderboardEachRound())
+                    {
+                        await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Displaying leaderboards");
+                        await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
+                        await Task.Delay(5000);
+                    }
+                    await EliminateParticipantsAsync(hub, handler, roomPin, adminData);
                     await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Elimination, reducing population to half");
                 }
             }
             await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
             
             SetParticipantsEndTime(handler, roomPin); // End participant time
-            await SendParticipantsScoresAsync(hub, handler, roomPin); // send scores
+            await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
             handler.RemoveRoomDataCurrentDisplayed(roomPin); // clear the last question
             handler.RemoveActiveRoom(room.QRoomPin); // Quiz ended, can restart | Set to inactive
 
@@ -149,14 +162,16 @@ namespace QuizMaster.API.Gateway.Services
             }
         }
 
-        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin)
+        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData)
         {
             List<QuizParticipant> participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).ToList();
             participants.AddRange(handler.GetEliminatedParticipants(Convert.ToInt32(roomPin)));
-            foreach (var participant in participants)
+            int limitDisplayed = room.DisplayTop10Only() ? 10 : participants.Count();
+            foreach (var participant in participants.OrderByDescending(p => p.Score).Take(limitDisplayed))
             {
+                if (adminData.UserId == participant.UserId) continue; // don't display admin score
                 string eliminated = handler.IsParticipantEliminated(Convert.ToInt32(roomPin), participant) ? "Eliminated" : string.Empty;
-                await hub.Clients.Group(roomPin).SendAsync("notif", $"Score: {participant.Score} | Name: {participant.QParticipantDesc} {eliminated}");
+                await hub.Clients.Group(roomPin).SendAsync("leaderboard", $"Score: {participant.Score} | Name: {participant.QParticipantDesc} {eliminated}");
             }
 
 
@@ -200,10 +215,10 @@ namespace QuizMaster.API.Gateway.Services
             return JsonConvert.DeserializeObject<IEnumerable<QuizRoomData>>(rpcResponse.Data) ?? new List<QuizRoomData>();
         }
 
-        public async Task EliminateParticipantsAsync(SessionHub hub, SessionHandler handler, string roomPin)
+        public async Task EliminateParticipantsAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizParticipant hostData)
         {
             var participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin);
-            int population = participants.Count();
+            int population = participants.Count() - 1; // exclude 1 for the host
 
             // we don't need to kick the last participant if he/she is left in a group
             if (population == 1) return;
@@ -215,7 +230,7 @@ namespace QuizMaster.API.Gateway.Services
              * the high score participants. 50% of the population will be reduced.
              * The lowest score participant is the highest chance to be removed
              */
-            foreach(var participant in participants.OrderBy(x => x.Score).ToList().Take(half))
+            foreach(var participant in participants.Where(p => p.UserId != hostData.UserId).OrderBy(x => x.Score).ToList().Take(half))
             {
                 foreach(var connectionId in handler.GetConnectionIdsInAGroup(roomPin)){
                     var participantLinkedConnectionId = handler.GetLinkedParticipantInConnectionId(connectionId);

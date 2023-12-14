@@ -40,6 +40,9 @@ namespace QuizMaster.API.Gateway.Services
         {
             connectionGroupPair[connectionId] = group;
             await hub.Groups.AddToGroupAsync(connectionId, group);
+
+            IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
+            await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
         }
 
         public async Task RemoveFromGroup(SessionHub hub, string group, string connectionId)
@@ -63,7 +66,12 @@ namespace QuizMaster.API.Gateway.Services
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
                 await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync(channel, disconnectMessage);
+
+                IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
+                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
+
                 connectionGroupPair.Remove(connectionId);
+                
             }
         }
 
@@ -125,7 +133,7 @@ namespace QuizMaster.API.Gateway.Services
             {
                 return false;
             }
-            return RoomEliminatedParticipants[roomPin].Where(p => p.Id == participant.Id && p.QRoomId == participant.QRoomId && p.UserId == participant.UserId && p.QParticipantDesc == participant.QParticipantDesc).Any();
+            return RoomEliminatedParticipants[roomPin].Where(p => p.QRoomId == participant.QRoomId && p.UserId == participant.UserId && p.QParticipantDesc == participant.QParticipantDesc).Any();
         }
 
         public void ClearEliminatedParticipants(int roomPin)
