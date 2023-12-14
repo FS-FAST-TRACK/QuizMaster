@@ -19,6 +19,13 @@ export async function fetchQuestions({
 }) {
     try {
         var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
+        if(questionResourceParameter.exludeQuestionsIds && questionResourceParameter.exludeQuestionsIds.length !== 0){
+            apiUrl = apiUrl.concat(
+                `&exludeQuestionsIds=${JSON.stringify(
+                    questionResourceParameter.exludeQuestionsIds
+                )}`
+            );
+        }
 
         const { data, paginationMetadata } = await fetch(apiUrl).then(
             async (res) => {

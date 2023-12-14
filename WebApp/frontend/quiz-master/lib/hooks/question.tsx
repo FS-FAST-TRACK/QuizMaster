@@ -34,6 +34,13 @@ export async function fetchQuestions({
                 )}`
             );
         }
+        if(questionResourceParameter.exludeQuestionsIds && questionResourceParameter.exludeQuestionsIds.length !== 0){
+            apiUrl = apiUrl.concat(
+                `&exludeQuestionsIds=${JSON.stringify(
+                    questionResourceParameter.exludeQuestionsIds
+                )}`
+            );
+        }
         const { data, paginationMetadata } = await fetch(apiUrl).then(
             async (res) => {
                 var data: Question[];

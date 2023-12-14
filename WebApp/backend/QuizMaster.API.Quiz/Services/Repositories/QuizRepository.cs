@@ -44,6 +44,13 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 				collection = collection.Where(q => q.ActiveData);
 			}
 
+			if(resourceParameter.ExludeQuestionsIds != null)
+			{
+                var exludeQuestionsIds = JsonSerializer.Deserialize<List<int>>(resourceParameter.ExludeQuestionsIds);
+                if (exludeQuestionsIds != null)
+                    collection = collection.Where(q => !exludeQuestionsIds.Any((qId) => qId == q.Id));
+            }
+
 			if (resourceParameter.FilterByCategoriesId != null)
 			{
 				var filterCategoriesId = JsonSerializer.Deserialize<List<int>>(resourceParameter.FilterByCategoriesId);

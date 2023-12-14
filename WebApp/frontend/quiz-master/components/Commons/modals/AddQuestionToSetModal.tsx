@@ -11,7 +11,9 @@ import style from "@/styles/input.module.css";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import notificationStyles from "../../../styles/notification.module.css";
+import Pagination from "@/components/Commons/Pagination";
 import {
+    PaginationMetadata,
     Question,
     QuestionFilterProps,
     QuestionResourceParameter,
@@ -49,6 +51,9 @@ export default function AddQuestionToSetModal({
             filterByTypes: [],
         }
     );
+    const [paginationMetadata, setPaginationMetadata] = useState<
+        PaginationMetadata | undefined
+    >();
 
     const form = useForm<ResourceParameter>({
         initialValues: {
@@ -67,17 +72,12 @@ export default function AddQuestionToSetModal({
                 questionResourceParameter: {
                     ...form.values,
                     ...questionFilters,
+                    exludeQuestionsIds: questions.map((q) => q.id),
                 },
             });
             fetchQuestion.then((res) => {
-                const notYetAddedQuestions = res.data.filter((question) => {
-                    return (
-                        !questions ||
-                        !questions.some((q) => q.id === question.id)
-                    );
-                });
-
-                setQuestionsNotYetAdded(notYetAddedQuestions);
+                setPaginationMetadata(res.paginationMetadata);
+                setQuestionsNotYetAdded(res.data);
             });
         }
         close();
@@ -113,6 +113,7 @@ export default function AddQuestionToSetModal({
                     loading={visible}
                     callInQuestionsPage={false}
                 />
+                <Pagination form={form} metadata={paginationMetadata} />
                 <div className="flex justify-end">
                     <Button
                         variant="transparent"
