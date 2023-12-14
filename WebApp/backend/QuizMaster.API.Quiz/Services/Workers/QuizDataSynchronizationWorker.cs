@@ -75,6 +75,39 @@ namespace QuizMaster.API.Quiz.Services.Workers
             }
         }
 
+
+        public async Task Synchronize()
+        {
+            LogInformation("Initializing...");
+
+            using IConnection connection = _connectionFactory.CreateConnection();
+            using (var channel = connection.CreateModel())
+            {
+                LogInformation("Connection Established");
+                // declare an exchange 
+                channel.ExchangeDeclare(_applicationSettings.RabbitMq_Quiz_ExchangeName, ExchangeType.Direct);
+
+                // Declare a queue for sending messages
+                //channel.QueueDeclare(_applicationSettings.RabbitMq_Quiz_ResponseQueueName + "Init", false, false, false, null);
+
+                // process the payload to be sent
+                LogInformation("Processing Data");
+                // no joke, this is heavy HAHAHAHA
+                var processedPayload = await ProcessGetPayloadAsync();
+
+                LogInformation("Serializing Data");
+                // serialize the payload to JSON
+                var payloadJson = JsonConvert.SerializeObject(processedPayload);
+                var payloadBody = Encoding.UTF8.GetBytes(payloadJson);
+
+                LogInformation("Sending Data to be consumed in other services");
+                // Publish the payload to be consumed in other worker service
+                for(int i = 0; i < 5; i++)
+                    channel.BasicPublish(_applicationSettings.RabbitMq_Quiz_ExchangeName, "", null, payloadBody);
+                LogInformation("Data was sent");
+            }
+        }
+
         public async Task<RabbitMQ_QuestionPayload> ProcessGetPayloadAsync()
         {
             RabbitMQ_QuestionPayload payload = new();

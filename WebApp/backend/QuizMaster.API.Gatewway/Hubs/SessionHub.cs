@@ -9,6 +9,7 @@ using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Gateway.Utilities;
 using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -151,9 +152,41 @@ namespace QuizMaster.API.Gateway.Hubs
             try
             {
                 await Clients.Caller.SendAsync("notif", $"Submitting: {answer}");
-                await SessionHandler.SubmitAnswer(this, _channelClient, connectionId, Convert.ToInt32(questionId), answer);
+                await SessionHandler.SubmitAnswer(_channelClient, connectionId, Convert.ToInt32(questionId), answer);
             }
             catch { await Clients.Caller.SendAsync("notif",$"Failed to submit answer: {answer}"); }
+        }
+
+        public async Task KickParticipant(int participantUserId, int roomPin)
+        {
+            string connectionId = Context.ConnectionId;
+            if (!SessionHandler.IsAdmin(connectionId))
+            {
+                await Clients.Caller.SendAsync("notif", "Admin can only join use this function");
+                return;
+            }
+            var participant = SessionHandler.GetConnectionIdsInAGroup(roomPin.ToString());
+            if(participant == null)
+            {
+                await Clients.Caller.SendAsync("notif", "Could not kick participant");
+                return;
+            }
+            foreach(var connId in SessionHandler.GetConnectionIdsInAGroup(roomPin.ToString()))
+            {
+                var quizParticipant = SessionHandler.GetLinkedParticipantInConnectionId(connId);
+                if (quizParticipant == null) continue;
+                if(quizParticipant.UserId != participantUserId) continue;
+                if(connectionId == connId)
+                {
+                    await Clients.Client(connId).SendAsync("notif", "You cannot kick yourself");
+                    return;
+                }
+
+                await Clients.Client(connId).SendAsync("notif", "You are kicked from the room");
+                await SessionHandler.RemoveClientFromGroups(this, connId, $"{quizParticipant.QParticipantDesc} was kicked by admin");
+                SessionHandler.UnbindConnectionId(connId);
+            }
+            
         }
 
 
@@ -214,11 +247,52 @@ namespace QuizMaster.API.Gateway.Hubs
                     {
                         //string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
                         string Name = userData.UserData.UserName;
-                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id });
+                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id, QRoomId = room.Id });
+
+                        // get the linked participant and check if eliminated
+                        var ParticipantData = SessionHandler.GetLinkedParticipantInConnectionId(connectionId);
+                        if (ParticipantData == null) return;
+                        if (SessionHandler.IsParticipantEliminated(RoomPin, ParticipantData)) 
+                        {
+                            await Clients.Caller.SendAsync("notif", "You are eliminated on this quiz, you cannot join");
+                            return;
+                        }
+
+                        // before joining, check if room allows reconnection or joining on session is active
+                        if (SessionHandler.IsRoomActive(RoomPin))
+                        {
+                            var activeRoom = SessionHandler.GetActiveRoom(RoomPin);
+                            if (activeRoom != null)
+                            {
+                                var joineeData = SessionHandler.GetLinkedParticipantInConnectionId(connectionId);
+                                var participantData = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString());
+
+                                // check if participant already exist in the active room
+                                if (participantData != null && joineeData != null)
+                                {
+                                    if (participantData.Where(p => p.UserId == joineeData.UserId).Any())
+                                    {
+                                        if (!activeRoom.AllowReconnect())
+                                        {
+                                            await Clients.Caller.SendAsync("notif", $"Sorry but disconnected participant is not allowed to join again.");
+                                            return;
+                                        }
+                                    }
+                                }
+
+                                if (!activeRoom.AllowJoinOnQuizStarted())
+                                {
+                                    await Clients.Caller.SendAsync("notif", $"Sorry but the quiz has already been started.");
+                                    return;
+                                }
+                            }
+                        }
+
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("notif", $"{Name} has joined Room {room.QRoomDesc}", room);
+                        IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
+                        await Clients.Group($"{RoomPin}").SendAsync("participants", participants);
                     }
-                    //await Clients.All.SendAsync("QuizRooms", quizRooms);
                 }
         }
             catch (Exception ex)
@@ -271,34 +345,32 @@ namespace QuizMaster.API.Gateway.Hubs
             try
             {
                 var reply = _channelClient.GetAllRoom(new RoomsEmptyRequest());
-                int roomId = -1;
+                QuizRoom? quizRoom = null;
 
                 if (reply.Code == 200)
                 {
                     var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(reply.Data);
 
-                    bool containsId = false;
                     var room = new QuizRoom();
                     foreach (QuizRoom rooms in quizRooms)
                     {
                         if (rooms.QRoomPin == Convert.ToInt32(roomPin))
                         {
-                            room = rooms;
-                            containsId = true;
+                            quizRoom = rooms;
                             break;
                         }
                     }
-
-                    if(containsId)
-                    {
-                        roomId = room.Id;
-                    }
                 }
 
+                if(quizRoom == null)
+                {
+                    await Clients.Caller.SendAsync("notif", "Failed to start a session");
+                    return;
+                }
                 // we will not use await, we will let the request pass
                 await Clients.Group(roomPin).SendAsync("start", true);
                 //await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
-                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, roomId.ToString());
+                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, quizRoom);
             }
             catch (Exception ex)
             {
