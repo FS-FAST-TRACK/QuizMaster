@@ -230,7 +230,10 @@ export async function patchQuestion({
         );
 
         if (res.status === 201) {
-            return res;
+            var data: Question;
+
+            data = await res.json();
+            return data;
         } else {
             throw new Error("Failed to create question");
         }

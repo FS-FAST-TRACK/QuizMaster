@@ -55,7 +55,6 @@ export default function Page({ params }: { params: { id: number } }) {
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(params.id);
         fetchQuestion({ questionId: params.id })
             .then((data) => {
                 console.log(data);
@@ -245,6 +244,28 @@ export default function Page({ params }: { params: { id: number } }) {
         },
     });
 
+    const handleFileChange = useCallback(
+        (file: File | null, type: "audio" | "image") => {
+            if (file) {
+                patchQuestion({
+                    id: form.values.id,
+                    patches: [],
+                    image: type === "image" ? file : null,
+                    audio: type === "audio" ? file : null,
+                }).then((res) => {
+                    if (type === "image") {
+                        setFileImage(null);
+                        form.setFieldValue("qImage", res.qImage);
+                    } else {
+                        setFileAudio(null);
+                        form.setFieldValue("qAudio", res.qAudio);
+                    }
+                });
+            }
+        },
+        [fileImage, fileAudio, form.values.qImage, form.values.qAudio]
+    );
+
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
@@ -266,9 +287,9 @@ export default function Page({ params }: { params: { id: number } }) {
                     withAsterisk
                     classNames={styles}
                     {...form.getInputProps("qStatement")}
-                    onBlur={() => {
+                    onBlur={async () => {
                         if (form.values.qStatement !== "") {
-                            patchQuestion({
+                            await patchQuestion({
                                 id: form.values.id,
                                 patches: [
                                     {
@@ -403,7 +424,9 @@ export default function Page({ params }: { params: { id: number } }) {
                     <div className="flex flex-col gap-4 justify-between sm:justify-start ">
                         <ImageInput
                             fileImage={fileImage}
-                            setFileImage={setFileImage}
+                            setFileImage={(file) =>
+                                handleFileChange(file, "image")
+                            }
                             qImageId={
                                 form.values.qImage.length > 15
                                     ? form.values.qImage
@@ -412,7 +435,9 @@ export default function Page({ params }: { params: { id: number } }) {
                         />
                         <AudioInput
                             fileAudio={fileAudio}
-                            setFileAudio={setFileAudio}
+                            setFileAudio={(file) =>
+                                handleFileChange(file, "audio")
+                            }
                             qAudioId={
                                 form.values.qAudio.length > 15
                                     ? form.values.qAudio
