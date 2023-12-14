@@ -96,6 +96,7 @@ export interface QuestionResourceParameter extends ResourceParameter {
     filterByCategories: number[];
     filterByDifficulties: number[];
     filterByTypes: number[];
+    exludeQuestionsIds: number[] | undefined;
 }
 
 export type QuestionFilterProps = {
