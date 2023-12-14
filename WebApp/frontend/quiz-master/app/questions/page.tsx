@@ -57,6 +57,7 @@ export default function Page() {
             questionResourceParameter: {
                 ...form.values,
                 ...questionFilters,
+                exludeQuestionsIds: undefined,
             },
         });
 

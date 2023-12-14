@@ -63,6 +63,10 @@ export default function Page() {
         },
     });
 
+    useEffect(() => {
+        console.log(questionSet);
+    }, [questionSet]);
+
     const handleSubmit = useCallback(async () => {
         formValues.values.questions = questionSet.map(
             (question) => question.id
@@ -78,6 +82,7 @@ export default function Page() {
             dateUpdated: formValues.values.dateUpdated,
         };
 
+        console.log(questionSetCreateDto);
         open();
 
         postQuestionSet({ questionSet: questionSetCreateDto })
@@ -102,7 +107,7 @@ export default function Page() {
                 // close loading overlay
                 close();
             });
-    }, [formValues.values]);
+    }, [formValues.values, questionSet]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -158,8 +163,8 @@ export default function Page() {
                     }
                     setSelectedRow={() => null}
                     loading={visible}
+                    callInQuestionsPage={false}
                 />
-                <Pagination form={form} metadata={paginationMetadata} />
                 <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
