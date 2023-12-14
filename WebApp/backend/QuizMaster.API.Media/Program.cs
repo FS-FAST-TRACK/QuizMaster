@@ -1,7 +1,9 @@
+using Grpc.Net.Client;
 using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Media.Data.Context;
 using QuizMaster.API.Media.Services;
 using QuizMaster.API.Media.Services.GRPC;
+using QuizMaster.API.Monitoring.Proto;
 
 namespace QuizMaster.API.Media
 {
@@ -13,6 +15,11 @@ namespace QuizMaster.API.Media
 
             // Add services to the container.
             builder.Services.AddGrpc();
+            builder.Services.AddScoped(sp =>
+            {
+                var channel = GrpcChannel.ForAddress("https://localhost:7065");
+                return new MediaAuditService.MediaAuditServiceClient(channel);
+            });
             builder.Services.AddControllers();
             builder.Services.AddLogging();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
