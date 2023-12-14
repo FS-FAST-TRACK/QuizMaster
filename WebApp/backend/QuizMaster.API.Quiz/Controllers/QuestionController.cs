@@ -8,6 +8,7 @@ using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 using QuizMaster.Library.Common.Models;
 using System.Text.Json;
 
@@ -61,11 +62,12 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
 		}
-		#endregion
 
-		#region Get Question
-		// GET api/question/5
-		[HttpGet("{id}", Name = "GetQuestion")]
+        #endregion
+
+        #region Get Question
+        // GET api/question/5
+        [HttpGet("{id}", Name = "GetQuestion")]
 		public async Task<ActionResult<QuestionDto>> Get(int id)
 		{
 			// Get Question asynchronously

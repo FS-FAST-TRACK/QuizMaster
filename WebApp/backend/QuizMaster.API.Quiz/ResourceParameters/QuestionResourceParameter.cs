@@ -13,6 +13,8 @@
 		public string?  FilterByTypesId { get; set; }
 		public string? FilterByDifficultiesId { get; set; }
 
+		public string? ExludeQuestionsIds { get; set; }
+
 		public int PageSize
 		{
 			get => _pageSize;
