@@ -1,23 +1,20 @@
-import { QuestionCreateValues, QuestionValues } from "@/lib/definitions";
+import { DetailType, QuestionDetail, QuestionValues } from "@/lib/definitions";
 import {
     Bars4Icon,
     PlusCircleIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Button, Input, InputLabel, Text, Tooltip } from "@mantine/core";
+import { Button, Input, InputLabel, Tooltip } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     DragDropContext,
     Draggable,
-    DraggableProvided,
-    DraggableProvidedDraggableProps,
-    DraggingStyle,
     DropResult,
     Droppable,
-    NotDraggingStyle,
 } from "react-beautiful-dnd";
 import styles from "@/styles/input.module.css";
+import { patchQuestionDetail } from "@/lib/hooks/questionDetails";
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "var(--primary-100)" : "white",
@@ -31,41 +28,21 @@ export default function PuzzleQuestionDetails({
 }: {
     form: UseFormReturnType<QuestionValues>;
 }) {
-    const optionFields = form.values.questionDetailDtos.map((item, index) => {
-        if (!item.detailTypes.includes("option")) {
-            return;
-        }
-        return (
-            <div key={index} className="h-[60px]">
-                <Input
-                    size="lg"
-                    leftSection={<Bars4Icon className="w-6" />}
-                    classNames={styles}
-                    rightSectionWidth={40}
-                    rightSection={
-                        <Tooltip label="Remove">
-                            <TrashIcon
-                                className="w-6 cursor-pointer"
-                                onClick={() =>
-                                    form.removeListItem("options", index)
-                                }
-                            />
-                        </Tooltip>
-                    }
-                    leftSectionPointerEvents="visible"
-                    rightSectionPointerEvents="visible"
-                    {...form.getInputProps(`options.${index}.value`)}
-                />
-                <Input.Error>
+    const patchtDetail = (id: number, desc: string) => {
+        if (desc !== "") {
+            patchQuestionDetail({
+                questionId: form.values.id,
+                id: id,
+                patchRequest: [
                     {
-                        form.getInputProps(
-                            `questionDetailDtos.${index}.qDetailDesc`
-                        ).error
-                    }
-                </Input.Error>
-            </div>
-        );
-    });
+                        path: "/qDetailDesc",
+                        op: "replace",
+                        value: desc,
+                    },
+                ],
+            });
+        }
+    };
 
     const onDragEnd = (result: DropResult) => {
         // dropped outside the list'
@@ -74,16 +51,24 @@ export default function PuzzleQuestionDetails({
             return;
         }
 
-        form.reorderListItem("options", {
+        form.reorderListItem("questionDetailDtos", {
             from: result.source.index,
             to: result.destination.index,
         });
     };
+
+    const [droppableID, setDroppableId] = useState("droppable");
+    useEffect(() => {
+        return () => {
+            setDroppableId("droppableID");
+        };
+    }, []);
+
     return (
         <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
             <DragDropContext onDragEnd={(result) => onDragEnd(result)}>
-                <Droppable droppableId="droppableID">
+                <Droppable droppableId={droppableID}>
                     {(provided, snapshot) => (
                         <div
                             {...provided.droppableProps}
@@ -92,57 +77,13 @@ export default function PuzzleQuestionDetails({
                         >
                             {form.values.questionDetailDtos.map(
                                 (item, index) => {
-                                    if (!item.detailTypes.includes("answer")) {
-                                        return;
-                                    }
                                     return (
-                                        <Draggable
+                                        <CustomDraggable
                                             key={index}
-                                            draggableId={index + "id"}
+                                            form={form}
                                             index={index}
-                                        >
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    style={{
-                                                        userSelect: "none",
-                                                        margin: `0 0 8px 0`,
-                                                        ...provided
-                                                            .draggableProps
-                                                            .style,
-                                                    }}
-                                                >
-                                                    <Input
-                                                        size="lg"
-                                                        leftSection={
-                                                            <Bars4Icon className="w-6" />
-                                                        }
-                                                        classNames={styles}
-                                                        rightSectionWidth={40}
-                                                        rightSection={
-                                                            <Tooltip label="Remove">
-                                                                <TrashIcon
-                                                                    className="w-6 cursor-pointer"
-                                                                    onClick={() =>
-                                                                        form.removeListItem(
-                                                                            "qDetailDesc",
-                                                                            index
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </Tooltip>
-                                                        }
-                                                        leftSectionPointerEvents="visible"
-                                                        rightSectionPointerEvents="visible"
-                                                        {...form.getInputProps(
-                                                            `questionDetailDtos.${index}.qDetailDesc`
-                                                        )}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Draggable>
+                                            item={item}
+                                        />
                                     );
                                 }
                             )}
@@ -156,7 +97,7 @@ export default function PuzzleQuestionDetails({
                     size="lg"
                     className="border-4 outline-2 outline-gray-800 w-full"
                     onClick={() =>
-                        form.insertListItem("options", {
+                        form.insertListItem("questionDetailDtos", {
                             value: "",
                             isAnswer: false,
                         })
@@ -166,5 +107,84 @@ export default function PuzzleQuestionDetails({
                 </Button>
             </DragDropContext>
         </div>
+    );
+}
+
+function CustomDraggable({
+    item,
+    index,
+    form,
+}: {
+    item: QuestionDetail;
+    index: number;
+    form: UseFormReturnType<QuestionValues>;
+}) {
+    const [draggableId, setDraggableId] = useState(`draggable-${index}`);
+    useEffect(() => {
+        return () => {
+            setDraggableId(`draggable-${index}`);
+        };
+    }, []);
+    const patchtDetail = (id: number, desc: string) => {
+        if (desc !== "") {
+            patchQuestionDetail({
+                questionId: form.values.id,
+                id: id,
+                patchRequest: [
+                    {
+                        path: "/qDetailDesc",
+                        op: "replace",
+                        value: desc,
+                    },
+                ],
+            });
+        }
+    };
+    if (!item.detailTypes.includes("answer")) {
+        return;
+    }
+    return (
+        <Draggable key={index} draggableId={draggableId} index={index}>
+            {(provided, snapshot) => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    style={{
+                        userSelect: "none",
+                        margin: `0 0 8px 0`,
+                        ...provided.draggableProps.style,
+                    }}
+                >
+                    <Input
+                        size="lg"
+                        leftSection={<Bars4Icon className="w-6" />}
+                        classNames={styles}
+                        rightSectionWidth={40}
+                        rightSection={
+                            <Tooltip label="Remove">
+                                <TrashIcon
+                                    className="w-6 cursor-pointer"
+                                    onClick={() =>
+                                        form.removeListItem(
+                                            "qDetailDesc",
+                                            index
+                                        )
+                                    }
+                                />
+                            </Tooltip>
+                        }
+                        leftSectionPointerEvents="visible"
+                        rightSectionPointerEvents="visible"
+                        {...form.getInputProps(
+                            `questionDetailDtos.${index}.qDetailDesc`
+                        )}
+                        onBlur={() => {
+                            patchtDetail(item.id, item.qDetailDesc);
+                        }}
+                    />
+                </div>
+            )}
+        </Draggable>
     );
 }

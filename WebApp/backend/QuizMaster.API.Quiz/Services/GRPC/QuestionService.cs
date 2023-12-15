@@ -9,6 +9,7 @@ using QuizMaster.API.Quiz.Models.ValidationModel;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.API.Quiz.Services.Workers;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Helpers;
@@ -23,13 +24,15 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         private readonly IQuestionDetailManager _questionDetailManager;
         private readonly QuizAuditService.QuizAuditServiceClient _quizAuditServiceClient;
         private readonly IMapper _mapper;
+        private readonly QuizDataSynchronizationWorker _synchronizationWorker;
 
-        public QuestionService(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager,IMapper mapper, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient)
+        public QuestionService(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager,IMapper mapper, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient, QuizDataSynchronizationWorker quizDataSynchronizationWorker)
         {
             _quizRepository = quizRepository;
             _questionDetailManager = questionDetailManager;
             _mapper = mapper;
             _quizAuditServiceClient = quizAuditServiceClient;
+            _synchronizationWorker = quizDataSynchronizationWorker;
         }
 
         public override async Task<QuestionResponse> GetQuestions(QuestionRequest request, ServerCallContext context)
@@ -120,6 +123,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             }
 
             await _quizRepository.SaveChangesAsync();
+            await _synchronizationWorker.Synchronize();
             var questionDto = _mapper.Map<QuestionDto>(questionRepo);
 
             reply.Code = 200;
@@ -208,8 +212,11 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 return await Task.FromResult(reply);
             }
 
+            
+
             reply.Code = 200;
             await _quizRepository.SaveChangesAsync();
+            await _synchronizationWorker.Synchronize();
 
             return await Task.FromResult(reply);
         }
@@ -322,7 +329,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
                 reply.Code = 200;
                 reply.Questions = JsonConvert.SerializeObject(question);
-
+                await _synchronizationWorker.Synchronize();
                 return await Task.FromResult(reply);
             }
             catch (Exception ex)

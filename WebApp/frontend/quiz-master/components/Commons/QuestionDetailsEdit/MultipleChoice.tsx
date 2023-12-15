@@ -18,6 +18,11 @@ import { UseFormReturnType, useForm } from "@mantine/form";
 import { useCallback, useEffect, useState } from "react";
 import styles from "./MultipleChoice.module.css";
 import { fetchQuestionDetails } from "@/lib/quizData";
+import {
+    deleteQuestionDetail,
+    patchQuestionDetail,
+    postQuestionDetail,
+} from "@/lib/hooks/questionDetails";
 
 export default function MultipleChoiceQuestionDetail({
     form,
@@ -45,15 +50,39 @@ export default function MultipleChoiceQuestionDetail({
                             checked={item.detailTypes.includes("answer")}
                             onChange={(e) => {
                                 if (e.target.checked) {
-                                    form.setFieldValue(
-                                        `questionDetailDtos.${index}.detailTypes`,
-                                        ["answer", "option"]
-                                    );
+                                    patchQuestionDetail({
+                                        questionId: form.values.id,
+                                        id: item.id,
+                                        patchRequest: [
+                                            {
+                                                path: "/detailTypes",
+                                                op: "replace",
+                                                value: ["answer", "option"],
+                                            },
+                                        ],
+                                    }).then(() => {
+                                        form.setFieldValue(
+                                            `questionDetailDtos.${index}.detailTypes`,
+                                            ["answer", "option"]
+                                        );
+                                    });
                                 } else {
-                                    form.setFieldValue(
-                                        `questionDetailDtos.${index}.detailTypes`,
-                                        ["option"]
-                                    );
+                                    patchQuestionDetail({
+                                        questionId: form.values.id,
+                                        id: item.id,
+                                        patchRequest: [
+                                            {
+                                                path: "/detailTypes",
+                                                op: "replace",
+                                                value: ["answer", "option"],
+                                            },
+                                        ],
+                                    }).then(() => {
+                                        form.setFieldValue(
+                                            `questionDetailDtos.${index}.detailTypes`,
+                                            ["option"]
+                                        );
+                                    });
                                 }
                             }}
                         />
@@ -75,12 +104,17 @@ export default function MultipleChoiceQuestionDetail({
                             <Tooltip label="Remove">
                                 <TrashIcon
                                     className="w-6 cursor-pointer"
-                                    onClick={() =>
-                                        form.removeListItem(
-                                            "questionDetailDtos",
-                                            index
-                                        )
-                                    }
+                                    onClick={() => {
+                                        deleteQuestionDetail({
+                                            questionId: form.values.id,
+                                            id: item.id,
+                                        }).then(() => {
+                                            form.removeListItem(
+                                                "questionDetailDtos",
+                                                index
+                                            );
+                                        });
+                                    }}
                                 />
                             </Tooltip>
                         )
@@ -90,6 +124,21 @@ export default function MultipleChoiceQuestionDetail({
                     {...form.getInputProps(
                         `questionDetailDtos.${index}.qDetailDesc`
                     )}
+                    onBlur={() => {
+                        if (item.qDetailDesc !== "") {
+                            patchQuestionDetail({
+                                questionId: form.values.id,
+                                id: item.id,
+                                patchRequest: [
+                                    {
+                                        path: "/qDetailDesc",
+                                        op: "replace",
+                                        value: item.qDetailDesc,
+                                    },
+                                ],
+                            });
+                        }
+                    }}
                 />
                 <Input.Error>
                     {
@@ -112,12 +161,18 @@ export default function MultipleChoiceQuestionDetail({
                     color="gray"
                     size="lg"
                     className="border-4 outline-2 outline-gray-800"
-                    onClick={() =>
-                        form.insertListItem("options", {
-                            value: "",
-                            isAnswer: false,
-                        })
-                    }
+                    onClick={() => {
+                        postQuestionDetail({
+                            questionId: form.values.id,
+                            questionDetail: {
+                                qDetailDesc: "Choice1",
+                                detailTypes: ["option"],
+                            },
+                        }).then((res) => {
+                            console.log(res);
+                            form.insertListItem("questionDetailDtos", res);
+                        });
+                    }}
                 >
                     <PlusCircleIcon className="w-6" />
                 </Button>

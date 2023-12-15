@@ -1,9 +1,11 @@
 import { UseFormReturnType, useForm } from "@mantine/form";
 import {
+    PatchItem,
     Question,
     QuestionCreateDto,
     QuestionCreateValues,
     QuestionDetailCreateDto,
+    QuestionSetDTO,
     QuestionValues,
 } from "./definitions";
 import {
@@ -130,6 +132,58 @@ export function mapData(
     return questionCreateDto;
 }
 
+export function GetPatches(
+    form: UseFormReturnType<QuestionValues>
+): PatchItem[] {
+    var patches: PatchItem[] = [];
+
+    // Patch for Question Statement
+    patches = patches.concat(
+        form.isDirty("qStatement")
+            ? {
+                  path: "qStatement",
+                  op: "replace",
+                  value: form.values.qStatement,
+              }
+            : []
+    );
+
+    // Patch for Question Category
+    patches = patches.concat(
+        form.isDirty("qCategoryId")
+            ? {
+                  path: "qCategoryId",
+                  op: "replace",
+                  value: parseInt(form.values.qCategoryId),
+              }
+            : []
+    );
+
+    // Patch for Question Difficulty
+    patches = patches.concat(
+        form.isDirty("qDifficultyId")
+            ? {
+                  path: "qDifficultyId",
+                  op: "replace",
+                  value: parseInt(form.values.qDifficultyId),
+              }
+            : []
+    );
+
+    // Patch for Question Time Limit
+    patches = patches.concat(
+        form.isDirty("qTime")
+            ? {
+                  path: "qTime",
+                  op: "replace",
+                  value: parseInt(form.values.qTime),
+              }
+            : []
+    );
+
+    return patches;
+}
+
 export function humanFileSize(bytes?: number, si = true, dp = 1) {
     if (bytes === undefined) {
         return;
@@ -155,4 +209,18 @@ export function humanFileSize(bytes?: number, si = true, dp = 1) {
     );
 
     return bytes.toFixed(dp) + " " + units[u];
+}
+
+export function mapDataQuestionSet(
+    form: UseFormReturnType<QuestionSetDTO>
+): QuestionSetDTO {
+    var setCreateDto: QuestionSetDTO = {
+        qSetName: form.values.qSetName || "nothing",
+        qSetDesc: form.values.qSetName || "nothing",
+        questions: form.values.questions,
+        dateCreated: form.values.dateCreated,
+        dateUpdated: form.values.dateUpdated,
+    };
+
+    return setCreateDto;
 }

@@ -11,7 +11,7 @@ export default function ImageInput({
     qImageId,
 }: {
     fileImage: File | undefined | null;
-    setFileImage: Dispatch<SetStateAction<File | null>>;
+    setFileImage: (file: File | null) => void;
     qImageId?: string;
 }) {
     const [blob, setBlob] = useState<null | string>("");

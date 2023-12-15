@@ -20,7 +20,6 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public int QuestionId { get; set; }
         public Question Question { get; set; }
 
-        [JsonIgnore]
 		public IEnumerable<DetailType> DetailTypes { get; set; }
 
 		[Required]

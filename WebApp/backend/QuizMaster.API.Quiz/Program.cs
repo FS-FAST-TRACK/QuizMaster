@@ -45,7 +45,8 @@ namespace QuizMaster.API.Quiz
 
 			builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-			// Register worker services
+            // Register worker service
+            builder.Services.AddScoped<QuizDataSynchronizationWorker>(); 
 			builder.Services.AddHostedService<QuizDataSynchronizationWorker>();
 
 
