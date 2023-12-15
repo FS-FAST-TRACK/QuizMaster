@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import {
     PaginationMetadata,
     Question,
@@ -188,12 +189,12 @@ export async function fetchSets() {
     }
 }
 
-export async function fetchSetQuestions() {
+export async function fetchSet({ setId }: { setId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_question_set`;
+        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
-            var data: QuestionSet[];
+            var data: Set;
             data = await res.json();
 
             return data;
@@ -205,9 +206,30 @@ export async function fetchSetQuestions() {
     }
 }
 
-export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
+export async function fetchAllSetQuestions() {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/get_question_set/${qSetId}`;
+        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_question_set`;
+
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionSet[];
+            data = await res.json();
+            data.forEach((set) => {
+                set.dateCreated = new Date(set.dateCreated);
+                set.dateUpdated = new Date(set.dateUpdated);
+            });
+
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question data.");
+    }
+}
+
+export async function fetchSetQuestions({ setId }: { setId: number }) {
+    try {
+        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/get_question_set/${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionSet[];
@@ -215,7 +237,6 @@ export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
 
             return data;
         });
-        console.log(data);
         return data;
     } catch (error) {
         console.error("Database Error:", error);

@@ -131,6 +131,8 @@ export type Set = {
 export type QuestionSet = {
     questionId: number;
     setId: number;
+    dateCreated: Date;
+    dateUpdated: Date;
 };
 export type QuestionSetDTO = {
     qSetDesc: string;
