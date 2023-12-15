@@ -98,8 +98,8 @@ namespace QuizMaster.API.Gateway.Hubs
 
             if (reply.Code == 204)
             {
-                await Clients.Caller.SendAsync("chat", "Room was deleted");
-                await Clients.Group(reply.Data).SendAsync("chat", "[System] You have been removed from the room");
+                await Clients.Caller.SendAsync("notif", "Room was deleted");
+                await Clients.Group(reply.Data).SendAsync("notif", "[System] You have been removed from the room");
                 await SessionHandler.RemoveGroup(this, reply.Data);
             }
             else
@@ -124,11 +124,11 @@ namespace QuizMaster.API.Gateway.Hubs
             {
                 var quizRoom = JsonConvert.DeserializeObject<QuizRoom>(reply.Data);
                 await Clients.Caller.SendAsync("NewQuizRooms", new[] { quizRoom });
-                await Clients.Caller.SendAsync("chat", "Room was updated");
+                await Clients.Caller.SendAsync("notif", "Room was updated");
             }
             else
             {
-                await Clients.Caller.SendAsync("chat", reply.Message);
+                await Clients.Caller.SendAsync("notif", reply.Message);
             }
         }
 
@@ -178,11 +178,11 @@ namespace QuizMaster.API.Gateway.Hubs
                 if(quizParticipant.UserId != participantUserId) continue;
                 if(connectionId == connId)
                 {
-                    await Clients.Client(connId).SendAsync("notif", "You cannot kick yourself");
+                    await Clients.Client(connId).SendAsync("chat", new { Message = "You cannot kick yourself", Name="bot", IsAdmin=false });
                     return;
                 }
 
-                await Clients.Client(connId).SendAsync("notif", "You are kicked from the room");
+                await Clients.Client(connId).SendAsync("chat", new { Message = "You are kicked from the room", Name = "bot", IsAdmin = false });
                 await SessionHandler.RemoveClientFromGroups(this, connId, $"{quizParticipant.QParticipantDesc} was kicked by admin");
                 SessionHandler.UnbindConnectionId(connId);
             }
@@ -203,8 +203,8 @@ namespace QuizMaster.API.Gateway.Hubs
             if(participantData == null) { return; }
             // send chat only to group
             if (SessionHandler.IsAdmin(connectionId))
-                await Clients.Group(roomId).SendAsync("chat", $"[{participantData.QParticipantDesc}(host)]: {chat}");
-            else await Clients.Group(roomId).SendAsync("chat", $"[{participantData.QParticipantDesc}]: {chat}");
+                await Clients.Group(roomId).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = true });
+            else await Clients.Group(roomId).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = false });
         }
 
         public async Task JoinRoom(int RoomPin)
@@ -289,7 +289,7 @@ namespace QuizMaster.API.Gateway.Hubs
                         }
 
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
-                        await Clients.Group($"{RoomPin}").SendAsync("notif", $"{Name} has joined Room {room.QRoomDesc}", room);
+                        await Clients.Group($"{RoomPin}").SendAsync("chat", new { Message = $"{Name} has joined the room", Name = "bot", IsAdmin = false});
                         IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
                         await Clients.Group($"{RoomPin}").SendAsync("participants", participants);
                     }
