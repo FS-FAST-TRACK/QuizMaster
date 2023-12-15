@@ -234,6 +234,10 @@ export async function fetchSetQuestions({ setId }: { setId: number }) {
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionSet[];
             data = await res.json();
+            data.forEach((set) => {
+                set.dateCreated = new Date(set.dateCreated);
+                set.dateUpdated = new Date(set.dateUpdated);
+            });
 
             return data;
         });
