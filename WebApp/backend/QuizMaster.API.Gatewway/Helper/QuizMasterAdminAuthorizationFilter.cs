@@ -62,6 +62,11 @@ namespace QuizMaster.API.Gateway.Helper
             {
                 context.Result = new BadRequestResult();
             }
+
+            if (!context.HttpContext.Items.ContainsKey("token"))
+            {
+                context.HttpContext.Items["token"] = tokenClaim;
+            }
         }
 
         private bool IsTokenValid(string token, HttpContext httpContext)
@@ -116,7 +121,9 @@ namespace QuizMaster.API.Gateway.Helper
                 if (userRole == null)
                     return false;
 
-                return true;
+                context.Items["token"] = token;
+
+                return !authStore.IsExpired();
             }
             catch
             {

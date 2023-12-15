@@ -6,6 +6,7 @@ using QuizMaster.API.Quiz.Models.ValidationModel;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Services.Repositories;
+using QuizMaster.API.Quiz.Services.Workers;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Helpers.Quiz;
@@ -23,13 +24,15 @@ namespace QuizMaster.API.Quiz.Controllers
 		private readonly IQuizRepository _quizRepository;
 		private readonly IQuestionDetailManager _questionDetailManager;
 		private readonly IMapper _mapper;
+		private readonly QuizDataSynchronizationWorker _synchronizationWorker;
 
 
-		public QuestionController(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager, IMapper mapper)
+		public QuestionController(IQuizRepository quizRepository, IQuestionDetailManager questionDetailManager, IMapper mapper, QuizDataSynchronizationWorker synchronizationWorker)
 		{
 			_quizRepository = quizRepository;
 			_questionDetailManager = questionDetailManager;
 			_mapper = mapper;
+			_synchronizationWorker = synchronizationWorker;
 		}
 
 		#region Get All Questions
@@ -82,11 +85,11 @@ namespace QuizMaster.API.Quiz.Controllers
 			return Ok(questionDto);
 
 		}
-		#endregion
+        #endregion
 
-		#region Post Question
-		// POST api/question
-		[HttpPost]
+        #region Post Question
+        // POST api/question
+        [HttpPost]
 		public async Task<IActionResult> Post([FromBody] QuestionCreateDto question)
 		{
 			// validate model
@@ -173,6 +176,7 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			var questionDto = _mapper.Map<QuestionDto>(questionFromRepo);
 
+			await _synchronizationWorker.Synchronize();
 			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, questionDto);
 		}
 		#endregion
@@ -236,7 +240,8 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			// Save changes and return created question
 			await _quizRepository.SaveChangesAsync();
-			return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, _mapper.Map<QuestionDto>(questionFromRepo));
+            await _synchronizationWorker.Synchronize();
+            return CreatedAtRoute("GetQuestion", new { id = questionFromRepo.Id }, _mapper.Map<QuestionDto>(questionFromRepo));
 
 		}
 		#endregion
@@ -267,8 +272,8 @@ namespace QuizMaster.API.Quiz.Controllers
 
 			// Save changes and return created question
 			await _quizRepository.SaveChangesAsync();
-
-			return NoContent();
+            await _synchronizationWorker.Synchronize();
+            return NoContent();
 		}
 		#endregion
 

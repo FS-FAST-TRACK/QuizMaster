@@ -16,7 +16,7 @@ namespace QuizMaster.API.Quiz.Models
 		[Required]
 		public TAnswer QAnswer { get; set; }
 
-		[Required]
+		[AllowNull]
 		public string QImage { get; set; }
 
 		[AllowNull]
@@ -42,7 +42,8 @@ namespace QuizMaster.API.Quiz.Models
         [Required]
 		public string QStatement { get; set; }
 
-		public string QImage { get; set; }
+		[AllowNull]
+		public string? QImage { get; set; }
 
 		public string? QAudio { get; set; }
 

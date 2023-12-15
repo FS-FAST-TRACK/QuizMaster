@@ -20,6 +20,9 @@ namespace QuizMaster.API.Gateway.Services
         private Dictionary<string, string> AuthenticatedClientIds;
         private List<string> AuthenticatedClientAdmins;
         private Dictionary<string, int> RoomCurrentQuestionDisplayed;
+        private List<string> ClientsSubmittedAnswers;
+        private Dictionary<int, QuizRoom> ActiveRooms;
+        private Dictionary<int, IEnumerable<QuizParticipant>> RoomEliminatedParticipants;
         public SessionHandler()
         {
             connectionGroupPair = new();
@@ -28,12 +31,18 @@ namespace QuizMaster.API.Gateway.Services
             AuthenticatedClientAdmins = new();
             AbandonedParticipants = new();
             RoomCurrentQuestionDisplayed = new();
+            ClientsSubmittedAnswers = new();
+            ActiveRooms = new();
+            RoomEliminatedParticipants = new();
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
         {
             connectionGroupPair[connectionId] = group;
             await hub.Groups.AddToGroupAsync(connectionId, group);
+
+            IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
+            await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
         }
 
         public async Task RemoveFromGroup(SessionHub hub, string group, string connectionId)
@@ -51,16 +60,90 @@ namespace QuizMaster.API.Gateway.Services
                 connectionGroupPair.Remove(connectionId);
             }
         }
-        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage)
+        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, string channel = "chat")
         {
-            await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
-            await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("chat", disconnectMessage);
-            connectionGroupPair.Remove(connectionId);
+            if (connectionGroupPair.ContainsKey(connectionId))
+            {
+                await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
+                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync(channel, disconnectMessage);
+
+                IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
+                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
+
+                connectionGroupPair.Remove(connectionId);
+                
+            }
         }
 
         public string? GetConnectionGroup(string connectionId)
         {
-            return connectionGroupPair[connectionId];
+            return connectionGroupPair.GetValueOrDefault(connectionId);
+        }
+
+        public void HoldClientAnswerSubmission(string connectionId)
+        {
+            ClientsSubmittedAnswers.Add(connectionId);
+        }
+
+        public bool ClientOnHoldAnswerSubmission(string connectionId)
+        {
+            return ClientsSubmittedAnswers.Contains(connectionId);
+        }
+
+        public bool RemoveHoldOnAnswerSubmission(string connectionId)
+        {
+            return ClientsSubmittedAnswers.Remove(connectionId);
+        }
+
+        public void AddActiveRoom(int roomPin, QuizRoom room)
+        {
+            ActiveRooms.Add(roomPin, room);
+        }
+
+        public QuizRoom GetActiveRoom(int roomPin)
+        {
+            return ActiveRooms[roomPin];
+        }
+
+        public void RemoveActiveRoom(int roomPin)
+        {
+            ActiveRooms.Remove(roomPin);
+        }
+
+        public bool IsRoomActive(int roomPin)
+        {
+            return ActiveRooms.ContainsKey(roomPin);
+        }
+
+        public void AddEliminatedParticipant(int roomPin, QuizParticipant participant)
+        {
+            if(!RoomEliminatedParticipants.ContainsKey(roomPin)) 
+            {
+                RoomEliminatedParticipants.Add(roomPin, new List<QuizParticipant>() { participant });
+            }
+            else
+            {
+                RoomEliminatedParticipants[roomPin].ToList().Add(participant);
+            }
+        }
+
+        public bool IsParticipantEliminated(int roomPin, QuizParticipant participant)
+        {
+            if (!RoomEliminatedParticipants.ContainsKey(roomPin))
+            {
+                return false;
+            }
+            return RoomEliminatedParticipants[roomPin].Where(p => p.QRoomId == participant.QRoomId && p.UserId == participant.UserId && p.QParticipantDesc == participant.QParticipantDesc).Any();
+        }
+
+        public void ClearEliminatedParticipants(int roomPin)
+        {
+            RoomEliminatedParticipants[roomPin] = new List<QuizParticipant>();
+        }
+
+        public IEnumerable<QuizParticipant> GetEliminatedParticipants(int roomPin)
+        {
+            return RoomEliminatedParticipants.GetValueOrDefault(roomPin) ?? new List<QuizParticipant>();
         }
 
         public void LinkParticipantConnectionId(string connectionId, QuizParticipant quizParticipant)
@@ -69,8 +152,12 @@ namespace QuizMaster.API.Gateway.Services
 
             // Link back the disconnected connectionId to a participant that hasn't completed the session yet
             if(hasAbandonedParticipant != null)
-                participantLinkedConnectionId.Add(connectionId, hasAbandonedParticipant);
-            else 
+            {
+                if (!participantLinkedConnectionId.ContainsKey(connectionId))
+                    participantLinkedConnectionId.Add(connectionId, hasAbandonedParticipant);
+                else participantLinkedConnectionId[connectionId] = hasAbandonedParticipant;
+            }
+            else if(!participantLinkedConnectionId.ContainsKey(connectionId))
                 participantLinkedConnectionId.Add(connectionId, quizParticipant);
         }
 
@@ -82,6 +169,12 @@ namespace QuizMaster.API.Gateway.Services
         public bool RemoveLinkedParticipantInConnectionId(string connectionId)
         {
             return participantLinkedConnectionId.Remove(connectionId);
+        }
+
+        public IEnumerable<string> GetConnectionIdsInAGroup(string group)
+        {
+            var connectionIds = connectionGroupPair.Where(kv => kv.Value.Equals(group)).Select(kv => kv.Key).ToList();
+            return connectionIds ?? new List<string>();
         }
 
 
@@ -123,7 +216,7 @@ namespace QuizMaster.API.Gateway.Services
             RoomCurrentQuestionDisplayed.Remove(roomPin);
         }
 
-        public async Task SubmitAnswer(SessionHub hub, QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string answer)
+        public async Task<string> SubmitAnswer(QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string answer)
         {
             /*
              * If the current displayed questionId is not the same as passed questionId
@@ -132,27 +225,28 @@ namespace QuizMaster.API.Gateway.Services
 
             // retrieve the current group of the user
             string? userGroup = GetConnectionGroup(connectionId);
-            if (userGroup == null) return;
+            if (userGroup == null) return "Not in session";
+            if (ClientOnHoldAnswerSubmission(connectionId)) return "Already Submitted";
 
-            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return;
+            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return "Not in session";
 
             int? currentQuestionIdDisplayed = RoomCurrentQuestionDisplayed.GetValueOrDefault(userGroup);
-            if (currentQuestionIdDisplayed == null) return;
+            if (currentQuestionIdDisplayed == null) return "Not in session";
             if (questionId != currentQuestionIdDisplayed)
             {
                 //await hub.Clients.Client(connectionId).SendAsync("notif", "Question expired, your current answer is declined");
-                return;
+                return "Question Expired, your answer is declined";
             }
             //await hub.Clients.Client(connectionId).SendAsync("notif", "Answer Submitted");
             // get the question data
             #region GettingQuestionData
             var gRpcRequest = new SetRequest() { Id = questionId };
             var gRpcReply = await grpcClient.GetQuestionAsync(gRpcRequest);
-            if (gRpcReply == null) return;
+            if (gRpcReply == null) return "Failed to retrieve question information";
 
             // parse the data
             var questionData = JsonConvert.DeserializeObject<QuestionsDTO>(gRpcReply.Data); 
-            if (questionData == null) return;
+            if (questionData == null) return "Failed to retrieve question information";
 
             // check if user has the correct answer
             var answers = questionData.details.Where(a => a.DetailTypes.Where(dt => dt.DTypeDesc.ToLower() == "answer").Select(Dt => Dt.DTypeDesc).ToList().Count > 0).Select(d => d.QDetailDesc).ToList();
@@ -171,12 +265,17 @@ namespace QuizMaster.API.Gateway.Services
             {
                 // get the participant data
                 var participantData = GetLinkedParticipantInConnectionId(connectionId);
-                if (participantData == null) return;
+                if (participantData == null) return "Participant data not found";
 
                 // increment score by 1
                 participantData.Score += 1;
+
+                
             }
+            // Hold Submission of Answer
+            HoldClientAnswerSubmission(connectionId);
             #endregion
+            return "Answer submitted";
         }
 
         

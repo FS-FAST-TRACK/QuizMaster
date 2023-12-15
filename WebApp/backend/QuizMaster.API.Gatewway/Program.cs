@@ -11,6 +11,7 @@ using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Quiz.Services.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
