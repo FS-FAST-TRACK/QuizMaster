@@ -1,10 +1,13 @@
 "use client";
 
+import Pagination from "@/components/Commons/Pagination";
 import {
     PaginationMetadata,
     Question,
+    QuestionSet,
     QuestionSetDTO,
     ResourceParameter,
+    Set,
 } from "@/lib/definitions";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import {
@@ -21,13 +24,14 @@ import styles from "@/styles/input.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import AddQuestionToSetModal from "@/components/Commons/modals/AddQuestionToSetModal";
-import { postQuestionSet } from "@/lib/hooks/set";
+import { postQuestionSet, updateQuestionSet } from "@/lib/hooks/set";
 import { notification } from "@/lib/notifications";
 import { useRouter } from "next/navigation";
+import { fetchQuestion, fetchSet, fetchSetQuestions } from "@/lib/quizData";
 
 const items = [
     { label: "All", href: "/question-sets" },
-    { label: "Create Set", href: "#" },
+    { label: "Edit Set", href: "#" },
     { label: "", href: "#" },
 ].map((item, index) => (
     <Anchor href={item.href} key={index}>
@@ -35,14 +39,17 @@ const items = [
     </Anchor>
 ));
 
-export default function Page() {
+export default function Page({ params }: { params: { id: number } }) {
     const router = useRouter();
     const [addQuestions, setAddQuestions] = useState(false);
+    const [noChanges, setNoChanges] = useState(true);
+    const [originalQIds, setOriginalQIds] = useState<number[]>([]);
+    const [originalSetDetails, setOriginalSetDetails] = useState<Set>();
     const [questionSet, setQuestionSet] = useState<Question[]>([]);
     const [visible, { close, open }] = useDisclosure(false);
-    const [paginationMetadata, setPaginationMetadata] = useState<
-        PaginationMetadata | undefined
-    >();
+    const [count, setCount] = useState<number>(0);
+    const [removeQuestion, setRemoveQuestion] = useState<number[]>([]);
+
     const formValues = useForm<QuestionSetDTO>({
         initialValues: {
             qSetName: "",
@@ -60,6 +67,49 @@ export default function Page() {
             pageNumber: 1,
         },
     });
+
+    useEffect(() => {
+        if (count <= 1) {
+            setCount(count + 1);
+            originalQIds.map((id) => {
+                fetchQuestion({ questionId: id }).then((r) => {
+                    setQuestionSet((prev) => [...prev, r.data]);
+                });
+            });
+        }
+    }, [originalQIds]);
+
+    useEffect(() => {
+        fetchSet({ setId: params.id }).then((res) => {
+            setOriginalSetDetails(res);
+            formValues.values.qSetName = res.qSetName;
+            formValues.values.qSetDesc = res.qSetDesc;
+        });
+        fetchSetQuestions({ setId: params.id }).then((res) => {
+            setOriginalQIds(res.map((q) => q.questionId));
+        });
+    }, [params.id]);
+
+    useEffect(() => {
+        removeQuestion.map((id) => {
+            setQuestionSet((prev) =>
+                prev.filter((question) => question.id !== id)
+            );
+        });
+    }, [removeQuestion]);
+
+    //check if there is changes in list of questions
+    useEffect(() => {
+        setNoChanges(true);
+        originalQIds.map((id) => {
+            const same = questionSet.filter((qs) => {
+                return id === qs.id;
+            });
+            if (same.length === 0) {
+                setNoChanges(false);
+            }
+        });
+    }, [questionSet]);
 
     const handleSubmit = useCallback(async () => {
         formValues.values.questions = questionSet.map(
@@ -79,13 +129,13 @@ export default function Page() {
         console.log(questionSetCreateDto);
         open();
 
-        postQuestionSet({ questionSet: questionSetCreateDto })
+        updateQuestionSet({ id: params.id, questionSet: questionSetCreateDto })
             .then((res) => {
                 console.log(res, "hello");
                 // Notify for successful post
                 notification({
                     type: "success",
-                    title: "Question Set created successfuly",
+                    title: "Question Set update successfuly",
                 });
                 // redirect to questions set page
                 router.push("/question-sets");
@@ -94,7 +144,7 @@ export default function Page() {
                 // notify for error
                 notification({
                     type: "error",
-                    title: "Failed to create Question Set",
+                    title: "Failed to update Question Set",
                 });
             })
             .finally(() => {
@@ -107,13 +157,12 @@ export default function Page() {
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
             <div className="flex flex-col md:flex-row justify-between text-2xl font-bold">
-                <h3>Create New Question Set</h3>
+                <h3>Edit Question Set</h3>
             </div>
             <form
                 className="flex flex-col gap-8 relative"
                 onSubmit={form.onSubmit((values) => {
                     console.log(values);
-                    //handelSubmit();
                 })}
                 onReset={() => form.reset()}
             >
@@ -155,14 +204,14 @@ export default function Page() {
                               ? "No Questions"
                               : undefined
                     }
-                    setSelectedRow={() => null}
+                    setSelectedRow={setRemoveQuestion}
                     loading={visible}
                     callInQuestionsPage="set"
                 />
                 <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
-                        href="#"
+                        href="/question-sets"
                     >
                         Cancel
                     </Link>
@@ -171,11 +220,14 @@ export default function Page() {
                         color="green"
                         onClick={handleSubmit}
                         disabled={
-                            formValues.values.qSetName === "" ||
-                            questionSet.length === 0
+                            (formValues.values.qSetName ===
+                                originalSetDetails?.qSetName &&
+                                noChanges) ||
+                            questionSet.length === 0 ||
+                            formValues.values.qSetName === ""
                         }
                     >
-                        <p className="block">Create Set</p>
+                        <p className="block">Update Set</p>
                     </Button>
                 </div>
             </form>

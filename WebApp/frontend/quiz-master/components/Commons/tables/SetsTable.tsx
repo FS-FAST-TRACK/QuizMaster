@@ -1,13 +1,9 @@
-import {
-    Question,
-    QuestionCategory,
-    QuestionSet,
-    Set,
-} from "@/lib/definitions";
-import { fetchQuestionsInSet, fetchSetQuestions } from "@/lib/quizData";
+import { QuestionSet, Set } from "@/lib/definitions";
+import { fetchAllSetQuestions } from "@/lib/quizData";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Loader, Table } from "@mantine/core";
 import { useEffect, useState } from "react";
+import SetAction from "../popover/SetAction";
 
 export default function QuestionSetsTable({
     questionSets,
@@ -22,7 +18,7 @@ export default function QuestionSetsTable({
     useEffect(() => {
         setSelectedRows([]);
 
-        fetchSetQuestions().then((res) => {
+        fetchAllSetQuestions().then((res) => {
             setQuestionsSet(res);
         });
     }, [questionSets]);
@@ -61,9 +57,7 @@ export default function QuestionSetsTable({
                 <Table.Td>{questionSet.dateUpdated.toDateString()}</Table.Td>
                 <Table.Td>{count.length}</Table.Td>
                 <Table.Td>
-                    <div className="cursor-pointer flex items-center justify-center aspect-square">
-                        <EllipsisVerticalIcon className="w-6" />
-                    </div>
+                    <SetAction setId={questionSet.id} onDelete={() => {}} />
                 </Table.Td>
             </Table.Tr>
         );
