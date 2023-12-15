@@ -40,9 +40,7 @@ export default function Page() {
     const [addQuestions, setAddQuestions] = useState(false);
     const [questionSet, setQuestionSet] = useState<Question[]>([]);
     const [visible, { close, open }] = useDisclosure(false);
-    const [paginationMetadata, setPaginationMetadata] = useState<
-        PaginationMetadata | undefined
-    >();
+    const [removeQuestion, setRemoveQuestion] = useState<number[]>([]);
     const formValues = useForm<QuestionSetDTO>({
         initialValues: {
             qSetName: "",
@@ -60,6 +58,14 @@ export default function Page() {
             pageNumber: 1,
         },
     });
+
+    useEffect(() => {
+        removeQuestion.map((id) => {
+            setQuestionSet((prev) =>
+                prev.filter((question) => question.id !== id)
+            );
+        });
+    }, [removeQuestion]);
 
     const handleSubmit = useCallback(async () => {
         formValues.values.questions = questionSet.map(
@@ -155,7 +161,7 @@ export default function Page() {
                               ? "No Questions"
                               : undefined
                     }
-                    setSelectedRow={() => null}
+                    setSelectedRow={setRemoveQuestion}
                     loading={visible}
                     callInQuestionsPage="set"
                 />

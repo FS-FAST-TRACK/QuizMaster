@@ -98,7 +98,7 @@ export default function Page({ params }: { params: { id: number } }) {
         });
     }, [removeQuestion]);
 
-    //check if there is changes in list of questions
+    //check if there are changes in list of questions
     useEffect(() => {
         setNoChanges(true);
         originalQIds.map((id) => {

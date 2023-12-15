@@ -157,7 +157,7 @@ export default function QuestionTable({
                     setViewQuestion(undefined);
                 }}
                 question={viewQuestion}
-                callInQuestionsPage={false}
+                callInQuestionsPage="set"
             />
         </div>
     );
