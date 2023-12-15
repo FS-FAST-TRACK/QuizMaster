@@ -99,8 +99,8 @@ namespace QuizMaster.API.Quiz.Controllers
 			await _quizRepository.SaveChangesAsync();
 
 			// Return the created question Detail in the form of QuestionDetailDto
-			questionDetail.DetailTypes = detailTypes;
 			var questionDetailDto = _mapper.Map<QuestionDetailDto>(questionDetail);
+			questionDetailDto.DetailTypes = questionDetailCreateDto.DetailTypes;
 
 			return CreatedAtRoute("GetQuestionDetail", new { questionId , id = questionDetailDto.Id }, questionDetailDto);
 		}

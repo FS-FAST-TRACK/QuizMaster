@@ -1,4 +1,4 @@
-import { Box, Button, Modal } from "@mantine/core";
+import { Box, Button, Modal, ModalProps } from "@mantine/core";
 import { ReactNode } from "react";
 
 export default function PromptModal({
@@ -9,7 +9,7 @@ export default function PromptModal({
     onClose,
     opened,
 }: {
-    title?: string;
+    title?: React.ReactNode;
     body?: ReactNode;
     action: string;
     onConfirm: () => void;

@@ -1,27 +1,18 @@
 "use client";
 
 import Pagination from "@/components/Commons/Pagination";
-import SearchField from "@/components/Commons/SearchField";
-import CreateCategoryModal from "@/components/Commons/modals/CreateCategoryModal";
-import CategoriesTable from "@/components/Commons/tables/CategoriesTable";
 import {
-    CategoryResourceParameter,
     PaginationMetadata,
     Question,
-    QuestionCategory,
-    QuestionResourceParameter,
-    SetQuestions,
+    QuestionSetDTO,
+    ResourceParameter,
 } from "@/lib/definitions";
-import { fetchCategories, fetchQuestions } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import {
     Anchor,
     Breadcrumbs,
     Button,
-    FileInput,
-    InputLabel,
     LoadingOverlay,
-    Select,
     TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -30,9 +21,13 @@ import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import QuestionTable from "@/components/Commons/tables/QuestionTable";
+import AddQuestionToSetModal from "@/components/Commons/modals/AddQuestionToSetModal";
+import { postQuestionSet } from "@/lib/hooks/set";
+import { notification } from "@/lib/notifications";
+import { useRouter } from "next/navigation";
 
 const items = [
-    { label: "All", href: "#" },
+    { label: "All", href: "/question-sets" },
     { label: "Create Set", href: "#" },
     { label: "", href: "#" },
 ].map((item, index) => (
@@ -42,15 +37,25 @@ const items = [
 ));
 
 export default function Page() {
+    const router = useRouter();
     const [createSetQuestion, setCreateSetQuestions] = useState(false);
-    const [addQuestion, setAddQuestions] = useState(false);
-    const [setQuestions, setSetQuestions] = useState<Question[]>([]);
-    const [visible, { toggle, close }] = useDisclosure(false);
+    const [addQuestions, setAddQuestions] = useState(false);
+    const [questionSet, setQuestionSet] = useState<Question[]>([]);
+    const [visible, { close, open }] = useDisclosure(false);
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
+    const formValues = useForm<QuestionSetDTO>({
+        initialValues: {
+            qSetName: "",
+            qSetDesc: "",
+            questions: [],
+            dateCreated: new Date(),
+            dateUpdated: new Date(1, 0, 1),
+        },
+    });
 
-    const form = useForm<CategoryResourceParameter>({
+    const form = useForm<ResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",
@@ -59,14 +64,50 @@ export default function Page() {
     });
 
     useEffect(() => {
-        var questionsFetch = fetchQuestions({
-            questionResourceParameter: form.values,
-        });
-        questionsFetch.then((res) => {
-            setSetQuestions(res.data);
-            setPaginationMetadata(res.paginationMetadata);
-        });
-    }, [form.values]);
+        console.log(questionSet);
+    }, [questionSet]);
+
+    const handleSubmit = useCallback(async () => {
+        formValues.values.questions = questionSet.map(
+            (question) => question.id
+        );
+        formValues.values.dateCreated = new Date();
+        formValues.values.dateUpdated = new Date(1, 0, 1);
+
+        const questionSetCreateDto: QuestionSetDTO = {
+            qSetDesc: formValues.values.qSetName,
+            qSetName: formValues.values.qSetName,
+            questions: formValues.values.questions,
+            dateCreated: formValues.values.dateCreated,
+            dateUpdated: formValues.values.dateUpdated,
+        };
+
+        console.log(questionSetCreateDto);
+        open();
+
+        postQuestionSet({ questionSet: questionSetCreateDto })
+            .then((res) => {
+                console.log(res, "hello");
+                // Notify for successful post
+                notification({
+                    type: "success",
+                    title: "Question Set created successfuly",
+                });
+                // redirect to questions set page
+                router.push("/question-sets");
+            })
+            .catch((err) => {
+                // notify for error
+                notification({
+                    type: "error",
+                    title: "Failed to create Question Set",
+                });
+            })
+            .finally(() => {
+                // close loading overlay
+                close();
+            });
+    }, [formValues.values, questionSet]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -93,7 +134,7 @@ export default function Page() {
                     variant="filled"
                     withAsterisk
                     classNames={styles}
-                    {...form.getInputProps("qStatement")}
+                    {...formValues.getInputProps("qSetName")}
                 />
 
                 <div className="flex align-center">
@@ -112,16 +153,18 @@ export default function Page() {
                 </div>
 
                 <QuestionTable
-                    questions={setQuestions}
+                    questions={questionSet}
                     message={
                         form.values.searchQuery
                             ? `No questions match \"${form.values.searchQuery}\"`
-                            : setQuestions.length === 0
+                            : questionSet.length === 0
                               ? "No Questions"
                               : undefined
                     }
+                    setSelectedRow={() => null}
+                    loading={visible}
+                    callInQuestionsPage={false}
                 />
-                <Pagination form={form} metadata={paginationMetadata} />
                 <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
@@ -132,15 +175,22 @@ export default function Page() {
                     <Button
                         className="flex ml-3 h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
                         color="green"
-                        onClick={() => setAddQuestions(true)}
+                        onClick={handleSubmit}
+                        disabled={
+                            formValues.values.qSetName === "" ||
+                            questionSet.length === 0
+                        }
                     >
-                        <PlusIcon className="w-6" />
-                        <p className="block">Add Question</p>
+                        <p className="block">Create a set</p>
                     </Button>
                 </div>
             </form>
+            <AddQuestionToSetModal
+                onClose={() => setAddQuestions(false)}
+                opened={addQuestions}
+                setQuestions={setQuestionSet}
+                questions={questionSet}
+            />
         </div>
     );
 }
-
-//MOCK DATA

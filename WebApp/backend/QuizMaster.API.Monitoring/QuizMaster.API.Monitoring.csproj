@@ -41,5 +41,6 @@
 	<ItemGroup>
 		<Protobuf Include="Proto\monitoring.proto" GrpcServices="Server,Client" />
 		<Protobuf Include="Proto\quizmonitoring.proto" GrpcServices="Server,Client" />
+		<Protobuf Include="Proto\mediamonitoring.proto" GrpcServices="Server,Client" />
 	</ItemGroup>
 </Project>

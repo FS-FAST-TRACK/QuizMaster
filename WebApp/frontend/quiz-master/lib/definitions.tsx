@@ -85,37 +85,62 @@ export type QuestionDetailCreateDto = {
     qDetailDesc: string;
     detailTypes: string[];
 };
-export type QuestionResourceParameter = {
+
+export type ResourceParameter = {
     pageSize: string;
     searchQuery?: string;
     pageNumber: number;
 };
-export type CategoryResourceParameter = {
-    pageSize: string;
-    searchQuery?: string;
-    pageNumber: number;
+
+export interface QuestionResourceParameter extends ResourceParameter {
+    filterByCategories: number[];
+    filterByDifficulties: number[];
+    filterByTypes: number[];
+    exludeQuestionsIds: number[] | undefined;
+}
+
+export type QuestionFilterProps = {
+    filterByCategories: number[];
+    filterByDifficulties: number[];
+    filterByTypes: number[];
+}
+export interface CategoryResourceParameter extends ResourceParameter {
+    
     isGetAll?: boolean;
-};
-export type DifficultyResourceParameter = {
-    pageSize: string;
-    searchQuery?: string;
-    pageNumber: number;
+}
+export interface DifficultyResourceParameter extends ResourceParameter {
+    
     isGetAll?: boolean;
-};
+}
 export type PaginationMetadata = {
     totalCount: number;
     pageSize: number;
     currentPage: number;
     totalPages: number;
 };
-export type QuestionSet = {
+export type Set = {
     id: number;
-    setName: string;
-    questionCounts: number;
+    qSetName: string;
+    qSetDesc: string;
+    activeData: boolean;
+    dateCreated: Date;
+    dateUpdated: Date;
+    createdByUserId: number;
+    updatedByUserId: number;
+};
+export type QuestionSet = {
+    questionId: number;
+    setId: number;
+};
+export type QuestionSetDTO = {
+    qSetDesc: string;
+    qSetName: string;
+    questions: number[];
     dateCreated: Date;
     dateUpdated: Date;
 };
-export type SetQuestions = {
-    id: number;
-    setId: number;
+export type PatchItem = {
+    path: string;
+    op: string;
+    value: any;
 };

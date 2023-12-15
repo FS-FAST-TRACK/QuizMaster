@@ -49,7 +49,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return await Task.FromResult(reply);
                 }
 
-                var set = new Set { QSetName = quizSet.QSetName, QSetDesc = quizSet.QSetDesc, ActiveData = true };
+                var set = new Set { QSetName = quizSet.QSetName, QSetDesc = quizSet.QSetDesc, ActiveData = true, DateCreated = DateTime.Now };
                 await _quizSetManager.Sets.AddAsync(set);
                 await _quizSetManager.SaveChangesAsync();
 
@@ -189,6 +189,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 // Update the changes
                 data.QSetName = setDTO.QSetName;
                 data.QSetDesc = setDTO.QSetDesc;
+                data.DateUpdated = DateTime.Now;
                 await _quizSetManager.SaveChangesAsync();
 
                 // Get the question in the set

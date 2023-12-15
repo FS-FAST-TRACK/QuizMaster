@@ -196,7 +196,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 0,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 783, DateTimeKind.Local).AddTicks(9253),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 830, DateTimeKind.Local).AddTicks(5744),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QAudio = "",
                             QCategoryId = 1,
@@ -211,7 +211,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 0,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 784, DateTimeKind.Local).AddTicks(8287),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(739),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QAudio = "",
                             QCategoryId = 1,
@@ -226,7 +226,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 0,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 784, DateTimeKind.Local).AddTicks(9447),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(1181),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QAudio = "",
                             QCategoryId = 1,
@@ -276,7 +276,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(4541),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(4429),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Science"
                         },
@@ -285,7 +285,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5806),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5465),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Movies"
                         },
@@ -294,7 +294,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5812),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5470),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Animals"
                         },
@@ -303,7 +303,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 4,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5813),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5471),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Places"
                         },
@@ -312,7 +312,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 5,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5814),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5472),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "People"
                         },
@@ -321,7 +321,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 6,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5826),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5478),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "System Operations and Maintenance"
                         },
@@ -330,7 +330,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 7,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5827),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5479),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Data Structures"
                         },
@@ -339,7 +339,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 8,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 782, DateTimeKind.Local).AddTicks(5828),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(5480),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QCategoryDesc = "Algorithms"
                         });
@@ -387,7 +387,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(6520),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(5400),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "Oxygen",
                             QuestionId = 1
@@ -397,7 +397,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7828),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6239),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "Nitrogen",
                             QuestionId = 1
@@ -407,7 +407,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7833),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6244),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "Carbon Dioxide",
                             QuestionId = 1
@@ -417,7 +417,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 4,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7834),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6245),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "Hydrogen",
                             QuestionId = 1
@@ -427,7 +427,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 5,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7835),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6246),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "True",
                             QuestionId = 2
@@ -437,7 +437,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 6,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7842),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6250),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "42",
                             QuestionId = 3
@@ -447,7 +447,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 7,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7843),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6251),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "10",
                             QuestionId = 3
@@ -457,7 +457,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 8,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7844),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6252),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "50",
                             QuestionId = 3
@@ -467,7 +467,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 9,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 785, DateTimeKind.Local).AddTicks(7845),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(6253),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailDesc = "1",
                             QuestionId = 3
@@ -510,7 +510,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(3760),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 831, DateTimeKind.Local).AddTicks(9818),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -519,7 +519,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4559),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(403),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -528,7 +528,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4563),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(423),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -537,7 +537,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4695),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(424),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -546,7 +546,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4697),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(425),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -555,7 +555,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4704),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(429),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -564,7 +564,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4705),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(429),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -573,7 +573,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(4705),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(430),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -582,7 +582,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 4,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(5087),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(700),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -591,7 +591,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             DetailTypeId = 5,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 786, DateTimeKind.Local).AddTicks(5096),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 832, DateTimeKind.Local).AddTicks(706),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
@@ -634,7 +634,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 781, DateTimeKind.Local).AddTicks(5905),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 828, DateTimeKind.Local).AddTicks(8961),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDifficultyDesc = "Easy"
                         },
@@ -643,7 +643,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 781, DateTimeKind.Local).AddTicks(7628),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(205),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDifficultyDesc = "Average"
                         },
@@ -652,7 +652,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 781, DateTimeKind.Local).AddTicks(7771),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 829, DateTimeKind.Local).AddTicks(272),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDifficultyDesc = "Difficult"
                         });
@@ -699,7 +699,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 1,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 776, DateTimeKind.Local).AddTicks(5234),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 688, DateTimeKind.Local).AddTicks(3),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Multiple Choice"
@@ -709,7 +709,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 2,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 778, DateTimeKind.Local).AddTicks(7491),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 827, DateTimeKind.Local).AddTicks(2880),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Multiple Choice + Audio"
@@ -719,7 +719,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 3,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 778, DateTimeKind.Local).AddTicks(7522),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 827, DateTimeKind.Local).AddTicks(2893),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = false,
                             QTypeDesc = "True or False"
@@ -729,7 +729,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 4,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 778, DateTimeKind.Local).AddTicks(7524),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 827, DateTimeKind.Local).AddTicks(2895),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Type Answer"
@@ -739,7 +739,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 5,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 778, DateTimeKind.Local).AddTicks(7526),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 827, DateTimeKind.Local).AddTicks(2896),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Slider"
@@ -749,7 +749,7 @@ namespace QuizMaster.API.Quiz.Migrations
                             Id = 6,
                             ActiveData = true,
                             CreatedByUserId = 1,
-                            DateCreated = new DateTime(2023, 11, 14, 22, 26, 23, 778, DateTimeKind.Local).AddTicks(7527),
+                            DateCreated = new DateTime(2023, 12, 12, 15, 51, 26, 827, DateTimeKind.Local).AddTicks(2897),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             QDetailRequired = true,
                             QTypeDesc = "Puzzle"

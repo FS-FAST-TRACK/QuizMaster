@@ -1,9 +1,12 @@
 import { Box, Button, Modal, TextInput } from "@mantine/core";
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import style from "@/styles/input.module.css";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import notificationStyles from "../../../styles/notification.module.css";
+import { QuestionDifficulty } from "@/lib/definitions";
+import { createDifficulty } from "@/lib/hooks/difficulty";
+import { notification } from "@/lib/notifications";
 
 export type DifficultyCreateDto = {
     qDifficultyDesc: string;
@@ -12,49 +15,45 @@ export type DifficultyCreateDto = {
 export default function CreateDifficultyModal({
     onClose,
     opened,
+    onUpdate,
+    difficulty,
 }: {
     opened: boolean;
     onClose: () => void;
+    onUpdate?: (qCategoryDesc: string) => void;
+    difficulty?: QuestionDifficulty;
 }) {
-    const router = useRouter();
-    const [difficulty, setDifficulty] = useState("");
-    const handelSubmit = useCallback(async () => {
-        const difficultyCreateDto: DifficultyCreateDto = {
-            qDifficultyDesc: difficulty,
-        };
-        const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`,
-            {
-                method: "POST",
-                mode: "cors",
-                body: JSON.stringify(difficultyCreateDto),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+    const [difficultyDesc, setDifficultyDesc] = useState("");
 
-        console.log(res);
-        if (res.status === 201) {
-            onClose();
-            notifications.show({
-                color: "green",
-                title: "Difficulty created successfully",
-                message: "",
-                classNames: notificationStyles,
-                className: "",
-            });
-            router.push("/difficulties");
-        } else {
-            const error = await res.json();
-            notifications.show({
-                color: "red",
-                title: "Failed to create difficulty",
-                message: error.message,
-                classNames: notificationStyles,
-            });
+    useEffect(() => {
+        if (difficulty) {
+            setDifficultyDesc(difficulty.qDifficultyDesc);
         }
     }, [difficulty]);
+
+    const handelSubmit = useCallback(async () => {
+        const difficultyCreateDto: DifficultyCreateDto = {
+            qDifficultyDesc: difficultyDesc,
+        };
+        createDifficulty({ difficultyCreateDto })
+            .then(() => {
+                notification({
+                    type: "success",
+                    title: "Difficulty created successfully",
+                });
+                setDifficultyDesc("");
+            })
+            .catch(() => {
+                notification({
+                    type: "error",
+                    title: "Failed to create difficulty",
+                });
+            })
+            .finally(() => {
+                onClose();
+            });
+    }, [difficulty, difficultyDesc]);
+
     return (
         <Modal
             zIndex={100}
@@ -67,8 +66,8 @@ export default function CreateDifficultyModal({
             <div className="space-y-5">
                 <TextInput
                     classNames={style}
-                    value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value)}
+                    value={difficultyDesc}
+                    onChange={(e) => setDifficultyDesc(e.target.value)}
                     placeholder="Difficulty"
                 />
                 <div className="flex justify-end">
@@ -82,10 +81,16 @@ export default function CreateDifficultyModal({
                     <Button
                         variant="filled"
                         color="green"
-                        disabled={difficulty === ""}
-                        onClick={handelSubmit}
+                        disabled={difficultyDesc === ""}
+                        onClick={
+                            difficulty && onUpdate
+                                ? () => {
+                                      onUpdate(difficultyDesc);
+                                  }
+                                : handelSubmit
+                        }
                     >
-                        Add Difficulty
+                        {difficulty ? "Update" : "Add Difficulty"}
                     </Button>
                 </div>
             </div>

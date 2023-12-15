@@ -2,15 +2,22 @@ import { QuestionDifficulty } from "@/lib/definitions";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Checkbox, Loader, Table } from "@mantine/core";
 import { useEffect, useState } from "react";
+import ViewDifficultyModal from "../modals/ViewDifficultyModal";
+import CategoryAction from "../popover/CategoryAction";
 
 export default function DifficultiesTable({
     difficulties,
     message,
+    onEdit,
+    onDelete,
 }: {
     difficulties: QuestionDifficulty[];
     message?: string;
+    onEdit?: (category: QuestionDifficulty) => void;
+    onDelete?: (category: QuestionDifficulty) => void;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
     useEffect(() => {
         setSelectedRows([]);
     }, [difficulties]);
@@ -44,11 +51,14 @@ export default function DifficultiesTable({
             <Table.Td>{difficulty.dateCreated.toDateString()}</Table.Td>
             <Table.Td>{difficulty.dateUpdated.toDateString()}</Table.Td>
             <Table.Td>{difficulty.questionCounts}</Table.Td>
-            <Table.Td>
-                <div className="cursor-pointer flex items-center justify-center aspect-square">
-                    <EllipsisVerticalIcon className="w-6" />
-                </div>
-            </Table.Td>
+            {onDelete && onEdit && (
+                <Table.Td>
+                    <CategoryAction
+                        onDelete={() => onDelete(difficulty)}
+                        onEdit={() => onEdit(difficulty)}
+                    />
+                </Table.Td>
+            )}
         </Table.Tr>
     ));
 

@@ -11,6 +11,7 @@ using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Quiz.Services.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,7 @@ builder.Services.AddLogging();
 builder.Services.AddSignalR();
 builder.Services.AddCors(o => 
     o.AddDefaultPolicy(builder => 
-    builder.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+    builder.WithOrigins("http://localhost:5173", "http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 builder.Services.AddScoped<SessionHub>();
 builder.Services.AddSingleton<SessionHandler>();

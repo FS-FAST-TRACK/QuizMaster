@@ -2,7 +2,7 @@
 
 import QuestionDetailsEdit from "@/components/Commons/QuestionDetailsEdit";
 import { QuestionValues } from "@/lib/definitions";
-import { humanFileSize } from "@/lib/helpers";
+import { GetPatches, humanFileSize } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
@@ -30,6 +30,7 @@ import styles from "@/styles/input.module.css";
 import { fetchMedia, fetchQuestion } from "@/lib/quizData";
 import ImageInput from "@/components/Commons/inputs/ImageInput";
 import AudioInput from "@/components/Commons/inputs/AudioInput";
+import { patchQuestion } from "@/lib/hooks/question";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -54,7 +55,6 @@ export default function Page({ params }: { params: { id: number } }) {
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(params.id);
         fetchQuestion({ questionId: params.id })
             .then((data) => {
                 console.log(data);
@@ -244,9 +244,27 @@ export default function Page({ params }: { params: { id: number } }) {
         },
     });
 
-    const handelSubmit = useCallback(async () => {
-        console.log(form.isDirty("qStatement"));
-    }, [form.values, fileAudio, fileImage]);
+    const handleFileChange = useCallback(
+        (file: File | null, type: "audio" | "image") => {
+            if (file) {
+                patchQuestion({
+                    id: form.values.id,
+                    patches: [],
+                    image: type === "image" ? file : null,
+                    audio: type === "audio" ? file : null,
+                }).then((res) => {
+                    if (type === "image") {
+                        setFileImage(null);
+                        form.setFieldValue("qImage", res.qImage);
+                    } else {
+                        setFileAudio(null);
+                        form.setFieldValue("qAudio", res.qAudio);
+                    }
+                });
+            }
+        },
+        [fileImage, fileAudio, form.values.qImage, form.values.qAudio]
+    );
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -256,10 +274,6 @@ export default function Page({ params }: { params: { id: number } }) {
             </div>
             <form
                 className="flex flex-col gap-8 relative"
-                onSubmit={form.onSubmit(() => {
-                    console.log(form.values);
-                    handelSubmit();
-                })}
                 onReset={() => form.reset()}
             >
                 <LoadingOverlay
@@ -273,6 +287,22 @@ export default function Page({ params }: { params: { id: number } }) {
                     withAsterisk
                     classNames={styles}
                     {...form.getInputProps("qStatement")}
+                    onBlur={async () => {
+                        if (form.values.qStatement !== "") {
+                            await patchQuestion({
+                                id: form.values.id,
+                                patches: [
+                                    {
+                                        path: "qStatement",
+                                        op: "replace",
+                                        value: form.values.qStatement,
+                                    },
+                                ],
+                                image: null,
+                                audio: null,
+                            });
+                        }
+                    }}
                 />
                 <div className="flex flex-col md:flex-row gap-5 md:gap-10 [&>*]:grow">
                     <Select
@@ -289,6 +319,24 @@ export default function Page({ params }: { params: { id: number } }) {
                         clearable
                         required
                         classNames={styles}
+                        onChange={(value) => {
+                            if (value) {
+                                patchQuestion({
+                                    id: form.values.id,
+                                    patches: [
+                                        {
+                                            path: "qCategoryId",
+                                            op: "replace",
+                                            value: parseInt(value),
+                                        },
+                                    ],
+                                    image: null,
+                                    audio: null,
+                                }).then(() => {
+                                    form.setFieldValue("qCategoryId", value);
+                                });
+                            }
+                        }}
                     />
                     <Select
                         variant="filled"
@@ -304,6 +352,24 @@ export default function Page({ params }: { params: { id: number } }) {
                         {...form.getInputProps("qDifficultyId")}
                         clearable
                         required
+                        onChange={(value) => {
+                            if (value) {
+                                patchQuestion({
+                                    id: form.values.id,
+                                    patches: [
+                                        {
+                                            path: "qDifficultyId",
+                                            op: "replace",
+                                            value: parseInt(value),
+                                        },
+                                    ],
+                                    image: null,
+                                    audio: null,
+                                }).then(() => {
+                                    form.setFieldValue("qDifficultyId", value);
+                                });
+                            }
+                        }}
                     />
                     <Select
                         variant="filled"
@@ -333,6 +399,24 @@ export default function Page({ params }: { params: { id: number } }) {
                     clearable
                     required
                     classNames={styles}
+                    onChange={(value) => {
+                        if (value) {
+                            patchQuestion({
+                                id: form.values.id,
+                                patches: [
+                                    {
+                                        path: "qTime",
+                                        op: "replace",
+                                        value: parseInt(value),
+                                    },
+                                ],
+                                image: null,
+                                audio: null,
+                            }).then(() => {
+                                form.setFieldValue("qTime", value);
+                            });
+                        }
+                    }}
                 />
 
                 <div>
@@ -340,7 +424,9 @@ export default function Page({ params }: { params: { id: number } }) {
                     <div className="flex flex-col gap-4 justify-between sm:justify-start ">
                         <ImageInput
                             fileImage={fileImage}
-                            setFileImage={setFileImage}
+                            setFileImage={(file) =>
+                                handleFileChange(file, "image")
+                            }
                             qImageId={
                                 form.values.qImage.length > 15
                                     ? form.values.qImage
@@ -349,7 +435,9 @@ export default function Page({ params }: { params: { id: number } }) {
                         />
                         <AudioInput
                             fileAudio={fileAudio}
-                            setFileAudio={setFileAudio}
+                            setFileAudio={(file) =>
+                                handleFileChange(file, "audio")
+                            }
                             qAudioId={
                                 form.values.qAudio.length > 15
                                     ? form.values.qAudio
@@ -360,21 +448,6 @@ export default function Page({ params }: { params: { id: number } }) {
                 </div>
 
                 <QuestionDetailsEdit form={form} />
-
-                <div className="flex justify-end">
-                    <Button variant="transparent" color="gray" type="reset">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="filled"
-                        color="green"
-                        type="submit"
-                        disabled={!form.isDirty()}
-                        onClick={() => console.log(form.errors)}
-                    >
-                        Update
-                    </Button>
-                </div>
             </form>
         </div>
     );

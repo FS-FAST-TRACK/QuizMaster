@@ -10,7 +10,7 @@ export default function AudioInput({
     qAudioId,
 }: {
     fileAudio: File | null;
-    setFileAudio: Dispatch<SetStateAction<File | null>>;
+    setFileAudio: (file: File | null) => void;
     qAudioId?: string;
 }) {
     const [blob, setBlob] = useState<null | string>("");

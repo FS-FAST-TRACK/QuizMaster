@@ -3,8 +3,21 @@ import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Box, Checkbox, Loader, Table, Text } from "@mantine/core";
-import { useCallback, useEffect, useState } from "react";
+import {
+    Box,
+    Checkbox,
+    Loader,
+    LoadingOverlay,
+    Table,
+    Text,
+} from "@mantine/core";
+import {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 import QuesitonAction from "../popover/QuestionAction";
 import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
@@ -14,9 +27,15 @@ import ViewQuestionModal from "../modals/ViewQuestionModal";
 export default function QuestionTable({
     questions,
     message,
+    setSelectedRow,
+    loading,
+    callInQuestionsPage,
 }: {
     questions: Question[];
     message?: string;
+    setSelectedRow: Dispatch<SetStateAction<number[]>>;
+    loading: boolean;
+    callInQuestionsPage: boolean | false;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
@@ -29,6 +48,10 @@ export default function QuestionTable({
     useEffect(() => {
         setSelectedRows([]);
     }, [questions]);
+
+    useEffect(() => {
+        setSelectedRow(selectedRows);
+    }, [selectedRows]);
 
     const handelDelete = useCallback(async () => {
         const res = await fetch(
@@ -77,14 +100,16 @@ export default function QuestionTable({
             <Table.Td>
                 {getQuestionDifficultyDescription(question.qDifficultyId)}
             </Table.Td>
-            <Table.Td>
-                <QuesitonAction
-                    questionId={question.id}
-                    onDelete={() => {
-                        setDeleteQuestion(question);
-                    }}
-                />
-            </Table.Td>
+            {callInQuestionsPage && (
+                <Table.Td>
+                    <QuesitonAction
+                        questionId={question.id}
+                        onDelete={() => {
+                            setDeleteQuestion(question);
+                        }}
+                    />
+                </Table.Td>
+            )}
         </Table.Tr>
     ));
 
@@ -118,7 +143,15 @@ export default function QuestionTable({
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                    {questions.length === 0 ? (
+                    {loading ? (
+                        <Table.Tr>
+                            <Table.Td colSpan={99} rowSpan={10}>
+                                <div className="relative h-60">
+                                    <LoadingOverlay visible={loading} />
+                                </div>
+                            </Table.Td>
+                        </Table.Tr>
+                    ) : questions.length === 0 ? (
                         <Table.Tr>
                             <Table.Td colSpan={99} rowSpan={10}>
                                 <div className="flex grow justify-center">
@@ -157,6 +190,7 @@ export default function QuestionTable({
                     setViewQuestion(undefined);
                 }}
                 question={viewQuestion}
+                callInQuestionsPage={callInQuestionsPage}
             />
         </div>
     );

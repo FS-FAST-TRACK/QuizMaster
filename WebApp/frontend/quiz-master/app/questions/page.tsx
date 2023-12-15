@@ -7,12 +7,15 @@ import QuestionTable from "@/components/Commons/tables/QuestionTable";
 import {
     PaginationMetadata,
     Question,
+    QuestionFilterProps,
     QuestionResourceParameter,
+    ResourceParameter,
 } from "@/lib/definitions";
-import { fetchQuestions } from "@/lib/quizData";
+import { fetchQuestions } from "@/lib/hooks/question";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Anchor, Breadcrumbs } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -28,11 +31,20 @@ const items = [
 export default function Page() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [questionFilters, setQuestionFilters] = useState<QuestionFilterProps>(
+        {
+            filterByCategories: [],
+            filterByDifficulties: [],
+            filterByTypes: [],
+        }
+    );
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
 
-    const form = useForm<QuestionResourceParameter>({
+    const [visible, { close, open }] = useDisclosure(true);
+
+    const form = useForm<ResourceParameter>({
         initialValues: {
             pageSize: "10",
             searchQuery: "",
@@ -40,20 +52,38 @@ export default function Page() {
         },
     });
 
+    const getQuestions = useCallback(async () => {
+        var questionsFetch = await fetchQuestions({
+            questionResourceParameter: {
+                ...form.values,
+                ...questionFilters,
+                exludeQuestionsIds: undefined,
+            },
+        });
+
+        setQuestions(questionsFetch.data);
+        setPaginationMetadata(questionsFetch.paginationMetadata);
+    }, [form.values, questionFilters]);
+
     useEffect(() => {
-        var questionsFetch = fetchQuestions({
-            questionResourceParameter: form.values,
-        });
-        questionsFetch.then((res) => {
-            setQuestions(res.data);
-            setPaginationMetadata(res.paginationMetadata);
-        });
-    }, [form.values]);
+        open();
+        getQuestions();
+        close();
+    }, [form.values, questionFilters]);
 
     const handleSearch = useCallback(() => {
         form.setFieldValue("searchQuery", searchQuery);
         form.setFieldValue("pageNumber", 1);
     }, [searchQuery, form]);
+
+    const handleFilter = useCallback(
+        (filter: QuestionFilterProps) => {
+            setQuestionFilters(filter);
+            form.setFieldValue("pageNumber", 1);
+        },
+
+        [questionFilters, form]
+    );
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -81,7 +111,7 @@ export default function Page() {
                         }}
                     />
 
-                    <QuestionFilter />
+                    <QuestionFilter setQuestionFilters={handleFilter} />
                 </div>
             </div>
             <QuestionTable
@@ -93,6 +123,9 @@ export default function Page() {
                           ? "No Questions"
                           : undefined
                 }
+                setSelectedRow={() => null}
+                loading={visible}
+                callInQuestionsPage={true}
             />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>

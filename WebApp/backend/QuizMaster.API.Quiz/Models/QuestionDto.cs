@@ -9,9 +9,9 @@ namespace QuizMaster.API.Quiz.Models
 		public int Id { get; set; }
 		public string QStatement { get; set; }
 
-		public string QImage { get; set; }
+		public string QImage { get; set; } = "null";
 
-		public string QAudio { get; set; }
+		public string QAudio { get; set; } = "null";
 
 		public int QTime { get; set; }
 
