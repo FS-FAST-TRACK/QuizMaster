@@ -288,6 +288,7 @@ namespace QuizMaster.API.Gateway.Hubs
                             }
                         }
 
+                        await Task.Delay(500);
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("chat", new { Message = $"{Name} has joined the room", Name = "bot", IsAdmin = false});
                         IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });

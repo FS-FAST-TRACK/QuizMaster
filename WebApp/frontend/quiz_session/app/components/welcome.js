@@ -14,6 +14,7 @@ export default function Welcome() {
       .start()
       .then(() => {
         console.log("Connection started");
+        connection.on("participants", participants);
       })
       .catch((err) => {
         console.error("Error starting connection:", err);
