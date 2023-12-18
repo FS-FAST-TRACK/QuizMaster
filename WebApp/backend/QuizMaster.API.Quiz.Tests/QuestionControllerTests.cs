@@ -8,7 +8,6 @@ using QuizMaster.API.Quiz.Profiles;
 using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services;
 using QuizMaster.API.Quiz.Tests.Services;
-using System.Text.Json;
 
 namespace QuizMaster.API.Quiz.Tests
 {
@@ -25,9 +24,9 @@ namespace QuizMaster.API.Quiz.Tests
 					cfg.AddProfile<QuestionDetailProfile>();
 					});
 			var mapper = new Mapper(mapperConfiguration);
-			var moqQuestionDetailManager = new Mock<IQuestionDetailManager>(); 
-		
-			var questionController = new QuestionController(quizTestDataRepository, moqQuestionDetailManager.Object, mapper);
+			var moqQuestionDetailManager = new Mock<IQuestionDetailManager>();
+
+			var questionController = new QuestionController(quizTestDataRepository, moqQuestionDetailManager.Object, mapper, null);
 
 			questionController.ControllerContext.HttpContext = new DefaultHttpContext();
 			
