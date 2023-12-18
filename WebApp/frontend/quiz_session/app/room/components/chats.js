@@ -1,11 +1,34 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import { conversation } from "../util/data";
+import { useState } from "react";
+import { useConnection } from "@/app/util/store";
 
 export default function Chats() {
+  const username = localStorage.getItem("username");
+  const { connection } = useConnection();
+  const [conversation, setConverstaion] = useState([]);
+
+  useEffect(() => {
+    // Define the event handler function
+    const handleChat = (chat) => {
+      setConverstaion((prev) => [...prev, chat]);
+    };
+
+    // Subscribe to the "chat" event
+    connection.on("chat", handleChat);
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      connection.off("chat", handleChat);
+    };
+  }, [connection]);
+
   return (
     <>
       {conversation.map((message, index) => {
-        if (message.role === "Admin") {
+        if (message.name.toLowerCase() === username) {
           return (
             <div
               key={index}
@@ -20,7 +43,7 @@ export default function Chats() {
               </div>
             </div>
           );
-        } else if (message.role === "Bot") {
+        } else if (message.name === "bot") {
           return (
             <div key={index} className="flex flex-col w-full items-center">
               <div className=" text-gray_text text-sm">{message.message}</div>

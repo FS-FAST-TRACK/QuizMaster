@@ -5,6 +5,7 @@ import { names } from "../util/data";
 import { Input } from "@mantine/core";
 import send from "@/public/icons/send.png";
 import Chats from "./chats";
+import Message from "./message";
 
 export default function Chat() {
   return (
@@ -19,15 +20,7 @@ export default function Chat() {
       <div className=" grow px-2 overflow-auto bg-gray-100 space-y-2 pb-2">
         <Chats />
       </div>
-      <div className="h-14  p-2 flex flex-row items-center space-x-2 border-t-2 border-gray-300">
-        <Input className="w-full" placeholder="Message" />
-        <Image
-          src={send}
-          width={35}
-          height={35}
-          className="p-2 bg-wall rounded-md"
-        />
-      </div>
+      <Message />
     </div>
   );
 }

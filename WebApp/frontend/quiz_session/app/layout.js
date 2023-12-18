@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import "@mantine/core/styles.css";
+import StartConnection from "./components/welcome";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
         <ColorSchemeScript />
       </head>
       <body className={`${inter.className} w-screen h-screen bg-wall`}>
+        <StartConnection />
         <MantineProvider withGlobalSyles withNormalizeCss>
           {children}
         </MantineProvider>
