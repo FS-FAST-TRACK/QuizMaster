@@ -3,6 +3,7 @@
 import {
     Button,
     Container,
+    Input,
     PasswordInput,
     Text,
     TextInput,
@@ -12,35 +13,55 @@ import logo from "/public/quiz-master-logo.png";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-const LoginForm = () => {
+import { redirect } from "next/navigation";
+import { notification } from "@/lib/notifications";
+import { useDisclosure } from "@mantine/hooks";
+
+const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
     const form = useForm({
         initialValues: {
             username: "",
             password: "",
         },
+        validateInputOnBlur: true,
         validate: {
             username: isNotEmpty("Username is required"),
             password: isNotEmpty("Password is required"),
         },
     });
+
+    const [open, handlers] = useDisclosure(false);
+
     const login = async (username: string, password: string) => {
-        console.log(process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY);
-        const response = await fetch(
-            `${process.env.QUIZMASTER_GATEWAY}/auth/login`,
-            {
-                method: "POST",
-                body: JSON.stringify({ username, password }),
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+        handlers.open();
+        try {
+            const response = await fetch(
+                `${process.env.QUIZMASTER_GATEWAY}/gateway/api/auth/login`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({ username, password }),
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            const data = await response.json();
+            console.log(data);
+            // Sign In the user if response is with 200
+            if (response.status < 300) {
+                await signIn("credentials", {
+                    jwt: data.token,
+                });
+                redirect(callbackUrl);
+            } else {
+                notification({ type: "error", title: data.message });
             }
-        );
-        const data = await response.json();
-        console.log(data);
-        await signIn("credentials", {
-            jwt: data.token,
-        });
+        } catch (e) {
+            notification({ type: "error", title: "Something went wrong." });
+        }
+        handlers.close();
     };
 
     return (
@@ -60,28 +81,27 @@ const LoginForm = () => {
                 })}
             >
                 <div className="flex flex-col gap-[15px]">
-                    <Text size="16px" fw="500">
-                        {" "}
-                        Username
-                    </Text>
+                    <Input.Wrapper className="space-y-4">
+                        <Input.Label size="16px" fw="500" htmlFor="username">
+                            Username
+                        </Input.Label>
 
-                    <TextInput
-                        radius="6px"
-                        placeholder="Username"
-                        name="username"
-                        id="username"
-                        {...form.getInputProps("username")}
-                    />
-
+                        <TextInput
+                            radius="6px"
+                            placeholder="Username"
+                            name="username"
+                            height="42"
+                            id="username"
+                            {...form.getInputProps("username")}
+                        />
+                    </Input.Wrapper>
                     <Text size="16px" fw="500">
-                        {" "}
                         Password
                     </Text>
                     <PasswordInput
                         radius="6px"
                         placeholder="Password"
                         name="password"
-                        id="password"
                         {...form.getInputProps("password")}
                     />
                     <p className="text-sm self-end w-full flex justify-end ">
@@ -97,13 +117,14 @@ const LoginForm = () => {
                         color="#FF6633"
                         type="submit"
                         fullWidth
+                        disabled={open}
                     >
-                        Login
+                        {open ? "Logging in..." : "Login"}
                     </Button>
                     <p className="text-sm">
                         Don't have an account yet?{" "}
                         <Link
-                            href={"/register"}
+                            href={"/auth/signup"}
                             className="font-medium hover:underline cursor-pointer"
                         >
                             Sign up
