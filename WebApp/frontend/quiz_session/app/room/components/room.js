@@ -6,6 +6,7 @@ import { Loader, Button } from "@mantine/core";
 import { names } from "../util/data";
 import RoomPin from "./roomPin";
 import Participants from "./participants";
+import Start from "./start";
 
 export default function Room() {
   return (
@@ -14,11 +15,7 @@ export default function Room() {
       <div className=" grow flex items-center flex-col flex-1   overflow-hidden">
         <Participants />
       </div>
-      <div className="flex bottom-0 h-20 items-center justify-center">
-        <Button variant="filled" color="yellow">
-          Start Quiz
-        </Button>
-      </div>
+      <Start />
     </div>
   );
 }
