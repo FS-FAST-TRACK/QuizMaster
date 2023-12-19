@@ -20,7 +20,9 @@ service QuizAuditService {
 	rpc LogCreateQuestionTypeEvent (LogCreateQuestionTypeEventRequest) returns (google.protobuf.Empty);
 	rpc LogUpdateQuestionTypeEvent (LogUpdateQuestionTypeEventRequest) returns (google.protobuf.Empty);
 	rpc LogDeleteQuestionTypeEvent (LogDeleteQuestionTypeEventRequest) returns (google.protobuf.Empty);
-
+	rpc LogCreateQuizSetEvent (LogCreateQuizSetEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuizSetEvent (LogUpdateQuizSetEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuizSetEvent (LogDeleteQuizSetEventRequest) returns (google.protobuf.Empty);
 }
 
 message CreateQuizCategoryEvent {
@@ -154,6 +156,39 @@ message DeleteQuestionTypeEvent {
   string newValues = 8;
 }
 
+message CreateQuizSetEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message UpdateQuizSetEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message DeleteQuizSetEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
 message LogCreateQuizCategoryEventRequest {
   CreateQuizCategoryEvent event = 1;
 }
@@ -199,4 +234,16 @@ message LogUpdateQuestionTypeEventRequest {
 
 message LogDeleteQuestionTypeEventRequest {
   DeleteQuestionTypeEvent event = 1;
+}
+
+message LogCreateQuizSetEventRequest {
+  CreateQuizSetEvent event = 1;
+}
+
+message LogUpdateQuizSetEventRequest {
+  UpdateQuizSetEvent event = 1;
+}
+
+message LogDeleteQuizSetEventRequest {
+  DeleteQuizSetEvent event = 1;
 }
