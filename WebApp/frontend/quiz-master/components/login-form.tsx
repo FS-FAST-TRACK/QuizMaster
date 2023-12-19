@@ -59,7 +59,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                 notification({ type: "error", title: data.message });
             }
         } catch (e) {
-            notification({ type: "error", title: "Something went wrong." });
+            console.log(e);
         }
         handlers.close();
     };
