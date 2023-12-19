@@ -371,6 +371,7 @@ namespace QuizMaster.API.Gateway.Hubs
                 // we will not use await, we will let the request pass
                 await Clients.Group(roomPin).SendAsync("start", true);
                 //await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
+                await Task.Delay(500);
                 await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, quizRoom);
             }
             catch (Exception ex)

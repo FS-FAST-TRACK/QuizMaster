@@ -11,19 +11,20 @@ export default function Start() {
   const { push } = useRouter();
   const pathName = usePathname();
   const searchParams = useSearchParams();
-  const roomId = new URLSearchParams(searchParams).get("roomPin");
+  const params = new URLSearchParams(searchParams);
 
   useEffect(() => {
     connection.on("start", (isStart) => {
       console.log(isStart);
       if (isStart) {
-        push(`${pathName}/quiz`);
+        params.set("roomPin", params.get("roomPin"));
+        push(`${pathName}/quiz?${params.toString()}`);
       }
     });
   }, []);
 
   const startQuiz = () => {
-    connection.invoke("StartRoom", roomId);
+    connection.invoke("StartRoom", params.get("roomPin"));
   };
   return (
     <div className="flex bottom-0 h-20 items-center justify-center">
