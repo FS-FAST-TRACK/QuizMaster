@@ -60,15 +60,18 @@ namespace QuizMaster.API.Gateway.Services
                 connectionGroupPair.Remove(connectionId);
             }
         }
-        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, string channel = "chat")
+        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, string channel = "chat", bool sendParticipantData = true)
         {
             if (connectionGroupPair.ContainsKey(connectionId))
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
                 await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync(channel, new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
 
-                IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
-                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
+                if (sendParticipantData)
+                {
+                    IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
+                    await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
+                }
 
                 connectionGroupPair.Remove(connectionId);
                 

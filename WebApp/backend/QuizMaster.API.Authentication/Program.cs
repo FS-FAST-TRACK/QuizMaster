@@ -34,6 +34,14 @@ namespace QuizMaster.API.Authentication
             builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
             builder.Services.AddSingleton<RabbitMqRepository>();
 
+            builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+            }));
+
 
             // configure cookie authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -59,12 +67,17 @@ namespace QuizMaster.API.Authentication
                 app.UseSwaggerUI();
             }
 
-            //app.UseHttpsRedirection();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            app.UseHttpsRedirection();
+
+            app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapGrpcService<Service>();
+            app.MapGrpcService<Service>().RequireCors("AllowAll");
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 
