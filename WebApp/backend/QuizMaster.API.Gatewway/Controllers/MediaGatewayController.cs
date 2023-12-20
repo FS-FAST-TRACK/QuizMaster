@@ -27,11 +27,14 @@ namespace QuizMaster.API.Gateway.Controllers
 
         public MediaGatewayController(ILogger<MediaGatewayController> logger, IWebHostEnvironment webHostEnvironment, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Media_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Media_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new MediaService.MediaServiceClient(_channel);
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
-            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 

@@ -11,6 +11,7 @@ using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Gatewway.Controllers;
 using QuizMaster.API.Quiz.Services.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,6 +78,7 @@ builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<RabbitMqUserWorker>();
 builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
 builder.Services.AddSingleton<RabbitMqRepository>();
+builder.Services.AddScoped<AccountGatewayController>();
 builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
 
 
@@ -113,6 +115,18 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
     });
 }
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swagger, httpReq) =>
+    {
+        swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" } };
+    });
+});
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
+});
+
 
 app.UseHttpsRedirection();
 
@@ -120,7 +134,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors();
-
 app.MapControllers();
 app.MapHub<SessionHub>("/gateway/hub/session");
 
