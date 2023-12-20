@@ -30,11 +30,14 @@ namespace QuizMaster.API.Gateway.Controllers
 
         public QuestionGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
             _mapper = mapper;
-            _channel = GrpcChannel.ForAddress(options.Value.Quiz_Category_Service);
+            _channel = GrpcChannel.ForAddress(options.Value.Quiz_Category_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new QuestionServices.QuestionServicesClient(_channel);
             _mapper = mapper;
-            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
