@@ -59,6 +59,15 @@ namespace QuizMaster.API.Monitoring
             builder.Logging.ClearProviders(); // Remove the default logging providers
             builder.Logging.AddConsole(); // Add the console logger
             builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+            builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+            }));
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -71,11 +80,32 @@ namespace QuizMaster.API.Monitoring
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-            app.MapGrpcService<MonitoringInfoService>();
-            app.MapGrpcService<QuizMonitoringService>();
-            app.MapGrpcService<MediaMonitoringInfoService>();
+            app.MapGrpcService<MonitoringInfoService>().RequireCors("AllowAll"); ;
+            app.MapGrpcService<QuizMonitoringService>().RequireCors("AllowAll"); ;
+            app.MapGrpcService<MediaMonitoringInfoService>().RequireCors("AllowAll"); ;
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
+
+            // Make sure database is created
+            using (var scope = app.Services.CreateScope())
+            {
+                bool run = false;
+                while (!run)
+                {
+                    try
+                    {
+                        Console.WriteLine("Building DB");
+                        var services = scope.ServiceProvider;
+                        Task.Delay(1000).Wait();
+                        var dbContext = services.GetRequiredService<MonitoringDbContext>();
+                        // Ensure the database is created
+                        dbContext.Database.EnsureCreated();
+                        Console.WriteLine("DB Was built successfully");
+                        run = true;
+                    }
+                    catch { }
+                }
+            }
 
             app.Run();
         }

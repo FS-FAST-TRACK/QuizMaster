@@ -26,9 +26,12 @@ namespace QuizMaster.API.Gateway.Controllers
 
         public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new QuizSetService.QuizSetServiceClient(_channel);
-            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler });
             roomChannelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             SessionHandler = sessionHandler;
         }

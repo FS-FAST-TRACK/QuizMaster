@@ -14,6 +14,10 @@ using QuizMaster.API.Gateway.Helper;
 using Microsoft.Extensions.Options;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.Library.Common.Models;
+using QuizMaster.API.Gatewway.Controllers;
+using QuizMaster.API.Account.Models;
+using AutoMapper;
+using QuizMaster.Library.Common.Entities.Accounts;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -26,7 +30,10 @@ namespace QuizMaster.API.Gateway.Controllers
 
         public AuthenticationGatewayController(IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new AuthService.AuthServiceClient(_channel);
         }
 
