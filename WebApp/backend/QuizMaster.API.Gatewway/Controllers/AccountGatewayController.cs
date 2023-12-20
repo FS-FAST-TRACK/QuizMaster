@@ -30,9 +30,12 @@ namespace QuizMaster.API.Gatewway.Controllers
 
         public AccountGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Account_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Account_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new AccountService.AccountServiceClient(_channel);
-            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
             _mapper = mapper;
         }
@@ -44,7 +47,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         /// <returns>Task<IActionResult></returns>
         [QuizMasterAuthorization]
         [HttpGet("account/{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<ActionResult<AccountDto>> Get(int id)
         {
             var request = new GetAccountByIdRequest
             {

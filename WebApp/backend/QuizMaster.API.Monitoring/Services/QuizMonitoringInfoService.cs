@@ -17,15 +17,17 @@ namespace QuizMaster.API.Monitoring.Services
         private readonly IQuizDifficultyAuditTrailRepository _quizDifficultyAuditTrailRepository;
         private readonly IQuestionAuditTrailRepository _questionAuditTrailRepository;
         private readonly IQuestionTypeAuditTrailRepository _questionTypeAuditTrailRepository;
+        private readonly IQuizSetAuditTrailRepository _quizSetAuditTrailRepository;
         private readonly ILogger<QuizMonitoringService> _logger;
 
-        public QuizMonitoringService(IQuizCategoryAuditTrailRepository quizCategoryAuditTrailRepository, ILogger<QuizMonitoringService> logger, IQuizDifficultyAuditTrailRepository quizDifficultyAuditTrailRepository, IQuestionAuditTrailRepository questionAuditTrailRepository, IQuestionTypeAuditTrailRepository questionTypeAuditTrailRepository)
+        public QuizMonitoringService(IQuizCategoryAuditTrailRepository quizCategoryAuditTrailRepository, ILogger<QuizMonitoringService> logger, IQuizDifficultyAuditTrailRepository quizDifficultyAuditTrailRepository, IQuestionAuditTrailRepository questionAuditTrailRepository, IQuestionTypeAuditTrailRepository questionTypeAuditTrailRepository, IQuizSetAuditTrailRepository quizSetAuditTrailRepository)
         {
             _categoryAuditTrailRepository = quizCategoryAuditTrailRepository;
             _logger = logger;
             _quizDifficultyAuditTrailRepository = quizDifficultyAuditTrailRepository;
             _questionAuditTrailRepository = questionAuditTrailRepository;
             _questionTypeAuditTrailRepository = questionTypeAuditTrailRepository;
+            _quizSetAuditTrailRepository = quizSetAuditTrailRepository;
         }
         public override async Task<Empty> LogCreateQuizCategoryEvent(LogCreateQuizCategoryEventRequest request, ServerCallContext context)
         {
@@ -488,6 +490,126 @@ namespace QuizMaster.API.Monitoring.Services
 
                     // Add the auditTrail to the database using Entity Framework Core
                     await _questionTypeAuditTrailRepository.AddQuestionTypeAuditTrailAsync(questionTypeAuditTrail);
+                }
+                else
+                {
+                    // Handle the case where the timestamp is not a valid date and time
+                    _logger.LogError("Invalid timestamp format: {request.Timestamp}");
+                    // You can log an error or use a default timestamp as needed.
+                }
+
+                return new Empty();
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions, log them, and return an appropriate response
+                Console.WriteLine($"Error while logging add event: {ex.Message}");
+                throw; // You may want to return an error response instead of throwing an exception.
+            }
+
+        }
+        public override async Task<Empty> LogCreateQuizSetEvent(LogCreateQuizSetEventRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (DateTime.TryParse(request.Event.Timestamp, out DateTime timestamp))
+                {
+                    var quizSetAuditTrail = new QuizSetAuditTrail
+                    {
+
+                        UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
+                        Action = request.Event.Action,
+                        Timestamp = timestamp,
+                        Details = request.Event.Details,
+                        UserRole = request.Event.Userrole,
+                        OldValues = request.Event.OldValues,
+                        NewValues = request.Event.NewValues
+                        // You can add more fields or details as needed
+                    };
+
+                    // Add the auditTrail to the database using Entity Framework Core
+                    await _quizSetAuditTrailRepository.AddQuizSetAuditTrailAsync(quizSetAuditTrail);
+                }
+                else
+                {
+                    // Handle the case where the timestamp is not a valid date and time
+                    _logger.LogError("Invalid timestamp format: {request.Timestamp}");
+                    // You can log an error or use a default timestamp as needed.
+                }
+
+                return new Empty();
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions, log them, and return an appropriate response
+                Console.WriteLine($"Error while logging add event: {ex.Message}");
+                throw; // You may want to return an error response instead of throwing an exception.
+            }
+
+        }
+        public override async Task<Empty> LogUpdateQuizSetEvent(LogUpdateQuizSetEventRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (DateTime.TryParse(request.Event.Timestamp, out DateTime timestamp))
+                {
+                    var quizSetAuditTrail = new QuizSetAuditTrail
+                    {
+
+                        UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
+                        Action = request.Event.Action,
+                        Timestamp = timestamp,
+                        Details = request.Event.Details,
+                        UserRole = request.Event.Userrole,
+                        OldValues = request.Event.OldValues,
+                        NewValues = request.Event.NewValues
+                        // You can add more fields or details as needed
+                    };
+
+                    // Add the auditTrail to the database using Entity Framework Core
+                    await _quizSetAuditTrailRepository.AddQuizSetAuditTrailAsync(quizSetAuditTrail);
+                }
+                else
+                {
+                    // Handle the case where the timestamp is not a valid date and time
+                    _logger.LogError("Invalid timestamp format: {request.Timestamp}");
+                    // You can log an error or use a default timestamp as needed.
+                }
+
+                return new Empty();
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions, log them, and return an appropriate response
+                Console.WriteLine($"Error while logging add event: {ex.Message}");
+                throw; // You may want to return an error response instead of throwing an exception.
+            }
+
+        }
+        public override async Task<Empty> LogDeleteQuizSetEvent(LogDeleteQuizSetEventRequest request, ServerCallContext context)
+        {
+            try
+            {
+                if (DateTime.TryParse(request.Event.Timestamp, out DateTime timestamp))
+                {
+                    var quizSetAuditTrail = new QuizSetAuditTrail
+                    {
+
+                        UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
+                        Action = request.Event.Action,
+                        Timestamp = timestamp,
+                        Details = request.Event.Details,
+                        UserRole = request.Event.Userrole,
+                        OldValues = request.Event.OldValues,
+                        NewValues = request.Event.NewValues
+                        // You can add more fields or details as needed
+                    };
+
+                    // Add the auditTrail to the database using Entity Framework Core
+                    await _quizSetAuditTrailRepository.AddQuizSetAuditTrailAsync(quizSetAuditTrail);
                 }
                 else
                 {
