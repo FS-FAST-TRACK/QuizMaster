@@ -49,40 +49,49 @@ namespace QuizMaster.API.QuizSession.Services.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            LogInformation("Initializing...");
-
-            using IConnection connection = _RabbitMqConnectionFactory.CreateConnection();
-            using var channel = connection.CreateModel();
-
-            // declare an exchange
-            channel.ExchangeDeclare(_settings.RabbitMq_Quiz_ExchangeName, ExchangeType.Direct);
-
-            // Declare a request queue for recieving messages
-            channel.QueueDeclare(_settings.RabbitMq_Quiz_QuizInitQueue, false, false, false, null);
-            channel.QueueBind(_settings.RabbitMq_Quiz_QuizInitQueue, _settings.RabbitMq_Quiz_ExchangeName, "");
-
-            // Setup consumer to listen for upcoming messages
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += (model, ea) =>
+            while(!stoppingToken.IsCancellationRequested)
             {
-                LogInformation("Received Data");
-                var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
-                var jsonMssage = Encoding.UTF8.GetString(body);
-                var requestMessage = JsonConvert.DeserializeObject<RabbitMQ_QuestionPayload>(jsonMssage);
-
-                if(requestMessage != null)
+                try
                 {
-                    ProcessData(requestMessage);
+                    await Task.Delay(1000, stoppingToken);
+                    LogInformation("Initializing...");
+
+                    using IConnection connection = _RabbitMqConnectionFactory.CreateConnection();
+                    using var channel = connection.CreateModel();
+
+                    // declare an exchange
+                    channel.ExchangeDeclare(_settings.RabbitMq_Quiz_ExchangeName, ExchangeType.Direct);
+
+                    // Declare a request queue for recieving messages
+                    channel.QueueDeclare(_settings.RabbitMq_Quiz_QuizInitQueue, false, false, false, null);
+                    channel.QueueBind(_settings.RabbitMq_Quiz_QuizInitQueue, _settings.RabbitMq_Quiz_ExchangeName, "");
+
+                    // Setup consumer to listen for upcoming messages
+                    var consumer = new EventingBasicConsumer(channel);
+                    consumer.Received += (model, ea) =>
+                    {
+                        LogInformation("Received Data");
+                        var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
+                        var jsonMssage = Encoding.UTF8.GetString(body);
+                        var requestMessage = JsonConvert.DeserializeObject<RabbitMQ_QuestionPayload>(jsonMssage);
+
+                        if (requestMessage != null)
+                        {
+                            ProcessData(requestMessage);
+                        }
+                    };
+
+                    // Consume messages from the request queue
+                    channel.BasicConsume(_settings.RabbitMq_Quiz_QuizInitQueue, true, consumer);
+
+                    LogInformation("Message Bus running");
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        await Task.Delay(1000, stoppingToken);
+                    }
                 }
-            };
-
-            // Consume messages from the request queue
-            channel.BasicConsume(_settings.RabbitMq_Quiz_QuizInitQueue, true, consumer);
-
-            LogInformation("Message Bus running");
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(1000, stoppingToken);
+                catch { }
+                
             }
         }
 

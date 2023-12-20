@@ -13,6 +13,7 @@
     "RabbitMq_Account_ExchangeName": "QuizMasterExchange",
     "RabbitMq_Account_RequestQueueName": "QuizMasterRequestQueue",
     "RabbitMq_Account_ResponseQueueName": "QuizMasterResponseQueue",
-    "RabbitMq_Hostname": "localhost"
+    "RabbitMq_Hostname": "localhost",
+    "Service_MonitoringGRPC": "https://localhost:7065"
   }
 }
