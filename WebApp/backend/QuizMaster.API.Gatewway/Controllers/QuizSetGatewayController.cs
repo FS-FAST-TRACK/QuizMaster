@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
@@ -23,6 +26,8 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly QuizSetService.QuizSetServiceClient _channelClient;
         private readonly QuizRoomService.QuizRoomServiceClient roomChannelClient;
         private SessionHandler SessionHandler;
+        private readonly GrpcChannel _authChannel;
+        private readonly AuthService.AuthServiceClient _authChannelClient;
 
         public QuizSetGatewayController(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler)
         {
@@ -34,13 +39,38 @@ namespace QuizMaster.API.Gateway.Controllers
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler });
             roomChannelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             SessionHandler = sessionHandler;
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateSet([FromBody] SetDTO setDTO)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
             var request = new QuizSetRequest { QuizSet = JsonConvert.SerializeObject(setDTO) }; 
-            var response = await _channelClient.AddQuizSetAsync(request);
+            var response = await _channelClient.AddQuizSetAsync(request, headers);
 
             if(response.Code == 404)
             { return NotFound(response.Message); }
@@ -118,8 +148,31 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPut("update_set/{id}")]
         public async Task<IActionResult> UpdateSet(int id, [FromBody] SetDTO setDTO)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
             var request = new QuizSetRequest { Id = id, QuizSet = JsonConvert.SerializeObject(setDTO) };
-            var reply = await _channelClient.UpdateQuizSetAsync(request);
+            var reply = await _channelClient.UpdateQuizSetAsync(request, headers);
 
             if(reply.Code == 404)
             { return NotFound(reply.Message); }
@@ -133,8 +186,31 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpDelete("delete_set/{id}")]
         public async Task<IActionResult> DeleteSet(int id)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
             var request = new GetQuizSetRequest { Id = id };
-            var reply = await _channelClient.DeleteQuizSetAsync(request);
+            var reply = await _channelClient.DeleteQuizSetAsync(request, headers);
 
             if (reply.Code == 404)
             { return NotFound(reply.Message); }
@@ -143,6 +219,56 @@ namespace QuizMaster.API.Gateway.Controllers
             { return BadRequest(reply.Message); }
 
             return Ok(reply.Message);
+        }
+
+        private async Task<AuthStore> ValidateUserTokenAndGetInfo()
+        {
+            string token = GetUserToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            var info = await GetAuthStoreInfo(token);
+
+            if (info == null || info.UserData == null)
+            {
+                return null;
+            }
+
+            return info;
+        }
+
+        private string GetUserToken()
+        {
+            var tokenClaim = User.Claims.FirstOrDefault(e => e.Type == "token");
+
+            if (tokenClaim != null)
+            {
+                return tokenClaim.Value;
+            }
+
+            try
+            {
+                return HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<AuthStore> GetAuthStoreInfo(string token)
+        {
+            var requestValidation = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(requestValidation);
+
+            return !string.IsNullOrEmpty(authStore?.AuthStore) ? JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore) : null;
         }
     }
 }
