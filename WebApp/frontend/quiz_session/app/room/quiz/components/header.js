@@ -29,7 +29,7 @@ export default function Header() {
     });
   }, []);
   return (
-    <div className="px-5 pt-2">
+    <div className="px-5 pt-2 w-full">
       <div className="flex flex-row  w-full">
         <div className="flex justify-start w-full">
           <RoomPin />

@@ -31,12 +31,13 @@ export default function Question() {
     });
   }, []);
   return (
-    <div className="flex flex-col w-full items-center space-y-5 pt-5 h-full ">
-      {question?.question.qTypeId === 1 && (
+    <div className="flex flex-col w-full items-center space-y-5 pt-5 flex-grow bg-yellow-500">
+      {/* {question?.question.qTypeId === 1 && (
         <MulitpleChoice question={question} />
       )}
       {question?.question.qTypeId === 3 && <TrueOrFalse question={question} />}
-      {question?.question.qTypeId === 4 && <TypeAnswer question={question} />}
+      {question?.question.qTypeId === 4 && <TypeAnswer question={question} />} */}
+      <MulitpleChoice question={question} />
       {/* <MultipleChoiceAudio /> */}
       {/* <MulitpleChoice /> */}
       {/* <TrueOrFalse /> */}

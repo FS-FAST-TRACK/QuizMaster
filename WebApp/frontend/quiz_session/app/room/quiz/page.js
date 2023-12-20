@@ -5,7 +5,7 @@ import Header from "./components/header";
 
 export default function page() {
   return (
-    <div>
+    <div className="h-full bg-red-500 flex flex-col">
       <TimeProgress />
       <Header />
 
