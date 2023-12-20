@@ -29,19 +29,15 @@ namespace QuizMaster.API.Gateway.Hubs
         private readonly AuthService.AuthServiceClient _authChannelClient;
         private SessionHandler SessionHandler;
         private QuizHandler QuizHandler;
-        /*
-         * TODO
-         * - Create A QB Context for QuizParticipants
-         * - Link Participants to ConnectionId
-         * - Allow Submission of Answers based on running question [current displayed]
-         * - Implement the Authorization to link QuizParticipants and Account.API
-         */
 
         public SessionHub(IOptions<GrpcServerConfiguration> options, SessionHandler sessionHandler, QuizHandler quizHandler)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
-            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_channel);
             SessionHandler = sessionHandler;
             QuizHandler = quizHandler;
@@ -331,8 +327,15 @@ namespace QuizMaster.API.Gateway.Hubs
         {
             var participantData = SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId);
             if (participantData == null) { return; }
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room");
+            var group = SessionHandler.GetConnectionGroup(Context.ConnectionId);
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false);
             SessionHandler.UnbindConnectionId(Context.ConnectionId);
+
+            if(group != null)
+            {
+                IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(group).Select(p => new { p.UserId, p.QParticipantDesc });
+                await Clients.Group(group).SendAsync("participants", participants);
+            }
         }
 
         public async Task StartRoom(string roomPin)
