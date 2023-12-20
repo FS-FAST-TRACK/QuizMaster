@@ -65,7 +65,7 @@ namespace QuizMaster.API.Gateway.Services
             if (connectionGroupPair.ContainsKey(connectionId))
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
-                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync(channel, disconnectMessage);
+                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync(channel, new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
 
                 IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
                 await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync("participants", participants);
@@ -309,6 +309,7 @@ namespace QuizMaster.API.Gateway.Services
             }
 
             await hub.Clients.Caller.SendAsync("notif", "Logged in successfully");
+            await hub.Clients.Caller.SendAsync("auth_data", info.UserData.UserName);
         }
 
         public bool IsAuthenticated(string connectionId)
