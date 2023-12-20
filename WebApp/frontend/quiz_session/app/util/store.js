@@ -8,3 +8,8 @@ export const useConnection = create((set) => ({
     .withUrl("https://localhost:7081/gateway/hub/session")
     .build(),
 }));
+
+export const useConnectionId = create((set) => ({
+  connectionId: "",
+  setConnection: (id) => set({ connectionId: id }),
+}));

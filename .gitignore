@@ -39,7 +39,7 @@ x86/
 project.lock.json
 artifacts/
 global.json
-
+appsettings.json
 # Visual Studio profiler
 *.psess
 *.vsp

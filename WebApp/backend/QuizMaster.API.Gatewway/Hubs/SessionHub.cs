@@ -54,6 +54,7 @@ namespace QuizMaster.API.Gateway.Hubs
         {
             var connectionId = Context.ConnectionId;
             await SessionHandler.AuthenticateConnectionId(this, _authChannelClient, connectionId, token);
+            
         }
 
         public async Task CreateRoom(CreateRoomDTO roomDTO)

@@ -3,10 +3,11 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useConnection } from "@/app/util/store";
+import { useConnection, useConnectionId } from "@/app/util/store";
 
 export default function Login() {
   const { connection } = useConnection();
+  const { setConnection } = useConnectionId();
   const { push } = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -21,10 +22,15 @@ export default function Login() {
       body: JSON.stringify({ username, password }),
     }).then(async (r) => {
       if (r.status === 200) {
-        const data = await r.json();
-        await connection.invoke("Login", data.token);
-        localStorage.setItem("username", username.toLowerCase());
-        push("/auth/code");
+        try {
+          const data = await r.json();
+          await connection.invoke("Login", data.token);
+          localStorage.setItem("username", username.toLowerCase());
+
+          push("/auth/code");
+        } catch (error) {
+          console.error("SignalR error:", error);
+        }
       }
     });
   };

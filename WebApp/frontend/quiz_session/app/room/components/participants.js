@@ -4,10 +4,12 @@ import React from "react";
 import { Loader } from "@mantine/core";
 import { useConnection } from "@/app/util/store";
 import { useEffect, useState } from "react";
+import { useConnectionId } from "@/app/util/store";
 
 export default function Participants() {
   const [names, setNames] = useState([]);
   const { connection } = useConnection();
+  const { setConnection } = useConnectionId();
 
   useEffect(() => {
     // Define the event handler function
@@ -15,8 +17,12 @@ export default function Participants() {
       setNames(participants);
     };
 
+    connection.invoke("GetConnectionId");
     // Subscribe to the "chat" event
     connection.on("participants", getParticipants);
+    connection.on("connId", (connId) => {
+      setConnection(connId);
+    });
 
     // Clean up the subscription when the component unmounts
     return () => {

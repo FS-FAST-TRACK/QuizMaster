@@ -93,22 +93,29 @@ namespace QuizMaster.API.Gateway.Services
                     {
                         details.RemainingTime = time;
                         await hub.Clients.Group(roomPin).SendAsync("question", details);
+                        //string connectionId = hub.Context.ConnectionId;
+                        
+                        //await hub.Clients.Group(roomPin).SendAsync("connId", connectionId);
+
                         await Task.Delay(1000);
                     }
+                }
+
+                if (room.ShowLeaderboardEachRound())
+                {
+                    await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Displaying leaderboards");
+                    await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
+                    await Task.Delay(5000);
                 }
 
                 // before going to new set, do some elimination if toggled
                 if (room.IsEliminationRound() && ++setIndex < quizSets.Count)
                 {
-                    if (room.ShowLeaderboardEachRound())
-                    {
-                        await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Displaying leaderboards");
-                        await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
-                        await Task.Delay(5000);
-                    }
                     await EliminateParticipantsAsync(hub, handler, roomPin, adminData);
                     await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Elimination, reducing population to half");
                 }
+
+
             }
             await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
             
