@@ -180,13 +180,27 @@ namespace QuizMaster.API.Account.Controllers
 			{
 				return ReturnModelStateErrors();
 			}
+			var userUsingEmail = await _userManager.FindByEmailAsync(userFromDb.Email);
 
+			if (userUsingEmail!=  null && userUsingEmail.Id != userFromDb.Id)
+			{
+				return ReturnEmailAlreadyExist();
+			}
+
+			var userUsingUsername = await _userManager.FindByNameAsync(userFromDb.UserName);
+
+			if(userUsingUsername!= null && userUsingUsername.Id != userFromDb.Id)
+			{
+				return ReturnUserNameAlreadyExist();
+			}
+
+			userFromDb.DateUpdated = DateTime.UtcNow;
 
 			var result = await _userManager.UpdateAsync(userFromDb);
 
 			if (!result.Succeeded)
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to delete user." });
+				return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update user." });
 			}
 
 			return NoContent();

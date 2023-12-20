@@ -15,6 +15,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.25.1" />
     <PackageReference Include="Google.Protobuf.Tools" Version="3.25.1" />
     <PackageReference Include="Grpc.AspNetCore.Server" Version="2.59.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
     <PackageReference Include="Grpc.Tools" Version="2.59.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -36,11 +37,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\QuizMaster.API.Monitoring\QuizMaster.API.Monitoring.csproj" />
     <ProjectReference Include="..\QuizMaster.Library.Common\QuizMaster.Library.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\quiz_set.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\quiz_set.proto" GrpcServices="Server,Client" />
     <Protobuf Include="Protos\room.proto" GrpcServices="Server" />
   </ItemGroup>
 
