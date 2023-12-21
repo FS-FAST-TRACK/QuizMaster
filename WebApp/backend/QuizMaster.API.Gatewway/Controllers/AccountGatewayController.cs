@@ -283,6 +283,57 @@ namespace QuizMaster.API.Gatewway.Controllers
                 return NotFound(new { Message = "Invalid user information in the token" });
             }
 
+            /*
+             * Check if username, and email, id exists
+             * 
+             * Id should not be able to change
+             */
+
+            foreach (var operation in patch.Operations)
+            {
+                string path = operation.path.ToLower();
+                object value = operation.value;
+
+                if (!string.IsNullOrEmpty(path))
+                {
+                    // make sure that Id is not editable
+                    if(path == "id")
+                    {
+                        return BadRequest(new { Type = "Error", Message = "Property Id is unique and should not be editted" });
+                    }
+                    // username must be unique
+                    if(path == "username")
+                    {
+                        var checkUsername = new CheckUserNameRequest
+                        {
+                            Username = value.ToString(),
+                        };
+
+                        var checkUserNameResponse = _channelClient.CheckUserName(checkUsername);
+
+                        if (!checkUserNameResponse.IsAvailable)
+                        {
+                            return ReturnUserNameAlreadyExist();
+                        }
+                    }
+                    // email must be unique
+                    if (path == "email")
+                    {
+                        var checkEmail = new CheckEmailRequest
+                        {
+                            Email = value.ToString()
+                        };
+
+                        var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+                        if (!emailResponse.IsAvailable)
+                        {
+                            return ReturnEmailAlreadyExist();
+                        }
+                    }
+                }
+            }
+
             var userName = info.UserData.UserName;
             var userId = info.UserData.Id;
             var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
