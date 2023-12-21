@@ -21,4 +21,4 @@ FROM base AS final
 WORKDIR /app
 COPY QuizMaster.API.Monitoring/localhost_cert.pfx ./localhost_cert.pfx
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "QuizMaster.API.Monitoring.dll", , "https://*:6004"]
+ENTRYPOINT ["dotnet", "QuizMaster.API.Monitoring.dll", "https://*:6004"]

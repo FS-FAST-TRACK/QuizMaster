@@ -39,7 +39,7 @@ namespace QuizMaster.API.Gateway.Controllers
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler });
             roomChannelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             SessionHandler = sessionHandler;
-            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service);
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
