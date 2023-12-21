@@ -346,13 +346,22 @@ namespace QuizMaster.API.Account.Service
                     {
                         Event = updateEvent
                     };
-
+                    reply.Message = "Updated Account Successfully";
                     // Make the gRPC call to log the update event
-                    _auditServiceClient.LogUpdateEvent(updateRequest);
+                    try
+                    {
+                        _auditServiceClient.LogUpdateEvent(updateRequest);
+                    }
+                    catch(Exception ex)
+                    {
+                        reply.StatusCode = 200;
+                        reply.Message = "Update account success, failed to log: " + ex.Message;
+                    }
                 }
                 else
                 {
                     reply.StatusCode = 500;
+                    reply.Message = "Failed to update Account";
                 }
             }
             catch (Exception ex)

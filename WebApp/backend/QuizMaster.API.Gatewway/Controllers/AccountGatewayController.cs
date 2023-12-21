@@ -319,13 +319,13 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
 
-            var updateReply = await _channelClient.UpdateAccountAsync(update, headers);
+            var updateReply = _channelClient.UpdateAccount(update, headers);
             if (updateReply.StatusCode == 500)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update user." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = updateReply.Message });
             }
 
-            return NoContent();
+            return Ok(new ResponseDto { Type = "Success", Message = updateReply.Message });
         }
 
         //[QuizMasterAdminAuthorization]

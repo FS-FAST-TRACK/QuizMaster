@@ -107,6 +107,7 @@ message UpdateAccountRequest{
 
 message UpdateAccountReply{
 	int32 statusCode = 1;
+	string message = 2;
 }
 
 message SetAccountAdminRequest{
