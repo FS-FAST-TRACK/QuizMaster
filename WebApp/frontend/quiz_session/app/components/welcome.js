@@ -9,17 +9,19 @@ import { useConnection } from "../util/store";
 
 export default function Welcome() {
   const { connection } = useConnection();
-  if (!connection.state !== "Connected") {
-    connection
-      .start()
-      .then(() => {
-        console.log("Connection started");
-        connection.on("participants", participants);
-      })
-      .catch((err) => {
-        console.error("Error starting connection:", err);
-      });
-  }
+  useEffect(() => {
+    if (!connection.state !== "Connected") {
+      connection
+        .start()
+        .then(() => {
+          console.log("Connection started");
+          connection.on("participants", participants);
+        })
+        .catch((err) => {
+          console.error("Error starting connection:", err);
+        });
+    }
+  }, []);
 
   return (
     <>
