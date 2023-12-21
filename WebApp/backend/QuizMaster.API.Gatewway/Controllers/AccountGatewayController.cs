@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.JsonPatch;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Authentication.Models;
@@ -269,7 +271,7 @@ namespace QuizMaster.API.Gatewway.Controllers
 
         [QuizMasterAuthorization]
         [HttpPatch("account/update/{id}")]
-        public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
+        public async Task<IActionResult> Update(int id, JsonPatchDocument<AccountCreateDto> patch)
         {
             var info = await ValidateUserTokenAndGetInfo();
 
@@ -281,57 +283,6 @@ namespace QuizMaster.API.Gatewway.Controllers
             if (info == null || info.UserData == null)
             {
                 return NotFound(new { Message = "Invalid user information in the token" });
-            }
-
-            /*
-             * Check if username, and email, id exists
-             * 
-             * Id should not be able to change
-             */
-
-            foreach (var operation in patch.Operations)
-            {
-                string path = operation.path.ToLower();
-                object value = operation.value;
-
-                if (!string.IsNullOrEmpty(path))
-                {
-                    // make sure that Id is not editable
-                    if(path == "id")
-                    {
-                        return BadRequest(new { Type = "Error", Message = "Property Id is unique and should not be editted" });
-                    }
-                    // username must be unique
-                    if(path == "username")
-                    {
-                        var checkUsername = new CheckUserNameRequest
-                        {
-                            Username = value.ToString(),
-                        };
-
-                        var checkUserNameResponse = _channelClient.CheckUserName(checkUsername);
-
-                        if (!checkUserNameResponse.IsAvailable)
-                        {
-                            return ReturnUserNameAlreadyExist();
-                        }
-                    }
-                    // email must be unique
-                    if (path == "email")
-                    {
-                        var checkEmail = new CheckEmailRequest
-                        {
-                            Email = value.ToString()
-                        };
-
-                        var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
-
-                        if (!emailResponse.IsAvailable)
-                        {
-                            return ReturnEmailAlreadyExist();
-                        }
-                    }
-                }
             }
 
             var userName = info.UserData.UserName;
@@ -356,8 +307,39 @@ namespace QuizMaster.API.Gatewway.Controllers
             }
 
             var account = JsonConvert.DeserializeObject<UserAccount>(response.GetAccountByIdReply.Account);
+            var mappedAccount = _mapper.Map<AccountCreateDto>(account);
+            patch.ApplyTo(mappedAccount);
 
-            patch.ApplyTo(account);
+            _mapper.Map(mappedAccount, account);
+
+            #region checkUsername
+            var checkUsername = new CheckUserNameRequest
+            {
+                Username = account.UserName,
+                Id = id
+            };
+            var checkUserNameResponse = _channelClient.CheckUserName(checkUsername);
+
+            if (!checkUserNameResponse.IsAvailable)
+            {
+                return ReturnUserNameAlreadyExist();
+            }
+            #endregion
+
+            #region checkEmail
+            var checkEmail = new CheckEmailRequest
+            {
+                Email = account.Email,
+                Id = id
+            };
+
+            var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+            if (!emailResponse.IsAvailable)
+            {
+                return ReturnEmailAlreadyExist();
+            }
+            #endregion
 
             if (!ModelState.IsValid)
             {

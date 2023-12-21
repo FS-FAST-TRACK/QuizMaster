@@ -79,7 +79,7 @@ namespace QuizMaster.API.Account.Service
         {
             var reply = new CheckUserNameResponse();
             var user = _userManager.FindByNameAsync(request.Username).Result;
-            if (user != null)
+            if (user != null && user.Id != request.Id)
             {
                 reply.IsAvailable = false;
             }
@@ -100,7 +100,7 @@ namespace QuizMaster.API.Account.Service
 		{
 			var reply = new CheckEmailResponse();
 			var user = _userManager.FindByEmailAsync(request.Email).Result;
-			if (user != null)
+			if (user != null && user.Id != request.Id)
 			{
 				reply.IsAvailable = false;
 			}

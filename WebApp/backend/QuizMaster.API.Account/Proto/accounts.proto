@@ -57,6 +57,7 @@ message AllUserReply{
 // Request check username
 message CheckUserNameRequest {
 	string username = 1;
+	int32 id = 2;
 }
 
 // Reply check username
@@ -67,6 +68,7 @@ message CheckUserNameResponse{
 // Request check username
 message CheckEmailRequest {
 	string email = 1;
+	int32 id = 2;
 }
 
 // Reply check username
