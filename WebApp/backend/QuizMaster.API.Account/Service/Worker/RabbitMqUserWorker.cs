@@ -142,12 +142,28 @@ namespace QuizMaster.API.Account.Service.Worker
             if(userAccount == null)
                 return new() { Id = -1 };
 
-            // Compare user password
-            PasswordHasher<UserAccount> hasher = new();
+            // Partial Account
+            if(request.Password == "System.Partial.Account" && string.IsNullOrEmpty(userAccount.PasswordHash))
+            {
+                if(string.IsNullOrEmpty(userAccount.FirstName) && string.IsNullOrEmpty(userAccount.LastName))
+                {
+                    string tempUser = "User-" + new Random().Next(1000000, 9999999).ToString();
+                    userAccount.FirstName = tempUser;
+                    userAccount.LastName = tempUser;
+                }
+                else { return new() { Id = -1 }; };
+            }
+            // With Password
+            else
+            {
+                // Compare user password
+                PasswordHasher<UserAccount> hasher = new();
 
-            // check if password is correct
-            var passwordVerification = hasher.VerifyHashedPassword(userAccount, userAccount.PasswordHash, request.Password);
-            if (PasswordVerificationResult.Success != passwordVerification) { return new() { Id = -1 }; };
+                // check if password is correct
+                var passwordVerification = hasher.VerifyHashedPassword(userAccount, userAccount.PasswordHash, request.Password);
+                if (PasswordVerificationResult.Success != passwordVerification) { return new() { Id = -1 }; };
+            }
+            
 
             return userAccount;
         }

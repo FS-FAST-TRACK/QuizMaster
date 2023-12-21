@@ -29,4 +29,16 @@ namespace QuizMaster.API.Authentication.Models
             return new AuthRequest { Email = Email, Password = Password, Username = Username, Type = "Credentials" };
         }
     }
+
+    public class PartialAuthenticationRequest
+    {
+        /// <summary>
+        /// **Username**(Optional when Email exists): Authenticatate with using the user's Username
+        /// </summary>
+        public string Username { get; set; } = string.Empty;
+        /// <summary>
+        /// **Email**(Optional when Username exists): Authenticatate with using the user's Email
+        /// </summary>
+        public string Email { get; set; } = string.Empty;
+    }
 }

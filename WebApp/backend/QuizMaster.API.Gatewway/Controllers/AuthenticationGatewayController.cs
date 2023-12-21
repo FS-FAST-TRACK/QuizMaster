@@ -66,6 +66,12 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "Logged in successfully", reply.Token });
         }
 
+        [HttpPost("partialLogin")]
+        public async Task<IActionResult> LoginPartial([FromBody] PartialAuthenticationRequest requestModel)
+        {
+            return await Login(new AuthenticationRequestDTO { Email = requestModel.Email, Username = requestModel.Username, Password = "System.Partial.Account" });
+        }
+
         [QuizMasterAuthorization]
         [HttpPost]
         [Route("logout")]
