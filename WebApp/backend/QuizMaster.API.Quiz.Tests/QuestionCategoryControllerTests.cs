@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using QuizMaster.API.Quiz.Controllers;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Profiles;
 using QuizMaster.API.Quiz.Tests.Services;
-using System.Collections.Generic;
 
 namespace QuizMaster.API.Quiz.Tests
 {

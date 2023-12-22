@@ -11,7 +11,6 @@ using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.QuizSession.Protos;
-using QuizMaster.Library.Common.Entities.Questionnaire.Answers;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.Threading.Channels;
