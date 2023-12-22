@@ -354,7 +354,7 @@ namespace QuizMaster.API.Account.Service
                     }
                     catch(Exception ex)
                     {
-                        reply.StatusCode = 500;
+                        reply.StatusCode = 200;
                         reply.Message = "Update account success, failed to log: " + ex.Message;
                     }
                 }
