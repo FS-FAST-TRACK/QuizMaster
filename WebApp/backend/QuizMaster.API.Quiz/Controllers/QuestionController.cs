@@ -9,7 +9,6 @@ using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.API.Quiz.Services.Workers;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
-using QuizMaster.Library.Common.Helpers.Quiz;
 using QuizMaster.Library.Common.Models;
 using System.Text.Json;
 
