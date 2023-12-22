@@ -79,7 +79,7 @@ namespace QuizMaster.API.Account.Service
         {
             var reply = new CheckUserNameResponse();
             var user = _userManager.FindByNameAsync(request.Username).Result;
-            if (user != null)
+            if (user != null && user.Id != request.Id)
             {
                 reply.IsAvailable = false;
             }
@@ -100,7 +100,7 @@ namespace QuizMaster.API.Account.Service
 		{
 			var reply = new CheckEmailResponse();
 			var user = _userManager.FindByEmailAsync(request.Email).Result;
-			if (user != null)
+			if (user != null && user.Id != request.Id)
 			{
 				reply.IsAvailable = false;
 			}
@@ -346,13 +346,22 @@ namespace QuizMaster.API.Account.Service
                     {
                         Event = updateEvent
                     };
-
+                    reply.Message = "Updated Account Successfully";
                     // Make the gRPC call to log the update event
-                    _auditServiceClient.LogUpdateEvent(updateRequest);
+                    try
+                    {
+                        _auditServiceClient.LogUpdateEvent(updateRequest);
+                    }
+                    catch(Exception ex)
+                    {
+                        reply.StatusCode = 200;
+                        reply.Message = "Update account success, failed to log: " + ex.Message;
+                    }
                 }
                 else
                 {
                     reply.StatusCode = 500;
+                    reply.Message = "Failed to update Account";
                 }
             }
             catch (Exception ex)
