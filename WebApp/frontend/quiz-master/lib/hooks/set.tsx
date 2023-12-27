@@ -1,3 +1,4 @@
+import { QUIZMASTER_SET_POST, QUIZMASTER_SET_PUT } from "@/api/api-routes";
 import { QuestionSetDTO } from "../definitions";
 
 export async function postQuestionSet({
@@ -8,7 +9,7 @@ export async function postQuestionSet({
     try {
         // Post Question
         const res = await fetch(
-            `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/create`,
+            `${QUIZMASTER_SET_POST}`,
             {
                 method: "POST",
                 mode: "cors",
@@ -39,7 +40,7 @@ export async function updateQuestionSet({
     try {
         // Post Question
         const res = await fetch(
-            `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/update_set/${id}`,
+            `${QUIZMASTER_SET_PUT}${id}`,
             {
                 method: "PUT",
                 mode: "cors",

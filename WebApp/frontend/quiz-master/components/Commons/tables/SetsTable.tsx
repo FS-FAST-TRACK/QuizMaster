@@ -36,7 +36,7 @@ export default function QuestionSetsTable({
 
     const handelDelete = useCallback(async () => {
         const res = await fetch(
-            `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/delete_set/${deleteSet?.id}`,
+            `${process.env.QUIZMASTER_GATEWAY}/set/delete_set/${deleteSet?.id}`,
             {
                 method: "DELETE",
             }

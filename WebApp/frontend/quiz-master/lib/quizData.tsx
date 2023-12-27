@@ -12,6 +12,7 @@ import {
     QuestionSet,
     Set,
 } from "./definitions";
+import { QUIZMASTER_MEDIA_GET_DOWNLOAD, QUIZMASTER_QCATEGORY_GET_CATEGORIES, QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES, QUIZMASTER_QTYPE_GET_TYPES, QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_SET_GET_SET, QUIZMASTER_SET_GET_SETQUESTIONS, QUIZMASTER_SET_GET_SETS } from "@/api/api-routes";
 
 export async function fetchQuestions({
     questionResourceParameter,
@@ -19,7 +20,7 @@ export async function fetchQuestions({
     questionResourceParameter: QuestionResourceParameter;
 }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
+        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
         if(questionResourceParameter.exludeQuestionsIds && questionResourceParameter.exludeQuestionsIds.length !== 0){
             apiUrl = apiUrl.concat(
                 `&exludeQuestionsIds=${JSON.stringify(
@@ -52,7 +53,7 @@ export async function fetchCategories(
     questionResourceParameter?: CategoryResourceParameter
 ) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/category`;
+        var apiUrl = `${QUIZMASTER_QCATEGORY_GET_CATEGORIES}`;
         if (questionResourceParameter) {
             apiUrl = apiUrl.concat(
                 `?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`
@@ -60,10 +61,11 @@ export async function fetchCategories(
         }
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionCategory[];
-            var paginationMetadata: PaginationMetadata;
+            var paginationMetadata: PaginationMetadata | null; 
             paginationMetadata = JSON.parse(
                 res.headers.get("x-pagination") || ""
             );
+           
             data = await res.json();
             data.forEach((cat) => {
                 cat.dateCreated = new Date(cat.dateCreated);
@@ -83,7 +85,7 @@ export async function fetchDifficulties(
     difficultyResourceParameter?: DifficultyResourceParameter
 ) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`;
+        var apiUrl = `${QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES}`;
         if (difficultyResourceParameter) {
             apiUrl = apiUrl.concat(
                 `?pageSize=${difficultyResourceParameter.pageSize}&pageNumber=${difficultyResourceParameter.pageNumber}&searchQuery=${difficultyResourceParameter.searchQuery}`
@@ -113,7 +115,7 @@ export async function fetchDifficulties(
 export async function fetchTypes() {
     try {
         const data = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/type`
+            `${QUIZMASTER_QTYPE_GET_TYPES}`
         )
             .then((res) => res.json())
             .then((data) => {
@@ -130,7 +132,7 @@ export async function fetchTypes() {
 
 export async function fetchQuestion({ questionId }: { questionId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}`;
+        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTION}${questionId}`;
 
         const { data } = await fetch(apiUrl).then(async (res) => {
             var data: Question;
@@ -170,7 +172,7 @@ export async function fetchQuestionDetails({
 
 export async function fetchSets() {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_set`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SETS}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: Set[];
@@ -191,7 +193,7 @@ export async function fetchSets() {
 
 export async function fetchSet({ setId }: { setId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/${setId}`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SET}/${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: Set;
@@ -208,7 +210,7 @@ export async function fetchSet({ setId }: { setId: number }) {
 
 export async function fetchAllSetQuestions() {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_question_set`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionSet[];
@@ -229,7 +231,7 @@ export async function fetchAllSetQuestions() {
 
 export async function fetchSetQuestions({ setId }: { setId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/get_question_set/${setId}`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionSet[];
@@ -251,7 +253,7 @@ export async function fetchSetQuestions({ setId }: { setId: number }) {
 export async function fetchMedia(id: string) {
     try {
         const data = await fetch(
-            `${process.env.QUIZMASTER_MEDIA}/api/Media/download/${id}`
+            `${QUIZMASTER_MEDIA_GET_DOWNLOAD}${id}`
         )
             .then(async (res) => {
                 if (res.status === 404) {
