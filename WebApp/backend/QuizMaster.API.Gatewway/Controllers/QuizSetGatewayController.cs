@@ -144,7 +144,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(reply.Data));
         }
 
-        [HttpPut("update_set/{id}")]
+        [HttpPatch("update_set/{id}")]
         public async Task<IActionResult> UpdateSet(int id, [FromBody] SetDTO setDTO)
         {
             var info = await ValidateUserTokenAndGetInfo();
