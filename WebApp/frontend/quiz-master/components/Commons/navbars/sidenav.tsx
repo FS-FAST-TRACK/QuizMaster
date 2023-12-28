@@ -37,7 +37,7 @@ export default function SideNav() {
                     <div className="flex grow flex-col justify-between space-x-0">
                         <NavLinks />
                         <div className="h-auto w-full grow rounded-md bg-transparent block"></div>
-                        <UserNavBar userName="Admin" email="admin@gmail.com" />
+                        <UserNavBar />
                     </div>
                 </div>
             </div>
