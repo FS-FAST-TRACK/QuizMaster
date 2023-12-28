@@ -10,6 +10,8 @@ using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
+using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Models;
 
 namespace QuizMaster.API.Gateway.Controllers
@@ -35,34 +37,71 @@ namespace QuizMaster.API.Gateway.Controllers
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
-        [HttpGet("get_all_difficulty")]
-        public async Task<IActionResult> GetAllDifficulty()
+        [HttpGet("get_difficulties")]
+        public async Task<IActionResult> GetPagedDifficulties([FromQuery] DifficultyResourceParameter resourceParameter)
         {
-            var request = new EmptyDifficultyRequest();
-            var response = _channelClient.GetDificulties(request);
-            var difficulties = new List<DifficultyDto>();
-            while (await response.ResponseStream.MoveNext())
+            // Proccess Input
+            var request = new DifficultyRequest()
             {
-                difficulties.Add(_mapper.Map<DifficultyDto>(response.ResponseStream.Current));
+                Content = JsonConvert.SerializeObject(resourceParameter),
+                Type = "difficultyResourceParameter",
+            };
+
+
+            // Process Logic
+            if (resourceParameter.IsGetAll)
+            {
+                var response = await _channelClient.GetAllDifficultyAsync(request);
+                var difficulties = JsonConvert.DeserializeObject<IEnumerable<QuestionDifficulty>>(response.Content);
+
+                return Ok(_mapper.Map<IEnumerable<DifficultyDto>>(difficulties));
             }
-            return Ok(difficulties);
+
+            var pagedResponse = await _channelClient.GetDifficultiesAsync(request);
+
+            // Process output
+           
+            try
+            {
+                var pagedDifficulties = JsonConvert.DeserializeObject<Tuple<IEnumerable<DifficultyDto>, Dictionary<string, object?>>>(pagedResponse.Content);
+            Response.Headers.Add("X-Pagination",
+                   JsonConvert.SerializeObject(pagedDifficulties!.Item2));
+
+            Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
+
+            return Ok(pagedDifficulties.Item1);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
+
         }
+
 
         [HttpGet("get_difficulty/{id}")]
         public async Task<IActionResult> GetDifficulty(int id)
         {
-            var request = new GetDificultyRequest
+
+            // Process Input
+            var request = new DifficultyRequest
             {
-                Id = id
+                Content = JsonConvert.SerializeObject(id),
+                Type = "int",
             };
-            var response = await _channelClient.GetDificultyAsync(request);
-            if (response.NotFoundDifficulty != null)
+
+            // Process Logic
+            var response = await _channelClient.GetDifficultyAsync(request);
+
+            // Process Output
+            if (response.Code == 404)
             {
-                if (response.NotFoundDifficulty.Code == 404)
-                    return NotFound("Difficulty not found");
-                return BadRequest(response.NotFoundDifficulty.Message);
+
+                return NotFound("Difficulty not found");
+
             }
-            return Ok(_mapper.Map<DifficultyDto>(response.DificultiesReply));
+            return Ok(_mapper.Map<DifficultyDto>(JsonConvert.DeserializeObject<QuestionDifficulty>(response.Content)));
         }
 
         [HttpPost("add_difficulty")]
@@ -89,38 +128,25 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "id", userId.ToString() ?? "unknown" },
                 { "role", userRole }
             };
-            var request = new GetDifficultyByDescRequest
+            // Process Input
+            var request = new DifficultyRequest
             {
-                Desc = difficulty.QDifficultyDesc
+                Content = JsonConvert.SerializeObject(difficulty),
+                Type = "difficultyCreateDto"
             };
-            if (!ModelState.IsValid)
+
+            // Process Logic
+            var response = await _channelClient.CreateDifficultyAsync(request, headers);
+
+            // Process Output
+            if (response.Code == 500)
             {
-                return ReturnModelStateErrors();
+                return StatusCode(StatusCodes.Status500InternalServerError, response.Content);
             }
+            var createDifficulty = JsonConvert.DeserializeObject<QuestionDifficulty>(response.Content);
+            
+            return Ok(_mapper.Map<DifficultyDto>(createDifficulty));
 
-            var checkDifficulty = await _channelClient.GetDifficultyByDescAsync(request);
-
-            if (checkDifficulty.Code == 200)
-            {
-                return ReturnDifficultyAlreadyExist();
-            }
-
-            if(checkDifficulty.Code == 201)
-            {
-                return Ok(new { id = checkDifficulty.Id, qDifficultyDesc = difficulty.QDifficultyDesc });
-            }
-
-            if (checkDifficulty.Code == 400)
-            {
-                var createDifficulty = await _channelClient.CreateDifficultyAsync(_mapper.Map<CreateDifficultyRequest>(difficulty), headers);
-                if (createDifficulty.Code == 500)
-                {
-                    return BadRequest("Failed to create difficulty");
-                }
-
-                return Ok(new { id = createDifficulty.Id, qDifficultyDesc  = createDifficulty.QDifficultyDesc});
-            }
-            return BadRequest("Something went wrong");
         }
 
         [HttpDelete("delete_difficulty/{id}")]
@@ -147,14 +173,19 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "id", userId.ToString() ?? "unknown" },
                 { "role", userRole }
             };
+            
+            // Process Input
+            var request = new DifficultyRequest() { Content = JsonConvert.SerializeObject(id) };
 
-            var request = new GetDificultyRequest() { Id = id };
+            // Process Logic
             var resposnse = await _channelClient.DeleteDifficultyAsync(request, headers);
-            if(resposnse.Code == 404)
+
+            // Process Output
+            if (resposnse.Code == 404)
             {
                 return ReturnDifficultyDoesNotExist(id);
             }
-            if(resposnse.Code == 500)
+            if (resposnse.Code == 500)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update difficulty." });
             }
@@ -186,28 +217,34 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "role", userRole }
             };
 
-            var request = new UpdateDifficultyRequest();
-            request.Id = id;
-            request.Patch = JsonConvert.SerializeObject(patch);
+            // Process Input
+            var request = new DifficultyRequest()
+            {
+                Content = JsonConvert.SerializeObject(new Tuple<int, JsonPatchDocument<DifficultyCreateDto>>(id, patch))
+            };
 
+            // Process Logic
             var response = await _channelClient.UpdateDifficultyAsync(request, headers);
 
-            if(response.Code == 404)
+            // Process Output
+            if (response.Code == 404)
             {
                 return ReturnDifficultyDoesNotExist(id);
             }
 
-            if(response.Code == 409)
+            if (response.Code == 409)
             {
                 return ReturnDifficultyAlreadyExist();
             }
 
-            if(response.Code == 500)
+            if (response.Code == 500)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update difficulty." });
             }
 
-            return Ok(new { id = response.Id, qDifficultyDesc = response.QDifficultyDesc });
+            var createDifficulty = JsonConvert.DeserializeObject<QuestionDifficulty>(response.Content);
+
+            return Ok(_mapper.Map<DifficultyDto>(createDifficulty));
         }
 
         private ActionResult ReturnModelStateErrors()
