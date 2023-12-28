@@ -8,6 +8,7 @@ import {
     QuestionSetDTO,
     ResourceParameter,
     Set,
+    SetDTO,
 } from "@/lib/definitions";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import {
@@ -115,15 +116,11 @@ export default function Page({ params }: { params: { id: number } }) {
         formValues.values.questions = questionSet.map(
             (question) => question.id
         );
-        formValues.values.dateCreated = new Date();
-        formValues.values.dateUpdated = new Date(1, 0, 1);
 
-        const questionSetCreateDto: QuestionSetDTO = {
+        const questionSetCreateDto: SetDTO = {
             qSetDesc: formValues.values.qSetName,
             qSetName: formValues.values.qSetName,
             questions: formValues.values.questions,
-            dateCreated: formValues.values.dateCreated,
-            dateUpdated: formValues.values.dateUpdated,
         };
 
         console.log(questionSetCreateDto);
@@ -141,6 +138,7 @@ export default function Page({ params }: { params: { id: number } }) {
                 router.push("/question-sets");
             })
             .catch((err) => {
+                console.log(err);
                 // notify for error
                 notification({
                     type: "error",
