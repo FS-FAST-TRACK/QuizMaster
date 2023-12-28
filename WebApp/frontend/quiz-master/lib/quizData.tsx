@@ -12,7 +12,7 @@ import {
     QuestionSet,
     Set,
 } from "./definitions";
-import { QUIZMASTER_MEDIA_GET_DOWNLOAD, QUIZMASTER_QCATEGORY_GET_CATEGORIES, QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES, QUIZMASTER_QTYPE_GET_TYPES, QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_SET_GET_SET, QUIZMASTER_SET_GET_SETQUESTIONS, QUIZMASTER_SET_GET_SETS } from "@/api/api-routes";
+import { QUIZMASTER_MEDIA_GET_DOWNLOAD, QUIZMASTER_QCATEGORY_GET_CATEGORIES, QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES, QUIZMASTER_QTYPE_GET_TYPES, QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_SET_GET_SET, QUIZMASTER_SET_GET_SETQUESTION, QUIZMASTER_SET_GET_SETQUESTIONS, QUIZMASTER_SET_GET_SETS } from "@/api/api-routes";
 
 export async function fetchQuestions({
     questionResourceParameter,
@@ -193,7 +193,7 @@ export async function fetchSets() {
 
 export async function fetchSet({ setId }: { setId: number }) {
     try {
-        var apiUrl = `${QUIZMASTER_SET_GET_SET}/${setId}`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SET}${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: Set;
@@ -231,7 +231,7 @@ export async function fetchAllSetQuestions() {
 
 export async function fetchSetQuestions({ setId }: { setId: number }) {
     try {
-        var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}${setId}`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTION}${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionSet[];

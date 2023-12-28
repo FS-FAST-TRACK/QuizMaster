@@ -128,6 +128,11 @@ export type Set = {
     createdByUserId: number;
     updatedByUserId: number;
 };
+export type SetDTO = {
+    qSetDesc: string;
+    qSetName: string;
+    questions: number[];
+}
 export type QuestionSet = {
     questionId: number;
     setId: number;
