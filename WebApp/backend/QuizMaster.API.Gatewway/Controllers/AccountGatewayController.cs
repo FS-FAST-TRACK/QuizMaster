@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.JsonPatch;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Authentication.Models;
@@ -269,7 +271,7 @@ namespace QuizMaster.API.Gatewway.Controllers
 
         [QuizMasterAuthorization]
         [HttpPatch("account/update/{id}")]
-        public async Task<IActionResult> Update(int id, JsonPatchDocument<UserAccount> patch)
+        public async Task<IActionResult> Update(int id, JsonPatchDocument<AccountCreateDto> patch)
         {
             var info = await ValidateUserTokenAndGetInfo();
 
@@ -305,8 +307,39 @@ namespace QuizMaster.API.Gatewway.Controllers
             }
 
             var account = JsonConvert.DeserializeObject<UserAccount>(response.GetAccountByIdReply.Account);
+            var mappedAccount = _mapper.Map<AccountCreateDto>(account);
+            patch.ApplyTo(mappedAccount);
 
-            patch.ApplyTo(account);
+            _mapper.Map(mappedAccount, account);
+
+            #region checkUsername
+            var checkUsername = new CheckUserNameRequest
+            {
+                Username = account.UserName,
+                Id = id
+            };
+            var checkUserNameResponse = _channelClient.CheckUserName(checkUsername);
+
+            if (!checkUserNameResponse.IsAvailable)
+            {
+                return ReturnUserNameAlreadyExist();
+            }
+            #endregion
+
+            #region checkEmail
+            var checkEmail = new CheckEmailRequest
+            {
+                Email = account.Email,
+                Id = id
+            };
+
+            var emailResponse = await _channelClient.CheckEmailAsync(checkEmail);
+
+            if (!emailResponse.IsAvailable)
+            {
+                return ReturnEmailAlreadyExist();
+            }
+            #endregion
 
             if (!ModelState.IsValid)
             {
@@ -319,13 +352,13 @@ namespace QuizMaster.API.Gatewway.Controllers
             };
 
 
-            var updateReply = await _channelClient.UpdateAccountAsync(update, headers);
+            var updateReply = _channelClient.UpdateAccount(update, headers);
             if (updateReply.StatusCode == 500)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update user." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = updateReply.Message });
             }
 
-            return NoContent();
+            return Ok(new ResponseDto { Type = "Success", Message = updateReply.Message });
         }
 
         //[QuizMasterAdminAuthorization]
