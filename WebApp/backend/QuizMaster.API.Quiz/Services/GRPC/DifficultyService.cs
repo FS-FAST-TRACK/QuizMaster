@@ -204,7 +204,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 difficulty.ActiveData = false;
 
                 // Set updatedby userId and DateUpdated to latest
-                difficulty.DateUpdated = DateTime.UtcNow;
+                difficulty.DateUpdated = DateTime.Now;
                 difficulty.UpdatedByUserId = int.Parse(userId!);
 
                 var isSuccess = _quizRepository.UpdateDifficulty(difficulty);
@@ -339,7 +339,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
                 // Update other properties as needed
                 checkDifficultyId.UpdatedByUserId = int.Parse(userId!);
-                checkDifficultyId.DateUpdated = DateTime.UtcNow;
+                checkDifficultyId.DateUpdated = DateTime.Now;
 
                 var isSuccess = _quizRepository.UpdateDifficulty(checkDifficultyId);
 
@@ -448,7 +448,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 _mapper.Map(difficulty, difficultyFromRepo);
 
                 // udpate necessary properties
-                difficultyFromRepo.DateUpdated = DateTime.UtcNow;
+                difficultyFromRepo.DateUpdated = DateTime.Now;
                 difficultyFromRepo.UpdatedByUserId = int.Parse(userId!);
 
                 isSuccess = _quizRepository.UpdateDifficulty(difficultyFromRepo);
@@ -458,7 +458,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             {
                 difficultyFromRepo = _mapper.Map<QuestionDifficulty>(difficulty);
                 difficultyFromRepo.CreatedByUserId = int.Parse(userId!);
-                difficultyFromRepo.DateCreated = DateTime.UtcNow;
+                difficultyFromRepo.DateCreated = DateTime.Now;
 
                 isSuccess = await _quizRepository.AddDifficultyAsync(difficultyFromRepo);
             }

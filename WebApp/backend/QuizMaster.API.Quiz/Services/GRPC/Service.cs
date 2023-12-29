@@ -150,6 +150,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 reply.Code = 500;
                 reply.Content = ex.Message;
                 reply.Type = "string";
+                return reply;
             }
 
             // Check if category description already exist
@@ -158,8 +159,9 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             if (categoryFromRepo != null && categoryFromRepo.ActiveData)
             {
                 reply.Code = 409;
-                reply.Content = "Difficulty already exist";
+                reply.Content = "Category already exist";
                 reply.Type = "string";
+                return reply;
             }
 
             bool isSuccess;
@@ -172,7 +174,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 _mapper.Map(category, categoryFromRepo);
 
                 // udpate necessary properties
-                categoryFromRepo.DateUpdated = DateTime.UtcNow;
+                categoryFromRepo.DateUpdated = DateTime.Now;
                 categoryFromRepo.UpdatedByUserId = int.Parse(userId!);
 
                 isSuccess = _quizRepository.UpdateCategory(categoryFromRepo);
@@ -182,7 +184,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             {
                 categoryFromRepo = _mapper.Map<QuestionCategory>(category);
                 categoryFromRepo.CreatedByUserId = int.Parse(userId!);
-                categoryFromRepo.DateCreated = DateTime.UtcNow;
+                categoryFromRepo.DateCreated = DateTime.Now;
 
                 isSuccess = await _quizRepository.AddCategoryAsync(categoryFromRepo);
             }
@@ -277,6 +279,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 reply.Code = 500;
                 reply.Content = ex.Message;
                 reply.Type = "string";
+                return reply;
             }
 
             var category = await _quizRepository.GetCategoryAsync(id);
@@ -300,7 +303,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 category.ActiveData = false;
 
                 // Set updatedby userId and DateUpdated to latest
-                category.DateUpdated = DateTime.UtcNow;
+                category.DateUpdated = DateTime.Now;
                 category.UpdatedByUserId = int.Parse(userId!);
 
                 var isSuccess = _quizRepository.UpdateCategory(category);
@@ -481,7 +484,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 if (existingCategory != null && existingCategory.Id != id)
                 {
                     reply.Code = 409;
-                    reply.Content = $"Difficulty \'{categoryPatch.QCategoryDesc}\' already exist.";
+                    reply.Content = $"Category \'{categoryPatch.QCategoryDesc}\' already exist.";
                     return reply;
                 }
 
@@ -492,7 +495,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
 
                 // Update other properties as needed
                 checkCategoryId.UpdatedByUserId = int.Parse(userId!);
-                checkCategoryId.DateUpdated = DateTime.UtcNow;
+                checkCategoryId.DateUpdated = DateTime.Now;
 
                 var isSuccess = _quizRepository.UpdateCategory(checkCategoryId);
 
