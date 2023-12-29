@@ -470,7 +470,7 @@ namespace QuizMaster.API.Quiz.Services.GRPC
                 reply.Content = "Failed to create difficulty.";
                 reply.Type = "string";
                 reply.Code = 500;
-
+                return reply;
             }
             reply.Content = JsonConvert.SerializeObject(difficultyFromRepo);
             reply.Type = "difficulty";

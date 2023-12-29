@@ -12,6 +12,7 @@ using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Models;
@@ -46,23 +47,44 @@ namespace QuizMaster.API.Gateway.Controllers
         /// </summary>
         /// <returns>Task<IActionResult></returns>
         [HttpGet("get_all_category")]
-        public async Task<IActionResult> GetAllCategory()
+        public async Task<IActionResult> GetAllCategory([FromQuery] CategoryResourceParameter resourceParameter)
         {
-            // create the request
-            var request = new Empty();
-
-            // get all the categories from the service
-            var response = _channelClient.GetAllQuizCatagory(request);
-
-            var categories = new List<GetAllQuizCatagoryResponse>();
-
-            // iterate through the response stream
-            while (await response.ResponseStream.MoveNext())
+            // Proccess Input
+            var request = new CategoryRequest()
             {
-                categories.Add(response.ResponseStream.Current);
+                Content = JsonConvert.SerializeObject(resourceParameter),
+                Type = "getAllCategoryRequest",
+            };
+
+
+            // Process Logic
+            if (resourceParameter.IsGetAll)
+            {
+                var response = await _channelClient.GetAllQuizCatagoryAsync(request);
+                var categories = JsonConvert.DeserializeObject<IEnumerable<QuestionCategory>>(response.Content);
+
+                return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categories));
             }
 
-            return Ok(categories);
+            var pagedResponse = await _channelClient.GetCategoriesAsync(request);
+
+            // Process output
+
+            try
+            {
+                var pagedCategories= JsonConvert.DeserializeObject<Tuple<IEnumerable<CategoryDto>, Dictionary<string, object?>>>(pagedResponse.Content);
+                Response.Headers.Add("X-Pagination",
+                       JsonConvert.SerializeObject(pagedCategories!.Item2));
+
+                Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
+
+                return Ok(pagedCategories.Item1);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
         }
 
         /// <summary>
@@ -73,22 +95,22 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpGet("get_category/{id}")]
         public async Task<IActionResult> GetCategory(int id)
         {
-            // create the request
-            var request = new GetCategoryByIdRequest
+            // Process Input
+            var request = new CategoryRequest
             {
-                Id = id
+                Id = id,
             };
 
-            // get the category from the service
+            // Process Logic
             var response = await _channelClient.GetCategoryByIdAsync(request);
 
-            // if category not found, return not found
-            if (response.CategoryNotFound != null)
+            // Process Output
+            if (response.Code == 404)
             {
-                return NotFound(response.CategoryNotFound);
+                return NotFound("Category not found");
             }
-
-            return Ok(response.GetCategoryByIdReply);
+            return Ok(_mapper.Map<CategoryDto>(JsonConvert.DeserializeObject<QuestionCategory>(response.Content)));
+            
         }
 
         /// <summary>
@@ -115,40 +137,30 @@ namespace QuizMaster.API.Gateway.Controllers
             var userName = info.UserData.UserName;
             var userId = info.UserData.Id;
             var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
-
-            // create the request
-            var request = new CreateCategoryRequest
-            {
-                QuizCategoryDesc = category.QCategoryDesc
-            };
             var headers = new Metadata
             {
                 { "username", userName ?? "unknown" },
                 { "id", userId.ToString() ?? "unknown" },
                 { "role", userRole }
             };
+            // Process Input
+            var request = new CategoryRequest
+            {
+                Content = JsonConvert.SerializeObject(category),
+                Type = "categoryCreateDto"
+            };
 
-            // check if category already exist
+            // Process Logic
             var response = await _channelClient.CreateCategoryAsync(request, headers);
 
-            // if the server response is other than 200
-            if (response.CreateCategoryFail != null)
+            // Process Output
+            if (response.Code == 500)
             {
-                // if the category already exist
-                if (response.CreateCategoryFail.Type == "409")
-                {
-                    return StatusCode(409, new
-                    {
-                        error = "Resource Already Exists",
-                        message = "The category you are trying to create already exists.",
-                        details = "A category with the same description already exists in the system."
-                    });
-                }
-                // if the service failed to create the category
-                return BadRequest(response.CreateCategoryFail);
+                return StatusCode(StatusCodes.Status500InternalServerError, response.Content);
             }
+            var createDifficulty = JsonConvert.DeserializeObject<QuestionCategory>(response.Content);
 
-            return Ok(response.CreatedCategoryReply);
+            return Ok(_mapper.Map<CategoryDto>(createDifficulty));
         }
 
         /// <summary>
@@ -175,7 +187,6 @@ namespace QuizMaster.API.Gateway.Controllers
             var userName = info.UserData.UserName;
             var userId = info.UserData.Id;
             var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
-
             var headers = new Metadata
             {
                 { "username", userName ?? "unknown" },
@@ -183,36 +194,21 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "role", userRole }
             };
 
-            // create the request to check if category exist
-            var request = new DeleteCategoryRequest
-            {
-                Id = id
-            };
+            // Process Input
+            var request = new CategoryRequest() { Id  = id };
+            
+            // Process Logic
+            var resposnse = await _channelClient.DeleteCategoryAsync(request, headers);
 
-            // call the service to check if category exist
-            var response = await _channelClient.DeleteCategoryAsync(request, headers);
-
-            // if category does not exist
-            if (response.Response == 404)
+            // Process Output
+            if (resposnse.Code == 404)
             {
-                return NotFound(new
-                {
-                    error = "Resource Not Found",
-                    message = "The category you are trying to delete does not exist.",
-                    details = "A category with the same id does not exist in the system."
-                });
+                return ReturnCategoryDoesNotExist(id);
             }
-
-            // if the service failed to delete the category
-            else if (response.Response == 500)
+            if (resposnse.Code == 500)
             {
-                return StatusCode(500, new
-                {
-                    error = "Internal Server Error",
-                    message = "Failed to delete category.",
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to delete category." });
             }
-
             return NoContent();
         }
 
@@ -247,69 +243,37 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "id", userId.ToString() ?? "unknown" },
                 { "role", userRole }
             };
-            // create the request to check if category exist
-            var request = new CheckCategoryOrActiveRequest
+
+            // Process Input
+            var request = new CategoryRequest()
             {
-                Id = id
+                Id = id,
+                Content = JsonConvert.SerializeObject( patch)
             };
 
-            // call service to check if category exist or is it still active
-            var result = await _channelClient.CheckCategoryOrActiveAsync(request);
-            var categoryFromRepo = result.CheckCategoryOrActiveFail == null ?
-                JsonConvert.DeserializeObject<QuestionCategory>(result.CheckCategoryOrActiveReply.Category)
-                : null;
+            // Process Logic
+            var response = await _channelClient.UpdateCategoryAsync(request, headers);
 
-            // if category does not exist or is not active
-            if (result.CheckCategoryOrActiveFail != null || !categoryFromRepo.ActiveData)
+            // Process Output
+            if (response.Code == 404)
             {
                 return ReturnCategoryDoesNotExist(id);
             }
 
-            // create the CategoryCreateDto to update category
-            var categoryForPatch = new CategoryCreateDto();
-            patch.ApplyTo(categoryForPatch);
-
-            if(!TryValidateModel(categoryForPatch))
-            {
-                return ReturnModelStateErrors();
-            }   
-
-            // create the request to check if category already exist
-            var checkCategory = new CheckCategoryNameRequest 
-            { QuizCategoryDesc = categoryForPatch.QCategoryDesc };
-
-            // call service if category already exist
-            var checkCategoryResult = await _channelClient.CheckCategoryNameAsync(checkCategory);
-
-            // if category already exist
-            if(checkCategoryResult.Status == "200")
+            if (response.Code == 409)
             {
                 return ReturnCategoryAlreadyExist();
             }
 
-            // map the CategoryCreateDto to QuestionCategory
-            _mapper.Map(categoryForPatch, categoryFromRepo);
-
-            // create request to update category
-            var update = new UpdateCategoryRequest
+            if (response.Code == 500)
             {
-                Category = JsonConvert.SerializeObject(categoryFromRepo),
-            };
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to update category." });
+            }
 
-            // call service to update category
-            var updateResult = await _channelClient.UpdateCategoryAsync(update,headers);
+            var updateCategory = JsonConvert.DeserializeObject<QuestionCategory>(response.Content);
 
-            // if service failed to update category
-            if(updateResult.StatusCode == 500)
-            {
-                return StatusCode(500, new
-                {
-                    error = "Internal Server Error",
-                    message = "Failed to update category.",
-                });
-            }  
+            return Ok(_mapper.Map<CategoryDto>(updateCategory));
 
-            return Ok(new { id = updateResult.Id, questionCategoryDesc = updateResult.QuizCategoryDesc });
         }
 
         // return if category does not exist
