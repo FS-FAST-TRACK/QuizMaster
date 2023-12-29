@@ -1,8 +1,9 @@
 import { Question, QuestionSet, Set } from "@/lib/definitions";
 import { fetchSetQuestions } from "@/lib/quizData";
+import { Button } from "@mantine/core";
 import { useEffect, useState } from "react";
 
-export default function QuesitonCard({ set }: { set?: Set }) {
+export default function SetCard({ set }: { set?: Set }) {
     const [questionsInSet, setQuestionsInSet] = useState<QuestionSet[]>([]);
 
     useEffect(() => {
