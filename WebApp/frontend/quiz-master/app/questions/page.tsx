@@ -125,7 +125,7 @@ export default function Page() {
                 }
                 setSelectedRow={() => null}
                 loading={visible}
-                callInQuestionsPage={true}
+                callInQuestionsPage="questions"
             />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>

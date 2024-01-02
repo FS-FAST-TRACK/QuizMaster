@@ -1,10 +1,11 @@
 import { CategoryCreateDto } from "@/components/Commons/modals/CreateCategoryModal";
 import { PatchItem } from "../definitions";
+import { QUIZMASTER_QCATEGORY_DELETE, QUIZMASTER_QCATEGORY_PATCH, QUIZMASTER_QCATEGORY_POST } from "@/api/api-routes";
 
 export async function removeCategory({ id }: { id: number }) {
     try {
         const { res } = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/category/${id}`,
+            `${QUIZMASTER_QCATEGORY_DELETE}/${id}`,
             {
                 method: "DELETE",
             }
@@ -29,7 +30,7 @@ export async function createCategory({
 }) {
     try {
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/category`,
+            `${QUIZMASTER_QCATEGORY_POST}`,
             {
                 method: "POST",
                 mode: "cors",
@@ -61,7 +62,7 @@ export async function patchCategory({
 }) {
     try {
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/category/${id}`,
+            `${QUIZMASTER_QCATEGORY_PATCH}${id}`,
             {
                 method: "PATCH",
                 mode: "cors",

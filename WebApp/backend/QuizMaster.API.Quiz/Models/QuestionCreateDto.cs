@@ -50,7 +50,7 @@ namespace QuizMaster.API.Quiz.Models
 					break;
 
 				case QuestionTypes.PuzzleSeedDataId:
-					errors += questionDetailCreateDtos.Where(qDetail => qDetail.DetailTypes.Contains("answer")).Count() < 2 ? "[Puzzle Question] Provide at least 2 answer for the given options.  " : "";
+					errors += questionDetailCreateDtos.Where(qDetail => qDetail.DetailTypes.Contains("option")).Count() < 2 ? "[Puzzle Question] Provide at least parameters for options in correct order.  " : "";
 					break;
 
 				case QuestionTypes.SliderSeedDataId:

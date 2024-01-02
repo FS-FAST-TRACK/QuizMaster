@@ -1,11 +1,12 @@
 import { CategoryCreateDto } from "@/components/Commons/modals/CreateCategoryModal";
 import { PatchItem } from "../definitions";
 import { DifficultyCreateDto } from "@/components/Commons/modals/CreateDifficultyModal";
+import { QUIZMASTER_QDIFFICULTY_DELETE, QUIZMASTER_QDIFFICULTY_PATCH, QUIZMASTER_QDIFFICULTY_POST } from "@/api/api-routes";
 
 export async function removeDifficulty({ id }: { id: number }) {
     try {
         const { res } = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty/${id}`,
+            `${QUIZMASTER_QDIFFICULTY_DELETE}/${id}`,
             {
                 method: "DELETE",
             }
@@ -30,7 +31,7 @@ export async function createDifficulty({
 }) {
     try {
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`,
+            `${QUIZMASTER_QDIFFICULTY_POST}`,
             {
                 method: "POST",
                 mode: "cors",
@@ -62,7 +63,7 @@ export async function patchDifficulty({
 }) {
     try {
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty/${id}`,
+            `${QUIZMASTER_QDIFFICULTY_PATCH}${id}`,
             {
                 method: "PATCH",
                 mode: "cors",

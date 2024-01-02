@@ -2,12 +2,13 @@ import { Question } from "@/lib/definitions";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
     Box,
     Checkbox,
     Loader,
     LoadingOverlay,
+    Popover,
     Table,
     Text,
 } from "@mantine/core";
@@ -23,6 +24,7 @@ import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
 import QuestionModal from "../modals/ViewQuestionModal";
 import ViewQuestionModal from "../modals/ViewQuestionModal";
+import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
 
 export default function QuestionTable({
     questions,
@@ -35,7 +37,7 @@ export default function QuestionTable({
     message?: string;
     setSelectedRow: Dispatch<SetStateAction<number[]>>;
     loading: boolean;
-    callInQuestionsPage: boolean | false;
+    callInQuestionsPage: string | "";
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
@@ -55,7 +57,7 @@ export default function QuestionTable({
 
     const handelDelete = useCallback(async () => {
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${deleteQuestion?.id}`,
+            `${QUIZMASTER_QUESTION_DELETE}/${deleteQuestion?.id}`,
             {
                 method: "DELETE",
             }
@@ -100,7 +102,7 @@ export default function QuestionTable({
             <Table.Td>
                 {getQuestionDifficultyDescription(question.qDifficultyId)}
             </Table.Td>
-            {callInQuestionsPage && (
+            {callInQuestionsPage === "questions" ? (
                 <Table.Td>
                     <QuesitonAction
                         questionId={question.id}
@@ -109,7 +111,28 @@ export default function QuestionTable({
                         }}
                     />
                 </Table.Td>
-            )}
+            ) : callInQuestionsPage === "set" ? (
+                <Table.Td>
+                    <Popover width={140} zIndex={10} position="bottom">
+                        <Popover.Target>
+                            <div className="cursor-pointer flex items-center justify-center aspect-square">
+                                <EllipsisVerticalIcon className="w-6" />
+                            </div>
+                        </Popover.Target>
+                        <Popover.Dropdown p={10} className="space-y-3">
+                            <button
+                                className="flex w-full p-2 gap-2 text-[var(--error)] rounded-lg hover:text-white hover:bg-[var(--error)]   "
+                                onClick={() => {
+                                    setSelectedRow([question.id]);
+                                }}
+                            >
+                                <TrashIcon className="w-6" />
+                                <div>Remove</div>
+                            </button>
+                        </Popover.Dropdown>
+                    </Popover>
+                </Table.Td>
+            ) : null}
         </Table.Tr>
     ));
 

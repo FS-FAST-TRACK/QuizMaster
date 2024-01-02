@@ -1,31 +1,52 @@
-import {
-    Question,
-    QuestionCategory,
-    QuestionSet,
-    Set,
-} from "@/lib/definitions";
-import { fetchQuestionsInSet, fetchSetQuestions } from "@/lib/quizData";
+import { QuestionSet, Set } from "@/lib/definitions";
+import { fetchAllSetQuestions } from "@/lib/quizData";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Checkbox, Loader, Table } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Checkbox, Loader, Table, Text } from "@mantine/core";
+import {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
+import SetAction from "../popover/SetAction";
+import PromptModal from "../modals/PromptModal";
+import SetCard from "../cards/SetCard";
 
 export default function QuestionSetsTable({
     questionSets,
+    refreshData,
     message,
 }: {
     questionSets: Set[];
+    refreshData: (refreshData: boolean) => void;
     message?: string;
 }) {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [questionsSet, setQuestionsSet] = useState<QuestionSet[]>([]);
+    const [deleteSet, setDeleteSet] = useState<Set>();
 
     useEffect(() => {
         setSelectedRows([]);
 
-        fetchSetQuestions().then((res) => {
+        fetchAllSetQuestions().then((res) => {
             setQuestionsSet(res);
         });
     }, [questionSets]);
+
+    const handelDelete = useCallback(async () => {
+        const res = await fetch(
+            `${process.env.QUIZMASTER_GATEWAY}/set/delete_set/${deleteSet?.id}`,
+            {
+                method: "DELETE",
+            }
+        );
+
+        if (res.status === 200) {
+            setDeleteSet(undefined);
+            refreshData(true);
+        }
+    }, [deleteSet]);
 
     const rows = questionSets.map((questionSet) => {
         const count = questionsSet.filter(
@@ -61,9 +82,12 @@ export default function QuestionSetsTable({
                 <Table.Td>{questionSet.dateUpdated.toDateString()}</Table.Td>
                 <Table.Td>{count.length}</Table.Td>
                 <Table.Td>
-                    <div className="cursor-pointer flex items-center justify-center aspect-square">
-                        <EllipsisVerticalIcon className="w-6" />
-                    </div>
+                    <SetAction
+                        setId={questionSet.id}
+                        onDelete={() => {
+                            setDeleteSet(questionSet);
+                        }}
+                    />
                 </Table.Td>
             </Table.Tr>
         );
@@ -117,6 +141,26 @@ export default function QuestionSetsTable({
                     )}
                 </Table.Tbody>
             </Table>
+
+            <PromptModal
+                body={
+                    <div className="p-3">
+                        <Text size="xl" fw={700}>
+                            Are you sure want to delete this set?
+                        </Text>
+                        <Text>You are about to delete this set:</Text>
+                        <br />
+                        <SetCard set={deleteSet} />
+                    </div>
+                }
+                action="Delete"
+                onConfirm={handelDelete}
+                opened={deleteSet ? true : false}
+                onClose={() => {
+                    setDeleteSet(undefined);
+                }}
+                title="Delete Set"
+            />
         </div>
     );
 }

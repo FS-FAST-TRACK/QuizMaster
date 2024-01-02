@@ -36,6 +36,7 @@ export default function Page() {
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
+    const [refreshData, setRefreshData] = useState<Boolean>(false);
 
     const form = useForm<ResourceParameter>({
         initialValues: {
@@ -50,7 +51,10 @@ export default function Page() {
         questionsFetch.then((res) => {
             setQuestionSets(res);
         });
-    }, [form.values]);
+        if (refreshData) {
+            setRefreshData(false);
+        }
+    }, [form.values, refreshData]);
 
     const handleSearch = useCallback(() => {
         form.setFieldValue("searchQuery", searchQuery);
@@ -87,6 +91,7 @@ export default function Page() {
             </div>
             <SetsTable
                 questionSets={questionSets}
+                refreshData={() => setRefreshData(true)}
                 message={
                     form.values.searchQuery
                         ? `No question sets match \"${form.values.searchQuery}\"`

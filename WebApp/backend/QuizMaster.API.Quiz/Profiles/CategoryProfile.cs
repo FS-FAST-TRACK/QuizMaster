@@ -8,8 +8,8 @@ namespace QuizMaster.API.Quiz.Profiles
 	{
 		public CategoryProfile()
 		{
-			CreateMap<QuestionCategory, CategoryDto>().ForMember(destination => destination.DateCreated, act => act.Ignore()).ForMember(destination => destination.DateUpdated, act => act.Ignore());
-			CreateMap<CategoryCreateDto, QuestionCategory>();
+			CreateMap<QuestionCategory, CategoryDto>().ReverseMap();
+			CreateMap<CategoryCreateDto, QuestionCategory>().ReverseMap();
 		}
 	}
 }
