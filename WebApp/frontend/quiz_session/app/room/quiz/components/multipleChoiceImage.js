@@ -17,7 +17,7 @@ export default function MultipleChoiceAudio() {
       >
         <Image src={lifo} alt="LIFO diagram" />
       </Modal>
-      <div className="flex flex-col items-center h-1/2 bg-green-500">
+      <div className="flex flex-col items-center  flex-grow">
         <div className="text-white">Multiple Choice</div>
         <div className="text-white text-2xl font-bold flex flex-wrap text-center ">
           Which data structure is typically used to implement a

@@ -19,6 +19,7 @@
     "react": "^18",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18",
+    "tailwind-scrollbar-hide": "^1.1.7",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

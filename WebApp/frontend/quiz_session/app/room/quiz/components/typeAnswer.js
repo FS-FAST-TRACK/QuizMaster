@@ -3,7 +3,7 @@ import { Button, Input } from "@mantine/core";
 
 export default function TypeAnswer({ question }) {
   return (
-    <div className="w-full flex flex-col h-full  items-center bg-green-500 flex-grow p-5">
+    <div className="w-full flex flex-col h-full  items-center flex-grow p-5">
       <div className="flex flex-col items-center h-96 justify-center ">
         <div className="text-white">Type Answer</div>
         <div className="text-white text-2xl font-bold flex flex-wrap text-center  ">

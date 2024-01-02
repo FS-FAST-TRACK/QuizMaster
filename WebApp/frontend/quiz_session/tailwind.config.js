@@ -17,8 +17,10 @@ module.exports = {
         gold: "#FCE549",
         silver: "#E2E2E2",
         bronze: "#E9A67B",
+        dark_green: "#148E42",
       },
     },
   },
+
   plugins: [],
 };
