@@ -9,7 +9,6 @@ export default function SetCard({ set }: { set?: Set }) {
     useEffect(() => {
         if (set) {
             fetchSetQuestions({ setId: set.id }).then((res) => {
-                console.log(res);
                 setQuestionsInSet(res);
             });
         }

@@ -220,7 +220,8 @@ export default function Page({ params }: { params: { id: number } }) {
                         disabled={
                             (formValues.values.qSetName ===
                                 originalSetDetails?.qSetName &&
-                                noChanges) ||
+                                noChanges &&
+                                questionSet.length === originalQIds.length) ||
                             questionSet.length === 0 ||
                             formValues.values.qSetName === ""
                         }

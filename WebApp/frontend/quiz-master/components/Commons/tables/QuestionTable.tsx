@@ -48,6 +48,9 @@ export default function QuestionTable({
     const [viewQuestion, setViewQuestion] = useState<Question | undefined>();
 
     useEffect(() => {
+        console.log(callInQuestionsPage);
+    }, []);
+    useEffect(() => {
         setSelectedRows([]);
     }, [questions]);
 
@@ -213,7 +216,7 @@ export default function QuestionTable({
                     setViewQuestion(undefined);
                 }}
                 question={viewQuestion}
-                callInQuestionsPage="question"
+                callInQuestionsPage={callInQuestionsPage}
             />
         </div>
     );
