@@ -8,14 +8,17 @@ export async function postQuestionSet({
 }) {
     try {
         // Post Question
+        const token = localStorage.getItem("token");//just temporary
         const res = await fetch(
             `${QUIZMASTER_SET_POST}`,
             {
                 method: "POST",
                 mode: "cors",
                 body: JSON.stringify(questionSet),
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
             }
         );
@@ -38,6 +41,7 @@ export async function updateQuestionSet({
     questionSet: SetDTO;
 }) {
     try {
+        const token = localStorage.getItem("token");//just temporary
         // Post Question
         const res = await fetch(
             `${QUIZMASTER_SET_PUT}${id}`,
@@ -47,6 +51,7 @@ export async function updateQuestionSet({
                 body: JSON.stringify(questionSet),
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
             }
         );
