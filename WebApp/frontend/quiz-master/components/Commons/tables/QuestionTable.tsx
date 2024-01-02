@@ -213,7 +213,7 @@ export default function QuestionTable({
                     setViewQuestion(undefined);
                 }}
                 question={viewQuestion}
-                callInQuestionsPage={callInQuestionsPage}
+                callInQuestionsPage="question"
             />
         </div>
     );
