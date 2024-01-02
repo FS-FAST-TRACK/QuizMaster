@@ -28,6 +28,15 @@ export default function Header() {
       console.log(question.remainingTime);
     });
   }, []);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
+  };
   return (
     <div className="px-5 pt-2 w-full">
       <div className="flex flex-row  w-full">
@@ -43,7 +52,9 @@ export default function Header() {
         </div>
         <div className="flex items-end flex-col w-full">
           <div className="text-white">Time left</div>
-          <div className="text-2xl font-bold text-white">00:{time}</div>
+          <div className="text-2xl font-bold text-white">
+            {formatTime(time)}
+          </div>
         </div>
       </div>
     </div>

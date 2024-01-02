@@ -11,6 +11,15 @@ import { useConnectionId } from "@/app/util/store";
 import user from "@/public/icons/user.png";
 import Image from "next/image";
 import Leaderboard from "./leaderboard";
+import DragAndDrop from "./dragAndDrop";
+import dynamic from "next/dynamic";
+
+const DynamicDragAndDrop = dynamic(
+  () => import("@/app/room/quiz/components/dragAndDrop"),
+  {
+    ssr: false,
+  }
+);
 
 export default function Question() {
   const { connection } = useConnection();
@@ -48,7 +57,7 @@ export default function Question() {
   }, []);
   return (
     <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow ">
-      {question?.question.qTypeId === 1 && !isShowLeader && (
+      {/* {question?.question.qTypeId === 1 && !isShowLeader && (
         <MulitpleChoice question={question} connectionId={connectionId} />
       )}
       {question?.question.qTypeId === 3 && !isShowLeader && (
@@ -57,7 +66,7 @@ export default function Question() {
       {question?.question.qTypeId === 4 && !isShowLeader && (
         <TypeAnswer question={question} connectionId={connectionId} />
       )}
-      {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />}
+      {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />} */}
       {/* <MulitpleChoice question={question} /> */}
       {/* <MultipleChoiceAudio /> */}
       {/* <MulitpleChoice /> */}
@@ -69,6 +78,7 @@ export default function Question() {
           <div>{question.question.qStatement}</div>{" "}
         </>
       )} */}
+      <DynamicDragAndDrop />
     </div>
   );
 }
