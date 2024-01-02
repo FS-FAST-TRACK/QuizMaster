@@ -16,7 +16,7 @@ export default async function Home() {
                     <LogoutButton />
                 </div>
             ) : (
-                <LoginForm />
+                <LoginForm callbackUrl="/dashboard" />
             )}
         </main>
     );
