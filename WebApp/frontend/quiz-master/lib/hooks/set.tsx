@@ -1,25 +1,28 @@
 import { QUIZMASTER_SET_POST, QUIZMASTER_SET_PUT } from "@/api/api-routes";
-import { QuestionSetDTO } from "../definitions";
+import { QuestionSetDTO, SetDTO } from "../definitions";
 
 export async function postQuestionSet({
     questionSet
 }: {
-    questionSet: QuestionSetDTO;
+    questionSet: SetDTO;
 }) {
     try {
         // Post Question
+        const token = localStorage.getItem("token");//just temporary
         const res = await fetch(
             `${QUIZMASTER_SET_POST}`,
             {
                 method: "POST",
                 mode: "cors",
                 body: JSON.stringify(questionSet),
+                credentials: 'include',
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
             }
         );
-
+            console.log(res);
         if (res.status === 200) {
             return res;
         } else {
@@ -35,18 +38,20 @@ export async function updateQuestionSet({
     questionSet,
 }: {
     id: number;
-    questionSet: QuestionSetDTO;
+    questionSet: SetDTO;
 }) {
     try {
+        const token = localStorage.getItem("token");//just temporary
         // Post Question
         const res = await fetch(
             `${QUIZMASTER_SET_PUT}${id}`,
             {
-                method: "PUT",
+                method: "PATCH",
                 mode: "cors",
                 body: JSON.stringify(questionSet),
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
             }
         );

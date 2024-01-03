@@ -13,7 +13,7 @@ using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
-using QuizMaster.API.Gateway.Helper;
+using QuizMaster.API.Gateway.Attributes;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Models;
 

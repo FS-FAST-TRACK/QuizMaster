@@ -12,6 +12,7 @@ import {
 import SetAction from "../popover/SetAction";
 import PromptModal from "../modals/PromptModal";
 import SetCard from "../cards/SetCard";
+import ViewSetModal from "../modals/ViewSetModal";
 
 export default function QuestionSetsTable({
     questionSets,
@@ -25,6 +26,7 @@ export default function QuestionSetsTable({
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [questionsSet, setQuestionsSet] = useState<QuestionSet[]>([]);
     const [deleteSet, setDeleteSet] = useState<Set>();
+    const [viewSet, setViewSet] = useState<Set | undefined>();
 
     useEffect(() => {
         setSelectedRows([]);
@@ -77,7 +79,12 @@ export default function QuestionSetsTable({
                         }
                     />
                 </Table.Td>
-                <Table.Td>{questionSet.qSetName}</Table.Td>
+                <Table.Td
+                    className="cursor-pointer"
+                    onClick={() => setViewSet(questionSet)}
+                >
+                    {questionSet.qSetName}
+                </Table.Td>
                 <Table.Td>{questionSet.dateCreated.toDateString()}</Table.Td>
                 <Table.Td>{questionSet.dateUpdated.toDateString()}</Table.Td>
                 <Table.Td>{count.length}</Table.Td>
@@ -160,6 +167,13 @@ export default function QuestionSetsTable({
                     setDeleteSet(undefined);
                 }}
                 title="Delete Set"
+            />
+            <ViewSetModal
+                opened={viewSet !== undefined}
+                onClose={() => {
+                    setViewSet(undefined);
+                }}
+                set={viewSet}
             />
         </div>
     );

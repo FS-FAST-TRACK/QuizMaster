@@ -48,6 +48,9 @@ export default function QuestionTable({
     const [viewQuestion, setViewQuestion] = useState<Question | undefined>();
 
     useEffect(() => {
+        console.log(callInQuestionsPage);
+    }, []);
+    useEffect(() => {
         setSelectedRows([]);
     }, [questions]);
 
