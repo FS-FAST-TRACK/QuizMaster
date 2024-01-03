@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaster.API.QuizSession.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class QuizSesssion_InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QCategoryDesc = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -40,13 +40,37 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QDifficultyDesc = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Difficulties", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuizParticipants",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    QParticipantDesc = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    QRoomId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Score = table.Column<int>(type: "INTEGER", nullable: false),
+                    QStartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    QEndDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    QStatus = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuizParticipants", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -63,7 +87,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     HostId = table.Column<int>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -83,7 +107,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     RoomOptions = table.Column<string>(type: "TEXT", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -102,7 +126,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QSetDesc = table.Column<string>(type: "TEXT", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -121,43 +145,13 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QDetailRequired = table.Column<bool>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Types", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "QuizParticipants",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    QParticipantDesc = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    QRoomId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Score = table.Column<int>(type: "INTEGER", nullable: false),
-                    QStartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    QEndDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    QStatus = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuizParticipants", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_QuizParticipants_QuizRooms_QRoomId",
-                        column: x => x.QRoomId,
-                        principalTable: "QuizRooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -168,7 +162,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QRoomId = table.Column<int>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -196,15 +190,15 @@ namespace QuizMaster.API.QuizSession.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     QStatement = table.Column<string>(type: "TEXT", nullable: false),
-                    QImage = table.Column<string>(type: "TEXT", nullable: false),
-                    QAudio = table.Column<string>(type: "TEXT", nullable: false),
+                    QImage = table.Column<string>(type: "TEXT", nullable: true),
+                    QAudio = table.Column<string>(type: "TEXT", nullable: true),
                     QTime = table.Column<int>(type: "INTEGER", nullable: false),
                     QDifficultyId = table.Column<int>(type: "INTEGER", nullable: false),
                     QCategoryId = table.Column<int>(type: "INTEGER", nullable: false),
                     QTypeId = table.Column<int>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -241,7 +235,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QuestionId = table.Column<int>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -264,7 +258,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     SetId = table.Column<int>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -294,7 +288,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     DTypeDesc = table.Column<string>(type: "TEXT", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true),
                     QuestionDetailId = table.Column<int>(type: "INTEGER", nullable: true)
@@ -317,7 +311,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     DetailTypeId = table.Column<int>(type: "INTEGER", nullable: false),
                     ActiveData = table.Column<bool>(type: "INTEGER", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreatedByUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     UpdatedByUserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -343,14 +337,14 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QCategoryDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(644), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Science", null },
-                    { 2, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1192), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Movies", null },
-                    { 3, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1196), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Animals", null },
-                    { 4, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1197), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Places", null },
-                    { 5, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1198), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "People", null },
-                    { 6, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1201), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "System Operations and Maintenance", null },
-                    { 7, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1202), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Data Structures", null },
-                    { 8, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 995, DateTimeKind.Local).AddTicks(1202), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Algorithms", null }
+                    { 1, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9140), null, "Science", null },
+                    { 2, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9527), null, "Movies", null },
+                    { 3, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9529), null, "Animals", null },
+                    { 4, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9530), null, "Places", null },
+                    { 5, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9531), null, "People", null },
+                    { 6, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9534), null, "System Operations and Maintenance", null },
+                    { 7, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9535), null, "Data Structures", null },
+                    { 8, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9536), null, "Algorithms", null }
                 });
 
             migrationBuilder.InsertData(
@@ -358,14 +352,14 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DTypeDesc", "DateCreated", "DateUpdated", "QuestionDetailId", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, false, 0, "Answer", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 2, false, 0, "Option", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 3, false, 0, "Minimum", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 4, false, 0, "Maximum", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 5, false, 0, "Interval", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 6, false, 0, "Margin", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 7, false, 0, "TextToAudio", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null },
-                    { 8, false, 0, "Language", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null }
+                    { 1, false, 0, "Answer", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 2, false, 0, "Option", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 3, false, 0, "Minimum", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 4, false, 0, "Maximum", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 5, false, 0, "Interval", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 6, false, 0, "Margin", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 7, false, 0, "TextToAudio", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null },
+                    { 8, false, 0, "Language", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -373,9 +367,9 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QDifficultyDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 994, DateTimeKind.Local).AddTicks(6502), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Easy", null },
-                    { 2, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 994, DateTimeKind.Local).AddTicks(7087), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Average", null },
-                    { 3, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 994, DateTimeKind.Local).AddTicks(7123), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Difficult", null }
+                    { 1, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(5953), null, "Easy", null },
+                    { 2, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(6427), null, "Average", null },
+                    { 3, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(6455), null, "Difficult", null }
                 });
 
             migrationBuilder.InsertData(
@@ -383,12 +377,12 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QDetailRequired", "QTypeDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 991, DateTimeKind.Local).AddTicks(6950), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Multiple Choice", null },
-                    { 2, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 993, DateTimeKind.Local).AddTicks(5021), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Multiple Choice + Audio", null },
-                    { 3, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 993, DateTimeKind.Local).AddTicks(5031), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, "True or False", null },
-                    { 4, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 993, DateTimeKind.Local).AddTicks(5032), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Type Answer", null },
-                    { 5, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 993, DateTimeKind.Local).AddTicks(5034), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Slider", null },
-                    { 6, true, 1, new DateTime(2023, 12, 12, 22, 18, 11, 993, DateTimeKind.Local).AddTicks(5035), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Puzzle", null }
+                    { 1, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 165, DateTimeKind.Local).AddTicks(7759), null, true, "Multiple Choice", null },
+                    { 2, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4925), null, true, "Multiple Choice + Audio", null },
+                    { 3, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4932), null, false, "True or False", null },
+                    { 4, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4934), null, true, "Type Answer", null },
+                    { 5, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4935), null, true, "Slider", null },
+                    { 6, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4935), null, true, "Puzzle", null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -425,11 +419,6 @@ namespace QuizMaster.API.QuizSession.Migrations
                 name: "IX_QuestionSets_SetId",
                 table: "QuestionSets",
                 column: "SetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuizParticipants_QRoomId",
-                table: "QuizParticipants",
-                column: "QRoomId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SetQuizRooms_QRoomId",

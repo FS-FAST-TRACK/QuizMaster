@@ -9,6 +9,7 @@ using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.API.Quiz.Services.Workers;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 using QuizMaster.Library.Common.Models;
 using System.Text.Json;
 
@@ -43,19 +44,11 @@ namespace QuizMaster.API.Quiz.Controllers
 			// Get all active questions asynchronously
 			var questions = await _quizRepository.GetAllQuestionsAsync(resourceParameter);
 
-			var paginationMetadata = new Dictionary<string, object?>
-				{
-					{ "totalCount", questions.TotalCount },
-					{ "pageSize", questions.PageSize },
-					{ "currentPage", questions.CurrentPage },
-					{ "totalPages", questions.TotalPages },
-					{ "previousPageLink", questions.HasPrevious ?
+			var paginationMetadata= questions.GeneratePaginationMetadata(questions.HasPrevious ?
 						Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
-						: null },
-					{ "nextPageLink", questions.HasNext ?
+						: null, questions.HasNext ?
 						Url.Link("GetQuestions", resourceParameter.GetObject("next"))
-						: null }
-				};
+						: null);
 
 			Response.Headers.Add("X-Pagination",
 				   JsonSerializer.Serialize(paginationMetadata));

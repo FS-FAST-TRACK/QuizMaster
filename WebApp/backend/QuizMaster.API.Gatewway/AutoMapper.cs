@@ -25,6 +25,7 @@ namespace QuizMaster.API.Gatewway
             CreateMap<TypeReply, TypeDto>().ReverseMap();
             CreateMap<Question, QuestionDto>().ReverseMap();
             CreateMap<Question, QuestionDto>();
+            CreateMap<QuestionCategory, CategoryDto>().ReverseMap();
     //        CreateMap<QuestionCreateDto, Question>()
     //.ForMember(destination => destination.QAnswer, act => act.MapFrom(src =>
     //src.QTypeId == QuestionTypes.MultipleChoiceSeedData.Id

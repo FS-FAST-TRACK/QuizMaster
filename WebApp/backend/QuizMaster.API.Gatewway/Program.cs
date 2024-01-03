@@ -26,7 +26,7 @@ builder.Services.AddLogging();
 builder.Services.AddSignalR();
 builder.Services.AddCors(o => 
     o.AddDefaultPolicy(builder => 
-    builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+    builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 builder.Services.AddScoped<SessionHub>();
 builder.Services.AddSingleton<SessionHandler>();
@@ -133,7 +133,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors();
+
+app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+
 app.MapControllers();
 app.MapHub<SessionHub>("/gateway/hub/session");
 
