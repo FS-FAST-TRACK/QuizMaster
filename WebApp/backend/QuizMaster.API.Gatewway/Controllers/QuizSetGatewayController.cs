@@ -7,18 +7,20 @@ using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.Text.RegularExpressions;
 using System.Threading.Channels;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
     [ApiController]
-    [Route("gateway/api/set")]
+    [Route("gateway/api")]
     public class QuizSetGatewayController : Controller
     {
         private readonly GrpcChannel _channel;
@@ -42,7 +44,8 @@ namespace QuizMaster.API.Gateway.Controllers
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
-        [HttpPost("create")]
+        [QuizMasterAdminAuthorization]
+        [HttpPost("set/create")]
         public async Task<IActionResult> CreateSet([FromBody] SetDTO setDTO)
         {
             var info = await ValidateUserTokenAndGetInfo();
@@ -83,14 +86,15 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<Set>( response.Data));
         }
 
-        [HttpPost("submitAnswer")]
+        [HttpPost("room/submitAnswer")]
         public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerDTO answerDTO)
         {
             string Message = await SessionHandler.SubmitAnswer(roomChannelClient, answerDTO.ConnectionId, answerDTO.QuestionId, answerDTO.Answer);
             return Ok(new {  Message });
         }
 
-        [HttpGet("all_set")]
+        [QuizMasterAdminAuthorization]
+        [HttpGet("set/all_set")]
         public async Task<IActionResult> GetAllSet()
         {
             var response = await _channelClient.GetAllQuizSetAsync(new QuizSetEmpty());
@@ -103,7 +107,8 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<Set[]>(response.Data));
         }
 
-        [HttpGet("{id}")]
+        [QuizMasterAdminAuthorization]
+        [HttpGet("set/{id}")]
         public async Task<IActionResult> GetSet(int id)
         {
             var request = new GetQuizSetRequest { Id = id };
@@ -118,7 +123,8 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<Set>(reply.Data));
         }
 
-        [HttpGet("all_question_set")]
+        [QuizMasterAdminAuthorization]
+        [HttpGet("set/all_question_set")]
         public async Task<IActionResult> GetAllQuestionSet()
         {
             var response = await _channelClient.GetAllQuestionSetAsync(new QuizSetEmpty());
@@ -129,7 +135,8 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(response.Data));
         }
 
-        [HttpGet("get_question_set/{id}")]
+        [QuizMasterAdminAuthorization]
+        [HttpGet("set/get_question_set/{id}")]
         public async Task<IActionResult> GetQuestionSet(int id)
         {
             var request = new GetQuizSetRequest { Id = id };
@@ -144,7 +151,8 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<QuestionSet[]>(reply.Data));
         }
 
-        [HttpPut("update_set/{id}")]
+        [QuizMasterAdminAuthorization]
+        [HttpPut("set/update_set/{id}")]
         public async Task<IActionResult> UpdateSet(int id, [FromBody] SetDTO setDTO)
         {
             var info = await ValidateUserTokenAndGetInfo();
@@ -182,7 +190,8 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(JsonConvert.DeserializeObject<Set>(reply.Data));
         }
 
-        [HttpDelete("delete_set/{id}")]
+        [QuizMasterAdminAuthorization]
+        [HttpDelete("set/delete_set/{id}")]
         public async Task<IActionResult> DeleteSet(int id)
         {
             var info = await ValidateUserTokenAndGetInfo();
@@ -268,6 +277,88 @@ namespace QuizMaster.API.Gateway.Controllers
             var authStore = await _authChannelClient.ValidateAuthenticationAsync(requestValidation);
 
             return !string.IsNullOrEmpty(authStore?.AuthStore) ? JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore) : null;
+        }
+
+        [QuizMasterAdminAuthorization]
+        [HttpPost("room/createRoom")]
+        public async Task<IActionResult> CreateRoom(CreateRoomDTO roomDTO)
+        {
+            var request = new CreateRoomRequest { Room = JsonConvert.SerializeObject(roomDTO) };
+            var reply = await roomChannelClient.CreateRoomAsync(request);
+
+            if (reply.Code == 200)
+            {
+                var quizRoom = JsonConvert.DeserializeObject<QuizRoom>(reply.Data);
+                return Created("createRoom", new { Message = "Room was created", Data = quizRoom });
+            }
+            return BadRequest(new { Message = "Failed to create room", gRPC_Reply = reply });
+        }
+
+        [QuizMasterAdminAuthorization]
+        [HttpGet("room/getAllRooms")]
+        public async Task<IActionResult> GetAllRoomsAsync()
+        {
+            try
+            {
+                var roomResponse = await roomChannelClient.GetAllRoomAsync(new RoomsEmptyRequest());
+
+                if (roomResponse.Code == 200)
+                {
+                    var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(roomResponse.Data);
+
+                    return Ok(new { Message = "Retrieved Rooms", Data = quizRooms });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "Failed to retrieve rooms: Error : " + ex.Message });
+            }
+
+            return Ok(new { Message = "No rooms to retrieve"});
+        }
+
+        [QuizMasterAdminAuthorization]
+        [HttpGet("room/getRoomByPin/{RoomPin}")]
+        public async Task<IActionResult> GetRoomByPinAsync(int RoomPin, bool isId = false)
+        {
+            try
+            {
+                var roomResponse = await roomChannelClient.GetAllRoomAsync(new RoomsEmptyRequest());
+
+                if (roomResponse.Code == 200)
+                {
+                    var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(roomResponse.Data);
+
+                    bool containsId = false;
+                    var room = new QuizRoom();
+                    foreach (QuizRoom rooms in quizRooms)
+                    {
+                        if ((rooms.QRoomPin == RoomPin && !isId) || (rooms.Id == RoomPin && isId))
+                        {
+                            room = rooms;
+                            containsId = true;
+                            break;
+                        }
+                    }
+
+                    if (containsId)
+                    {
+                        return Ok( new { Message = $"Retrieved Room {room.QRoomDesc}", Data = room });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "Failed to retrieve room: Error : " + ex.Message });
+            }
+            return Ok(new { Message = "No room to retrieve" });
+        }
+
+        [QuizMasterAdminAuthorization]
+        [HttpGet("room/getRoomById/{RoomId}")]
+        public async Task<IActionResult> GetRoomByIdAsync(int RoomId)
+        {
+            return await GetRoomByPinAsync(RoomId, true);
         }
     }
 }
