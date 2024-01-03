@@ -3,12 +3,25 @@ syntax = "proto3";
 option csharp_namespace = "QuizMaster.API.Quiz.Protos";
 
 service QuizDifficultyService{
-	rpc GetDificulties(EmptyDifficultyRequest) returns (stream DificultiesReply);
-	rpc GetDificulty(GetDificultyRequest) returns (DifficultyOrNotFound);
-	rpc	GetDifficultyByDesc(GetDifficultyByDescRequest) returns (DifficultyByDescResponse);
-	rpc CreateDifficulty(CreateDifficultyRequest) returns (CreateDifficultyResponse);
-	rpc DeleteDifficulty(GetDificultyRequest) returns (DeleteDifficultyReply);
-	rpc	UpdateDifficulty(UpdateDifficultyRequest) returns (UpdateDifficultyResponse);
+	rpc GetAllDifficulty(DifficultyRequest) returns (DifficultyResponse);
+	rpc GetDifficulties(DifficultyRequest) returns (DifficultyResponse);
+	rpc GetDifficulty(DifficultyRequest) returns (DifficultyResponse);
+	rpc	GetDifficultyByDesc(DifficultyRequest) returns (DifficultyResponse);
+	rpc CreateDifficulty(DifficultyRequest) returns (DifficultyResponse);
+	rpc DeleteDifficulty(DifficultyRequest) returns (DifficultyResponse);
+	rpc	UpdateDifficulty(DifficultyRequest) returns (DifficultyResponse);
+}
+
+message DifficultyRequest{
+	int32 id = 1;
+	string type = 2;
+	string content = 3;
+}
+
+message DifficultyResponse {
+	int32 code = 1;
+	string type = 2;
+	string content = 3; 
 }
 
 message EmptyDifficultyRequest{}

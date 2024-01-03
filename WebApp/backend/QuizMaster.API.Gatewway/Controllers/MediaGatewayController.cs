@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
-using QuizMaster.API.Gateway.Helper;
+using QuizMaster.API.Gateway.Attributes;
 using QuizMaster.API.Media.Models;
 using QuizMaster.API.Media.Proto;
 using QuizMaster.API.Media.Utility;

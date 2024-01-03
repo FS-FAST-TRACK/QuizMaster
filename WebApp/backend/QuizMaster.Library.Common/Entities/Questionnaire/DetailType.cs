@@ -12,7 +12,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 		public string DTypeDesc { get; set; }
 		public bool ActiveData { get ; set ; }
 		public DateTime DateCreated { get ; set ; }
-		public DateTime DateUpdated { get ; set ; }
+		public DateTime? DateUpdated { get ; set ; }
 		public int CreatedByUserId { get ; set ; }
 		public int? UpdatedByUserId { get ; set ; }
 	}

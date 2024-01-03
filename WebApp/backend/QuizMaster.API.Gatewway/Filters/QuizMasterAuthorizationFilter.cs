@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Grpc.Core;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using QuizMaster.API.Authentication.Helper;
 using QuizMaster.API.Authentication.Services.Auth;
 
-namespace QuizMaster.API.Gateway.Helper
+namespace QuizMaster.API.Gateway.Filters
 {
-    public class QuizMasterAuthorizationFilter: IAuthorizationFilter
+    public class QuizMasterAuthorizationFilter : IAuthorizationFilter
     {
         private readonly IAuthenticationServices _authenticationServices;
         public QuizMasterAuthorizationFilter(IAuthenticationServices authenticationServices)
@@ -16,10 +17,11 @@ namespace QuizMaster.API.Gateway.Helper
         {
             // Retrieve the user's principal from the HttpContext
             var principal = context.HttpContext.User;
+            string authType = context.HttpContext.Request.Headers.Authorization.ToString().Split(" ").Length > 1 ? "Token Based" : "Cookie Based";
 
-            if(principal.Identity == null)
+            if (principal.Identity == null)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new UnauthorizedObjectResult(new { Status = 401, Message = "Unauthorized, please login", AuthType = authType });
                 return;
             }
 
@@ -27,11 +29,13 @@ namespace QuizMaster.API.Gateway.Helper
             if (!principal.Identity.IsAuthenticated)
             {
                 // If not authenticated, try to check if there is a JWT token in the header
-                bool isJWTAuthenticated = IsJWTAuthenticated(context.HttpContext);
+                var (isJWTAuthenticated, Message, Status) = IsJWTAuthenticated(context.HttpContext);
                 if (!isJWTAuthenticated)
                 {
                     // if still not authorized, return unauthorized
-                    context.Result = new UnauthorizedResult();
+                    var result = new ObjectResult(new { Status, Message, AuthType = authType });
+                    result.StatusCode = Status;
+                    context.Result = result;
                 }
                 return;
             }
@@ -41,14 +45,14 @@ namespace QuizMaster.API.Gateway.Helper
 
             if (string.IsNullOrEmpty(tokenClaim))
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new UnauthorizedObjectResult(new { Status = 401, Message = "Unauthorized, please login", AuthType = authType });
                 return;
             }
 
             // Validate the token as needed
             if (!IsTokenValid(tokenClaim, context.HttpContext))
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new UnauthorizedObjectResult(new { Status = 401, Message = "Unauthorized, token expired", AuthType = authType });
             }
 
             if (!context.HttpContext.Items.ContainsKey("token"))
@@ -73,7 +77,7 @@ namespace QuizMaster.API.Gateway.Helper
             // If token is valid, return true; otherwise, return false.
             return true;
         }
-        private bool IsJWTAuthenticated(HttpContext context)
+        private (bool, string, int) IsJWTAuthenticated(HttpContext context)
         {
             try
             {
@@ -84,16 +88,16 @@ namespace QuizMaster.API.Gateway.Helper
 
                 // if auth store is null, the token specified failed to decode
                 if (authStore == null)
-                    return false;
+                    return (false, "Unauthorized,Invalid Token", 401);
 
                 context.Items["token"] = token;
 
-                return !authStore.IsExpired(); // If Is Authenticated, then it should not be Expired
+                return (!authStore.IsExpired(), authStore.IsExpired() ? "Unauthorized, Token expired" : "", 401); // If Is Authenticated, then it should not be Expired
             }
             catch
             {
                 // If error on splitting the token, return false
-                return false;
+                return (false, "Unauthorized, please login", 401);
             }
         }
     }

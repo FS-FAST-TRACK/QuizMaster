@@ -16,6 +16,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { notification } from "@/lib/notifications";
 import { useDisclosure } from "@mantine/hooks";
+import { QUIZMASTER_AUTH_POST_LOGIN } from "@/api/api-routes";
 
 const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
     const form = useForm({
@@ -35,22 +36,20 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
     const login = async (username: string, password: string) => {
         handlers.open();
         try {
-            const response = await fetch(
-                `${process.env.QUIZMASTER_GATEWAY}/gateway/api/auth/login`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({ username, password }),
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            const response = await fetch(`${QUIZMASTER_AUTH_POST_LOGIN}`, {
+                method: "POST",
+                body: JSON.stringify({ username, password }),
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
             const data = await response.json();
             console.log(data);
             // Sign In the user if response is with 200
             if (response.status < 300) {
+                localStorage.setItem("token", data.token); //this is just temporary.
                 await signIn("credentials", {
                     jwt: data.token,
                 });

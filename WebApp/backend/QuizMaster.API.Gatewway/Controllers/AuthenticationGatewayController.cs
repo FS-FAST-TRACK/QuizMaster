@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using QuizMaster.API.Authentication.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
-using QuizMaster.API.Gateway.Helper;
+using QuizMaster.API.Gateway.Attributes;
 using Microsoft.Extensions.Options;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.Library.Common.Models;

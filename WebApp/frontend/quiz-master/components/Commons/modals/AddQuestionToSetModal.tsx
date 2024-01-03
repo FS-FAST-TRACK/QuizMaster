@@ -67,7 +67,6 @@ export default function AddQuestionToSetModal({
     useEffect(() => {
         open();
         if (opened) {
-            console.log(questions);
             const fetchQuestion = fetchQuestions({
                 questionResourceParameter: {
                     ...form.values,
@@ -111,7 +110,7 @@ export default function AddQuestionToSetModal({
                     }
                     setSelectedRow={setSelectedRows}
                     loading={visible}
-                    callInQuestionsPage={false}
+                    callInQuestionsPage="modal"
                 />
                 <Pagination form={form} metadata={paginationMetadata} />
                 <div className="flex justify-end">

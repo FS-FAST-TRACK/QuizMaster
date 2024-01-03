@@ -1,3 +1,4 @@
+import { QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_QUESTION_PATCH, QUIZMASTER_QUESTION_POST } from "@/api/api-routes";
 import {
     PaginationMetadata,
     PatchItem,
@@ -12,7 +13,7 @@ export async function fetchQuestions({
     questionResourceParameter: QuestionResourceParameter;
 }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
+        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
         if (questionResourceParameter.filterByCategories.length !== 0) {
             apiUrl = apiUrl.concat(
                 `&filterByCategoriesId=${JSON.stringify(
@@ -63,7 +64,7 @@ export async function fetchQuestions({
 
 export async function fetchQuestion({ questionId }: { questionId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}`;
+        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTION}${questionId}`;
 
         const { data } = await fetch(apiUrl).then(async (res) => {
             var data: Question;
@@ -134,7 +135,7 @@ export async function postQuestion({
         }
 
         // Post Question
-        const res = await fetch(`${process.env.QUIZMASTER_QUIZ}/api/question`, {
+        const res = await fetch(`${QUIZMASTER_QUESTION_POST}`, {
             method: "POST",
             mode: "cors",
             body: JSON.stringify(question),
@@ -218,7 +219,7 @@ export async function patchQuestion({
 
         // Post Question
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${id}`,
+            `${QUIZMASTER_QUESTION_PATCH}/${id}`,
             {
                 method: "PATCH",
                 mode: "cors",

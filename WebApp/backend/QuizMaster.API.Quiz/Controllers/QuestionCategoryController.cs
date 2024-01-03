@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 using QuizMaster.Library.Common.Models;
 using System.Text.Json;
 
@@ -26,7 +28,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		}
 
 		// GET: api/question/category
-		[HttpGet]
+		[HttpGet(Name = "GetCategories")]
 		public async Task<ActionResult<IEnumerable<CategoryDto>>> Get([FromQuery] CategoryResourceParameter resourceParameter)
 		{
 			if (resourceParameter.IsGetAll)
@@ -38,21 +40,13 @@ namespace QuizMaster.API.Quiz.Controllers
 			// Get all active categories asynchronously
 			var categories = await _quizRepository.GetAllCategoriesAsync(resourceParameter);
 
-			var paginationMetadata = new Dictionary<string, object?>
-			{
-					{ "totalCount", categories.TotalCount },
-					{ "pageSize", categories.PageSize },
-					{ "currentPage", categories.CurrentPage },
-					{ "totalPages", categories.TotalPages },
-					{ "previousPageLink", categories.HasPrevious ?
-						Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
-					: null },
-					{ "nextPageLink", categories.HasNext ?
-						Url.Link("GetQuestions", resourceParameter.GetObject("next"))
-						: null }
-				};
+            var paginationMetadata = categories.GeneratePaginationMetadata(categories.HasPrevious ?
+                        Url.Link("GetCategories", resourceParameter.GetObject("prev"))
+                        : null, categories.HasNext ?
+                        Url.Link("GetCategories", resourceParameter.GetObject("next"))
+                        : null);
 
-			Response.Headers.Add("X-Pagination",
+            Response.Headers.Add("X-Pagination",
 				   JsonSerializer.Serialize(paginationMetadata));
 
 			Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");

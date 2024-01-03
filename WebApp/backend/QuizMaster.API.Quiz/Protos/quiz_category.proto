@@ -4,23 +4,42 @@ option csharp_namespace = "QuizMaster.API.Quiz.Protos";
 
 service QuizCategoryService{
 	// Get all category
-	rpc GetAllQuizCatagory(Empty) returns (stream GetAllQuizCatagoryResponse);
+	rpc GetAllQuizCatagory(CategoryRequest) returns (CategoryResponse);
+	// Get Paged Categories
+	rpc GetCategories(CategoryRequest) returns (CategoryResponse);
 	// Get category by id
-	rpc GetCategoryById(GetCategoryByIdRequest) returns (CategoryOrNotFound);
+	rpc GetCategoryById(CategoryRequest) returns (CategoryResponse);
 	// Create category
-	rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryOrFail);
+	rpc CreateCategory(CategoryRequest) returns (CategoryResponse);
 	// Delete category
-	rpc	DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryReply);
+	rpc	DeleteCategory(CategoryRequest) returns (CategoryResponse);
 	// Check category or active
-	rpc CheckCategoryOrActive(CheckCategoryOrActiveRequest) returns (CheckCategoryOrActiveOrFail);
+	rpc CheckCategoryOrActive(CategoryRequest) returns (CategoryResponse);
 	// Check category name
-	rpc CheckCategoryName(CheckCategoryNameRequest) returns (CheckCategoryNameReply);
+	rpc CheckCategoryName(CategoryRequest) returns (CategoryResponse);
 	// Update category
-	rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryReply);
+	rpc UpdateCategory(CategoryRequest) returns (CategoryResponse);
+}
+
+
+// General Category Request
+message CategoryRequest{
+	int32 id = 1;
+	string content = 2;
+	string type = 3;
+}
+
+// General Category Response
+message CategoryResponse{
+	int32 code = 1;
+	string content = 2;
+	string type = 3;
 }
 
 // empty request
 message Empty{}
+
+
 
 // Reply all category
 message GetAllQuizCatagoryResponse{

@@ -10,6 +10,7 @@ import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
 import QuestionModal from "../modals/ViewQuestionModal";
 import ViewQuestionModal from "../modals/ViewQuestionModal";
+import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
 
 export default function QuestionTable({
     questions,
@@ -32,7 +33,7 @@ export default function QuestionTable({
 
     const handelDelete = useCallback(async () => {
         const res = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${deleteQuestion?.id}`,
+            `${QUIZMASTER_QUESTION_DELETE}/${deleteQuestion?.id}`,
             {
                 method: "DELETE",
             }
@@ -157,6 +158,7 @@ export default function QuestionTable({
                     setViewQuestion(undefined);
                 }}
                 question={viewQuestion}
+                callInQuestionsPage="set"
             />
         </div>
     );

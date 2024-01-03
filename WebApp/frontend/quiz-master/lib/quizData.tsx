@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import {
     PaginationMetadata,
     Question,
@@ -11,6 +12,7 @@ import {
     QuestionSet,
     Set,
 } from "./definitions";
+import { QUIZMASTER_MEDIA_GET_DOWNLOAD, QUIZMASTER_QCATEGORY_GET_CATEGORIES, QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES, QUIZMASTER_QTYPE_GET_TYPES, QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_SET_GET_SET, QUIZMASTER_SET_GET_SETQUESTION, QUIZMASTER_SET_GET_SETQUESTIONS, QUIZMASTER_SET_GET_SETS } from "@/api/api-routes";
 
 export async function fetchQuestions({
     questionResourceParameter,
@@ -18,7 +20,7 @@ export async function fetchQuestions({
     questionResourceParameter: QuestionResourceParameter;
 }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
+        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
         if(questionResourceParameter.exludeQuestionsIds && questionResourceParameter.exludeQuestionsIds.length !== 0){
             apiUrl = apiUrl.concat(
                 `&exludeQuestionsIds=${JSON.stringify(
@@ -51,7 +53,7 @@ export async function fetchCategories(
     questionResourceParameter?: CategoryResourceParameter
 ) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/category`;
+        var apiUrl = `${QUIZMASTER_QCATEGORY_GET_CATEGORIES}`;
         if (questionResourceParameter) {
             apiUrl = apiUrl.concat(
                 `?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`
@@ -59,10 +61,11 @@ export async function fetchCategories(
         }
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionCategory[];
-            var paginationMetadata: PaginationMetadata;
+            var paginationMetadata: PaginationMetadata | null; 
             paginationMetadata = JSON.parse(
                 res.headers.get("x-pagination") || ""
             );
+           
             data = await res.json();
             data.forEach((cat) => {
                 cat.dateCreated = new Date(cat.dateCreated);
@@ -82,7 +85,7 @@ export async function fetchDifficulties(
     difficultyResourceParameter?: DifficultyResourceParameter
 ) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/difficulty`;
+        var apiUrl = `${QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES}`;
         if (difficultyResourceParameter) {
             apiUrl = apiUrl.concat(
                 `?pageSize=${difficultyResourceParameter.pageSize}&pageNumber=${difficultyResourceParameter.pageNumber}&searchQuery=${difficultyResourceParameter.searchQuery}`
@@ -112,7 +115,7 @@ export async function fetchDifficulties(
 export async function fetchTypes() {
     try {
         const data = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/type`
+            `${QUIZMASTER_QTYPE_GET_TYPES}`
         )
             .then((res) => res.json())
             .then((data) => {
@@ -129,7 +132,7 @@ export async function fetchTypes() {
 
 export async function fetchQuestion({ questionId }: { questionId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}`;
+        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTION}${questionId}`;
 
         const { data } = await fetch(apiUrl).then(async (res) => {
             var data: Question;
@@ -169,7 +172,7 @@ export async function fetchQuestionDetails({
 
 export async function fetchSets() {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_set`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SETS}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: Set[];
@@ -188,12 +191,12 @@ export async function fetchSets() {
     }
 }
 
-export async function fetchSetQuestions() {
+export async function fetchSet({ setId }: { setId: number }) {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/all_question_set`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SET}${setId}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
-            var data: QuestionSet[];
+            var data: Set;
             data = await res.json();
 
             return data;
@@ -205,17 +208,41 @@ export async function fetchSetQuestions() {
     }
 }
 
-export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
+export async function fetchAllSetQuestions() {
     try {
-        var apiUrl = `${process.env.QUIZMASTER_GATEWAY}/gateway/api/set/get_question_set/${qSetId}`;
+        var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
 
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionSet[];
             data = await res.json();
+            data.forEach((set) => {
+                set.dateCreated = new Date(set.dateCreated);
+                set.dateUpdated = new Date(set.dateUpdated);
+            });
 
             return data;
         });
-        console.log(data);
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question data.");
+    }
+}
+
+export async function fetchSetQuestions({ setId }: { setId: number }) {
+    try {
+        var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTION}${setId}`;
+
+        const data = await fetch(apiUrl).then(async (res) => {
+            var data: QuestionSet[];
+            data = await res.json();
+            data.forEach((set) => {
+                set.dateCreated = new Date(set.dateCreated);
+                set.dateUpdated = new Date(set.dateUpdated);
+            });
+
+            return data;
+        });
         return data;
     } catch (error) {
         console.error("Database Error:", error);
@@ -226,7 +253,7 @@ export async function fetchQuestionsInSet({ qSetId }: { qSetId: number }) {
 export async function fetchMedia(id: string) {
     try {
         const data = await fetch(
-            `${process.env.QUIZMASTER_MEDIA}/api/Media/download/${id}`
+            `${QUIZMASTER_MEDIA_GET_DOWNLOAD}${id}`
         )
             .then(async (res) => {
                 if (res.status === 404) {
