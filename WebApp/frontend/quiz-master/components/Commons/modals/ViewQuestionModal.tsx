@@ -70,7 +70,7 @@ export default function ViewQuestionModal({
                     questionId={question?.id}
                     questionTypeId={question?.qTypeId}
                 />
-                {callInQuestionsPage === "question" && (
+                {callInQuestionsPage === "questions" && (
                     <div className="flex justify-end">
                         <Button
                             variant="transparent"

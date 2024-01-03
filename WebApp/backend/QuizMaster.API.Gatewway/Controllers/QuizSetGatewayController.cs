@@ -53,12 +53,12 @@ namespace QuizMaster.API.Gateway.Controllers
 
             if (info == null)
             {
-                return NotFound(new { Message = "Invalid user information in the token" });
+                return Unauthorized(new { Message = "Invalid user information in the token" });
             }
 
             if (info == null || info.UserData == null)
             {
-                return NotFound(new { Message = "Invalid user information in the token" });
+                return Unauthorized(new { Message = "Invalid user information in the token" });
             }
 
             var userName = info.UserData.UserName;
@@ -160,12 +160,12 @@ namespace QuizMaster.API.Gateway.Controllers
 
             if (info == null)
             {
-                return NotFound(new { Message = "Invalid user information in the token" });
+                return Unauthorized(new { Message = "Invalid user information in the token" });
             }
 
             if (info == null || info.UserData == null)
             {
-                return NotFound(new { Message = "Invalid user information in the token" });
+                return Unauthorized(new { Message = "Invalid user information in the token" });
             }
 
             var userName = info.UserData.UserName;

@@ -67,7 +67,6 @@ export default function AddQuestionToSetModal({
     useEffect(() => {
         open();
         if (opened) {
-            console.log(questions);
             const fetchQuestion = fetchQuestions({
                 questionResourceParameter: {
                     ...form.values,
