@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
-using QuizMaster.API.Gateway.Helper;
+using QuizMaster.API.Gateway.Attributes;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.Quiz.Protos;
@@ -16,6 +16,7 @@ using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
+using QuizMaster.API.Gateway.Helper;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
