@@ -3,7 +3,8 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useConnection } from "@/app/util/store";
-import MultipleChoiceAudio from "./multipleChoiceImage";
+import MultipleChoiceAudio from "./multipleChoiceAudio";
+import MultipleChoiceImage from "./multipleChoiceImage";
 import MulitpleChoice from "./mulitpleChoice";
 import TrueOrFalse from "./trueOrFalse";
 import TypeAnswer from "./typeAnswer";
@@ -68,7 +69,7 @@ export default function Question() {
       )}
       {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />} */}
       {/* <MulitpleChoice question={question} /> */}
-      {/* <MultipleChoiceAudio /> */}
+      {/* <MultipleChoiceImage /> */}
       {/* <MulitpleChoice /> */}
       {/* <TrueOrFalse /> */}
       {/* <TypeAnswer /> */}
@@ -78,7 +79,8 @@ export default function Question() {
           <div>{question.question.qStatement}</div>{" "}
         </>
       )} */}
-      <DynamicDragAndDrop />
+      {/* <DynamicDragAndDrop /> */}
+      <MultipleChoiceAudio />
     </div>
   );
 }

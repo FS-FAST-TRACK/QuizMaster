@@ -15,11 +15,14 @@
     "@microsoft/signalr": "^8.0.0",
     "@tabler/icons": "^2.44.0",
     "@tabler/icons-react": "^2.44.0",
+    "file-loader": "^6.2.0",
     "next": "14.0.4",
     "react": "^18",
+    "react-audio-player": "^0.17.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18",
     "tailwind-scrollbar-hide": "^1.1.7",
+    "use-sound": "^4.0.1",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
