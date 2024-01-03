@@ -1,22 +1,24 @@
-﻿using QuizMaster.Library.Common.Entities.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using QuizMaster.Library.Common.Entities.Interfaces;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace QuizMaster.Library.Common.Entities.Rooms
 {
-	public class QuizParticipant : IEntity
+    public class QuizParticipant : IEntity
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int QParticipantId { get; set; }
+		public int Id { get; set; }
 
 		[Required]
 		[MaxLength(50)]
 		public string QParticipantDesc { get; set; }
 
-		[Required]
-		public QuizRoom QRoom { get; set; }
+		[AllowNull]
+		public int QRoomId { get; set; }
 
 		[Required]
 		public int UserId { get; set; }
@@ -25,10 +27,10 @@ namespace QuizMaster.Library.Common.Entities.Rooms
 		public int Score { get; set; }
 
 		[Required]
-		public DateTime QStartDate { get; set; }
+		public DateTime? QStartDate { get; set; } = null;
 
 		[AllowNull]
-		public DateTime QEndDate { get; set; }
+		public DateTime? QEndDate { get; set; } = null;
 
 		[Required]
 		public bool QStatus { get; set; } = false;
@@ -40,7 +42,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
 		public DateTime DateCreated { get; set; } = DateTime.Now;
 
 		[AllowNull]
-		public DateTime DateUpdated { get; set; }
+		public DateTime? DateUpdated { get; set; }
 
 		[Required]
 		public int CreatedByUserId { get; set; }

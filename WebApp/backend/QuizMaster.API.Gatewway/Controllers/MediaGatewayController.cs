@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Media.Models;
@@ -20,13 +22,20 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly MediaService.MediaServiceClient _channelClient;
         private readonly ILogger _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly GrpcChannel _authChannel;
+        private readonly AuthService.AuthServiceClient _authChannelClient;
 
         public MediaGatewayController(ILogger<MediaGatewayController> logger, IWebHostEnvironment webHostEnvironment, IOptions<GrpcServerConfiguration> options)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Media_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Media_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new MediaService.MediaServiceClient(_channel);
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
+            _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
         /// <summary>
@@ -38,6 +47,28 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] IFormFile File)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
             if (File == null)
                 return BadRequest(new { Message = "Form Data should not be null." });
 
@@ -59,7 +90,7 @@ namespace QuizMaster.API.Gateway.Controllers
             try
             {
                 // Call service to save media info
-                var response = await _channelClient.UploadMediaAsync(request);
+                var response = await _channelClient.UploadMediaAsync(request, headers);
 
                 // If failed save
                 if (response.StatusCode == 500)
@@ -191,8 +222,30 @@ namespace QuizMaster.API.Gateway.Controllers
         /// <returns>IActionResult</returns>
         [QuizMasterAuthorization]
         [HttpDelete("delete_media/{id}")]
-        public IActionResult DeleteMedia(string id)
+        public async Task<IActionResult> DeleteMedia(string id)
         {
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
             // check of id is valid guid
             if (!Guid.TryParse(id, out var Id))
                 return BadRequest(new { Message = "Id specified is invalid format." });
@@ -201,7 +254,7 @@ namespace QuizMaster.API.Gateway.Controllers
             var request = new GetMediaRequest() { Id = id };
 
             // call service to delete media
-            var response = _channelClient.DeleteMedia(request);
+            var response = _channelClient.DeleteMedia(request, headers);
 
             // if media not found
             if(response.StatusCode == 404)
@@ -223,6 +276,55 @@ namespace QuizMaster.API.Gateway.Controllers
 
             return Ok(new { Message = "File Deleted." });
                 
+        }
+        private async Task<AuthStore> ValidateUserTokenAndGetInfo()
+        {
+            string token = GetUserToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            var info = await GetAuthStoreInfo(token);
+
+            if (info == null || info.UserData == null)
+            {
+                return null;
+            }
+
+            return info;
+        }
+
+        private string GetUserToken()
+        {
+            var tokenClaim = User.Claims.FirstOrDefault(e => e.Type == "token");
+
+            if (tokenClaim != null)
+            {
+                return tokenClaim.Value;
+            }
+
+            try
+            {
+                return HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<AuthStore> GetAuthStoreInfo(string token)
+        {
+            var requestValidation = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(requestValidation);
+
+            return !string.IsNullOrEmpty(authStore?.AuthStore) ? JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore) : null;
         }
 
     }

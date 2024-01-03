@@ -11,6 +11,7 @@ service AccountService {
 	rpc CreateAccountPartial(CreateAccountPartialRquest) returns (CreateAccountReply);
 	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
 	rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountReply);
+	rpc SetAdminAccount(SetAccountAdminRequest) returns (SetAccountAdminResponse);
 }
  
 // Get account by id
@@ -56,6 +57,7 @@ message AllUserReply{
 // Request check username
 message CheckUserNameRequest {
 	string username = 1;
+	int32 id = 2;
 }
 
 // Reply check username
@@ -66,6 +68,7 @@ message CheckUserNameResponse{
 // Request check username
 message CheckEmailRequest {
 	string email = 1;
+	int32 id = 2;
 }
 
 // Reply check username
@@ -106,4 +109,15 @@ message UpdateAccountRequest{
 
 message UpdateAccountReply{
 	int32 statusCode = 1;
+	string message = 2;
+}
+
+message SetAccountAdminRequest{
+	string username = 1;
+	bool setAdmin  =2;
+}
+
+message SetAccountAdminResponse{
+	int32 code = 1;
+	string message = 2;
 }

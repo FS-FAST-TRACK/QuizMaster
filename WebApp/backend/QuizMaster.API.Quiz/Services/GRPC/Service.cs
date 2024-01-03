@@ -1,19 +1,29 @@
-﻿using Azure;
+﻿using AutoMapper;
 using Grpc.Core;
+using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json;
+using QuizMaster.API.Monitoring.Proto;
+using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers;
+using QuizMaster.Library.Common.Helpers.Quiz;
 
 namespace QuizMaster.API.Quiz.Services.GRPC
 {
     public class Service : QuizCategoryService.QuizCategoryServiceBase
     {
         private readonly IQuizRepository _quizRepository;
+        private readonly IMapper _mapper;
+        private readonly QuizAuditService.QuizAuditServiceClient _quizAuditServiceClient;
 
-        public Service(IQuizRepository quizRepository)
+        public Service(IQuizRepository quizRepository, IMapper mapper, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient)
         {
             _quizRepository = quizRepository;
+            _quizAuditServiceClient = quizAuditServiceClient;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -23,17 +33,52 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="responseStream"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task GetAllQuizCatagory(Empty request, IServerStreamWriter<GetAllQuizCatagoryResponse> responseStream, ServerCallContext context)
+        public override async Task<CategoryResponse> GetAllQuizCatagory(CategoryRequest request, ServerCallContext context)
         {
-            var reply = new GetAllQuizCatagoryResponse();
-            // get all the categories from the service
-            foreach(var categories in await _quizRepository.GetAllCategoriesAsync())
-            {
-                reply.Id = categories.Id;
-                reply.QuizCategoryDesc = categories.QCategoryDesc;
 
-                await responseStream.WriteAsync(reply);
+            var reply = new CategoryResponse();
+
+            var categories = await _quizRepository.GetAllCategoriesAsync();
+
+            reply.Content = JsonConvert.SerializeObject(categories);
+
+            reply.Code = 200;
+            reply.Type = "categories";
+            return reply;
+
+        }
+
+        public override async Task<CategoryResponse> GetCategories(CategoryRequest request, ServerCallContext context)
+        {
+            var reply = new CategoryResponse();
+
+            var resourceParameter = new CategoryResourceParameter();
+            try
+            {
+                resourceParameter = JsonConvert.DeserializeObject<CategoryResourceParameter>(request.Content);
+                if (resourceParameter == null)
+                {
+                    throw new Exception("GRPC request content cannot be deserialized in to Tuple<int, JsonPatchDocument<DifficultyCreateDto>>.");
+                }
             }
+            catch (Exception ex)
+            {
+                reply.Content = ex.Message;
+                reply.Code = 500;
+                reply.Type = "string";
+                return reply;
+            }
+
+            var categories = await _quizRepository.GetAllCategoriesAsync(resourceParameter);
+
+            var paginationMetadata = categories.GeneratePaginationMetadata(null, null);
+
+            reply.Content = JsonConvert.SerializeObject(new Tuple<IEnumerable<CategoryDto>, Dictionary<string, object?>>(categories, paginationMetadata));
+            reply.Code = 200;
+            reply.Type = "pagedCategories";
+
+
+            return reply;
         }
 
         /// <summary>
@@ -42,27 +87,37 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<CategoryOrNotFound> GetCategoryById(GetCategoryByIdRequest request, ServerCallContext context)
+        public override async Task<CategoryResponse> GetCategoryById(CategoryRequest request, ServerCallContext context)
         {
-            var success = new GetCategoryByIdReply();
-            var response = new CategoryOrNotFound();
+            var reply = new CategoryResponse();
+            int id = request.Id;
 
-            // check if category exist
-            var category = await _quizRepository.GetCategoryAsync(request.Id);
-            
-            if(category == null)
-            {
-                // if not exist return not found
-                response.CategoryNotFound = new CategoryNotFound() { Code = "404", Message = "Category not found" };
-            }
-            else
-            {
-               success.Id = category.Id;
-               success.QuizCategoryDesc = category.QCategoryDesc;
-               response.GetCategoryByIdReply = success;
-            }
 
-            return await Task.FromResult(response);
+            try
+            {
+                var category = await _quizRepository.GetCategoryAsync(id);
+
+                if (category == null || !category.ActiveData)
+                {
+                    reply.Code = 404;
+                    reply.Content = "Difficulty not found";
+                    reply.Type = "string";
+                }
+                else
+                {
+                    reply.Content = JsonConvert.SerializeObject(category);
+                    reply.Code = 200;
+                    reply.Type = "difficulty";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Content = ex.Message;
+                reply.Type = "string";
+            }
+            return reply;
         }
 
         /// <summary>
@@ -71,57 +126,130 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<CreateCategoryOrFail> CreateCategory(CreateCategoryRequest request, ServerCallContext context)
+        public override async Task<CategoryResponse> CreateCategory(CategoryRequest request, ServerCallContext context)
         {
-            var success = new CreatedCategoryReply();
-            var fail = new CreateCategoryFail();
-            var response = new CreateCategoryOrFail();
+            var reply = new CategoryResponse();
+            var category = new CategoryCreateDto();
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
 
-            // check if category already exist
-            var categoryFromRepo = await _quizRepository.GetCategoryAsync(request.QuizCategoryDesc);
-
-            if(categoryFromRepo != null && categoryFromRepo.ActiveData)
+            try
             {
-                // if category already exist  and active return fail
-                fail.Type = "409";
-                fail.Message = $"Category with description {request.QuizCategoryDesc} already exist.";
-                response.CreateCategoryFail = fail;
-                return await Task.FromResult(response);
+                category = JsonConvert.DeserializeObject<CategoryCreateDto>(request.Content);
+                if (category == null)
+                {
+                    throw new Exception("Failed to deserialize GRPC request content into CategoryCreateDto.");
+                }
+                if (userId == null)
+                {
+                    throw new Exception("Create category requires UserId to be not null.");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Content = ex.Message;
+                reply.Type = "string";
+                return reply;
+            }
+
+            // Check if category description already exist
+            var categoryFromRepo = await _quizRepository.GetCategoryAsync(category!.QCategoryDesc);
+
+            if (categoryFromRepo != null && categoryFromRepo.ActiveData)
+            {
+                reply.Code = 409;
+                reply.Content = "Category already exist";
+                reply.Type = "string";
+                return reply;
             }
 
             bool isSuccess;
 
-            // If category is not null and not active, we set active to true and update the category
-            if(categoryFromRepo != null && !categoryFromRepo.ActiveData)
+            // If category is not null and not active, we set active to true and update the categrory
+            if (categoryFromRepo != null && !categoryFromRepo.ActiveData)
             {
                 categoryFromRepo.ActiveData = true;
+                // update category
+                _mapper.Map(category, categoryFromRepo);
+
+                // udpate necessary properties
+                categoryFromRepo.DateUpdated = DateTime.Now;
+                categoryFromRepo.UpdatedByUserId = int.Parse(userId!);
+
                 isSuccess = _quizRepository.UpdateCategory(categoryFromRepo);
             }
+            // else, we create new category
             else
             {
-                // else, we create new category
-                categoryFromRepo = new QuestionCategory { QCategoryDesc = request.QuizCategoryDesc };
+                categoryFromRepo = _mapper.Map<QuestionCategory>(category);
+                categoryFromRepo.CreatedByUserId = int.Parse(userId!);
+                categoryFromRepo.DateCreated = DateTime.Now;
+
                 isSuccess = await _quizRepository.AddCategoryAsync(categoryFromRepo);
             }
 
-            // if update or create is not success
-            if (!isSuccess) 
-            {
-                fail.Type = "500";
-                fail.Message = $"Failed to create category with description {request.QuizCategoryDesc}.";
-                response.CreateCategoryFail = fail;
-            }
-            else 
-            {
-                // else, we save the changes
-                await _quizRepository.SaveChangesAsync();
-                success.Id = categoryFromRepo.Id;
-                success.QuizCategoryDesc = categoryFromRepo.QCategoryDesc;
 
-                response.CreatedCategoryReply = success;
+            // Check if update or create is not access 
+            if (!isSuccess)
+            {
+                reply.Content = "Failed to create category.";
+                reply.Type = "string";
+                reply.Code = 500;
+                return reply;
             }
 
-            return await Task.FromResult(response);
+            await _quizRepository.SaveChangesAsync();
+
+            // Log changes after success full saving changes 
+            LogCreateQuizCategoryEvent(categoryFromRepo, request, context);
+
+            reply.Content = JsonConvert.SerializeObject(categoryFromRepo);
+            reply.Type = "category";
+            reply.Code = 201;
+
+            return reply;
+        }
+
+        private void LogCreateQuizCategoryEvent(QuestionCategory category, CategoryRequest request, ServerCallContext context)
+        {
+            // Capture the details of the user being deleted, including who deleted it
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            var createEvent = new CreateQuizCategoryEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Create Category",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Category {category.QCategoryDesc} created by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = "",
+                NewValues = JsonConvert.SerializeObject(category),
+            };
+
+            var logRequest = new LogCreateQuizCategoryEventRequest
+            {
+                Event = createEvent
+            };
+            createEvent.NewValues = JsonConvert.SerializeObject(new
+            {
+                category.QCategoryDesc,
+            });
+
+
+            try
+            {
+                // Make the gRPC call to log the create category event
+                _quizAuditServiceClient.LogCreateQuizCategoryEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during the gRPC call and log them
+                //logger.LogError($"Error while logging create category event: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -130,32 +258,115 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<DeleteCategoryReply> DeleteCategory(DeleteCategoryRequest request, ServerCallContext context)
+        public override async Task<CategoryResponse> DeleteCategory(CategoryRequest request, ServerCallContext context)
         {
-            var reply = new DeleteCategoryReply() { Response = 203 };
-
-            // get the category
-            var category = await _quizRepository.GetCategoryAsync(request.Id);
-
-            // if category does not exist
-            if(category == null)
+            var reply = new CategoryResponse();
+            int id = request.Id;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+            // Capture the details of the user attempting to delete the difficulty
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            try
             {
-                reply.Response = 404;
-                return await Task.FromResult(reply);
+                if (userId == null)
+                {
+                    throw new Exception("Delete category requires UserId to be not null.");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Content = ex.Message;
+                reply.Type = "string";
+                return reply;
             }
 
-            // update active data to false
-            category.ActiveData = false;
-            var result = _quizRepository.UpdateCategory(category);
-            await _quizRepository.SaveChangesAsync();
-
-            // if update is not success
-            if (!result)
+            var category = await _quizRepository.GetCategoryAsync(id);
+            if (category == null || !category.ActiveData)
             {
-                reply.Response = 500;
+                reply.Code = 404;
+                reply.Type = "string";
+                reply.Content = "Category is not found.";
             }
-            return await Task.FromResult(reply);
+            else
+            {
+
+                // Capture the current state of the category for audit logging
+                var deletedCategory = new QuestionCategory
+                {
+                    QCategoryDesc = category.QCategoryDesc,
+                    // Include other properties as needed
+                };
+
+                // Set ActiveData to false to "soft delete" the category
+                category.ActiveData = false;
+
+                // Set updatedby userId and DateUpdated to latest
+                category.DateUpdated = DateTime.Now;
+                category.UpdatedByUserId = int.Parse(userId!);
+
+                var isSuccess = _quizRepository.UpdateCategory(category);
+
+                if (!isSuccess)
+                {
+                    reply.Code = 500;
+                    reply.Content = "Failed to delete category. Database throws an error.";
+                    reply.Type = "string";
+                    return reply;
+                }
+
+
+                reply.Code = 200;
+                reply.Content = "Succesfully Deleted Category";
+                reply.Type = "string";
+
+
+                await _quizRepository.SaveChangesAsync();
+
+                // Log the delete category event with the old values
+                LogDeleteQuizCategoryEvent(category, userRoles!, userNameClaim!, userId!);
+            }
+
+            return reply;
+
         }
+
+        private void LogDeleteQuizCategoryEvent(QuestionCategory category, string userRoles, string userName, string userId)
+        {
+            // Construct the delete event
+            var deleteEvent = new DeleteQuizCategoryEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userName,
+                Action = "Delete Category",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Category {category.QCategoryDesc} deleted by: {userName}",
+                Userrole = userRoles,
+                OldValues = JsonConvert.SerializeObject(category),
+                NewValues = "",
+            };
+
+            var logRequest = new LogDeleteQuizCategoryEventRequest
+            {
+                Event = deleteEvent
+            };
+            deleteEvent.OldValues = JsonConvert.SerializeObject(new
+            {
+                category.Id,
+                category.QCategoryDesc
+            });
+            try
+            {
+                // Make the gRPC call to log the delete category event
+                _quizAuditServiceClient.LogDeleteQuizCategoryEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during the gRPC call
+            }
+        }
+
 
         /// <summary>
         /// Check if category ecist and is active
@@ -163,10 +374,12 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<CheckCategoryOrActiveOrFail> CheckCategoryOrActive(CheckCategoryOrActiveRequest request, ServerCallContext context)
+        public override async Task<CategoryResponse> CheckCategoryOrActive(CategoryRequest request, ServerCallContext context)
         {
-            var success = new CheckCategoryOrActiveReply();
-            var response = new CheckCategoryOrActiveOrFail();
+            var reply = new CategoryResponse()
+            {
+                Type = "string"
+            };
 
             // check if category exist
             var category = await _quizRepository.GetCategoryAsync(request.Id);
@@ -174,16 +387,17 @@ namespace QuizMaster.API.Quiz.Services.GRPC
             // if category does not exist
             if (category == null)
             {
-                response.CheckCategoryOrActiveFail = new CheckCategoryOrActiveFail() { Type = "404", Message = "Category not found" };
+                reply.Code = 404;
+                reply.Content = "Category not found.";
+
             }
-            else 
+            else
             {
-                success.Category = JsonConvert.SerializeObject(category);
-                response.CheckCategoryOrActiveReply = success;
+                reply.Code = 200;
+                reply.Content = JsonConvert.SerializeObject(category);
             }
 
-
-            return await Task.FromResult(response);
+            return reply;
         }
 
         /// <summary>
@@ -192,20 +406,19 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<CheckCategoryNameReply> CheckCategoryName(CheckCategoryNameRequest request, ServerCallContext context)
+        public override async Task<CategoryResponse> CheckCategoryName(CategoryRequest request, ServerCallContext context)
         {
-            var reply = new CheckCategoryNameReply() { Status = "404" };
+            var reply = new CategoryResponse() { Code = 400 };
 
             // check if category exist
-            var category = await _quizRepository.GetCategoryAsync(request.QuizCategoryDesc);
+            var category = await _quizRepository.GetCategoryAsync(request.Content);
 
             // if category exist
-            if(category != null)
+            if (category != null)
             {
-                reply.Status = "200";
+                reply.Code = 200;
             }
-
-            return await Task.FromResult(reply);
+            return reply;
         }
 
         /// <summary>
@@ -214,30 +427,150 @@ namespace QuizMaster.API.Quiz.Services.GRPC
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public override async Task<UpdateCategoryReply> UpdateCategory(UpdateCategoryRequest request, ServerCallContext context)
+        public override async Task<CategoryResponse> UpdateCategory(CategoryRequest request, ServerCallContext context)
         {
-            var reply = new UpdateCategoryReply();
-            var category = JsonConvert.DeserializeObject<QuestionCategory>(request.Category);
+            var reply = new CategoryResponse();
+            int id = request.Id;
+            var patch = new JsonPatchDocument<CategoryCreateDto>();
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
 
-            // update category
-            var result = _quizRepository.UpdateCategory(category);
-
-            // if update is not success
-            if (!result)
+            try
             {
-                
-                reply.StatusCode = 500;
-                reply.Id = 0;
-                reply.QuizCategoryDesc = "";
+                patch = JsonConvert.DeserializeObject<JsonPatchDocument<CategoryCreateDto>>(request.Content);
+                if (patch == null)
+                {
+                    throw new Exception("GRPC request content cannot be deserialized in to JsonPatchDocument<CategoryCreateDto>.");
+                }
+                if (userId == null)
+                {
+                    throw new Exception("User Id is not found in the GRPC context.");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Content = ex.Message;
+                reply.Type = "string";
+                return reply;
             }
 
-            // else, we save the changes
-            await _quizRepository.SaveChangesAsync();
-            reply.StatusCode = 200;
-            reply.Id = category.Id;
-            reply.QuizCategoryDesc = category.QCategoryDesc;
 
-            return await Task.FromResult(reply);  
+
+            var checkCategoryId = await _quizRepository.GetCategoryAsync(id);
+
+            if (checkCategoryId == null || !checkCategoryId.ActiveData)
+            {
+                reply.Code = 404;
+                reply.Content = "Category is not found";
+                reply.Type = "string";
+                return reply;
+            }
+
+            // Capture the old category state manually
+            var oldCategory = new QuestionCategory
+            {
+                QCategoryDesc = checkCategoryId.QCategoryDesc,
+                // Map other properties as needed
+            };
+
+            try
+            {
+                var categoryPatch = _mapper.Map<CategoryCreateDto>(checkCategoryId);
+                patch.ApplyTo(categoryPatch);
+
+                // Check if the QCategoryDesc already exists
+                var existingCategory = await _quizRepository.GetCategoryAsync(categoryPatch.QCategoryDesc);
+                if (existingCategory != null && existingCategory.Id != id)
+                {
+                    reply.Code = 409;
+                    reply.Content = $"Category \'{categoryPatch.QCategoryDesc}\' already exist.";
+                    return reply;
+                }
+
+
+
+                // Update Properties
+                _mapper.Map(categoryPatch, checkCategoryId);
+
+                // Update other properties as needed
+                checkCategoryId.UpdatedByUserId = int.Parse(userId!);
+                checkCategoryId.DateUpdated = DateTime.Now;
+
+                var isSuccess = _quizRepository.UpdateCategory(checkCategoryId);
+
+                if (!isSuccess)
+                {
+                    reply.Code = 500;
+                    reply.Content = "Failed to update Category";
+                    reply.Type = "string";
+                    return reply;
+                }
+                await _quizRepository.SaveChangesAsync();
+
+                reply.Code = 200;
+                reply.Content = JsonConvert.SerializeObject(checkCategoryId);
+                await _quizRepository.SaveChangesAsync();
+                LogUpdateQuizCategoryEvent(oldCategory, checkCategoryId, context);
+                return reply;
+
+            }
+            catch (Exception)
+            {
+
+                reply.Content = "Something went wrong.";
+                reply.Type = "string";
+            }
+
+            return reply;
+        }
+
+
+        private void LogUpdateQuizCategoryEvent(QuestionCategory oldCategory, QuestionCategory newCategory, ServerCallContext context)
+        {
+            // Capture the details of the user updating the category
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            // Construct the update event
+            var updateEvent = new UpdateQuizCategoryEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Update Category",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Category updated by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = JsonConvert.SerializeObject(oldCategory),
+                NewValues = JsonConvert.SerializeObject(newCategory),
+            };
+
+            var logRequest = new LogUpdateQuizCategoryEventRequest
+            {
+                Event = updateEvent
+            };
+            updateEvent.NewValues = JsonConvert.SerializeObject(new
+            {
+                newCategory.Id,
+                newCategory.QCategoryDesc,
+            });
+            updateEvent.OldValues = JsonConvert.SerializeObject(new
+            {
+                oldCategory.Id,
+                oldCategory.QCategoryDesc,
+            });
+
+            try
+            {
+                // Make the gRPC call to log the update category event
+                _quizAuditServiceClient.LogUpdateQuizCategoryEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during the gRPC call
+
+            }
         }
     }
 }

@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-    <PackageReference Include="Google.Protobuf" Version="3.24.4" />
+    <PackageReference Include="Google.Protobuf" Version="3.25.1" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
     <PackageReference Include="Grpc.Tools" Version="2.59.0">
@@ -30,6 +30,7 @@
     <ProjectReference Include="..\QuizMaster.API.Account\QuizMaster.API.Account.csproj" />
     <ProjectReference Include="..\QuizMaster.API.Authentication\QuizMaster.API.Authentication.csproj" />
     <ProjectReference Include="..\QuizMaster.API.Media\QuizMaster.API.Media.csproj" />
+    <ProjectReference Include="..\QuizMaster.API.QuizSession\QuizMaster.API.QuizSession.csproj" />
     <ProjectReference Include="..\QuizMaster.API.Quiz\QuizMaster.API.Quiz.csproj" />
     <ProjectReference Include="..\QuizMaster.Library.Common\QuizMaster.Library.Common.csproj" />
   </ItemGroup>
@@ -43,6 +44,12 @@
     </Protobuf>
     <Protobuf Include="..\QuizMaster.API.Media\Proto\media.proto" GrpcServices="Client">
       <Link>Protos\media.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.QuizSession\Protos\quiz_set.proto" GrpcServices="Client">
+      <Link>Protos\quiz_set.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\QuizMaster.API.QuizSession\Protos\room.proto" GrpcServices="Client">
+      <Link>Protos\room.proto</Link>
     </Protobuf>
     <Protobuf Include="..\QuizMaster.API.Quiz\Protos\quiz.proto" GrpcServices="Client">
       <Link>Protos\quiz.proto</Link>

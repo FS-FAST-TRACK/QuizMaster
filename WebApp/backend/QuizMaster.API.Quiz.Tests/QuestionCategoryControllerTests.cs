@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using QuizMaster.API.Quiz.Controllers;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Profiles;
 using QuizMaster.API.Quiz.Tests.Services;
-using System.Collections.Generic;
 
 namespace QuizMaster.API.Quiz.Tests
 {
@@ -22,7 +20,10 @@ namespace QuizMaster.API.Quiz.Tests
 			var questionCategoryController = new QuestionCategoryController(quizTestDataRepository, mapper);
 
 			// Act
-			var result =await  questionCategoryController.Get();
+			var result =await  questionCategoryController.Get(new ResourceParameters.CategoryResourceParameter
+			{
+
+			});
 
 			// Assert
 			Assert.NotNull(result.Result);

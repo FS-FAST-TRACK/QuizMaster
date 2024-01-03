@@ -6,9 +6,10 @@ namespace QuizMaster.API.Quiz.Profiles
 {
 	public class CategoryProfile : Profile
 	{
-		public CategoryProfile() {
-			CreateMap<QuestionCategory, CategoryDto>();
-			CreateMap<CategoryCreateDto, QuestionCategory>();
+		public CategoryProfile()
+		{
+			CreateMap<QuestionCategory, CategoryDto>().ReverseMap();
+			CreateMap<CategoryCreateDto, QuestionCategory>().ReverseMap();
 		}
 	}
 }

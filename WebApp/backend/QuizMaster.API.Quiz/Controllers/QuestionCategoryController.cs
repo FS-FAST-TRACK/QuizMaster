@@ -2,9 +2,13 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
+using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 using QuizMaster.Library.Common.Models;
+using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,12 +28,30 @@ namespace QuizMaster.API.Quiz.Controllers
 		}
 
 		// GET: api/question/category
-		[HttpGet]
-		public async Task<ActionResult<IEnumerable<CategoryDto>>> Get()
+		[HttpGet(Name = "GetCategories")]
+		public async Task<ActionResult<IEnumerable<CategoryDto>>> Get([FromQuery] CategoryResourceParameter resourceParameter)
 		{
+			if (resourceParameter.IsGetAll)
+			{
+				var categoriesFromDb = await _quizRepository.GetAllCategoriesAsync();
+
+				return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categoriesFromDb));
+			}
 			// Get all active categories asynchronously
-			var categories = await _quizRepository.GetAllCategoriesAsync();
-			return Ok(_mapper.Map<IEnumerable<CategoryDto>>(categories));
+			var categories = await _quizRepository.GetAllCategoriesAsync(resourceParameter);
+
+            var paginationMetadata = categories.GeneratePaginationMetadata(categories.HasPrevious ?
+                        Url.Link("GetCategories", resourceParameter.GetObject("prev"))
+                        : null, categories.HasNext ?
+                        Url.Link("GetCategories", resourceParameter.GetObject("next"))
+                        : null);
+
+            Response.Headers.Add("X-Pagination",
+				   JsonSerializer.Serialize(paginationMetadata));
+
+			Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
+
+			return Ok(categories);
 		}
 
 		// GET api/question/category/5

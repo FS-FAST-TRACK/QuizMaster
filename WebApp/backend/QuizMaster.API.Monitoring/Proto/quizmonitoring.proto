@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Monitoring.Proto";
+
+package audit;
+
+import "google/protobuf/empty.proto";
+
+
+service QuizAuditService {
+	rpc LogCreateQuizCategoryEvent (LogCreateQuizCategoryEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuizCategoryEvent (LogDeleteQuizCategoryEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuizCategoryEvent (LogUpdateQuizCategoryEventRequest) returns (google.protobuf.Empty);
+	rpc LogCreateQuizDifficultyEvent (LogCreateQuizDifficultyEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuizDifficultyEvent (LogUpdateQuizDifficultyEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuizDifficultyEvent (LogDeleteQuizDifficultyEventRequest) returns (google.protobuf.Empty);
+	rpc LogCreateQuestionEvent (LogCreateQuestionEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuestionEvent (LogUpdateQuestionEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuestionEvent (LogDeleteQuestionEventRequest) returns (google.protobuf.Empty);
+	rpc LogCreateQuestionTypeEvent (LogCreateQuestionTypeEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuestionTypeEvent (LogUpdateQuestionTypeEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuestionTypeEvent (LogDeleteQuestionTypeEventRequest) returns (google.protobuf.Empty);
+	rpc LogCreateQuizSetEvent (LogCreateQuizSetEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateQuizSetEvent (LogUpdateQuizSetEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteQuizSetEvent (LogDeleteQuizSetEventRequest) returns (google.protobuf.Empty);
+}
+
+message CreateQuizCategoryEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message DeleteQuizCategoryEvent{
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message UpdateQuizCategoryEvent{
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+message CreateQuizDifficultyEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message UpdateQuizDifficultyEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+message DeleteQuizDifficultyEvent {
+  int32 userId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+message CreateQuestionEvent {
+  int32 userId = 1;
+  int32 questionId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+message UpdateQuestionEvent {
+  int32 userId = 1;
+  int32 questionId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message DeleteQuestionEvent {
+  int32 userId = 1;
+  int32 questionId = 2;
+  string username = 3;
+  string action = 4;
+  string timestamp = 5;
+  string details = 6;
+  string userrole = 7;
+  string oldValues = 8;
+  string newValues = 9;
+}
+
+message CreateQuestionTypeEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message UpdateQuestionTypeEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message DeleteQuestionTypeEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message CreateQuizSetEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message UpdateQuizSetEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message DeleteQuizSetEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message LogCreateQuizCategoryEventRequest {
+  CreateQuizCategoryEvent event = 1;
+}
+
+message LogDeleteQuizCategoryEventRequest {
+  DeleteQuizCategoryEvent event = 1;	
+}
+
+message LogUpdateQuizCategoryEventRequest {
+  UpdateQuizCategoryEvent event = 1;
+}
+
+message LogCreateQuizDifficultyEventRequest {
+  CreateQuizDifficultyEvent event = 1;
+}
+
+message LogUpdateQuizDifficultyEventRequest {
+  UpdateQuizDifficultyEvent event = 1;
+}
+message LogDeleteQuizDifficultyEventRequest {
+  DeleteQuizDifficultyEvent event = 1;
+}
+
+message LogCreateQuestionEventRequest {
+  CreateQuestionEvent event = 1;
+}
+
+message LogUpdateQuestionEventRequest {
+  UpdateQuestionEvent event = 1;
+}
+
+message LogDeleteQuestionEventRequest {
+  DeleteQuestionEvent event = 1;
+}
+
+message LogCreateQuestionTypeEventRequest {
+  CreateQuestionTypeEvent event = 1;
+}
+
+message LogUpdateQuestionTypeEventRequest {
+  UpdateQuestionTypeEvent event = 1;
+}
+
+message LogDeleteQuestionTypeEventRequest {
+  DeleteQuestionTypeEvent event = 1;
+}
+
+message LogCreateQuizSetEventRequest {
+  CreateQuizSetEvent event = 1;
+}
+
+message LogUpdateQuizSetEventRequest {
+  UpdateQuizSetEvent event = 1;
+}
+
+message LogDeleteQuizSetEventRequest {
+  DeleteQuizSetEvent event = 1;
+}

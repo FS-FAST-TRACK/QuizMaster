@@ -99,15 +99,15 @@ namespace QuizMaster.API.Quiz.Controllers
 			await _quizRepository.SaveChangesAsync();
 
 			// Return the created question Detail in the form of QuestionDetailDto
-			questionDetail.DetailTypes = detailTypes;
 			var questionDetailDto = _mapper.Map<QuestionDetailDto>(questionDetail);
+			questionDetailDto.DetailTypes = questionDetailCreateDto.DetailTypes;
 
 			return CreatedAtRoute("GetQuestionDetail", new { questionId , id = questionDetailDto.Id }, questionDetailDto);
 		}
 
 		// PUT api/<QuestionDetailController>/5
 		[HttpPatch("{id}")]
-		public async Task<ActionResult<CategoryDto>> Patch(int questionId, int id, [FromBody] JsonPatchDocument<QuestionDetailCreateDto> patch)
+		public async Task<ActionResult<QuestionDetailDto>> Patch(int questionId, int id, [FromBody] JsonPatchDocument<QuestionDetailCreateDto> patch)
 		{
 			var question = await _quizRepository.GetQuestionAsync(questionId);
 
@@ -145,7 +145,7 @@ namespace QuizMaster.API.Quiz.Controllers
 				questionDetailFromRepo.DetailTypes = detailTypes;
 			}
 
-			// Validate model of question
+			// Validate model of questionDetail
 			if (!TryValidateModel(questionDetailFromRepo))
 			{
 				return ReturnModelStateErrors();

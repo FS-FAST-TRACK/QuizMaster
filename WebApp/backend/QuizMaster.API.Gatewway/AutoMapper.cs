@@ -17,6 +17,7 @@ namespace QuizMaster.API.Gatewway
             CreateMap<AccountCreateDto, CreateAccountRequest>();
             CreateMap<AccountCreatePartialDto, CreateAccountPartialRquest>();
             CreateMap<UserAccount, AccountDto>().ReverseMap();
+            CreateMap<AccountCreateDto, UserAccount>().ReverseMap();
             CreateMap<CategoryCreateDto, QuestionCategory>().ReverseMap();
             CreateMap<Question, QuestionDto>();
             CreateMap<DificultiesReply, DifficultyDto>().ReverseMap();
@@ -24,6 +25,7 @@ namespace QuizMaster.API.Gatewway
             CreateMap<TypeReply, TypeDto>().ReverseMap();
             CreateMap<Question, QuestionDto>().ReverseMap();
             CreateMap<Question, QuestionDto>();
+            CreateMap<QuestionCategory, CategoryDto>().ReverseMap();
     //        CreateMap<QuestionCreateDto, Question>()
     //.ForMember(destination => destination.QAnswer, act => act.MapFrom(src =>
     //src.QTypeId == QuestionTypes.MultipleChoiceSeedData.Id

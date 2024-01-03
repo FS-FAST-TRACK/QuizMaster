@@ -45,59 +45,65 @@ namespace QuizMaster.API.Account.Service.Worker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation("RabbitMQ: Account Worker service is now running...");
-
-            using (var connection = connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+            while(!stoppingToken.IsCancellationRequested)
             {
-                // declare an exchange
-                channel.ExchangeDeclare(appSettings.RabbitMq_Account_ExchangeName, ExchangeType.Direct);
-
-                // Declare a request queue for recieving messages
-                channel.QueueDeclare(appSettings.RabbitMq_Account_RequestQueueName, false, false, false, null);
-                channel.QueueBind(appSettings.RabbitMq_Account_RequestQueueName, appSettings.RabbitMq_Account_ExchangeName, "");
-
-                // Declare a response queue for sending responses
-                channel.QueueDeclare(appSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
-
-                // Setup consumer to listen for upcoming messages
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += async (model, ea) =>
+                await Task.Delay(1000, stoppingToken);
+                try
                 {
-                    var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
-                    var jsonMssage = Encoding.UTF8.GetString(body);
-                    var requestMessage = JsonConvert.DeserializeObject<AuthRequest>(jsonMssage); // deserialize the json to object [useraccount]
-
-                    if(requestMessage != null)
+                    using (var connection = connectionFactory.CreateConnection())
+                    using (var channel = connection.CreateModel())
                     {
-                        RabbitMQ_AccountPayload? ProcessedPayload = null;
+                        // declare an exchange
+                        channel.ExchangeDeclare(appSettings.RabbitMq_Account_ExchangeName, ExchangeType.Direct);
 
-                        if (requestMessage.Type == "Credentials")
+                        // Declare a request queue for recieving messages
+                        channel.QueueDeclare(appSettings.RabbitMq_Account_RequestQueueName, false, false, false, null);
+                        channel.QueueBind(appSettings.RabbitMq_Account_RequestQueueName, appSettings.RabbitMq_Account_ExchangeName, "");
+
+                        // Declare a response queue for sending responses
+                        channel.QueueDeclare(appSettings.RabbitMq_Account_ResponseQueueName, false, false, false, null);
+
+                        // Setup consumer to listen for upcoming messages
+                        var consumer = new EventingBasicConsumer(channel);
+                        consumer.Received += async (model, ea) =>
                         {
-                            ProcessedPayload = await ProcessAccountRequest(requestMessage);
-                        }
-                        else
+                            var body = ea.Body.ToArray(); // convert the body to byte array for deserialization
+                            var jsonMssage = Encoding.UTF8.GetString(body);
+                            var requestMessage = JsonConvert.DeserializeObject<AuthRequest>(jsonMssage); // deserialize the json to object [useraccount]
+
+                            if (requestMessage != null)
+                            {
+                                RabbitMQ_AccountPayload? ProcessedPayload = null;
+
+                                if (requestMessage.Type == "Credentials")
+                                {
+                                    ProcessedPayload = await ProcessAccountRequest(requestMessage);
+                                }
+                                else
+                                {
+                                    ProcessedPayload = await ProcessRoleRequest(requestMessage);
+                                }
+
+                                // serialize the payload to JSON
+                                var jsonResponse = JsonConvert.SerializeObject(ProcessedPayload);
+                                var responseBody = Encoding.UTF8.GetBytes(jsonResponse);
+                                logger.LogInformation("RabbitMQ: Sending Response...\n" + jsonResponse + "\n\n");
+
+                                // publish the response to the response queue
+                                channel.BasicPublish("", appSettings.RabbitMq_Account_ResponseQueueName, null, responseBody);
+                            }
+                        };
+
+                        // consume messages from the request queue
+                        channel.BasicConsume(appSettings.RabbitMq_Account_RequestQueueName, true, consumer);
+                        logger.LogInformation("RabbitMQ: Account Worker service is now running...");
+                        while (!stoppingToken.IsCancellationRequested)
                         {
-                            ProcessedPayload = await ProcessRoleRequest(requestMessage);
+                            await Task.Delay(1000, stoppingToken);
                         }
-
-                        // serialize the payload to JSON
-                        var jsonResponse = JsonConvert.SerializeObject(ProcessedPayload);
-                        var responseBody = Encoding.UTF8.GetBytes(jsonResponse);
-                        logger.LogInformation("RabbitMQ: Sending Response...\n" + jsonResponse + "\n\n");
-
-                        // publish the response to the response queue
-                        channel.BasicPublish("", appSettings.RabbitMq_Account_ResponseQueueName, null, responseBody);
                     }
-                };
-
-                // consume messages from the request queue
-                channel.BasicConsume(appSettings.RabbitMq_Account_RequestQueueName, true, consumer);
-
-                while(!stoppingToken.IsCancellationRequested)
-                {
-                    await Task.Delay(1000, stoppingToken);
                 }
+                catch { }
             }
         }
 
@@ -136,12 +142,28 @@ namespace QuizMaster.API.Account.Service.Worker
             if(userAccount == null)
                 return new() { Id = -1 };
 
-            // Compare user password
-            PasswordHasher<UserAccount> hasher = new();
+            // Partial Account
+            if(request.Password == "System.Partial.Account" && string.IsNullOrEmpty(userAccount.PasswordHash))
+            {
+                if(string.IsNullOrEmpty(userAccount.FirstName) && string.IsNullOrEmpty(userAccount.LastName))
+                {
+                    string tempUser = "User-" + new Random().Next(1000000, 9999999).ToString();
+                    userAccount.FirstName = tempUser;
+                    userAccount.LastName = tempUser;
+                }
+                else { return new() { Id = -1 }; };
+            }
+            // With Password
+            else
+            {
+                // Compare user password
+                PasswordHasher<UserAccount> hasher = new();
 
-            // check if password is correct
-            var passwordVerification = hasher.VerifyHashedPassword(userAccount, userAccount.PasswordHash, request.Password);
-            if (PasswordVerificationResult.Success != passwordVerification) { return new() { Id = -1 }; };
+                // check if password is correct
+                var passwordVerification = hasher.VerifyHashedPassword(userAccount, userAccount.PasswordHash, request.Password);
+                if (PasswordVerificationResult.Success != passwordVerification) { return new() { Id = -1 }; };
+            }
+            
 
             return userAccount;
         }

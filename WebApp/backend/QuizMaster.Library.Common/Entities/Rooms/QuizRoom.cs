@@ -15,6 +15,11 @@ namespace QuizMaster.Library.Common.Entities.Rooms
         [Required]
         public string QRoomDesc { get; set; }
 
+        [Range(10000000, 99999999)]
+        public int QRoomPin { get; set; }
+
+        public string RoomOptions { get; set; } = string.Empty;
+
         [Required]
         public bool ActiveData { get; set; } = true;
 
@@ -22,7 +27,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [AllowNull]
-        public DateTime DateUpdated { get; set; }
+        public DateTime? DateUpdated { get; set; }
 
         [Required]
         public int CreatedByUserId { get; set; }

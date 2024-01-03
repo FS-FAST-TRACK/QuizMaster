@@ -1,4 +1,5 @@
-﻿using QuizMaster.Library.Common.Entities.Accounts;
+﻿using Newtonsoft.Json;
+using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,7 +20,6 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public int QuestionId { get; set; }
         public Question Question { get; set; }
 
-
 		public IEnumerable<DetailType> DetailTypes { get; set; }
 
 		[Required]
@@ -29,7 +29,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [AllowNull]
-        public DateTime DateUpdated { get; set; }
+        public DateTime? DateUpdated { get; set; }
 
         [Required]
         public int CreatedByUserId { get; set; } = 1; 

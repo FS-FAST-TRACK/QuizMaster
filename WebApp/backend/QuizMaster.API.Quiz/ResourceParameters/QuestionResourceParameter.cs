@@ -3,12 +3,18 @@
 	public class QuestionResourceParameter : IResourceParameter
 	{
 		public int maxPageSize => 50;
-		public bool IsOnlyActiveData { get; set; } = false;
+		public bool IsOnlyActiveData { get; set; } = true;
 		public bool IncludeDetails { get; set; } = true;
 		public string? SearchQuery { get; set; }
 		public int PageNumber { get; set; } = 1;
 
 		private int _pageSize = 40;
+		public string? FilterByCategoriesId { get; set; }
+		public string?  FilterByTypesId { get; set; }
+		public string? FilterByDifficultiesId { get; set; }
+
+		public string? ExludeQuestionsIds { get; set; }
+
 		public int PageSize
 		{
 			get => _pageSize;
@@ -26,7 +32,10 @@
 				pageSize = PageSize,
 				isOnlyActiveData = IsOnlyActiveData,
 				includeDetails = IncludeDetails,
-				searchQuery = SearchQuery
+				searchQuery = SearchQuery,
+				filterByCategories = FilterByCategoriesId,
+				filterByDifficulties = FilterByDifficultiesId,
+				filterByTypes = FilterByTypesId
 			};
 		}
 	}

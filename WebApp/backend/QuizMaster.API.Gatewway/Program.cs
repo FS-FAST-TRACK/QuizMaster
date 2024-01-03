@@ -9,6 +9,10 @@ using QuizMaster.API.Authentication.Services.GRPC;
 using QuizMaster.API.Authentication.Services.Temp;
 using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
+using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Gatewway.Controllers;
+using QuizMaster.API.Quiz.Services.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +23,15 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 builder.Services.AddLogging();
+builder.Services.AddSignalR();
+builder.Services.AddCors(o => 
+    o.AddDefaultPolicy(builder => 
+    builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
+builder.Services.AddScoped<SessionHub>();
+builder.Services.AddSingleton<SessionHandler>();
+builder.Services.AddSingleton<QuizHandler>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -65,6 +78,8 @@ builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<RabbitMqUserWorker>();
 builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
 builder.Services.AddSingleton<RabbitMqRepository>();
+builder.Services.AddScoped<AccountGatewayController>();
+builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
 
 
 // configure cookie authentication
@@ -100,12 +115,28 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
     });
 }
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swagger, httpReq) =>
+    {
+        swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" } };
+    });
+});
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
+});
+
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+
 app.MapControllers();
+app.MapHub<SessionHub>("/gateway/hub/session");
 
 app.Run();

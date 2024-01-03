@@ -1,4 +1,5 @@
-﻿using QuizMaster.API.Quiz.ResourceParameters;
+﻿using QuizMaster.API.Quiz.Models;
+using QuizMaster.API.Quiz.ResourceParameters;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -101,10 +102,20 @@ namespace QuizMaster.API.Quiz.Tests.Services
 			return await Task.FromResult(_categories);
 		}
 
+		public Task<PagedList<QuestionCategory>> GetAllCategoriesAsync(CategoryResourceParameter resourceParameter)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<IEnumerable<QuestionDifficulty>> GetAllDifficultiesAsync()
 		{
 			return await Task.FromResult(_difficulties);
 		}
+
+        public Task<PagedList<DifficultyDto>> GetAllDifficultiesAsync(DifficultyResourceParameter resourceParameter)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<IEnumerable<QuestionDetail>> GetAllQuestionDetailsAsync()
         {
@@ -177,6 +188,11 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		}
 
 		public Task<Question?> GetQuestionAsync(string qStatement, int difficultyId, int typeId, int categoryId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<Question?> GetQuestionAsync(Question question)
 		{
 			throw new NotImplementedException();
 		}
@@ -270,5 +286,10 @@ namespace QuizMaster.API.Quiz.Tests.Services
 		{
 			throw new NotImplementedException();
 		}
-	}
+
+        Task<PagedList<CategoryDto>> IQuizRepository.GetAllCategoriesAsync(CategoryResourceParameter resourceParameter)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

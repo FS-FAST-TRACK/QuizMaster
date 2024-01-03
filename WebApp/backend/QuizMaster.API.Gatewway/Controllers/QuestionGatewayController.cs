@@ -1,10 +1,13 @@
-﻿using AutoMapper;
+﻿ using AutoMapper;
 using Azure;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using QuizMaster.API.Authentication.Models;
+using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
@@ -22,68 +25,97 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly IMapper _mapper;
         private readonly GrpcChannel _channel;
         private readonly QuestionServices.QuestionServicesClient _channelClient;
+        private readonly GrpcChannel _authChannel;
+        private readonly AuthService.AuthServiceClient _authChannelClient;
 
         public QuestionGatewayController(IMapper mapper, IOptions<GrpcServerConfiguration> options)
         {
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
             _mapper = mapper;
-            _channel = GrpcChannel.ForAddress(options.Value.Quiz_Category_Service);
+            _channel = GrpcChannel.ForAddress(options.Value.Quiz_Category_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new QuestionServices.QuestionServicesClient(_channel);
             _mapper = mapper;
+            _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
+            _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
         }
 
         [HttpGet("get_questions")]
         public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions([FromQuery] QuestionResourceParameter resourceParameter)
         {
+            // Process Input
             var request = new QuestionRequest
             {
-                Parameter = JsonConvert.SerializeObject(resourceParameter)
+                Content = JsonConvert.SerializeObject(resourceParameter)
             };
 
+            // Process Logic
             var response = await _channelClient.GetQuestionsAsync(request);
 
-            var questions = JsonConvert.DeserializeObject<PagedList<Question>>(response.Questions);
+            // Process Output
+            try
+            {
+                var pagedQuestions = JsonConvert.DeserializeObject<Tuple<IEnumerable<Question>, Dictionary<string, object?>>>(response.Content);
+                Response.Headers.Add("X-Pagination",
+                       JsonConvert.SerializeObject(pagedQuestions!.Item2));
 
-            var paginationMetadata = new Dictionary<string, object?>
-                {
-                    { "totalCount", questions.TotalCount },
-                    { "pageSize", questions.PageSize },
-                    { "currentPage", questions.CurrentPage },
-                    { "totalPages", questions.TotalPages },
-                    { "previousPageLink", questions.HasPrevious ?
-                        Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
-                        : null },
-                    { "nextPageLink", questions.HasNext ?
-                        Url.Link("GetQuestions", resourceParameter.GetObject("next"))
-                        : null }
-                };
+                Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
 
-            Response.Headers.Add("X-Pagination",
-                   System.Text.Json.JsonSerializer.Serialize(paginationMetadata));
+                return Ok(_mapper.Map<IEnumerable<QuestionDto>>(pagedQuestions.Item1));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
 
-            Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
-
-            return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
         }
 
         [HttpGet("get_question/{id}")] 
         public async Task<IActionResult> GetQuestion(int id)
         {
-            var request = new GetQuestionRequest() { Id = id};
+            // Process Input
+            var request = new QuestionRequest() { Id = id};
 
+            // Process logic
             var response = await _channelClient.GetQuestionAsync(request);
 
             if(response.Code == 404)
             {
                 return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
             }
-            var question = JsonConvert.DeserializeObject<QuestionDto>(response.Questions);
+            var question = JsonConvert.DeserializeObject<QuestionDto>(response.Content);
             return Ok(question);
         }
 
         [HttpPost("add_question")]
         public async Task<IActionResult> AddQuestion([FromBody] QuestionCreateDto questionDto)
         {
-            if(!ModelState.IsValid)
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
+
+
+            if (!ModelState.IsValid)
 
             {
                 return ReturnModelStateErrors();
@@ -95,12 +127,15 @@ namespace QuizMaster.API.Gateway.Controllers
                     new ResponseDto { Type = "Error", Message = validationResult.Error }
                 );
             }
-
+            // Process Input
             var question = JsonConvert.SerializeObject(questionDto);
-            var request = new QuestionRequest() { Parameter = question };
+            var request = new QuestionRequest() { Content = question };
 
-            var reply = await _channelClient.AddQuestionAsync(request);
+            // Process Logic
+            var reply = await _channelClient.AddQuestionAsync(request, headers);
 
+
+            // Process Output
             if (reply.Code == 409)
             {
                 return ReturnQuestionAlreadyExist();
@@ -111,15 +146,37 @@ namespace QuizMaster.API.Gateway.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
             }
 
-            var createdQuestion = JsonConvert.DeserializeObject<QuestionDto>(reply.Questions);
+            var createdQuestion = JsonConvert.DeserializeObject<QuestionDto>(reply.Content);
             return Ok(createdQuestion);
         }
 
         [HttpDelete("delete_question/{id}")]
         public async Task<IActionResult> DeleteQuestion(int id)
         {
-            var request = new GetQuestionRequest() { Id = id };
-            var reply = await _channelClient.DeleteQuestionAsync(request);
+            var info = await ValidateUserTokenAndGetInfo();
+
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+
+            var request = new QuestionRequest() { Id = id };
+            var reply = await _channelClient.DeleteQuestionAsync(request, headers);
 
             if(reply.Code == 404)
             {
@@ -137,11 +194,35 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpPatch("update_question/{id}")]
         public async Task<IActionResult> UpdateQuestion(int id,[FromBody] JsonPatchDocument<QuestionCreateDto> patch)
         {
-            var patchRequest = JsonConvert.SerializeObject(patch);
-            var request = new PatchQuestionRequest() { Id = id, Patch = patchRequest };
+            var info = await ValidateUserTokenAndGetInfo();
 
-            var reply = await _channelClient.PatchQuestionAsync(request);
+            if (info == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            if (info == null || info.UserData == null)
+            {
+                return NotFound(new { Message = "Invalid user information in the token" });
+            }
+
+            var userName = info.UserData.UserName;
+            var userId = info.UserData.Id;
+            var userRole = info.Roles.Any(h => h.Equals("Administrator")) ? "Administrator" : "User";
+            var headers = new Metadata
+            {
+                { "username", userName ?? "unknown" },
+                { "id", userId.ToString() ?? "unknown" },
+                { "role", userRole }
+            };
+            // Process Input
+            var patchRequest = JsonConvert.SerializeObject(patch);
+            var request = new QuestionRequest() { Id = id, Content = patchRequest };
+
+            // Process Logic
+            var reply = await _channelClient.PatchQuestionAsync(request, headers);
             
+            // Process Output
             if(reply.Code == 404)
             {
                 return ReturnQuestionDoesNotExist(id);
@@ -152,7 +233,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(new ResponseDto
                 {
                     Type = "Error",
-                    Message = reply.Questions
+                    Message = reply.Content
                 });
             }
             
@@ -166,11 +247,11 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(new ResponseDto
                 {
                     Type = "Error",
-                    Message = reply.Questions
+                    Message = reply.Content
                 }) ;
             }
 
-            var result = JsonConvert.DeserializeObject<Question>(reply.Questions);
+            var result = JsonConvert.DeserializeObject<Question>(reply.Content);
             return Ok(_mapper.Map<QuestionDto>(result));
         }
 
@@ -208,6 +289,55 @@ namespace QuizMaster.API.Gateway.Controllers
                 Type = "Error",
                 Message = errorString
             });
+        }
+        private async Task<AuthStore> ValidateUserTokenAndGetInfo()
+        {
+            string token = GetUserToken();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return null;
+            }
+
+            var info = await GetAuthStoreInfo(token);
+
+            if (info == null || info.UserData == null)
+            {
+                return null;
+            }
+
+            return info;
+        }
+
+        private string GetUserToken()
+        {
+            var tokenClaim = User.Claims.FirstOrDefault(e => e.Type == "token");
+
+            if (tokenClaim != null)
+            {
+                return tokenClaim.Value;
+            }
+
+            try
+            {
+                return HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<AuthStore> GetAuthStoreInfo(string token)
+        {
+            var requestValidation = new ValidationRequest()
+            {
+                Token = token
+            };
+
+            var authStore = await _authChannelClient.ValidateAuthenticationAsync(requestValidation);
+
+            return !string.IsNullOrEmpty(authStore?.AuthStore) ? JsonConvert.DeserializeObject<AuthStore>(authStore.AuthStore) : null;
         }
         #endregion
     }

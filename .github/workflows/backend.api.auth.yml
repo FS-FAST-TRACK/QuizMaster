@@ -3,7 +3,7 @@ name: QuizMaster - Auth API
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   build:
