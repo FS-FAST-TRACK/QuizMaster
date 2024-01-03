@@ -118,7 +118,7 @@ namespace QuizMaster.API.Gateway.Services
 
 
             }
-            await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
+            //await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
             
             SetParticipantsEndTime(handler, roomPin); // End participant time
             await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
@@ -131,7 +131,7 @@ namespace QuizMaster.API.Gateway.Services
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
             //await hub.Clients.Group(roomPin).SendAsync("notif", "Quiz Data: "+JsonConvert.SerializeObject(await GetQuizRoomDatasAsync()));
-            await hub.Clients.Group(roomPin).SendAsync("notif", "[THE QUIZ HAS ENDED]");
+            await hub.Clients.Group(roomPin).SendAsync("stop",true);
         }
 
         public void AcceptParticipantsAnswerSubmission(SessionHandler handler, string roomPin, QuizRoom room)

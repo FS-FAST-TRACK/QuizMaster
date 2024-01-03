@@ -15,20 +15,23 @@ import Leaderboard from "./leaderboard";
 import DragAndDrop from "./dragAndDrop";
 import dynamic from "next/dynamic";
 import Slider from "./slider";
-
-const DynamicDragAndDrop = dynamic(
-  () => import("@/app/room/quiz/components/dragAndDrop"),
-  {
-    ssr: false,
-  }
-);
+import ReactConfetti from "react-confetti";
+import useWindowSize from "react-use/lib/useWindowSize";
+import { Button } from "@mantine/core";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Question() {
+  const { width, height } = useWindowSize();
   const { connection } = useConnection();
   const [question, setQuestion] = useState();
-  const [isShowLeader, setIsShowLeader] = useState();
+  const [isShowLeader, setIsShowLeader] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
   const [leaderBoard, setLeaderBoard] = useState([]);
   const { connectionId } = useConnectionId();
+
+  const { push, back } = useRouter();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
 
   console.log(connectionId);
   useEffect(() => {
@@ -56,23 +59,49 @@ export default function Question() {
         setIsShowLeader(false);
       }, 5000);
     });
+
+    connection.on("stop", (isStop) => {
+      console.log(`Finish?: ${isStop}`);
+      setIsFinished(true);
+    });
   }, []);
+
+  const goBackToLoby = () => {
+    try {
+      const code = params.get("roomPin");
+      connection.invoke("GetRoomParticipants", code);
+      back();
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+
+  if (isShowLeader) {
+    return <Leaderboard leaderBoard={leaderBoard} />;
+  } else if (isFinished) {
+    return (
+      <>
+        <ReactConfetti width={width} height={height} />
+        <Leaderboard leaderBoard={leaderBoard} />
+        <Button onClick={goBackToLoby}>Go back to Loby</Button>
+      </>
+    );
+  }
   return (
     <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow ">
-      {question?.question.qTypeId === 1 && !isShowLeader && (
+      {question?.question.qTypeId === 1 && (
         <MulitpleChoice question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 3 && !isShowLeader && (
+      {question?.question.qTypeId === 3 && (
         <TrueOrFalse question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 4 && !isShowLeader && (
+      {question?.question.qTypeId === 4 && (
         <TypeAnswer question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 5 && !isShowLeader && <Slider />}
-      {question?.question.qTypeId === 6 && !isShowLeader && (
-        <DynamicDragAndDrop />
-      )}
-      {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />}
+      {question?.question.qTypeId === 5 && <Slider />}
+      {question?.question.qTypeId === 6 && <DragAndDrop />}
+      {/* {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />}
+      {isFinished && <Leaderboard leaderBoard={leaderBoard} />} */}
       {/* <MulitpleChoice question={question} /> */}
       {/* <MultipleChoiceImage /> */}
       {/* <MulitpleChoice /> */}

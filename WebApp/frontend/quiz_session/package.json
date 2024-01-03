@@ -20,7 +20,9 @@
     "react": "^18",
     "react-audio-player": "^0.17.0",
     "react-beautiful-dnd": "^13.1.1",
+    "react-confetti": "^6.1.0",
     "react-dom": "^18",
+    "react-use": "^17.4.2",
     "tailwind-scrollbar-hide": "^1.1.7",
     "use-sound": "^4.0.1",
     "zustand": "^4.4.7"
