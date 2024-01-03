@@ -89,6 +89,7 @@ namespace QuizMaster.API.Quiz
 			app.MapGrpcService<QuestionService>().RequireCors("AllowAll"); ;
 			app.MapGrpcService<DifficultyService>().RequireCors("AllowAll"); ;
 			app.MapGrpcService<TypeService>().RequireCors("AllowAll"); ;
+			app.MapGrpcService<QuestionDetailsService>().RequireCors("AllowAll");
 			app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 			app.MapControllers();

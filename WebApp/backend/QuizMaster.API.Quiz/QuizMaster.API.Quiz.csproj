@@ -51,7 +51,8 @@
     <Protobuf Include="Protos\quiz.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\quiz_category.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\quiz_difficulty.proto" GrpcServices="Server" />
-    <Protobuf Include="Protos\quiz_type.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\quiz_type.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\quiz_questionDetail.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>
