@@ -30,7 +30,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [AllowNull]
-        public DateTime DateUpdated { get; set; }
+        public DateTime? DateUpdated { get; set; }
 
 		[Required]
         public int CreatedByUserId { get; set; }

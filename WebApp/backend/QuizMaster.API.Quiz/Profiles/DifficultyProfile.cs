@@ -10,7 +10,7 @@ namespace QuizMaster.API.Quiz.Profiles
 		public DifficultyProfile()
 		{
 			CreateMap<QuestionDifficulty, DifficultyDto>();
-			CreateMap<DifficultyCreateDto, QuestionDifficulty>();
+			CreateMap<DifficultyCreateDto, QuestionDifficulty>().ReverseMap();
 			CreateMap<QuestionDifficulty, CreateDifficultyRequest>().ReverseMap();
 		}
 	}

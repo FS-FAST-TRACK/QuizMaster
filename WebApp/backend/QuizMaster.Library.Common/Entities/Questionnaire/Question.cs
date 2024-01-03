@@ -21,10 +21,10 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public IEnumerable<QuestionDetail> Details { get; set; }
 
 		[AllowNull]
-		public string QImage { get; set; }
+		public string? QImage { get; set; }
 
         [AllowNull]
-        public string QAudio { get; set; }
+        public string? QAudio { get; set; }
 
         [Required] 
         public int QTime { get; set; }
@@ -52,7 +52,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         [AllowNull]
-        public DateTime DateUpdated { get; set; }
+        public DateTime? DateUpdated { get; set; }
 
 		[Required]
 		public int CreatedByUserId { get; set; }

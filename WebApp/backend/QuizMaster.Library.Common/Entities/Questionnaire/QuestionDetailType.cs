@@ -24,7 +24,7 @@ namespace QuizMaster.Library.Common.Entities.Questionnaire
 
 		public bool ActiveData { get; set; } = true;
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public DateTime DateUpdated { get; set; }
+        public DateTime? DateUpdated { get; set; }
         public int CreatedByUserId { get; set; } = 1; // Admin as default creator
         public int? UpdatedByUserId { get; set; }
     }

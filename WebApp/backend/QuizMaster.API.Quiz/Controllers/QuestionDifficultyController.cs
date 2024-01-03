@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.ResourceParameters;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using QuizMaster.Library.Common.Helpers.Quiz;
 using QuizMaster.Library.Common.Models;
 using System.Text.Json;
 
@@ -27,7 +29,7 @@ namespace QuizMaster.API.Quiz.Controllers
 		}
 
 		// GET: api/question/difficulty
-		[HttpGet]
+		[HttpGet(Name = "GetDifficulties")]
 		public async Task<ActionResult<IEnumerable<DifficultyDto>>> Get([FromQuery] DifficultyResourceParameter resourceParameter)
 		{
             if (resourceParameter.IsGetAll)
@@ -39,19 +41,11 @@ namespace QuizMaster.API.Quiz.Controllers
             // Get all active difficulties asynchronously
             var difficulties = await _quizRepository.GetAllDifficultiesAsync(resourceParameter);
 
-            var paginationMetadata = new Dictionary<string, object?>
-            {
-                    { "totalCount", difficulties.TotalCount },
-                    { "pageSize", difficulties.PageSize },
-                    { "currentPage", difficulties.CurrentPage },
-                    { "totalPages", difficulties.TotalPages },
-                    { "previousPageLink", difficulties.HasPrevious ?
-                        Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
-                    : null },
-                { "nextPageLink", difficulties.HasNext ?
-                        Url.Link("GetQuestions", resourceParameter.GetObject("next"))
-                        : null }
-                };
+            var paginationMetadata = difficulties.GeneratePaginationMetadata(difficulties.HasPrevious ?
+                         Url.Link("GetDifficulties", resourceParameter.GetObject("prev"))
+                         : null, difficulties.HasNext ?
+                         Url.Link("GetDifficulties", resourceParameter.GetObject("next"))
+                         : null);
 
             Response.Headers.Add("X-Pagination",
                    JsonSerializer.Serialize(paginationMetadata));

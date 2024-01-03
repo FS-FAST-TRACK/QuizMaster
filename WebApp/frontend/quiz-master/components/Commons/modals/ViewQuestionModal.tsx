@@ -16,7 +16,7 @@ export default function ViewQuestionModal({
     question?: Question;
     opened: boolean;
     onClose: () => void;
-    callInQuestionsPage: boolean;
+    callInQuestionsPage: string;
 }) {
     const [imageBlobUrl, setImageBlobUrl] = useState<null | string>(null);
     const [audioBlobUrl, setAudioBlobUrl] = useState<null | string>(null);
@@ -70,7 +70,7 @@ export default function ViewQuestionModal({
                     questionId={question?.id}
                     questionTypeId={question?.qTypeId}
                 />
-                {callInQuestionsPage && (
+                {callInQuestionsPage === "questions" && (
                     <div className="flex justify-end">
                         <Button
                             variant="transparent"

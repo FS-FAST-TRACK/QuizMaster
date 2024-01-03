@@ -44,49 +44,47 @@ namespace QuizMaster.API.Gateway.Controllers
         [HttpGet("get_questions")]
         public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions([FromQuery] QuestionResourceParameter resourceParameter)
         {
+            // Process Input
             var request = new QuestionRequest
             {
-                Parameter = JsonConvert.SerializeObject(resourceParameter)
+                Content = JsonConvert.SerializeObject(resourceParameter)
             };
 
+            // Process Logic
             var response = await _channelClient.GetQuestionsAsync(request);
 
-            var questions = JsonConvert.DeserializeObject<PagedList<Question>>(response.Questions);
+            // Process Output
+            try
+            {
+                var pagedQuestions = JsonConvert.DeserializeObject<Tuple<IEnumerable<Question>, Dictionary<string, object?>>>(response.Content);
+                Response.Headers.Add("X-Pagination",
+                       JsonConvert.SerializeObject(pagedQuestions!.Item2));
 
-            var paginationMetadata = new Dictionary<string, object?>
-                {
-                    { "totalCount", questions.TotalCount },
-                    { "pageSize", questions.PageSize },
-                    { "currentPage", questions.CurrentPage },
-                    { "totalPages", questions.TotalPages },
-                    { "previousPageLink", questions.HasPrevious ?
-                        Url.Link("GetQuestions", resourceParameter.GetObject("prev"))
-                        : null },
-                    { "nextPageLink", questions.HasNext ?
-                        Url.Link("GetQuestions", resourceParameter.GetObject("next"))
-                        : null }
-                };
+                Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
 
-            Response.Headers.Add("X-Pagination",
-                   System.Text.Json.JsonSerializer.Serialize(paginationMetadata));
+                return Ok(_mapper.Map<IEnumerable<QuestionDto>>(pagedQuestions.Item1));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
 
-            Response.Headers.Add("Access-Control-Expose-Headers", "X-Pagination");
-
-            return Ok(_mapper.Map<IEnumerable<QuestionDto>>(questions));
         }
 
         [HttpGet("get_question/{id}")] 
         public async Task<IActionResult> GetQuestion(int id)
         {
-            var request = new GetQuestionRequest() { Id = id};
+            // Process Input
+            var request = new QuestionRequest() { Id = id};
 
+            // Process logic
             var response = await _channelClient.GetQuestionAsync(request);
 
             if(response.Code == 404)
             {
                 return NotFound(new ResponseDto { Type = "Error", Message = $"Question with id {id} not found." });
             }
-            var question = JsonConvert.DeserializeObject<QuestionDto>(response.Questions);
+            var question = JsonConvert.DeserializeObject<QuestionDto>(response.Content);
             return Ok(question);
         }
 
@@ -129,12 +127,15 @@ namespace QuizMaster.API.Gateway.Controllers
                     new ResponseDto { Type = "Error", Message = validationResult.Error }
                 );
             }
-
+            // Process Input
             var question = JsonConvert.SerializeObject(questionDto);
-            var request = new QuestionRequest() { Parameter = question };
+            var request = new QuestionRequest() { Content = question };
 
+            // Process Logic
             var reply = await _channelClient.AddQuestionAsync(request, headers);
 
+
+            // Process Output
             if (reply.Code == 409)
             {
                 return ReturnQuestionAlreadyExist();
@@ -145,7 +146,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto { Type = "Error", Message = "Failed to create question." });
             }
 
-            var createdQuestion = JsonConvert.DeserializeObject<QuestionDto>(reply.Questions);
+            var createdQuestion = JsonConvert.DeserializeObject<QuestionDto>(reply.Content);
             return Ok(createdQuestion);
         }
 
@@ -174,7 +175,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "role", userRole }
             };
 
-            var request = new GetQuestionRequest() { Id = id };
+            var request = new QuestionRequest() { Id = id };
             var reply = await _channelClient.DeleteQuestionAsync(request, headers);
 
             if(reply.Code == 404)
@@ -214,12 +215,14 @@ namespace QuizMaster.API.Gateway.Controllers
                 { "id", userId.ToString() ?? "unknown" },
                 { "role", userRole }
             };
-
+            // Process Input
             var patchRequest = JsonConvert.SerializeObject(patch);
-            var request = new PatchQuestionRequest() { Id = id, Patch = patchRequest };
+            var request = new QuestionRequest() { Id = id, Content = patchRequest };
 
+            // Process Logic
             var reply = await _channelClient.PatchQuestionAsync(request, headers);
             
+            // Process Output
             if(reply.Code == 404)
             {
                 return ReturnQuestionDoesNotExist(id);
@@ -230,7 +233,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(new ResponseDto
                 {
                     Type = "Error",
-                    Message = reply.Questions
+                    Message = reply.Content
                 });
             }
             
@@ -244,11 +247,11 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(new ResponseDto
                 {
                     Type = "Error",
-                    Message = reply.Questions
+                    Message = reply.Content
                 }) ;
             }
 
-            var result = JsonConvert.DeserializeObject<Question>(reply.Questions);
+            var result = JsonConvert.DeserializeObject<Question>(reply.Content);
             return Ok(_mapper.Map<QuestionDto>(result));
         }
 
