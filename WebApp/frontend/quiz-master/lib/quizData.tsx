@@ -184,8 +184,13 @@ export async function fetchQuestionDetails({
 export async function fetchSets() {
     try {
         var apiUrl = `${QUIZMASTER_SET_GET_SETS}`;
-
-        const data = await fetch(apiUrl).then(async (res) => {
+        const token = localStorage.getItem("token");//just temporary
+        const data = await fetch(apiUrl, {
+            headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+        }).then(async (res) => {
             var data: Set[];
             data = await res.json();
             data.forEach((set) => {
@@ -222,8 +227,14 @@ export async function fetchSet({ setId }: { setId: number }) {
 export async function fetchAllSetQuestions() {
     try {
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
+        const token = localStorage.getItem("token");//just temporary
 
-        const data = await fetch(apiUrl).then(async (res) => {
+        const data = await fetch(apiUrl, {
+            headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+        }).then(async (res) => {
             var data: QuestionSet[];
             data = await res.json();
             data.forEach((set) => {
@@ -243,8 +254,14 @@ export async function fetchAllSetQuestions() {
 export async function fetchSetQuestions({ setId }: { setId: number }) {
     try {
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTION}${setId}`;
+        const token = localStorage.getItem("token");//just temporary
 
-        const data = await fetch(apiUrl).then(async (res) => {
+        const data = await fetch(apiUrl, {
+            headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+        }).then(async (res) => {
             var data: QuestionSet[];
             data = await res.json();
             data.forEach((set) => {
