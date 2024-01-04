@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import {
     PaginationMetadata,
     Question,
@@ -12,7 +11,18 @@ import {
     QuestionSet,
     Set,
 } from "./definitions";
-import { QUIZMASTER_MEDIA_GET_DOWNLOAD, QUIZMASTER_QCATEGORY_GET_CATEGORIES, QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES, QUIZMASTER_QTYPE_GET_TYPES, QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_SET_GET_SET, QUIZMASTER_SET_GET_SETQUESTION, QUIZMASTER_SET_GET_SETQUESTIONS, QUIZMASTER_SET_GET_SETS } from "@/api/api-routes";
+import {
+    QUIZMASTER_MEDIA_GET_DOWNLOAD,
+    QUIZMASTER_QCATEGORY_GET_CATEGORIES,
+    QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES,
+    QUIZMASTER_QTYPE_GET_TYPES,
+    QUIZMASTER_QUESTION_GET_QUESTION,
+    QUIZMASTER_QUESTION_GET_QUESTIONS,
+    QUIZMASTER_SET_GET_SET,
+    QUIZMASTER_SET_GET_SETQUESTION,
+    QUIZMASTER_SET_GET_SETQUESTIONS,
+    QUIZMASTER_SET_GET_SETS,
+} from "@/api/api-routes";
 
 export async function fetchQuestions({
     questionResourceParameter,
@@ -21,7 +31,10 @@ export async function fetchQuestions({
 }) {
     try {
         var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
-        if(questionResourceParameter.exludeQuestionsIds && questionResourceParameter.exludeQuestionsIds.length !== 0){
+        if (
+            questionResourceParameter.exludeQuestionsIds &&
+            questionResourceParameter.exludeQuestionsIds.length !== 0
+        ) {
             apiUrl = apiUrl.concat(
                 `&exludeQuestionsIds=${JSON.stringify(
                     questionResourceParameter.exludeQuestionsIds
@@ -61,11 +74,11 @@ export async function fetchCategories(
         }
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionCategory[];
-            var paginationMetadata: PaginationMetadata | null; 
+            var paginationMetadata: PaginationMetadata | null;
             paginationMetadata = JSON.parse(
                 res.headers.get("x-pagination") || ""
             );
-           
+
             data = await res.json();
             data.forEach((cat) => {
                 cat.dateCreated = new Date(cat.dateCreated);
@@ -93,7 +106,7 @@ export async function fetchDifficulties(
         }
         const data = await fetch(apiUrl).then(async (res) => {
             var data: QuestionDifficulty[];
-            var paginationMetadata: PaginationMetadata;
+            var paginationMetadata: PaginationMetadata | null;
             paginationMetadata = JSON.parse(
                 res.headers.get("x-pagination") || ""
             );
@@ -114,9 +127,7 @@ export async function fetchDifficulties(
 
 export async function fetchTypes() {
     try {
-        const data = await fetch(
-            `${QUIZMASTER_QTYPE_GET_TYPES}`
-        )
+        const data = await fetch(`${QUIZMASTER_QTYPE_GET_TYPES}`)
             .then((res) => res.json())
             .then((data) => {
                 var types: QuestionType[];
@@ -252,9 +263,7 @@ export async function fetchSetQuestions({ setId }: { setId: number }) {
 
 export async function fetchMedia(id: string) {
     try {
-        const data = await fetch(
-            `${QUIZMASTER_MEDIA_GET_DOWNLOAD}${id}`
-        )
+        const data = await fetch(`${QUIZMASTER_MEDIA_GET_DOWNLOAD}${id}`)
             .then(async (res) => {
                 if (res.status === 404) {
                     throw new Error(`Media with id ${id} not found`);
