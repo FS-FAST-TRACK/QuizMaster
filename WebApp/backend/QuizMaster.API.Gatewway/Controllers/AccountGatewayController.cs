@@ -429,7 +429,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         // Return id username already exist
         private ActionResult ReturnUserNameAlreadyExist()
         {
-            return BadRequest(new ResponseDto
+            return StatusCode( StatusCodes.Status409Conflict,new ResponseDto
             {
                 Type = "Error",
                 Message = "UserName already exist."
@@ -439,7 +439,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         // Return if user doesn't exist
         private ActionResult ReturnUserDoesNotExist()
         {
-            return BadRequest(new ResponseDto
+            return StatusCode(StatusCodes.Status409Conflict, new ResponseDto
             {
                 Type = "Error",
                 Message = "User doesn't exist."
@@ -450,7 +450,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         // Return if email already exist
         private ActionResult ReturnEmailAlreadyExist()
         {
-            return BadRequest(new ResponseDto
+            return StatusCode(StatusCodes.Status409Conflict, new ResponseDto
             {
                 Type = "Error",
                 Message = "Email already exist."
