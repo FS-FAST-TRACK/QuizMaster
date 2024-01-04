@@ -46,7 +46,7 @@ export async function updateQuestionSet({
         const res = await fetch(
             `${QUIZMASTER_SET_PUT}${id}`,
             {
-                method: "PATCH",
+                method: "PUT",
                 mode: "cors",
                 body: JSON.stringify(questionSet),
                 headers: {

@@ -13,6 +13,7 @@ import SetAction from "../popover/SetAction";
 import PromptModal from "../modals/PromptModal";
 import SetCard from "../cards/SetCard";
 import ViewSetModal from "../modals/ViewSetModal";
+import { QUIZMASTER_SET_DELETE } from "@/api/api-routes";
 
 export default function QuestionSetsTable({
     questionSets,
@@ -27,6 +28,7 @@ export default function QuestionSetsTable({
     const [questionsSet, setQuestionsSet] = useState<QuestionSet[]>([]);
     const [deleteSet, setDeleteSet] = useState<Set>();
     const [viewSet, setViewSet] = useState<Set | undefined>();
+    const token = localStorage.getItem("token"); //just temporary
 
     useEffect(() => {
         setSelectedRows([]);
@@ -37,12 +39,13 @@ export default function QuestionSetsTable({
     }, [questionSets]);
 
     const handelDelete = useCallback(async () => {
-        const res = await fetch(
-            `${process.env.QUIZMASTER_GATEWAY}/set/delete_set/${deleteSet?.id}`,
-            {
-                method: "DELETE",
-            }
-        );
+        const res = await fetch(`${QUIZMASTER_SET_DELETE}${deleteSet?.id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
         if (res.status === 200) {
             setDeleteSet(undefined);

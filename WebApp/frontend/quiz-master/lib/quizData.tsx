@@ -210,8 +210,14 @@ export async function fetchSets() {
 export async function fetchSet({ setId }: { setId: number }) {
     try {
         var apiUrl = `${QUIZMASTER_SET_GET_SET}${setId}`;
+        const token = localStorage.getItem("token");//just temporary
 
-        const data = await fetch(apiUrl).then(async (res) => {
+        const data = await fetch(apiUrl, {
+            headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+        }).then(async (res) => {
             var data: Set;
             data = await res.json();
 
