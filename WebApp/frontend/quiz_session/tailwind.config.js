@@ -11,8 +11,16 @@ module.exports = {
         wall: "#18A44C",
         secondary_text: "#8D8D8D",
         button: "#17A14B",
+        green_text: "#18A44C",
+        orange_button: "#FFAD33",
+        gray_text: "#706E6D",
+        gold: "#FCE549",
+        silver: "#E2E2E2",
+        bronze: "#E9A67B",
+        dark_green: "#148E42",
       },
     },
   },
+
   plugins: [],
 };
