@@ -65,7 +65,7 @@ namespace QuizMaster.API.Gateway.Services
 
                 if (Setquestions == null) continue;
 
-
+                int currentQuestion = 1;
                 foreach (var questionSet in Setquestions)
                 {
                     roomPin = Qset.QRoom.QRoomPin + "";
@@ -88,6 +88,22 @@ namespace QuizMaster.API.Gateway.Services
                     details.CurrentSetName = questionSet.Set.QSetName;
                     details.CurrentSetDesc = questionSet.Set.QSetDesc;
                     details.details.ForEach(qD => qD.DetailTypes = new List<DetailType>());
+
+                    /*
+                     * Room Metadata
+                     * - CurrentSet
+                     * - TotalNumberOfSets
+                     * - CurrentQuestion
+                     * - TotalNumberOfQuestions
+                     * - ParticipantsInRoom
+                     */
+                    await hub.Clients.Group(roomPin).SendAsync("metadata", new {
+                        currentSet = setIndex + 1,
+                        totalNumberOfSets = quizSets.Count,
+                        currentQuestion = currentQuestion++,
+                        totalNumberOfQuestions = Setquestions.Count,
+                        participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
+                    });
 
                     for (int time = timout; time >= 0; time--)
                     {
