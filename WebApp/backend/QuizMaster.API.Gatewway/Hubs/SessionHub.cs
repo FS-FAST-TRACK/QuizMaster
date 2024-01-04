@@ -48,7 +48,7 @@ namespace QuizMaster.API.Gateway.Hubs
         {
             var connectionId = Context.ConnectionId;
             await SessionHandler.AuthenticateConnectionId(this, _authChannelClient, connectionId, token);
-            await GetConnectionId(); // return connectionId
+            
         }
 
         public async Task CreateRoom(CreateRoomDTO roomDTO)
@@ -283,6 +283,7 @@ namespace QuizMaster.API.Gateway.Hubs
                             }
                         }
 
+                        await Task.Delay(500);
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("chat", new { Message = $"{Name} has joined the room", Name = "bot", IsAdmin = false});
                         IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
@@ -372,6 +373,7 @@ namespace QuizMaster.API.Gateway.Hubs
                 // we will not use await, we will let the request pass
                 await Clients.Group(roomPin).SendAsync("start", true);
                 //await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
+                await Task.Delay(500);
                 await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, quizRoom);
             }
             catch (Exception ex)

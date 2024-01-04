@@ -9,6 +9,7 @@ using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.Diagnostics.Eventing.Reader;
 
 namespace QuizMaster.API.Gateway.Services
 {
@@ -65,7 +66,7 @@ namespace QuizMaster.API.Gateway.Services
 
                 if (Setquestions == null) continue;
 
-
+                int currentQuestion = 1;
                 foreach (var questionSet in Setquestions)
                 {
                     roomPin = Qset.QRoom.QRoomPin + "";
@@ -89,26 +90,53 @@ namespace QuizMaster.API.Gateway.Services
                     details.CurrentSetDesc = questionSet.Set.QSetDesc;
                     details.details.ForEach(qD => qD.DetailTypes = new List<DetailType>());
 
+                    /*
+                     * Room Metadata
+                     * - CurrentSetIndex
+                     * - CurrentSetName
+                     * - TotalNumberOfSets
+                     * - CurrentQuestionIndex
+                     * - CurrentQuestionName
+                     * - TotalNumberOfQuestions
+                     * - ParticipantsInRoom
+                     */
+                    await hub.Clients.Group(roomPin).SendAsync("metadata", new {
+                        currentSetName = details.CurrentSetName,
+                        currentSetIndex = setIndex + 1,
+                        totalNumberOfSets = quizSets.Count,
+                        currentQuestionIndex = currentQuestion++,
+                        currentQuestionName = details.question.QStatement,
+                        totalNumberOfQuestions = Setquestions.Count,
+                        participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
+                    });
+
                     for (int time = timout; time >= 0; time--)
                     {
                         details.RemainingTime = time;
                         await hub.Clients.Group(roomPin).SendAsync("question", details);
+                        //string connectionId = hub.Context.ConnectionId;
+                        
+                        //await hub.Clients.Group(roomPin).SendAsync("connId", connectionId);
+
                         await Task.Delay(1000);
                     }
+                }
+
+                if (room.ShowLeaderboardEachRound())
+                {
+                    await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Displaying leaderboards");
+                    await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
+                    await Task.Delay(5000);
                 }
 
                 // before going to new set, do some elimination if toggled
                 if (room.IsEliminationRound() && ++setIndex < quizSets.Count)
                 {
-                    if (room.ShowLeaderboardEachRound())
-                    {
-                        await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Displaying leaderboards");
-                        await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
-                        await Task.Delay(5000);
-                    }
                     await EliminateParticipantsAsync(hub, handler, roomPin, adminData);
                     await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Elimination, reducing population to half");
                 }
+
+
             }
             await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
             
@@ -167,12 +195,27 @@ namespace QuizMaster.API.Gateway.Services
             List<QuizParticipant> participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).ToList();
             participants.AddRange(handler.GetEliminatedParticipants(Convert.ToInt32(roomPin)));
             int limitDisplayed = room.DisplayTop10Only() ? 10 : participants.Count();
-            foreach (var participant in participants.OrderByDescending(p => p.Score).Take(limitDisplayed))
-            {
-                if (adminData.UserId == participant.UserId) continue; // don't display admin score
-                string eliminated = handler.IsParticipantEliminated(Convert.ToInt32(roomPin), participant) ? "Eliminated" : string.Empty;
-                await hub.Clients.Group(roomPin).SendAsync("leaderboard", $"Score: {participant.Score} | Name: {participant.QParticipantDesc} {eliminated}");
-            }
+
+            var leaderboard = participants.OrderByDescending(p => p.Score).Take(limitDisplayed).Select(person => {
+                if (adminData.UserId != person.UserId)
+                {
+                    string eliminated = handler.IsParticipantEliminated(Convert.ToInt32(roomPin), person) ? "Eliminated" : string.Empty;
+                    return new ScoreDTO() { Name = person.QParticipantDesc, Score = person.Score, Eleminated = eliminated };
+                }
+                return null;
+
+            } ).Where(scoreDto => scoreDto != null).ToList();
+            await hub.Clients.Group(roomPin).SendAsync("leaderboard", leaderboard);
+
+            //foreach (var participant in participants.OrderByDescending(p => p.Score).Take(limitDisplayed))
+            //{
+            //    i // don't display admin score
+            //    if (adminData.UserId == participant.UserId) continue; // don't display admin score
+            //    string eliminated = handler.IsParticipantEliminated(Convert.ToInt32(roomPin), participant) ? "Eliminated" : string.Empty;
+
+            //    var score = new ScoreDTO (){ Name = participant.QParticipantDesc, Score = participant.Score, Eleminated= eliminated };
+            //    await hub.Clients.Group(roomPin).SendAsync("leaderboard",  score);
+            //}
 
 
         }

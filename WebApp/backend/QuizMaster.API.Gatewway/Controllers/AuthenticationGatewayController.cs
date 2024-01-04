@@ -32,7 +32,7 @@ namespace QuizMaster.API.Gateway.Controllers
         {
             var handler = new HttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-
+            
             _channel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _channelClient = new AuthService.AuthServiceClient(_channel);
         }
