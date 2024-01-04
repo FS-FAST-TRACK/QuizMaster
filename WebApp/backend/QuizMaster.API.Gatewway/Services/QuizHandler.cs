@@ -91,16 +91,20 @@ namespace QuizMaster.API.Gateway.Services
 
                     /*
                      * Room Metadata
-                     * - CurrentSet
+                     * - CurrentSetIndex
+                     * - CurrentSetName
                      * - TotalNumberOfSets
-                     * - CurrentQuestion
+                     * - CurrentQuestionIndex
+                     * - CurrentQuestionName
                      * - TotalNumberOfQuestions
                      * - ParticipantsInRoom
                      */
                     await hub.Clients.Group(roomPin).SendAsync("metadata", new {
-                        currentSet = setIndex + 1,
+                        currentSetName = details.CurrentSetName,
+                        currentSetIndex = setIndex + 1,
                         totalNumberOfSets = quizSets.Count,
-                        currentQuestion = currentQuestion++,
+                        currentQuestionIndex = currentQuestion++,
+                        currentQuestionName = details.question.QStatement,
                         totalNumberOfQuestions = Setquestions.Count,
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
