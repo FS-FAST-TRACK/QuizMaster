@@ -73,22 +73,24 @@ export default function QuestionTable({
                     : undefined
             }
         >
-            <Table.Td>
-                <Checkbox
-                    color="green"
-                    aria-label="Select row"
-                    checked={selectedRows.includes(question.id)}
-                    onChange={(event) =>
-                        setSelectedRows(
-                            event.currentTarget.checked
-                                ? [...selectedRows, question.id]
-                                : selectedRows.filter(
-                                      (id) => id !== question.id
-                                  )
-                        )
-                    }
-                />
-            </Table.Td>
+            {callInQuestionsPage === "set single view" ? null : (
+                <Table.Td>
+                    <Checkbox
+                        color="green"
+                        aria-label="Select row"
+                        checked={selectedRows.includes(question.id)}
+                        onChange={(event) =>
+                            setSelectedRows(
+                                event.currentTarget.checked
+                                    ? [...selectedRows, question.id]
+                                    : selectedRows.filter(
+                                          (id) => id !== question.id
+                                      )
+                            )
+                        }
+                    />
+                </Table.Td>
+            )}
             <Table.Td
                 className="cursor-pointer"
                 onClick={() => setViewQuestion(question)}
@@ -141,24 +143,26 @@ export default function QuestionTable({
             <Table striped>
                 <Table.Thead>
                     <Table.Tr>
-                        <Table.Th>
-                            <Checkbox
-                                color="green"
-                                aria-label="Select row"
-                                checked={
-                                    selectedRows.length === questions.length
-                                }
-                                onChange={(event) =>
-                                    setSelectedRows(
-                                        event.currentTarget.checked
-                                            ? questions.map(
-                                                  (question) => question.id
-                                              )
-                                            : []
-                                    )
-                                }
-                            />
-                        </Table.Th>
+                        {callInQuestionsPage === "set single view" ? null : (
+                            <Table.Th>
+                                <Checkbox
+                                    color="green"
+                                    aria-label="Select row"
+                                    checked={
+                                        selectedRows.length === questions.length
+                                    }
+                                    onChange={(event) =>
+                                        setSelectedRows(
+                                            event.currentTarget.checked
+                                                ? questions.map(
+                                                      (question) => question.id
+                                                  )
+                                                : []
+                                        )
+                                    }
+                                />
+                            </Table.Th>
+                        )}
                         <Table.Th>Question Statement</Table.Th>
                         <Table.Th>Type</Table.Th>
                         <Table.Th>Category</Table.Th>

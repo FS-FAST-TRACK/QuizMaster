@@ -18,21 +18,23 @@ export default function ViewSetModal({
     opened: boolean;
     onClose: () => void;
 }) {
-    const [imageBlobUrl, setImageBlobUrl] = useState<null | string>(null);
-    const [audioBlobUrl, setAudioBlobUrl] = useState<null | string>(null);
-
     return (
         <Modal
             zIndex={100}
             opened={opened}
             onClose={onClose}
             centered
+            size="lg"
             title="Set"
         >
-            <div className="space-y-8 pl-3">
-                <Text size="xl" fw={700}>
-                    Set details:
-                </Text>
+            <div className="space-y-8 pb-3">
+                <div>
+                    <div className="flex w-full justify-center">
+                        <Chip color="rgba(0, 0, 0, 1)" variant="filled" checked>
+                            Question Set
+                        </Chip>
+                    </div>
+                </div>
                 <SetCard set={set} />
             </div>
             <div className="flex justify-end">
@@ -48,23 +50,4 @@ export default function ViewSetModal({
             </div>
         </Modal>
     );
-
-    // return (
-    //     <PromptModal
-    //         body={
-    //             <div className="p-3">
-    //                 <Text size="xl" fw={700}>
-    //                     Set Details:
-    //                 </Text>
-    //                 <br />
-    //                 <SetCard set={set} />
-    //             </div>
-    //         }
-    //         action="Update"
-    //         onConfirm={() => null}
-    //         opened={set ? true : false}
-    //         onClose={() => {}}
-    //         title="Set"
-    //     />
-    // );
 }
