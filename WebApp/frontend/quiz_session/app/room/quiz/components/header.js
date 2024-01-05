@@ -3,38 +3,16 @@
 import React from "react";
 import RoomPin from "../../components/roomPin";
 import { useEffect, useState } from "react";
-import { useConnection } from "@/app/util/store";
+import { useQuestion } from "@/app/util/store";
+import { timeFormater } from "@/app/auth/util/handlers";
 
 export default function Header() {
-  const { connection } = useConnection();
+  const { question } = useQuestion();
   const [time, setTime] = useState();
   useEffect(() => {
-    connection.on("question", (question) => {
-      /*
-       question - question.question.qStatement
-       answers - question.details.qDetailDesc
-       type - question.question.qTypeId
+    setTime(question?.remainingTime);
+  }, [question]);
 
-       Type Questions
-       1 - Multiple Choice
-       2 - Multiple Choice + Audio
-       3 - True or False
-       4 - Type Answer
-       5 - Slider
-       6 - Puzzle
-      */
-      setTime(question.remainingTime);
-    });
-  }, []);
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    seconds = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-      2,
-      "0"
-    )}`;
-  };
   return (
     <div className="px-5 pt-2 w-full">
       <div className="flex flex-row  w-full">
@@ -51,7 +29,7 @@ export default function Header() {
         <div className="flex items-end flex-col w-full">
           <div className="text-white">Time left</div>
           <div className="text-2xl font-bold text-white">
-            {formatTime(time)}
+            {timeFormater(time)}
           </div>
         </div>
       </div>
