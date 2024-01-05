@@ -2,12 +2,14 @@
 
 import PageHeader from "@/components/Commons/headers/PageHeader";
 import SideNav from "@/components/Commons/navbars/sidenav";
-import { fetchCategories, fetchDifficulties, fetchTypes } from "@/lib/quizData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
 import { Suspense, useEffect } from "react";
 import Loading from "./loading";
+import { getAllCategories } from "@/lib/hooks/category";
+import { getAllDifficulties } from "@/lib/hooks/difficulty";
+import { getAllTypes } from "@/lib/hooks/type";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { setQuestionCategories } = useQuestionCategoriesStore();
@@ -15,14 +17,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const { setQuestionTypes } = useQuestionTypesStore();
 
     useEffect(() => {
-        fetchCategories().then((res) => {
+        getAllCategories().then((res) => {
             setQuestionCategories(res.data);
         });
-        fetchDifficulties().then((res) => {
+        getAllDifficulties().then((res) => {
             setQuestionDifficulties(res.data);
         });
-        fetchTypes().then((res) => {
-            setQuestionTypes(res);
+        getAllTypes().then((res) => {
+            setQuestionTypes(res.data);
         });
     }, [setQuestionCategories, setQuestionDifficulties, setQuestionTypes]);
 
