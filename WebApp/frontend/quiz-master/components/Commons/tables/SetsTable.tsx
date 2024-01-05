@@ -28,6 +28,7 @@ export default function QuestionSetsTable({
     const [questionsSet, setQuestionsSet] = useState<QuestionSet[]>([]);
     const [deleteSet, setDeleteSet] = useState<Set>();
     const [viewSet, setViewSet] = useState<Set | undefined>();
+    const token = localStorage.getItem("token"); //just temporary
 
     useEffect(() => {
         setSelectedRows([]);
@@ -38,8 +39,12 @@ export default function QuestionSetsTable({
     }, [questionSets]);
 
     const handelDelete = useCallback(async () => {
-        const res = await fetch(`${QUIZMASTER_SET_DELETE}/${deleteSet?.id}`, {
+        const res = await fetch(`${QUIZMASTER_SET_DELETE}${deleteSet?.id}`, {
             method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         });
 
         if (res.status === 200) {
