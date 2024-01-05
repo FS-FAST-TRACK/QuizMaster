@@ -24,7 +24,9 @@ import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
 import QuestionModal from "../modals/ViewQuestionModal";
 import ViewQuestionModal from "../modals/ViewQuestionModal";
+import { deleteQuestion as removeQuestion } from "@/lib/hooks/question";
 import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
+import { notification } from "@/lib/notifications";
 
 export default function QuestionTable({
     questions,
@@ -56,12 +58,19 @@ export default function QuestionTable({
     }, [selectedRows]);
 
     const handelDelete = useCallback(async () => {
-        const res = await fetch(
-            `${QUIZMASTER_QUESTION_DELETE}/${deleteQuestion?.id}`,
-            {
-                method: "DELETE",
+        if (deleteQuestion) {
+            try {
+                const res = await removeQuestion({ id: deleteQuestion.id });
+                if (res.type === "success") {
+                    notification({ type: "success", title: res.message });
+                } else {
+                    notification({ type: "error", title: res.message });
+                }
+                setDeleteQuestion(undefined);
+            } catch (error) {
+                notification({ type: "error", title: "Something went wrong" });
             }
-        );
+        }
     }, [deleteQuestion]);
 
     const rows = questions.map((question) => (

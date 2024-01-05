@@ -1,4 +1,11 @@
-import { QUIZMASTER_QUESTION_GET_QUESTION, QUIZMASTER_QUESTION_GET_QUESTIONS, QUIZMASTER_QUESTION_PATCH, QUIZMASTER_QUESTION_POST } from "@/api/api-routes";
+import {
+    QUIZMASTER_MEDIA_POST,
+    QUIZMASTER_QUESTION_DELETE,
+    QUIZMASTER_QUESTION_GET_QUESTION,
+    QUIZMASTER_QUESTION_GET_QUESTIONS,
+    QUIZMASTER_QUESTION_PATCH,
+    QUIZMASTER_QUESTION_POST,
+} from "@/api/api-routes";
 import {
     PaginationMetadata,
     PatchItem,
@@ -6,6 +13,32 @@ import {
     QuestionCreateDto,
     QuestionResourceParameter,
 } from "../definitions";
+import { CustomResponse } from "@/api/definitions";
+
+interface QuestionPostResponse extends CustomResponse {
+    data:
+        | {
+              question: Question;
+          }
+        | undefined;
+}
+
+interface QuestionsGetResponse extends CustomResponse {
+    data:
+        | {
+              questions: Question[];
+              paginationMetada: PaginationMetadata;
+          }
+        | undefined;
+}
+
+interface QuestionGetResponse extends CustomResponse {
+    data:
+        | {
+              question: Question;
+          }
+        | undefined;
+}
 
 export async function fetchQuestions({
     questionResourceParameter,
@@ -14,6 +47,8 @@ export async function fetchQuestions({
 }) {
     try {
         var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
+
+        // Add filter by categories
         if (questionResourceParameter.filterByCategories.length !== 0) {
             apiUrl = apiUrl.concat(
                 `&filterByCategoriesId=${JSON.stringify(
@@ -21,6 +56,8 @@ export async function fetchQuestions({
                 )}`
             );
         }
+
+        // Add filter by types
         if (questionResourceParameter.filterByTypes.length !== 0) {
             apiUrl = apiUrl.concat(
                 `&filterByTypesId=${JSON.stringify(
@@ -28,6 +65,8 @@ export async function fetchQuestions({
                 )}`
             );
         }
+
+        // Add filter by difficulties
         if (questionResourceParameter.filterByDifficulties.length !== 0) {
             apiUrl = apiUrl.concat(
                 `&filterByDifficultiesId=${JSON.stringify(
@@ -35,27 +74,45 @@ export async function fetchQuestions({
                 )}`
             );
         }
-        if(questionResourceParameter.exludeQuestionsIds && questionResourceParameter.exludeQuestionsIds.length !== 0){
+
+        // Add filter excluding some questions given their ids
+        if (
+            questionResourceParameter.exludeQuestionsIds &&
+            questionResourceParameter.exludeQuestionsIds.length !== 0
+        ) {
             apiUrl = apiUrl.concat(
                 `&exludeQuestionsIds=${JSON.stringify(
                     questionResourceParameter.exludeQuestionsIds
                 )}`
             );
         }
-        const { data, paginationMetadata } = await fetch(apiUrl).then(
-            async (res) => {
-                var data: Question[];
-                var paginationMetadata: PaginationMetadata;
-                paginationMetadata = JSON.parse(
-                    res.headers.get("x-pagination") || ""
-                );
-                data = await res.json();
 
-                return { data, paginationMetadata };
-            }
-        );
+        const res = await fetch(apiUrl);
 
-        return { data, paginationMetadata };
+        const isSuccess = res.status === 201 || res.status === 200;
+        var response: QuestionsGetResponse = {
+            statusCode: res.status,
+            type: isSuccess ? "success" : "fail",
+            message: "",
+            data: undefined,
+        };
+
+        if (!isSuccess) {
+            var error = await res.json();
+            response.message = error.Message;
+            return response;
+        }
+
+        var data: Question[];
+        var paginationMetadata: PaginationMetadata;
+        paginationMetadata = JSON.parse(res.headers.get("x-pagination") || "");
+        data = await res.json();
+
+        response.data = {
+            questions: data,
+            paginationMetada: paginationMetadata,
+        };
+        return response;
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch question data.");
@@ -91,25 +148,34 @@ export async function postQuestion({
     audio: File | undefined | null;
 }) {
     try {
+        var response: CustomResponse = {
+            statusCode: 200,
+            data: null,
+            message: "",
+            type: "success",
+        };
+
         // Post Image
         if (image) {
             var imageForm = new FormData();
             imageForm.append("file", image);
-            const imageRes = await fetch(
-                `${process.env.QUIZMASTER_MEDIA}/api/media`,
-                {
-                    method: "POST",
-                    mode: "cors",
-                    body: imageForm,
-                }
-            );
+            const imageRes = await fetch(`${QUIZMASTER_MEDIA_POST}`, {
+                method: "POST",
+                mode: "cors",
+                body: imageForm,
+                credentials: "include",
+            });
 
             if (imageRes.ok) {
                 // Parse the response body as JSON
                 const responseBody = await imageRes.json();
                 question.qImage = responseBody.fileInformation.id;
             } else {
-                throw new Error("Failed Post Image.");
+                const data = await imageRes.json();
+                response.statusCode = imageRes.status;
+                response.type = "fail";
+                response.message = data.Message;
+                return response;
             }
         }
 
@@ -123,6 +189,7 @@ export async function postQuestion({
                     method: "POST",
                     mode: "cors",
                     body: audioForm,
+                    credentials: "include",
                 }
             );
             if (audioRes.ok) {
@@ -130,7 +197,11 @@ export async function postQuestion({
                 const responseBody = await audioRes.json();
                 question.qAudio = responseBody.fileInformation.id;
             } else {
-                throw new Error("Failed Post Audio.");
+                const data = await audioRes.json();
+                response.statusCode = audioRes.status;
+                response.type = "fail";
+                response.message = data.Message;
+                return response;
             }
         }
 
@@ -142,9 +213,12 @@ export async function postQuestion({
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
         });
 
-        if (res.status === 201) {
+        const isSuccess = res.status === 201 || res.status === 200;
+
+        if (isSuccess) {
             return res;
         } else {
             throw new Error("Failed to create question");
@@ -218,17 +292,14 @@ export async function patchQuestion({
         }
 
         // Post Question
-        const res = await fetch(
-            `${QUIZMASTER_QUESTION_PATCH}/${id}`,
-            {
-                method: "PATCH",
-                mode: "cors",
-                body: JSON.stringify(patches),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const res = await fetch(`${QUIZMASTER_QUESTION_PATCH}/${id}`, {
+            method: "PATCH",
+            mode: "cors",
+            body: JSON.stringify(patches),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
         if (res.status === 201) {
             var data: Question;
@@ -240,5 +311,33 @@ export async function patchQuestion({
         }
     } catch (error) {
         throw new Error("Failed to create question.");
+    }
+}
+
+export async function deleteQuestion({ id }: { id: number }) {
+    try {
+        // Post Question
+        const res = await fetch(`${QUIZMASTER_QUESTION_DELETE}${id}`, {
+            mode: "cors",
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        const isSuccess = res.status === 200 || res.status === 204;
+
+        var response: CustomResponse = {
+            statusCode: res.status,
+            type: isSuccess ? "success" : "fail",
+            message: isSuccess ? "Question succesfully deleted." : "",
+            data: null,
+        };
+        if (!isSuccess) {
+            var data = await res.json();
+            response.message = data.message;
+        }
+
+        return response;
+    } catch (error) {
+        throw new Error("Failed to delete question.");
     }
 }
