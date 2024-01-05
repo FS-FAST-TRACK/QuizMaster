@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Quiz.Protos";
+
+service QuestionDetailServices{
+	rpc GetQuestionDetails(QuestionDetailRequest) returns (QuestionDetailResponse);
+	rpc GetQuestionDetail(QuestionDetailRequest) returns (QuestionDetailResponse);
+	rpc AddQuestionDetail(QuestionDetailRequest) returns (QuestionDetailResponse);
+	rpc DeleteQuestionDetail(QuestionDetailRequest) returns (QuestionDetailResponse);
+	rpc PatchQuestionDetail(QuestionDetailRequest) returns (QuestionDetailResponse);
+}
+
+message QuestionDetailRequest{
+	int32 questionId = 1; 
+	int32 id = 2;
+	string content = 3;
+	string type = 4;
+}
+
+message QuestionDetailResponse{
+	int32 code  = 1;
+	string content = 2;
+	string type = 3;
+}
