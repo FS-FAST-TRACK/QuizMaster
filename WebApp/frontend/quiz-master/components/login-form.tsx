@@ -34,7 +34,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
         handlers.open();
         try {
             const response = await login({ username, password });
-            console.log(callbackUrl);
+
             // Sign In the user if response is with 200
             if (response.type === "success") {
                 localStorage.setItem("token", response.data.token); //this is just temporary.

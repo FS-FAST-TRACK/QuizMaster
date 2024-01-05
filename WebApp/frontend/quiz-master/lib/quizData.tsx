@@ -183,13 +183,14 @@ export async function fetchQuestionDetails({
 
 export async function fetchSets() {
     try {
+        const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETS}`;
-        const token = localStorage.getItem("token");//just temporary
         const data = await fetch(apiUrl, {
+            credentials: "include",
             headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         }).then(async (res) => {
             var data: Set[];
             data = await res.json();
@@ -209,14 +210,16 @@ export async function fetchSets() {
 
 export async function fetchSet({ setId }: { setId: number }) {
     try {
+        const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SET}${setId}`;
-        const token = localStorage.getItem("token");//just temporary
+        console.log(token);
 
         const data = await fetch(apiUrl, {
+            credentials: "include",
             headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         }).then(async (res) => {
             var data: Set;
             data = await res.json();
@@ -232,14 +235,16 @@ export async function fetchSet({ setId }: { setId: number }) {
 
 export async function fetchAllSetQuestions() {
     try {
+        const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
-        const token = localStorage.getItem("token");//just temporary
+        console.log(token);
 
         const data = await fetch(apiUrl, {
+            credentials: "include",
             headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         }).then(async (res) => {
             var data: QuestionSet[];
             data = await res.json();
@@ -259,14 +264,15 @@ export async function fetchAllSetQuestions() {
 
 export async function fetchSetQuestions({ setId }: { setId: number }) {
     try {
+        const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTION}${setId}`;
-        const token = localStorage.getItem("token");//just temporary
 
         const data = await fetch(apiUrl, {
+            credentials: "same-origin",
             headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         }).then(async (res) => {
             var data: QuestionSet[];
             data = await res.json();
