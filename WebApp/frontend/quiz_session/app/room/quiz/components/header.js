@@ -10,7 +10,6 @@ export default function Header() {
   const [time, setTime] = useState();
   useEffect(() => {
     connection.on("question", (question) => {
-      console.log(question);
       /*
        question - question.question.qStatement
        answers - question.details.qDetailDesc
@@ -25,7 +24,6 @@ export default function Header() {
        6 - Puzzle
       */
       setTime(question.remainingTime);
-      console.log(question.remainingTime);
     });
   }, []);
 

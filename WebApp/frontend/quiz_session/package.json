@@ -12,6 +12,7 @@
     "@hello-pangea/dnd": "^16.5.0",
     "@mantine/core": "^7.3.2",
     "@mantine/hooks": "^7.3.2",
+    "@mantine/notifications": "^7.4.0",
     "@microsoft/signalr": "^8.0.0",
     "@tabler/icons": "^2.44.0",
     "@tabler/icons-react": "^2.44.0",

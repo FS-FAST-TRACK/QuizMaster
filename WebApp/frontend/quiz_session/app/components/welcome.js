@@ -6,22 +6,34 @@ import logo1 from "@/public/logo/Logo1.svg";
 import { useEffect } from "react";
 import { ConnectToHub } from "../util/Connections";
 import { useConnection } from "../util/store";
+import { notifications } from "@mantine/notifications";
 
 export default function Welcome() {
-  const { connection } = useConnection();
+  const { connection, setConnection } = useConnection();
   useEffect(() => {
-    if (!connection.state !== "Connected") {
+    setConnection();
+  }, []);
+  useEffect(() => {
+    console.log(connection);
+    if (connection !== undefined && connection.state !== "Connected") {
+      console.log("connected");
       connection
         .start()
         .then(() => {
           console.log("Connection started");
-          connection.on("participants", participants);
+          //connection.on("participants", participants);
+          connection.on("notif", (message) => {
+            console.log("notification from welcome");
+            notifications.show({
+              title: message + "notification from welcome",
+            });
+          });
         })
         .catch((err) => {
           console.error("Error starting connection:", err);
         });
     }
-  }, []);
+  }, [connection]);
 
   return (
     <>

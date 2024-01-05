@@ -102,11 +102,11 @@ namespace QuizMaster.API.Gateway.Services
                     }
                 }
 
-                if (room.ShowLeaderboardEachRound())
+                if (room.ShowLeaderboardEachRound() && setIndex+1 < quizSets.Count)
                 {
-                    await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Displaying leaderboards");
-                    await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
-                    await Task.Delay(5000);
+                    await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying leaderboards");
+                    await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores
+                    await Task.Delay(10000);
                 }
 
                 // before going to new set, do some elimination if toggled
@@ -121,7 +121,7 @@ namespace QuizMaster.API.Gateway.Services
             //await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
             
             SetParticipantsEndTime(handler, roomPin); // End participant time
-            await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData); // send scores
+            await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, true); // send scores
             handler.RemoveRoomDataCurrentDisplayed(roomPin); // clear the last question
             handler.RemoveActiveRoom(room.QRoomPin); // Quiz ended, can restart | Set to inactive
 
@@ -131,7 +131,7 @@ namespace QuizMaster.API.Gateway.Services
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
             //await hub.Clients.Group(roomPin).SendAsync("notif", "Quiz Data: "+JsonConvert.SerializeObject(await GetQuizRoomDatasAsync()));
-            await hub.Clients.Group(roomPin).SendAsync("stop",true);
+            //await hub.Clients.Group(roomPin).SendAsync("stop",true);
         }
 
         public void AcceptParticipantsAnswerSubmission(SessionHandler handler, string roomPin, QuizRoom room)
@@ -170,7 +170,7 @@ namespace QuizMaster.API.Gateway.Services
             }
         }
 
-        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData)
+        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData, bool isStop)
         {
             List<QuizParticipant> participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).ToList();
             participants.AddRange(handler.GetEliminatedParticipants(Convert.ToInt32(roomPin)));
@@ -185,7 +185,7 @@ namespace QuizMaster.API.Gateway.Services
                 return null;
 
             } ).Where(scoreDto => scoreDto != null).ToList();
-            await hub.Clients.Group(roomPin).SendAsync("leaderboard", leaderboard);
+            await hub.Clients.Group(roomPin).SendAsync("leaderboard", leaderboard, isStop);
 
             //foreach (var participant in participants.OrderByDescending(p => p.Score).Take(limitDisplayed))
             //{
@@ -262,7 +262,7 @@ namespace QuizMaster.API.Gateway.Services
                     {
                         participantLinkedConnectionId.QEndDate = DateTime.Now;
                         // remove the connectionId from the group
-                        await handler.RemoveClientFromGroups(hub, connectionId, $"{participantLinkedConnectionId.QParticipantDesc} was eliminated");
+                        await handler.RemoveClientFromGroups(hub, connectionId, $"{participantLinkedConnectionId.QParticipantDesc} was eliminated", channel: "notification");
                         await hub.Clients.Client(connectionId).SendAsync("notif", "You are eliminated");
                         //await hub.Clients.Group(roomPin).SendAsync("notif", $"{participantLinkedConnectionId.QParticipantDesc} was eliminated");
                         // add to eliminated participant

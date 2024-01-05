@@ -19,6 +19,8 @@ import ReactConfetti from "react-confetti";
 import useWindowSize from "react-use/lib/useWindowSize";
 import { Button } from "@mantine/core";
 import { useRouter, useSearchParams } from "next/navigation";
+import Interval from "./interval";
+import { notifications } from "@mantine/notifications";
 
 export default function Question() {
   const { width, height } = useWindowSize();
@@ -33,7 +35,6 @@ export default function Question() {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
-  console.log(connectionId);
   useEffect(() => {
     connection.on("question", (question) => {
       /*
@@ -52,18 +53,24 @@ export default function Question() {
       setQuestion(question);
     });
 
-    connection.on("leaderboard", (leader) => {
-      setIsShowLeader(true);
-      setLeaderBoard(leader);
-      setTimeout(() => {
-        setIsShowLeader(false);
-      }, 5000);
+    connection.on("leaderboard", (leader, isStop) => {
+      if (isStop) {
+        setIsFinished(true);
+      } else {
+        setLeaderBoard(leader);
+        setIsShowLeader(true);
+        setTimeout(() => {
+          setIsShowLeader(false);
+        }, 10000);
+      }
     });
 
-    connection.on("stop", (isStop) => {
-      console.log(`Finish?: ${isStop}`);
-      setIsFinished(true);
-    });
+    // connection.on("notif", (message) => {
+    //   console.log("notification from Question");
+    //   notifications.show({
+    //     title: message + "notification from Question",
+    //   });
+    // });
   }, []);
 
   const goBackToLoby = () => {
@@ -76,8 +83,8 @@ export default function Question() {
     }
   };
 
-  if (isShowLeader) {
-    return <Leaderboard leaderBoard={leaderBoard} />;
+  if (isShowLeader && !isFinished) {
+    return <Interval leaderBoard={leaderBoard} />;
   } else if (isFinished) {
     return (
       <>

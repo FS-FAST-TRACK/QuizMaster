@@ -16,8 +16,14 @@ export default function Code() {
     e.preventDefault();
     try {
       connection.invoke("JoinRoom", Number.parseInt(code));
-      params.set("roomPin", Number.parseInt(code));
-      push(`/room?${params.toString()}`);
+      connection.on("JoinFailed", (isFailed) => {
+        if (isFailed) {
+          alert("Incorrect pin");
+        } else {
+          params.set("roomPin", Number.parseInt(code));
+          push(`/room?${params.toString()}`);
+        }
+      });
     } catch (ex) {
       console.log(ex);
     }
