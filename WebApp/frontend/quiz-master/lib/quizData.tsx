@@ -2,11 +2,7 @@ import {
     PaginationMetadata,
     Question,
     QuestionCategory,
-    QuestionDifficulty,
-    QuestionResourceParameter,
-    QuestionType,
     CategoryResourceParameter,
-    DifficultyResourceParameter,
     QuestionDetail,
     QuestionSet,
     Set,
@@ -14,53 +10,12 @@ import {
 import {
     QUIZMASTER_MEDIA_GET_DOWNLOAD,
     QUIZMASTER_QCATEGORY_GET_CATEGORIES,
-    QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES,
-    QUIZMASTER_QTYPE_GET_TYPES,
     QUIZMASTER_QUESTION_GET_QUESTION,
-    QUIZMASTER_QUESTION_GET_QUESTIONS,
     QUIZMASTER_SET_GET_SET,
     QUIZMASTER_SET_GET_SETQUESTION,
     QUIZMASTER_SET_GET_SETQUESTIONS,
     QUIZMASTER_SET_GET_SETS,
 } from "@/api/api-routes";
-
-export async function fetchQuestions({
-    questionResourceParameter,
-}: {
-    questionResourceParameter: QuestionResourceParameter;
-}) {
-    try {
-        var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?pageSize=${questionResourceParameter.pageSize}&pageNumber=${questionResourceParameter.pageNumber}&searchQuery=${questionResourceParameter.searchQuery}`;
-        if (
-            questionResourceParameter.exludeQuestionsIds &&
-            questionResourceParameter.exludeQuestionsIds.length !== 0
-        ) {
-            apiUrl = apiUrl.concat(
-                `&exludeQuestionsIds=${JSON.stringify(
-                    questionResourceParameter.exludeQuestionsIds
-                )}`
-            );
-        }
-
-        const { data, paginationMetadata } = await fetch(apiUrl).then(
-            async (res) => {
-                var data: Question[];
-                var paginationMetadata: PaginationMetadata;
-                paginationMetadata = JSON.parse(
-                    res.headers.get("x-pagination") || ""
-                );
-                data = await res.json();
-
-                return { data, paginationMetadata };
-            }
-        );
-
-        return { data, paginationMetadata };
-    } catch (error) {
-        console.error("Database Error:", error);
-        throw new Error("Failed to fetch question data.");
-    }
-}
 
 export async function fetchCategories(
     questionResourceParameter?: CategoryResourceParameter
@@ -91,53 +46,6 @@ export async function fetchCategories(
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch categories data.");
-    }
-}
-
-export async function fetchDifficulties(
-    difficultyResourceParameter?: DifficultyResourceParameter
-) {
-    try {
-        var apiUrl = `${QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES}`;
-        if (difficultyResourceParameter) {
-            apiUrl = apiUrl.concat(
-                `?pageSize=${difficultyResourceParameter.pageSize}&pageNumber=${difficultyResourceParameter.pageNumber}&searchQuery=${difficultyResourceParameter.searchQuery}`
-            );
-        }
-        const data = await fetch(apiUrl).then(async (res) => {
-            var data: QuestionDifficulty[];
-            var paginationMetadata: PaginationMetadata | null;
-            paginationMetadata = JSON.parse(
-                res.headers.get("x-pagination") || ""
-            );
-            data = await res.json();
-            data.forEach((dif) => {
-                dif.dateCreated = new Date(dif.dateCreated);
-                dif.dateUpdated = new Date(dif.dateUpdated);
-            });
-
-            return { data, paginationMetadata };
-        });
-        return data;
-    } catch (error) {
-        console.error("Database Error:", error);
-        throw new Error("Failed to fetch difficulties data.");
-    }
-}
-
-export async function fetchTypes() {
-    try {
-        const data = await fetch(`${QUIZMASTER_QTYPE_GET_TYPES}`)
-            .then((res) => res.json())
-            .then((data) => {
-                var types: QuestionType[];
-                types = data;
-                return types;
-            });
-        return data;
-    } catch (error) {
-        console.error("Database Error:", error);
-        throw new Error("Failed to fetch types data.");
     }
 }
 
