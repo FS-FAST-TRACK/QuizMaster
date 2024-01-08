@@ -16,11 +16,7 @@ import {
 import { CustomResponse } from "@/api/definitions";
 
 interface QuestionPostResponse extends CustomResponse {
-    data:
-        | {
-              question: Question;
-          }
-        | undefined;
+    data: Question | undefined;
 }
 
 interface QuestionsGetResponse extends CustomResponse {
@@ -148,11 +144,11 @@ export async function postQuestion({
     audio: File | undefined | null;
 }) {
     try {
-        var response: CustomResponse = {
+        var response: QuestionPostResponse = {
             statusCode: 200,
-            data: null,
-            message: "",
             type: "success",
+            message: "",
+            data: undefined,
         };
 
         // Post Image
@@ -218,11 +214,16 @@ export async function postQuestion({
 
         const isSuccess = res.status === 201 || res.status === 200;
 
-        if (isSuccess) {
-            return res;
-        } else {
-            throw new Error("Failed to create question");
+        if (!isSuccess) {
+            const data = await res.json();
+            response.message = data.message;
+
+            return response;
         }
+        const questionData: Question = await res.json();
+        response.data = questionData;
+        response.message = "Question added succesfully.";
+        return response;
     } catch (error) {
         throw new Error("Failed to create question.");
     }
@@ -240,6 +241,13 @@ export async function patchQuestion({
     audio: File | undefined | null;
 }) {
     try {
+        var response: QuestionPostResponse = {
+            statusCode: 200,
+            type: "success",
+            message: "",
+            data: undefined,
+        };
+
         // Post Image
         if (image) {
             var imageForm = new FormData();
@@ -262,7 +270,11 @@ export async function patchQuestion({
                     value: responseBody.fileInformation.id,
                 });
             } else {
-                throw new Error("Failed Post Image.");
+                const data = await imageRes.json();
+                response.statusCode = imageRes.status;
+                response.type = "fail";
+                response.message = data.Message;
+                return response;
             }
         }
 
@@ -287,7 +299,11 @@ export async function patchQuestion({
                     value: responseBody.fileInformation.id,
                 });
             } else {
-                throw new Error("Failed Post Audio.");
+                const data = await audioRes.json();
+                response.statusCode = audioRes.status;
+                response.type = "fail";
+                response.message = data.Message;
+                return response;
             }
         }
 
@@ -300,15 +316,17 @@ export async function patchQuestion({
                 "Content-Type": "application/json",
             },
         });
+        const isSuccess = res.status === 201 || res.status === 200;
 
-        if (res.status === 201) {
-            var data: Question;
+        if (!isSuccess) {
+            const data = await res.json();
+            response.message = data.message;
 
-            data = await res.json();
-            return data;
-        } else {
-            throw new Error("Failed to create question");
+            return response;
         }
+        const questionData: Question = await res.json();
+        response.data = questionData;
+        return response;
     } catch (error) {
         throw new Error("Failed to create question.");
     }
