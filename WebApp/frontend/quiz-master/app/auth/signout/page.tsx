@@ -6,6 +6,6 @@ import { useEffect } from "react";
 
 export default function Page() {
     signOut();
-
+    redirect("/auth/login");
     return <></>;
 }
