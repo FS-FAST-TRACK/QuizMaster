@@ -282,12 +282,16 @@ namespace QuizMaster.API.Gateway.Hubs
                                 }
                             }
                         }
-
-                        await Task.Delay(500);
+                        await Clients.Caller.SendAsync("JoinFailed", false);
+                        await Task.Delay(1000);
+                        
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("chat", new { Message = $"{Name} has joined the room", Name = "bot", IsAdmin = false});
                         IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
                         await Clients.Group($"{RoomPin}").SendAsync("participants", participants);
+                    }
+                    else {
+                        await Clients.Caller.SendAsync("JoinFailed", true);
                     }
                 }
         }
@@ -327,7 +331,7 @@ namespace QuizMaster.API.Gateway.Hubs
             var participantData = SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId);
             if (participantData == null) { return; }
             var group = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false);
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false, channel:"notif");
             SessionHandler.UnbindConnectionId(Context.ConnectionId);
 
             if(group != null)
@@ -384,11 +388,9 @@ namespace QuizMaster.API.Gateway.Hubs
 
         public async Task GetRoomParticipants(string roomPin)
         {
+            await Task.Delay(1000);
             var participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(roomPin);
             await Clients.Group(roomPin).SendAsync("participants", participants);
         }
-
-
-
     }
 }

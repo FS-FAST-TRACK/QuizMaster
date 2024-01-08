@@ -15,64 +15,115 @@ import Leaderboard from "./leaderboard";
 import DragAndDrop from "./dragAndDrop";
 import dynamic from "next/dynamic";
 import Slider from "./slider";
-
-const DynamicDragAndDrop = dynamic(
-  () => import("@/app/room/quiz/components/dragAndDrop"),
-  {
-    ssr: false,
-  }
-);
+import ReactConfetti from "react-confetti";
+import useWindowSize from "react-use/lib/useWindowSize";
+import { Button } from "@mantine/core";
+import { useRouter, useSearchParams } from "next/navigation";
+import Interval from "./interval";
+import { notifications } from "@mantine/notifications";
+import { useQuestion, useLeaderboard, useStart } from "@/app/util/store";
+import { goBackToLoby } from "@/app/auth/util/handlers";
 
 export default function Question() {
+  const { width, height } = useWindowSize();
   const { connection } = useConnection();
-  const [question, setQuestion] = useState();
-  const [isShowLeader, setIsShowLeader] = useState();
+  const { question } = useQuestion();
+  const { setStart } = useStart();
+  const { leader, isStop, setResetLeader } = useLeaderboard();
+  const [isShowLeader, setIsShowLeader] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
   const [leaderBoard, setLeaderBoard] = useState([]);
   const { connectionId } = useConnectionId();
 
-  console.log(connectionId);
+  const { push, back } = useRouter();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+
   useEffect(() => {
-    connection.on("question", (question) => {
-      /*
-       question - question.question.qStatement
-       answers - question.details.qDetailDesc
-       type - question.question.qTypeId
+    // connection.on("question", (question) => {
+    //   /*
+    //    question - question.question.qStatement
+    //    answers - question.details.qDetailDesc
+    //    type - question.question.qTypeId
 
-       Type Questions
-       1 - Multiple Choice
-       2 - Multiple Choice + Audio
-       3 - True or False
-       4 - Type Answer
-       5 - Slider
-       6 - Puzzle
-      */
-      setQuestion(question);
-    });
+    //    Type Questions
+    //    1 - Multiple Choice
+    //    2 - Multiple Choice + Audio
+    //    3 - True or False
+    //    4 - Type Answer
+    //    5 - Slider
+    //    6 - Puzzle
+    //   */
+    //   setQuestion(question);
+    // });
+    console.log(leader);
+    console.log(isStop);
 
-    connection.on("leaderboard", (leader) => {
-      setIsShowLeader(true);
-      setLeaderBoard(leader);
-      setTimeout(() => {
-        setIsShowLeader(false);
-      }, 5000);
-    });
-  }, []);
+    if (leader.length > 0) {
+      console.log(leader.length);
+      if (isStop) {
+        setIsFinished(true);
+      } else {
+        setLeaderBoard(leader);
+        setIsShowLeader(true);
+        setTimeout(() => {
+          setResetLeader();
+          setIsShowLeader(false);
+        }, 10000);
+      }
+    }
+    // connection.on("leaderboard", (leader, isStop) => {
+    //   if (isStop) {
+    //     setIsFinished(true);
+    //   } else {
+    //     setLeaderBoard(leader);
+    //     setIsShowLeader(true);
+    //     setTimeout(() => {
+    //       setIsShowLeader(false);
+    //     }, 10000);
+    //   }
+    // });
+
+    // connection.on("notif", (message) => {
+    //   console.log("notification from Question");
+    //   notifications.show({
+    //     title: message + "notification from Question",
+    //   });
+    // });
+  }, [question, leader, isStop]);
+
+  if (isShowLeader && !isFinished) {
+    return <Interval leaderBoard={leaderBoard} />;
+  } else if (isFinished) {
+    return (
+      <>
+        <ReactConfetti width={width} height={height} />
+        <Leaderboard leaderBoard={leaderBoard} />
+        <Button
+          onClick={() =>
+            goBackToLoby(params, connection, back, setResetLeader, setStart)
+          }
+        >
+          Go back to Loby
+        </Button>
+      </>
+    );
+  }
   return (
     <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow ">
-      {question?.question.qTypeId === 1 && !isShowLeader && (
+      {question?.question.qTypeId === 1 && (
         <MulitpleChoice question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 3 && !isShowLeader && (
+      {question?.question.qTypeId === 3 && (
         <TrueOrFalse question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 4 && !isShowLeader && (
+      {question?.question.qTypeId === 4 && (
         <TypeAnswer question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 5 && !isShowLeader && <Slider />}
-      {question?.question.qTypeId === 6 && !isShowLeader && (
-        <DynamicDragAndDrop />
-      )}
-      {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />}
+      {question?.question.qTypeId === 5 && <Slider />}
+      {question?.question.qTypeId === 6 && <DragAndDrop />}
+      {/* {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />}
+      {isFinished && <Leaderboard leaderBoard={leaderBoard} />} */}
       {/* <MulitpleChoice question={question} /> */}
       {/* <MultipleChoiceImage /> */}
       {/* <MulitpleChoice /> */}

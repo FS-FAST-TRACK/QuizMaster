@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaster.API.QuizSession.Migrations
 {
     /// <inheritdoc />
-    public partial class QuizSesssion_InitialMigration : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -337,14 +337,14 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QCategoryDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9140), null, "Science", null },
-                    { 2, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9527), null, "Movies", null },
-                    { 3, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9529), null, "Animals", null },
-                    { 4, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9530), null, "Places", null },
-                    { 5, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9531), null, "People", null },
-                    { 6, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9534), null, "System Operations and Maintenance", null },
-                    { 7, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9535), null, "Data Structures", null },
-                    { 8, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(9536), null, "Algorithms", null }
+                    { 1, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6204), null, "Science", null },
+                    { 2, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6681), null, "Movies", null },
+                    { 3, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6684), null, "Animals", null },
+                    { 4, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6685), null, "Places", null },
+                    { 5, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6686), null, "People", null },
+                    { 6, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6715), null, "System Operations and Maintenance", null },
+                    { 7, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6716), null, "Data Structures", null },
+                    { 8, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(6716), null, "Algorithms", null }
                 });
 
             migrationBuilder.InsertData(
@@ -367,9 +367,9 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QDifficultyDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(5953), null, "Easy", null },
-                    { 2, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(6427), null, "Average", null },
-                    { 3, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 168, DateTimeKind.Local).AddTicks(6455), null, "Difficult", null }
+                    { 1, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(2621), null, "Easy", null },
+                    { 2, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(3218), null, "Average", null },
+                    { 3, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 583, DateTimeKind.Local).AddTicks(3291), null, "Difficult", null }
                 });
 
             migrationBuilder.InsertData(
@@ -377,12 +377,12 @@ namespace QuizMaster.API.QuizSession.Migrations
                 columns: new[] { "Id", "ActiveData", "CreatedByUserId", "DateCreated", "DateUpdated", "QDetailRequired", "QTypeDesc", "UpdatedByUserId" },
                 values: new object[,]
                 {
-                    { 1, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 165, DateTimeKind.Local).AddTicks(7759), null, true, "Multiple Choice", null },
-                    { 2, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4925), null, true, "Multiple Choice + Audio", null },
-                    { 3, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4932), null, false, "True or False", null },
-                    { 4, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4934), null, true, "Type Answer", null },
-                    { 5, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4935), null, true, "Slider", null },
-                    { 6, true, 1, new DateTime(2024, 1, 2, 15, 42, 11, 167, DateTimeKind.Local).AddTicks(4935), null, true, "Puzzle", null }
+                    { 1, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 580, DateTimeKind.Local).AddTicks(9897), null, true, "Multiple Choice", null },
+                    { 2, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 582, DateTimeKind.Local).AddTicks(1628), null, true, "Multiple Choice + Audio", null },
+                    { 3, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 582, DateTimeKind.Local).AddTicks(1635), null, false, "True or False", null },
+                    { 4, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 582, DateTimeKind.Local).AddTicks(1636), null, true, "Type Answer", null },
+                    { 5, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 582, DateTimeKind.Local).AddTicks(1637), null, true, "Slider", null },
+                    { 6, true, 1, new DateTime(2024, 1, 3, 19, 16, 11, 582, DateTimeKind.Local).AddTicks(1638), null, true, "Puzzle", null }
                 });
 
             migrationBuilder.CreateIndex(
