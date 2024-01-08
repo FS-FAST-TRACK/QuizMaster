@@ -2,28 +2,40 @@
 
 import PageHeader from "@/components/Commons/headers/PageHeader";
 import SideNav from "@/components/Commons/navbars/sidenav";
-import { fetchCategories, fetchDifficulties, fetchTypes } from "@/lib/quizData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
-import { Suspense, useEffect } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import Loading from "./loading";
+import { getAllCategories } from "@/lib/hooks/category";
+import { getAllDifficulties } from "@/lib/hooks/difficulty";
+import { getAllTypes } from "@/lib/hooks/type";
+import ErrorContainer from "@/components/pages/ErrorContainer";
+import { useErrorRedirection } from "@/utils/errorRedirection";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { setQuestionCategories } = useQuestionCategoriesStore();
     const { setQuestionDifficulties } = useQuestionDifficultiesStore();
     const { setQuestionTypes } = useQuestionTypesStore();
+    const { redirectToError } = useErrorRedirection();
+
+    const populateData = useCallback(async () => {
+        try {
+            const categoriesRes = await getAllCategories();
+            setQuestionCategories(categoriesRes.data);
+
+            const difficultiesRes = await getAllDifficulties();
+            setQuestionDifficulties(difficultiesRes.data);
+
+            const typesRes = await getAllTypes();
+            setQuestionTypes(typesRes.data);
+        } catch (error) {
+            redirectToError();
+        }
+    }, []);
 
     useEffect(() => {
-        fetchCategories().then((res) => {
-            setQuestionCategories(res.data);
-        });
-        fetchDifficulties().then((res) => {
-            setQuestionDifficulties(res.data);
-        });
-        fetchTypes().then((res) => {
-            setQuestionTypes(res);
-        });
+        populateData();
     }, [setQuestionCategories, setQuestionDifficulties, setQuestionTypes]);
 
     return (
@@ -31,7 +43,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <SideNav />
             <div className="grow overflow-y-auto flex flex-col bg-[#F8F9FA]">
                 <PageHeader>Questions</PageHeader>
-                <Suspense fallback={<Loading />}>{children}</Suspense>
+                <ErrorContainer>
+                    <Suspense fallback={<Loading />}>{children}</Suspense>
+                </ErrorContainer>
             </div>
         </div>
     );

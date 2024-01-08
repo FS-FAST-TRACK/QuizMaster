@@ -1,10 +1,36 @@
 import { CategoryCreateDto } from "@/components/Commons/modals/CreateCategoryModal";
-import { PatchItem } from "../definitions";
+import { PatchItem, QuestionCategory } from "../definitions";
 import {
     QUIZMASTER_QCATEGORY_DELETE,
+    QUIZMASTER_QCATEGORY_GET_CATEGORIES,
     QUIZMASTER_QCATEGORY_PATCH,
     QUIZMASTER_QCATEGORY_POST,
 } from "@/api/api-routes";
+interface GetAllCategoriesResponse {
+    data: QuestionCategory[];
+}
+export async function getAllCategories() {
+    try {
+        var apiUrl = `${QUIZMASTER_QCATEGORY_GET_CATEGORIES}`;
+        const response = await fetch(apiUrl);
+
+        var data: QuestionCategory[];
+
+        data = await response.json();
+        data.forEach((cat) => {
+            cat.dateCreated = new Date(cat.dateCreated);
+            cat.dateUpdated = new Date(cat.dateUpdated);
+        });
+
+        var res: GetAllCategoriesResponse = {
+            data: data,
+        };
+        return res;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch categories data.");
+    }
+}
 
 export async function removeCategory({ id }: { id: number }) {
     try {

@@ -10,15 +10,13 @@ import {
     DifficultyResourceParameter,
     PaginationMetadata,
     QuestionDifficulty,
-    QuestionResourceParameter,
 } from "@/lib/definitions";
 import { patchDifficulty, removeDifficulty } from "@/lib/hooks/difficulty";
 import { notification } from "@/lib/notifications";
-import { fetchDifficulties } from "@/lib/quizData";
+import { fetchDifficulties } from "@/lib/hooks/difficulty";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Anchor, Breadcrumbs, Button, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 const items = [
@@ -53,46 +51,46 @@ export default function Page() {
     });
 
     useEffect(() => {
-        var questionsFetch = fetchDifficulties(form.values);
-        questionsFetch.then((res) => {
-            setDifficulties(res.data);
-            setPaginationMetadata(res.paginationMetadata);
-        });
-    }, [form.values, createDifficulty]);
+        try {
+            var questionsFetch = fetchDifficulties(form.values);
+            questionsFetch.then((res) => {
+                setDifficulties(res.data);
+                setPaginationMetadata(res.paginationMetadata!);
+            });
+        } catch (error) {}
+    }, [form.values, createDifficulty, deleteDifficulty]);
 
     const handleSearch = useCallback(() => {
         form.setFieldValue("searchQuery", searchQuery);
         form.setFieldValue("pageNumber", 1);
     }, [searchQuery, form]);
 
-    const handleDelete = useCallback(() => {
+    const handleDelete = useCallback(async () => {
         console.log("DELETE DIFFICULTY");
         if (deleteDifficulty) {
-            removeDifficulty({ id: deleteDifficulty?.id })
-                .then(() => {
-                    setDifficulties((state) => {
-                        var copy = state;
-                        const index = copy.findIndex(
-                            (qDifficulty) =>
-                                qDifficulty.id === deleteDifficulty.id
-                        );
-                        copy.splice(index, 0);
-                        return copy;
-                    });
+            try {
+                const response = await removeDifficulty({
+                    id: deleteDifficulty?.id,
+                });
+                if (response.type === "success") {
                     notification({
                         type: "success",
                         title: `${deleteDifficulty.qDifficultyDesc} difficulty succesfully deleted.`,
                     });
-                })
-                .catch(() => {
+                }
+                if (response.type === "fail") {
                     notification({
                         type: "error",
-                        title: "Failed to delete difficulty.",
+                        title: response.type,
                     });
-                })
-                .finally(() => {
-                    setDeleteDifficulty(undefined);
+                }
+                setDeleteDifficulty(undefined);
+            } catch (error) {
+                notification({
+                    type: "error",
+                    title: "Failed to delete difficulty.",
                 });
+            }
         }
     }, [deleteDifficulty]);
 
