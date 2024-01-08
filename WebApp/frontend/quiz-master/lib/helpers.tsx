@@ -1,10 +1,8 @@
-import { UseFormReturnType, useForm } from "@mantine/form";
+import { UseFormReturnType } from "@mantine/form";
 import {
     PatchItem,
-    Question,
     QuestionCreateDto,
     QuestionCreateValues,
-    QuestionDetailCreateDto,
     QuestionSetDTO,
     QuestionValues,
 } from "./definitions";
@@ -120,8 +118,7 @@ export function mapData(
         case PuzzleData.id:
             questionCreateDto.questionDetailCreateDtos =
                 form.values.options.map((op) => {
-                    var dTypes = ["answer"];
-
+                    var dTypes = ["option"];
                     return {
                         qDetailDesc: op.value,
                         detailTypes: dTypes,
