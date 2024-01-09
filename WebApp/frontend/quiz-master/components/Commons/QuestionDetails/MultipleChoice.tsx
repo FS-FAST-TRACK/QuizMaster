@@ -13,6 +13,7 @@ import {
 import { UseFormReturnType } from "@mantine/form";
 import { useEffect, useState } from "react";
 import styles from "./MultipleChoice.module.css";
+import { notification } from "@/lib/notifications";
 
 export default function MultipleChoiceQuestionDetail({
     form,
@@ -85,12 +86,20 @@ export default function MultipleChoiceQuestionDetail({
                     color="gray"
                     size="lg"
                     className="border-4 outline-2 outline-gray-800"
-                    onClick={() =>
+                    onClick={() => {
+                        if (form.values.options.length >= 10) {
+                            notification({
+                                type: "info",
+                                title: "Choices are limited up to 10.",
+                                message: "Unable to add another choice",
+                            });
+                            return;
+                        }
                         form.insertListItem("options", {
                             value: "",
                             isAnswer: false,
-                        })
-                    }
+                        });
+                    }}
                 >
                     <PlusCircleIcon className="w-6" />
                 </Button>
