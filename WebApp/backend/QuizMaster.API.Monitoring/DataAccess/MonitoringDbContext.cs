@@ -17,6 +17,7 @@ namespace QuizMaster.API.Monitoring.DataAccess
         public DbSet<QuestionTypeAuditTrail> QuestionTypeAuditTrails { get; set; }
         public DbSet<MediaAuditTrail> MediaAuditTrails { get; set; }
         public DbSet<QuizSetAuditTrail> QuizSetAuditTrails { get; set; }
+        public DbSet<RoomAuditTrail> RoomAuditTrails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,6 +57,11 @@ namespace QuizMaster.API.Monitoring.DataAccess
             modelBuilder.Entity<QuizSetAuditTrail>().Property(a => a.Action).IsRequired();
             modelBuilder.Entity<QuizSetAuditTrail>().Property(a => a.Timestamp).IsRequired();
             modelBuilder.Entity<QuizSetAuditTrail>().Property(a => a.Details).HasMaxLength(255);
+
+            modelBuilder.Entity<RoomAuditTrail>().HasKey(a => a.RoomAuditTrailId);
+            modelBuilder.Entity<RoomAuditTrail>().Property(a => a.Action).IsRequired();
+            modelBuilder.Entity<RoomAuditTrail>().Property(a => a.Timestamp).IsRequired();
+            modelBuilder.Entity<RoomAuditTrail>().Property(a => a.Details).HasMaxLength(255);
 
             base.OnModelCreating(modelBuilder);
         }

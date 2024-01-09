@@ -1,43 +1,53 @@
 ﻿using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.API.QuizSession.DbContexts;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Entities.Rooms;
+using QuizMaster.Library.Common.Helpers;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.Collections.Immutable;
+using static QuizMaster.API.Monitoring.Proto.RoomAuditService;
 
 namespace QuizMaster.API.QuizSession.Services.Grpc
 {
     public class QuizRoomServices : QuizRoomService.QuizRoomServiceBase
     {
         private readonly QuizSessionDbContext _context;
+        private readonly RoomAuditServiceClient _roomAuditServiceClient;
 
-        public QuizRoomServices(QuizSessionDbContext context)
+        public QuizRoomServices(QuizSessionDbContext context, RoomAuditServiceClient roomAuditServiceClient)
         {
             _context = context;
+            _roomAuditServiceClient = roomAuditServiceClient;
         }
         public override async Task<RoomResponse> CreateRoom(CreateRoomRequest request, ServerCallContext context)
         {
             var reply = new RoomResponse();
-            try 
+            try
             {
                 var room = JsonConvert.DeserializeObject<CreateRoomDTO>(request.Room);
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if(invalidId != -1)
+                if (invalidId != -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
                     return await Task.FromResult(reply);
                 }
 
-                var quizRoom = new QuizRoom { QRoomDesc = room.RoomName, QRoomPin = new Random().Next(10000000,99999999) };
+                // Capture the details of the user creating the room
+                var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+                var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+                var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+                var quizRoom = new QuizRoom { QRoomDesc = room.RoomName, QRoomPin = new Random().Next(10000000, 99999999) };
 
                 QuizRoom? existingRoom = _context.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
-                while(existingRoom != null)
+                while (existingRoom != null)
                 {
                     quizRoom.QRoomPin = new Random().Next(10000000, 99999999);
                     existingRoom = _context.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
@@ -48,11 +58,41 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 var createdRoomObject = await _context.QuizRooms.AddAsync(quizRoom);
                 await _context.SaveChangesAsync();
 
-                //Todo: Check quiz set ID
+                // Todo: Check quiz set ID
                 foreach (var id in room.QuestionSets)
                 {
                     await _context.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = createdRoomObject.Entity.Id });
                     await _context.SaveChangesAsync();
+                }
+
+                // Construct the create room event
+                var createRoomEvent = new CreateRoomEvent
+                {
+                    UserId = int.Parse(userId!),
+                    Username = userNameClaim,
+                    Action = "Create Room",
+                    Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                    Details = $"Room created by: {userNameClaim}",
+                    Userrole = userRoles,
+                    OldValues = "",
+                    NewValues = JsonConvert.SerializeObject(quizRoom),
+                };
+
+                var logRequest = new LogCreateRoomEventRequest
+                {
+                    Event = createRoomEvent
+                };
+
+                try
+                {
+                    // Make the gRPC call to log the create room event
+                    _roomAuditServiceClient.LogCreateRoomEvent(logRequest);
+                }
+                catch (Exception ex)
+                {
+                    reply.Code = 500;
+                    reply.Message = ex.Message;
+                    return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
@@ -60,7 +100,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 return await Task.FromResult(reply);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 reply.Code = 500;
                 reply.Message = ex.Message;
@@ -68,6 +108,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 return await Task.FromResult(reply);
             }
         }
+
 
         public override async Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
         {
@@ -85,7 +126,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return await Task.FromResult(reply);
                 }
 
-                var quizRoom = _context.QuizRooms.Where(q => q.Id == room.RoomId).FirstOrDefault();
+                var quizRoom = _context.QuizRooms.AsNoTracking().FirstOrDefault(q => q.Id == room.RoomId);
 
                 while (quizRoom == null)
                 {
@@ -94,17 +135,56 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return await Task.FromResult(reply);
                 }
 
+                // Capture the details of the user updating the room
+                var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+                var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+                var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+                var oldValues = JsonConvert.SerializeObject(quizRoom);
+
+                quizRoom = _context.QuizRooms.FirstOrDefault(q => q.Id == room.RoomId);
                 quizRoom.RoomOptions = JsonConvert.SerializeObject(room.RoomOptions);
                 await _context.SaveChangesAsync();
 
-                var sets =  _context.SetQuizRooms.Where(r => r.QRoomId == quizRoom.Id).ToList();
+                var sets = _context.SetQuizRooms.Where(r => r.QRoomId == quizRoom.Id).ToList();
                 _context.SetQuizRooms.RemoveRange(sets);
                 await _context.SaveChangesAsync();
-                
+
+                // Todo: Check quiz set ID
                 foreach (var id in room.QuestionSets)
                 {
                     await _context.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = quizRoom.Id });
                     await _context.SaveChangesAsync();
+                }
+
+                // Construct the update room event
+                var updateRoomEvent = new UpdateRoomEvent
+                {
+                    UserId = int.Parse(userId!),
+                    Username = userNameClaim,
+                    Action = "Update Room",
+                    Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                    Details = $"Room updated by: {userNameClaim}",
+                    Userrole = userRoles,
+                    OldValues = oldValues,
+                    NewValues = JsonConvert.SerializeObject(quizRoom),
+                };
+
+                var logRequest = new LogUpdateRoomEventRequest
+                {
+                    Event = updateRoomEvent
+                };
+
+                try
+                {
+                    // Make the gRPC call to log the update room event
+                    _roomAuditServiceClient.LogUpdateRoomEvent(logRequest);
+                }
+                catch (Exception ex)
+                {
+                    reply.Code = 500;
+                    reply.Message = ex.Message;
+                    return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
@@ -120,6 +200,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 return await Task.FromResult(reply);
             }
         }
+
 
         public override async Task<RoomResponse> GetAllRoom(RoomsEmptyRequest request, ServerCallContext context)
         {
@@ -146,29 +227,66 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
         {
             var reply = new RoomResponse();
 
-            var room = _context.QuizRooms.FirstOrDefault(r => r.Id == request.Room);
+            var room = _context.QuizRooms.AsNoTracking().FirstOrDefault(r => r.Id == request.Room);
             if (room == null)
             {
                 reply.Code = 404;
                 reply.Message = $"Room with Id {request.Room} does not exist";
                 return await Task.FromResult(reply);
             }
+
             if (!room.ActiveData)
             {
                 reply.Code = 200;
                 reply.Message = $"Room with Id '{request.Room}' ({room.QRoomDesc}) was already deleted";
                 return await Task.FromResult(reply);
             }
+
+            // Capture the details of the user deleting the room
+            var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
+            var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
+            var userId = context.RequestHeaders.FirstOrDefault(h => h.Key == "id")?.Value;
+
+            // Construct the delete room event
+            var deleteRoomEvent = new DeleteRoomEvent
+            {
+                UserId = int.Parse(userId!),
+                Username = userNameClaim,
+                Action = "Delete Room",
+                Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
+                Details = $"Room deleted by: {userNameClaim}",
+                Userrole = userRoles,
+                OldValues = JsonConvert.SerializeObject(room),
+                NewValues = "",
+            };
+
+            var logRequest = new LogDeleteRoomEventRequest
+            {
+                Event = deleteRoomEvent
+            };
+
+            try
+            {
+                // Make the gRPC call to log the delete room event
+                _roomAuditServiceClient.LogDeleteRoomEvent(logRequest);
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Message = ex.Message;
+                return await Task.FromResult(reply);
+            }
+
             room.ActiveData = false;
             await _context.SaveChangesAsync();
 
             reply.Code = 204;
             reply.Message = $"Successfully deleted '{room.QRoomDesc}'";
-            reply.Data = room.QRoomPin+"";
-
+            reply.Data = room.QRoomPin + "";
 
             return await Task.FromResult(reply);
         }
+
 
         // In room, get all the Sets
         public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)
