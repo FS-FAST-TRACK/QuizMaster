@@ -119,15 +119,23 @@ export async function fetchQuestion({ questionId }: { questionId: number }) {
     try {
         var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTION}${questionId}`;
 
-        const { data } = await fetch(apiUrl).then(async (res) => {
+        const res = await fetch(apiUrl);
+        const response: QuestionGetResponse = {
+            statusCode: res.status,
+            type: "success",
+            data: undefined,
+            message: "",
+        };
+        const isSuccess = res.status < 300;
+        if (isSuccess) {
             var data: Question;
-
             data = await res.json();
+            response.data = { question: data };
+        } else {
+            response.type = "fail";
+        }
 
-            return { data };
-        });
-
-        return { data };
+        return response;
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch question data.");
@@ -179,15 +187,12 @@ export async function postQuestion({
         if (audio) {
             var audioForm = new FormData();
             audioForm.append("file", audio);
-            const audioRes = await fetch(
-                `${process.env.QUIZMASTER_MEDIA}/api/media`,
-                {
-                    method: "POST",
-                    mode: "cors",
-                    body: audioForm,
-                    credentials: "include",
-                }
-            );
+            const audioRes = await fetch(`${QUIZMASTER_MEDIA_POST}`, {
+                method: "POST",
+                mode: "cors",
+                body: audioForm,
+                credentials: "include",
+            });
             if (audioRes.ok) {
                 // Parse the response body as JSON
                 const responseBody = await audioRes.json();
@@ -252,14 +257,12 @@ export async function patchQuestion({
         if (image) {
             var imageForm = new FormData();
             imageForm.append("file", image);
-            const imageRes = await fetch(
-                `${process.env.QUIZMASTER_MEDIA}/api/media`,
-                {
-                    method: "POST",
-                    mode: "cors",
-                    body: imageForm,
-                }
-            );
+            const imageRes = await fetch(`${QUIZMASTER_MEDIA_POST}`, {
+                method: "POST",
+                mode: "cors",
+                credentials: "include",
+                body: imageForm,
+            });
 
             if (imageRes.ok) {
                 // Parse the response body as JSON
@@ -282,14 +285,12 @@ export async function patchQuestion({
         if (audio) {
             var audioForm = new FormData();
             audioForm.append("file", audio);
-            const audioRes = await fetch(
-                `${process.env.QUIZMASTER_MEDIA}/api/media`,
-                {
-                    method: "POST",
-                    mode: "cors",
-                    body: audioForm,
-                }
-            );
+            const audioRes = await fetch(`${QUIZMASTER_MEDIA_POST}`, {
+                method: "POST",
+                mode: "cors",
+                credentials: "include",
+                body: audioForm,
+            });
             if (audioRes.ok) {
                 // Parse the response body as JSON
                 const responseBody = await audioRes.json();
@@ -308,9 +309,10 @@ export async function patchQuestion({
         }
 
         // Post Question
-        const res = await fetch(`${QUIZMASTER_QUESTION_PATCH}/${id}`, {
+        const res = await fetch(`${QUIZMASTER_QUESTION_PATCH}${id}`, {
             method: "PATCH",
             mode: "cors",
+            credentials: "include",
             body: JSON.stringify(patches),
             headers: {
                 "Content-Type": "application/json",
@@ -321,7 +323,7 @@ export async function patchQuestion({
         if (!isSuccess) {
             const data = await res.json();
             response.message = data.message;
-
+            response.type = "fail";
             return response;
         }
         const questionData: Question = await res.json();
