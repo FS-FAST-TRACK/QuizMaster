@@ -60,6 +60,7 @@ export default function Question() {
     if (leader.length > 0) {
       if (isStop) {
         setIsFinished(true);
+        setLeaderBoard(leader);
       } else {
         setLeaderBoard(leader);
         setIsShowLeader(true);
