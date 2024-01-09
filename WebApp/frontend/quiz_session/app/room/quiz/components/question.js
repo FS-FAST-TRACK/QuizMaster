@@ -56,13 +56,11 @@ export default function Question() {
     //   */
     //   setQuestion(question);
     // });
-    console.log(leader);
-    console.log(isStop);
 
     if (leader.length > 0) {
-      console.log(leader.length);
       if (isStop) {
         setIsFinished(true);
+        setLeaderBoard(leader);
       } else {
         setLeaderBoard(leader);
         setIsShowLeader(true);
@@ -72,24 +70,6 @@ export default function Question() {
         }, 10000);
       }
     }
-    // connection.on("leaderboard", (leader, isStop) => {
-    //   if (isStop) {
-    //     setIsFinished(true);
-    //   } else {
-    //     setLeaderBoard(leader);
-    //     setIsShowLeader(true);
-    //     setTimeout(() => {
-    //       setIsShowLeader(false);
-    //     }, 10000);
-    //   }
-    // });
-
-    // connection.on("notif", (message) => {
-    //   console.log("notification from Question");
-    //   notifications.show({
-    //     title: message + "notification from Question",
-    //   });
-    // });
   }, [question, leader, isStop]);
 
   if (isShowLeader && !isFinished) {
@@ -122,22 +102,6 @@ export default function Question() {
       )}
       {question?.question.qTypeId === 5 && <Slider />}
       {question?.question.qTypeId === 6 && <DragAndDrop />}
-      {/* {isShowLeader && <Leaderboard leaderBoard={leaderBoard} />}
-      {isFinished && <Leaderboard leaderBoard={leaderBoard} />} */}
-      {/* <MulitpleChoice question={question} /> */}
-      {/* <MultipleChoiceImage /> */}
-      {/* <MulitpleChoice /> */}
-      {/* <TrueOrFalse /> */}
-      {/* <TypeAnswer /> */}
-      {/* {question && (
-        <>
-          <div>{question.remainingTime}</div>
-          <div>{question.question.qStatement}</div>{" "}
-        </>
-      )} */}
-      {/* <DynamicDragAndDrop /> */}
-      {/* <MultipleChoiceAudio /> */}
-      {/* <Slider /> */}
     </div>
   );
 }
