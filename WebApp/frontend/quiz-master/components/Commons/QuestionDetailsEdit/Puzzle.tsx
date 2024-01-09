@@ -21,6 +21,7 @@ import {
 import styles from "@/styles/input.module.css";
 import { patchQuestionDetail } from "@/lib/hooks/questionDetails";
 import PuzzleInput from "../inputs/PuzzleInput";
+import { notification } from "@/lib/notifications";
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "var(--primary-100)" : "white",
@@ -55,7 +56,16 @@ export default function PuzzleQuestionDetails({
             setDroppableId("droppableID");
         };
     }, []);
-
+    const x = form.values.details.map((item, index) => {
+        return (
+            <CustomDraggable
+                key={index}
+                form={form}
+                index={index}
+                item={item}
+            />
+        );
+    });
     return (
         <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
@@ -67,16 +77,7 @@ export default function PuzzleQuestionDetails({
                             ref={provided.innerRef}
                             style={getListStyle(snapshot.isDraggingOver)}
                         >
-                            {form.values.details.map((item, index) => {
-                                return (
-                                    <CustomDraggable
-                                        key={index}
-                                        form={form}
-                                        index={index}
-                                        item={item}
-                                    />
-                                );
-                            })}
+                            {x}
                             {provided.placeholder}
                         </div>
                     )}
@@ -86,12 +87,24 @@ export default function PuzzleQuestionDetails({
                     color="gray"
                     size="lg"
                     className="border-4 outline-2 outline-gray-800 w-full"
-                    onClick={() =>
+                    onClick={() => {
+                        if (
+                            form.values.details.filter((qD) =>
+                                qD.detailTypes.includes("option")
+                            ).length >= 10
+                        ) {
+                            notification({
+                                type: "info",
+                                title: "Items are limited up to 10.",
+                                message: "Unable to add another item",
+                            });
+                            return;
+                        }
                         form.insertListItem("details", {
                             qDetailDesc: "",
                             detailTypes: ["option"],
-                        })
-                    }
+                        });
+                    }}
                 >
                     <PlusCircleIcon className="w-6" />
                 </Button>
@@ -117,30 +130,12 @@ function CustomDraggable({
             setDraggableId(`draggable-${index}`);
         };
     }, []);
-    // const patchtDetail = (id: number, desc: string) => {
-    //     if (desc !== "") {
-    //         patchQuestionDetail({
-    //             questionId: form.values.id,
-    //             id: id,
-    //             patchRequest: [
-    //                 {
-    //                     path: "/qDetailDesc",
-    //                     op: "replace",
-    //                     value: desc,
-    //                 },
-    //             ],
-    //         });
-    //     }
-    // };
+
     if (!item.detailTypes.includes("option")) {
         return;
     }
     return (
-        <Draggable
-            key={index}
-            draggableId={`draggable1-${index}`}
-            index={index}
-        >
+        <Draggable key={index} draggableId={`${draggableId}`} index={index}>
             {(provided, snapshot) => (
                 <div
                     ref={provided.innerRef}
