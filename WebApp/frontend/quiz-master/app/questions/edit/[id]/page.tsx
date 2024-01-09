@@ -1,11 +1,17 @@
 "use client";
 
 import QuestionDetailsEdit from "@/components/Commons/QuestionDetailsEdit";
-import { QuestionValues } from "@/lib/definitions";
+import {
+    Question,
+    QuestionEdit,
+    QuestionValues,
+    PatchItem,
+} from "@/lib/definitions";
 import { GetPatches, humanFileSize } from "@/lib/helpers";
 import {
     MultipleChoiceData,
     MultipleChoicePlusAudioData,
+    PuzzleData,
     SliderData,
 } from "@/lib/questionTypeData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
@@ -27,10 +33,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
-import { fetchMedia, fetchQuestion } from "@/lib/quizData";
 import ImageInput from "@/components/Commons/inputs/ImageInput";
 import AudioInput from "@/components/Commons/inputs/AudioInput";
-import { patchQuestion } from "@/lib/hooks/question";
+import { fetchQuestion, patchQuestion } from "@/lib/hooks/question";
+import { useErrorRedirection } from "@/utils/errorRedirection";
+import { notification } from "@/lib/notifications";
 
 const timeLimits = [10, 30, 60, 120];
 
@@ -46,6 +53,7 @@ const items = [
 
 export default function Page({ params }: { params: { id: number } }) {
     const { questionCategories } = useQuestionCategoriesStore();
+    const { redirectToError } = useErrorRedirection();
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
     const router = useRouter();
@@ -54,55 +62,50 @@ export default function Page({ params }: { params: { id: number } }) {
     const [fileAudio, setFileAudio] = useState<File | null>(null);
     const [isFetching, setIsFetching] = useState<boolean>(false);
 
-    useEffect(() => {
-        fetchQuestion({ questionId: params.id })
-            .then((data) => {
-                console.log(data);
-                form.setInitialValues({
-                    id: data.data.id,
-                    qStatement: data.data.qStatement,
-                    qAudio: data.data.qAudio,
-                    qImage: data.data.qImage,
-                    qCategoryId: data.data.qCategoryId.toString(),
-                    qDifficultyId: data.data.qDifficultyId.toString(),
-                    qTypeId: data.data.qTypeId.toString(),
-                    qTime: data.data.qTime.toString(),
-                    questionDetailCreateDtos: [],
-                    questionDetailDtos: data.data.details,
-                    options: [],
-                    trueOrFalseAnswer: true,
-                    minimum: 1,
-                    maximum: 1,
-                    sliderAnswer: 1,
-                    interval: 1,
-                    textToAudio: "",
-                    language: "ENG",
-                });
-                form.setValues({
-                    id: data.data.id,
-                    qStatement: data.data.qStatement,
-                    qAudio: data.data.qAudio,
-                    qImage: data.data.qImage,
-                    qCategoryId: data.data.qCategoryId.toString(),
-                    qDifficultyId: data.data.qDifficultyId.toString(),
-                    qTypeId: data.data.qTypeId.toString(),
-                    qTime: data.data.qTime.toString(),
-                    questionDetailCreateDtos: [],
-                    questionDetailDtos: data.data.details,
-                    options: [],
-                    trueOrFalseAnswer: true,
-                    minimum: 1,
-                    maximum: 1,
-                    sliderAnswer: 1,
-                    interval: 1,
-                    textToAudio: "",
-                    language: "ENG",
-                });
-            })
-            .catch(() => {});
-    }, [params.id]);
+    const populateQuestion = useCallback(async () => {
+        try {
+            const response = await fetchQuestion({ questionId: params.id });
 
-    const form = useForm<QuestionValues>({
+            if (response.type === "success") {
+                const question = response.data!.question;
+                form.setInitialValues({
+                    id: question.id,
+                    qStatement: question.qStatement,
+                    qAudio: question.qAudio,
+                    qImage: question.qImage,
+                    qCategoryId: question.qCategoryId.toString(),
+                    qDifficultyId: question.qDifficultyId.toString(),
+                    qTypeId: question.qTypeId.toString(),
+                    qTime: question.qTime.toString(),
+                    details: question.details,
+                });
+
+                form.setValues({
+                    id: question.id,
+                    qStatement: question.qStatement,
+                    qAudio: question.qAudio,
+                    qImage: question.qImage,
+                    qCategoryId: question.qCategoryId.toString(),
+                    qDifficultyId: question.qDifficultyId.toString(),
+                    qTypeId: question.qTypeId.toString(),
+                    qTime: question.qTime.toString(),
+                    details: question.details,
+                });
+            }
+        } catch (error) {
+            notification({ type: "error", title: "Something went wrong." });
+            redirectToError();
+        }
+    }, [params]);
+
+    useEffect(() => {
+        populateQuestion();
+    }, []);
+
+    const form = useForm<
+        QuestionEdit,
+        (questionEdit: QuestionEdit) => PatchItem[]
+    >({
         initialValues: {
             id: 1,
             qStatement: "",
@@ -112,19 +115,54 @@ export default function Page({ params }: { params: { id: number } }) {
             qDifficultyId: "1",
             qTypeId: "1",
             qTime: "30",
-            questionDetailCreateDtos: [],
-            questionDetailDtos: [],
-            options: [],
-            trueOrFalseAnswer: true,
-            minimum: 1,
-            maximum: 1,
-            sliderAnswer: 1,
-            interval: 1,
-            textToAudio: "",
-            language: "ENG",
+            details: [],
         },
         clearInputErrorOnChange: true,
         validateInputOnChange: true,
+        transformValues: (values) => {
+            var patches: PatchItem[] = [];
+            if (form.isDirty("qStatement")) {
+                patches = [
+                    {
+                        path: "qStatement",
+                        op: "replace",
+                        value: form.values.qStatement,
+                    },
+                    ...patches,
+                ];
+            }
+            if (form.isDirty("qCategoryId")) {
+                patches = [
+                    {
+                        path: "qCategoryId",
+                        op: "replace",
+                        value: parseInt(form.values.qCategoryId),
+                    },
+                    ...patches,
+                ];
+            }
+            if (form.isDirty("qDifficultyId")) {
+                patches = [
+                    {
+                        path: "qDifficultyId",
+                        op: "replace",
+                        value: parseInt(form.values.qDifficultyId),
+                    },
+                    ...patches,
+                ];
+            }
+            if (form.isDirty("qTime")) {
+                patches = [
+                    {
+                        path: "qTime",
+                        op: "replace",
+                        value: parseInt(form.values.qTime),
+                    },
+                    ...patches,
+                ];
+            }
+            return patches;
+        },
         validate: {
             qStatement: (value) =>
                 value.length < 1
@@ -132,139 +170,51 @@ export default function Page({ params }: { params: { id: number } }) {
                     : null,
             qCategoryId: (value, values) =>
                 value?.length === 0 ? "Question Category is required." : null,
-            questionDetailDtos: {
-                qDetailDesc: (value, values, path) => {
-                    if (!value) {
-                        return "Provide content.";
-                    }
-
-                    if (
-                        parseInt(values.qTypeId) === MultipleChoiceData.id ||
-                        parseInt(values.qTypeId) ===
-                            MultipleChoicePlusAudioData.id
-                    ) {
-                        return values.questionDetailDtos.findIndex((op, i) => {
-                            return (
-                                op.qDetailDesc === value &&
-                                path !==
-                                    `questionDetailDtos.${i}.qDetailDesc` &&
-                                op.detailTypes.includes("option")
-                            );
-                        }) >= 0
-                            ? "Duplicated Choice"
-                            : null;
-                    }
-
-                    if (parseInt(values.qTypeId) === SliderData.id) {
-                        var min = values.questionDetailDtos.find((qDetail) =>
-                            qDetail.detailTypes.includes("minimum")
-                        );
-                        var max = values.questionDetailDtos.find((qDetail) =>
-                            qDetail.detailTypes.includes("maximum")
-                        );
-                        var interval = values.questionDetailDtos.find(
-                            (qDetail) =>
-                                qDetail.detailTypes.includes("interval")
-                        );
-                        var answer = values.questionDetailDtos.find((qDetail) =>
-                            qDetail.detailTypes.includes("answer")
-                        );
-
-                        if (
-                            values.questionDetailDtos.find(
-                                (qDetail, i) =>
-                                    qDetail.detailTypes.includes("minimum") &&
-                                    path ===
-                                        `questionDetailDtos.${i}.qDetailDesc`
-                            )
-                        ) {
-                            if (!value) return "Provide minimmum";
-                            return max?.qDetailDesc &&
-                                parseInt(value) > parseInt(max?.qDetailDesc)
-                                ? "Minimum must not be larger than maximum"
-                                : null;
-                        }
-
-                        if (
-                            values.questionDetailDtos.find(
-                                (qDetail, i) =>
-                                    qDetail.detailTypes.includes("maximum") &&
-                                    path ===
-                                        `questionDetailDtos.${i}.qDetailDesc`
-                            )
-                        ) {
-                            if (!value) return "Provide maximum";
-                            return min?.qDetailDesc &&
-                                parseInt(value) < parseInt(min?.qDetailDesc)
-                                ? "Maximuam must not be smaller than minimim"
-                                : null;
-                        }
-
-                        if (
-                            values.questionDetailDtos.find(
-                                (qDetail, i) =>
-                                    qDetail.detailTypes.includes("interval") &&
-                                    path ===
-                                        `questionDetailDtos.${i}.qDetailDesc`
-                            )
-                        ) {
-                            if (!value) return "Provide interval";
-                            return answer?.qDetailDesc &&
-                                min?.qDetailDesc &&
-                                (parseInt(answer.qDetailDesc) -
-                                    parseInt(min.qDetailDesc)) %
-                                    parseInt(value) !==
-                                    0
-                                ? "Answer can't be hit with the given interval."
-                                : null;
-                        }
-                    }
-
-                    if (
-                        !value &&
-                        (parseInt(values.qTypeId) === MultipleChoiceData.id ||
-                            parseInt(values.qTypeId) ===
-                                MultipleChoicePlusAudioData.id)
-                    ) {
-                        return "Provide option";
-                    }
-
-                    return values.options.findIndex((op, i) => {
-                        return (
-                            op.value === value && path !== `options.${i}.value`
-                        );
-                    }) >= 0
-                        ? "Duplicated Choice"
-                        : null;
-                },
-                detailTypes: (value, values) => {
-                    return null;
-                },
-            },
         },
     });
 
-    const handleFileChange = useCallback(
-        (file: File | null, type: "audio" | "image") => {
-            if (file) {
-                patchQuestion({
-                    id: form.values.id,
-                    patches: [],
-                    image: type === "image" ? file : null,
-                    audio: type === "audio" ? file : null,
-                }).then((res) => {
-                    if (type === "image") {
-                        setFileImage(null);
-                        form.setFieldValue("qImage", res.qImage);
-                    } else {
-                        setFileAudio(null);
-                        form.setFieldValue("qAudio", res.qAudio);
-                    }
+    const updateQuestion = useCallback(async () => {
+        const patches = form.getTransformedValues();
+        try {
+            const response = await patchQuestion({
+                id: params.id,
+                patches: patches,
+                image: fileImage,
+                audio: fileAudio,
+            });
+            if (response.type === "success") {
+                notification({
+                    type: "success",
+                    title: "Successfuly updated.",
+                });
+                form.setInitialValues({
+                    ...form.values,
+                    qAudio: response.data!.qAudio || "",
+                    qImage: response.data!.qImage || "",
+                });
+
+                form.setValues({
+                    ...form.values,
+                    qAudio: response.data!.qAudio || "",
+                    qImage: response.data!.qImage || "",
+                });
+                setFileAudio(null);
+                setFileImage(null);
+                form.resetDirty();
+            } else {
+                notification({
+                    type: "error",
+                    title: response.message,
                 });
             }
-        },
-        [fileImage, fileAudio, form.values.qImage, form.values.qAudio]
-    );
+        } catch (error) {
+            notification({
+                type: "error",
+                title: "Something went wrong.",
+                message: "Unable to update question",
+            });
+        }
+    }, [form.values, fileAudio, fileImage]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -274,7 +224,14 @@ export default function Page({ params }: { params: { id: number } }) {
             </div>
             <form
                 className="flex flex-col gap-8 relative"
-                onReset={() => form.reset()}
+                onReset={() => {
+                    form.reset();
+                    setFileAudio(null), setFileImage(null);
+                }}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    updateQuestion();
+                }}
             >
                 <LoadingOverlay
                     visible={visible}
@@ -287,22 +244,6 @@ export default function Page({ params }: { params: { id: number } }) {
                     withAsterisk
                     classNames={styles}
                     {...form.getInputProps("qStatement")}
-                    onBlur={async () => {
-                        if (form.values.qStatement !== "") {
-                            await patchQuestion({
-                                id: form.values.id,
-                                patches: [
-                                    {
-                                        path: "qStatement",
-                                        op: "replace",
-                                        value: form.values.qStatement,
-                                    },
-                                ],
-                                image: null,
-                                audio: null,
-                            });
-                        }
-                    }}
                 />
                 <div className="flex flex-col md:flex-row gap-5 md:gap-10 [&>*]:grow">
                     <Select
@@ -319,24 +260,6 @@ export default function Page({ params }: { params: { id: number } }) {
                         clearable
                         required
                         classNames={styles}
-                        onChange={(value) => {
-                            if (value) {
-                                patchQuestion({
-                                    id: form.values.id,
-                                    patches: [
-                                        {
-                                            path: "qCategoryId",
-                                            op: "replace",
-                                            value: parseInt(value),
-                                        },
-                                    ],
-                                    image: null,
-                                    audio: null,
-                                }).then(() => {
-                                    form.setFieldValue("qCategoryId", value);
-                                });
-                            }
-                        }}
                     />
                     <Select
                         variant="filled"
@@ -352,24 +275,6 @@ export default function Page({ params }: { params: { id: number } }) {
                         {...form.getInputProps("qDifficultyId")}
                         clearable
                         required
-                        onChange={(value) => {
-                            if (value) {
-                                patchQuestion({
-                                    id: form.values.id,
-                                    patches: [
-                                        {
-                                            path: "qDifficultyId",
-                                            op: "replace",
-                                            value: parseInt(value),
-                                        },
-                                    ],
-                                    image: null,
-                                    audio: null,
-                                }).then(() => {
-                                    form.setFieldValue("qDifficultyId", value);
-                                });
-                            }
-                        }}
                     />
                     <Select
                         variant="filled"
@@ -399,24 +304,6 @@ export default function Page({ params }: { params: { id: number } }) {
                     clearable
                     required
                     classNames={styles}
-                    onChange={(value) => {
-                        if (value) {
-                            patchQuestion({
-                                id: form.values.id,
-                                patches: [
-                                    {
-                                        path: "qTime",
-                                        op: "replace",
-                                        value: parseInt(value),
-                                    },
-                                ],
-                                image: null,
-                                audio: null,
-                            }).then(() => {
-                                form.setFieldValue("qTime", value);
-                            });
-                        }
-                    }}
                 />
 
                 <div>
@@ -424,9 +311,7 @@ export default function Page({ params }: { params: { id: number } }) {
                     <div className="flex flex-col gap-4 justify-between sm:justify-start ">
                         <ImageInput
                             fileImage={fileImage}
-                            setFileImage={(file) =>
-                                handleFileChange(file, "image")
-                            }
+                            setFileImage={setFileImage}
                             qImageId={
                                 form.values.qImage.length > 15
                                     ? form.values.qImage
@@ -435,9 +320,7 @@ export default function Page({ params }: { params: { id: number } }) {
                         />
                         <AudioInput
                             fileAudio={fileAudio}
-                            setFileAudio={(file) =>
-                                handleFileChange(file, "audio")
-                            }
+                            setFileAudio={setFileAudio}
                             qAudioId={
                                 form.values.qAudio.length > 15
                                     ? form.values.qAudio
@@ -446,9 +329,42 @@ export default function Page({ params }: { params: { id: number } }) {
                         />
                     </div>
                 </div>
-
-                <QuestionDetailsEdit form={form} />
+                <div className="flex justify-end gap-3">
+                    <Button
+                        variant="transparent"
+                        color="gray"
+                        disabled={
+                            !(
+                                form.isDirty() ||
+                                fileAudio !== null ||
+                                fileImage !== null
+                            )
+                        }
+                        type="reset"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="filled"
+                        color="green"
+                        disabled={
+                            !(
+                                form.isDirty() ||
+                                fileAudio !== null ||
+                                fileImage !== null
+                            )
+                        }
+                        type="submit"
+                    >
+                        Update
+                    </Button>
+                </div>
             </form>
+            <QuestionDetailsEdit
+                questionId={form.values.id}
+                questionTypeId={form.values.qTypeId}
+                details={form.values.details}
+            />
         </div>
     );
 }
