@@ -20,17 +20,25 @@ export default function Message() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     connection.invoke("Chat", message, roomPin);
+    setMessage("");
   };
   return (
-    <div className="h-14  p-2 flex flex-row items-center space-x-2 border-t-2 border-gray-300">
+    <form
+      className="h-14  p-2 flex flex-row items-center space-x-2 border-t-2 border-gray-300"
+      onSubmit={handleSendMessage}
+    >
       <Input
         className="w-full"
-        placeholder="Message"
+        plaaceholder="Message"
         onChange={(e) => setMessage(e.target.value)}
+        value={message}
       />
-      <ActionIcon onClick={handleSendMessage}>
-        <IconSend />
-      </ActionIcon>
-    </div>
+      <button
+        type="submit"
+        className="bg-wall  w-12 h-9 rounded-lg justify-center flex items-center"
+      >
+        <IconSend color="white" />
+      </button>
+    </form>
   );
 }
