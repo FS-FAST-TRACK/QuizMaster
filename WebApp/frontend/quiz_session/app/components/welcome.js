@@ -29,14 +29,10 @@ export default function Welcome() {
     setConnection();
   }, []);
   useEffect(() => {
-    console.log(connection);
     if (connection !== undefined && connection.state !== "Connected") {
-      console.log("connected");
       connection
         .start()
         .then(() => {
-          console.log("Connection started");
-
           //notif
           connection.on("notif", (message) => {
             notifications.show({
@@ -71,9 +67,12 @@ export default function Welcome() {
 
           //leaderboard
           connection.on("leaderboard", (leader, isStop) => {
-            console.log("welcome");
-            console.log(leader);
             setLeaderboard({ scores: leader, stop: isStop });
+          });
+
+          //metadata
+          connection.on("metadata", (metadata) => {
+            console.log(metadata);
           });
         })
         .catch((err) => {

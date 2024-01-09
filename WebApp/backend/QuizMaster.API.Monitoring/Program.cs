@@ -4,11 +4,13 @@ using MonitoringService.DataAccess;
 using QuizMaster.API.Monitoring.DataAccess;
 using QuizMaster.API.Monitoring.DataAccess.Media;
 using QuizMaster.API.Monitoring.DataAccess.Quiz;
+using QuizMaster.API.Monitoring.DataAccess.Room;
 using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.API.Monitoring.Services;
 using QuizMaster.API.Monitoring.Services.Audit;
 using QuizMaster.API.Monitoring.Services.Media;
 using QuizMaster.API.Monitoring.Services.QuizAudit;
+using QuizMaster.API.Monitoring.Services.Room;
 
 namespace QuizMaster.API.Monitoring
 {
@@ -44,6 +46,9 @@ namespace QuizMaster.API.Monitoring
             builder.Services.AddScoped<IQuizSetAuditTrailRepository, QuizSetAuditTrailRepository>();
             builder.Services.AddScoped<IQuizSetAuditTrailService, QuizSetAuditTrailService>();
             builder.Services.AddScoped<QuizSetAuditTrailRepository>();
+            builder.Services.AddScoped<IRoomAuditTrailRepository, RoomAuditTrailRepository>();
+            builder.Services.AddScoped<IRoomAuditTrailService, RoomAuditTrailService>();
+            builder.Services.AddScoped<RoomAuditTrailRepository>();
 
             builder.Services.AddGrpc();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -88,6 +93,7 @@ namespace QuizMaster.API.Monitoring
             app.MapGrpcService<MonitoringInfoService>().RequireCors("AllowAll"); ;
             app.MapGrpcService<QuizMonitoringService>().RequireCors("AllowAll"); ;
             app.MapGrpcService<MediaMonitoringInfoService>().RequireCors("AllowAll"); ;
+            app.MapGrpcService<RoomMonitoringInfoService>().RequireCors("AllowAll");
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
             app.MapControllers();
 

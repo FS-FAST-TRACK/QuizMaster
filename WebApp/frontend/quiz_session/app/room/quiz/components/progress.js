@@ -15,7 +15,6 @@ export default function TimeProgress() {
         (question.remainingTime / question.question.qTime) * 100
       );
       setTime(percent);
-      console.log(question.remainingTime);
     }
   }, [question]);
   return <Progress value={time} />;
