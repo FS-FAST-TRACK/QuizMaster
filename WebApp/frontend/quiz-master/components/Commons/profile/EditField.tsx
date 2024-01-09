@@ -22,7 +22,8 @@ export default function EditField({
                     className="border border-black-200 rounded outline-1 p-2 w-[100%]"
                     type="text"
                     onChange={(e) => onInput(e.target.value)}
-                    value={`${value}`}
+                    value={value ? value : ""}
+                    placeholder={`Enter ${title}`}
                 />
             )}
         </div>

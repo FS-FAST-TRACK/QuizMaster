@@ -31,7 +31,11 @@ export default function EditFieldWithButton({
                 )}
                 {editting && (
                     <div className="block">
-                        <form>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                            }}
+                        >
                             <input
                                 name={`${
                                     inputType === "password"
@@ -63,7 +67,11 @@ export default function EditFieldWithButton({
                                 }`}
                             />
                         </form>
-                        <form>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                            }}
+                        >
                             {inputType === "password" && (
                                 <input
                                     placeholder={`${
@@ -139,8 +147,10 @@ export default function EditFieldWithButton({
                                                 currentPassword,
                                                 newPassword,
                                             ]);
+                                        setEditting(false);
                                     } else {
-                                        value;
+                                        onSave && onSave([value]);
+                                        setEditting(false);
                                     }
                                 }}
                                 onCancel={() => {

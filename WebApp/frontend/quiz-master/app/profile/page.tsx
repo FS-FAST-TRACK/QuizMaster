@@ -1,18 +1,93 @@
 "use client";
+import PromptModal from "@/components/Commons/modals/PromptModal";
 import EditField from "@/components/Commons/profile/EditField";
 import EditFieldWithButton from "@/components/Commons/profile/EditFieldWithButton";
 import SaveCancelButton from "@/components/Commons/profile/SaveCancelButton";
+import {
+    getAccountInfo,
+    getUserInfo,
+    saveUserDetails,
+    updateEmail,
+} from "@/lib/hooks/profile";
+import { IAccount, useAccountStore } from "@/store/ProfileStore";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Page() {
-    const [firstName, setFirstName] = useState<string>("Jay");
-    const [lastName, setLastName] = useState<string>("Abejar");
-    const [userName, setUserName] = useState<string>("jaymar921");
-    const [email, setEmail] = useState<string>("jay@gmail.com");
+    const { push } = useRouter();
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [userRoles, setUserRoles] = useState<string>("");
     const [editToggled, setEditToggled] = useState<boolean>(false);
+    const { setAccount, getAccount, getRoles, setRoles } = useAccountStore();
+    const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>("");
+
+    function updateChanges() {
+        const account = getAccount();
+        if (!account) return;
+        setFirstName(account.firstName as string);
+        setLastName(account.lastName as string);
+        setEmail(account.email as string);
+        setUserName(account.userName as string);
+        setUserRoles(getRoles().toString());
+    }
+
+    function handleErrorOnUpdateUserDetails(message: string) {
+        setShowErrorModal(true);
+        setErrorMessage(message);
+    }
+
+    function captureUserDetails() {
+        let newData = {
+            id: getAccount()?.id,
+            firstName,
+            lastName,
+            email,
+            userName,
+        } as IAccount;
+
+        saveUserDetails(
+            newData,
+            setEditToggled,
+            handleErrorOnUpdateUserDetails
+        );
+    }
+
+    useEffect(() => {
+        (async () => {
+            const { userData, roles } = await getUserInfo();
+            // set the account store
+            if (userData !== null) {
+                let _retrievedInfo = await getAccountInfo(userData.id);
+                setAccount(_retrievedInfo);
+            }
+            // redirect to login if userData is not found | unauthorized
+            else push("/login");
+            // set the roles
+            setRoles(roles);
+            // saving changes
+            updateChanges();
+        })();
+    }, [getUserInfo]);
+
     return (
         <>
+            <PromptModal
+                title="Update Failed"
+                body={errorMessage}
+                action="Ok"
+                opened={showErrorModal}
+                onConfirm={() => {
+                    setShowErrorModal(false);
+                }}
+                onClose={() => {
+                    setShowErrorModal(false);
+                }}
+            />
             <div>
                 <div>
                     <h1 className="text-[32px] font-bold text-[#3C3C3C]">
@@ -53,14 +128,17 @@ export default function Page() {
                     <EditField
                         editting={false}
                         title={"Roles"}
-                        value={"Admin"}
+                        value={userRoles}
                         onInput={() => {}}
                     />
                     {editToggled && (
                         <SaveCancelButton
-                            onSave={() => {}}
+                            onSave={() => {
+                                captureUserDetails();
+                            }}
                             onCancel={() => {
                                 setEditToggled(false);
+                                updateChanges();
                             }}
                         />
                     )}
@@ -75,6 +153,16 @@ export default function Page() {
                         value={email}
                         onInput={setEmail}
                         changeBtnTitle="Change"
+                        onSave={(values) => {
+                            const account = getAccount();
+                            if (account)
+                                updateEmail(
+                                    account.id,
+                                    values[0],
+                                    handleErrorOnUpdateUserDetails,
+                                    updateChanges
+                                );
+                        }}
                     />
                     <EditFieldWithButton
                         title="Password"
