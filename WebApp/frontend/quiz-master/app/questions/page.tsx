@@ -28,15 +28,7 @@ const items = [
     </Anchor>
 ));
 
-export default function Page({
-    searchParams,
-}: {
-    searchParams: {
-        pageSize: number;
-        searchQuery: string;
-        pageNumber: number;
-    };
-}) {
+export default function Page() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [questionFilters, setQuestionFilters] = useState<QuestionFilterProps>(
@@ -49,10 +41,6 @@ export default function Page({
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
-
-    const pageSize = searchParams.pageSize || 10;
-    const searchQuery2 = searchParams.searchQuery;
-    const pageNumber = searchParams.pageNumber || 1;
 
     const [visible, { close, open }] = useDisclosure(true);
 
