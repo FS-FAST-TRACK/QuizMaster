@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
@@ -7,6 +8,7 @@ using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 
 namespace QuizMaster.API.Gateway.Services
@@ -401,5 +403,6 @@ namespace QuizMaster.API.Gateway.Services
 
             return info;
         }
+
     }
 }

@@ -24,6 +24,11 @@ namespace QuizMaster.API.QuizSession
                 var channel = GrpcChannel.ForAddress("https://localhost:7065");
                 return new QuizAuditService.QuizAuditServiceClient(channel);
             });
+            builder.Services.AddScoped(sp =>
+            {
+                var channel = GrpcChannel.ForAddress("https://localhost:7065");
+                return new RoomAuditService.RoomAuditServiceClient(channel);
+            });
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
