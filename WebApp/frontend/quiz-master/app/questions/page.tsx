@@ -28,7 +28,15 @@ const items = [
     </Anchor>
 ));
 
-export default function Page() {
+export default function Page({
+    searchParams,
+}: {
+    searchParams: {
+        pageSize: number;
+        searchQuery: string;
+        pageNumber: number;
+    };
+}) {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [questionFilters, setQuestionFilters] = useState<QuestionFilterProps>(
@@ -41,6 +49,10 @@ export default function Page() {
     const [paginationMetadata, setPaginationMetadata] = useState<
         PaginationMetadata | undefined
     >();
+
+    const pageSize = searchParams.pageSize || 10;
+    const searchQuery2 = searchParams.searchQuery;
+    const pageNumber = searchParams.pageNumber || 1;
 
     const [visible, { close, open }] = useDisclosure(true);
 
@@ -65,6 +77,10 @@ export default function Page() {
                 setQuestions(response.data?.questions!);
                 setPaginationMetadata(response.data?.paginationMetada);
             } else {
+                notification({
+                    type: "error",
+                    title: "Failed to fetch questions",
+                });
             }
         } catch {
             notification({ type: "error", title: "Something went wrong." });
@@ -90,6 +106,12 @@ export default function Page() {
 
         [questionFilters, form]
     );
+
+    const onDeleteCallBack = useCallback(() => {
+        open();
+        getQuestions();
+        close();
+    }, [form.values, questionFilters]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -132,6 +154,7 @@ export default function Page() {
                 setSelectedRow={() => null}
                 loading={visible}
                 callInQuestionsPage="questions"
+                onDeleteCallBack={onDeleteCallBack}
             />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>
