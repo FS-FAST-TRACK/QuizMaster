@@ -584,7 +584,7 @@ namespace QuizMaster.API.Account.Service
             }
 
             string token = _passwordHandler.GenerateToken(request.Id.ToString(), request.CurrentPassword, request.NewPassword);
-            Task.Run(() => { _emailSenderService.SendEmail(existingUser.Email, token); });
+            Task.Run(() => { _emailSenderService.SendEmail(existingUser.Email, existingUser.FirstName, token); });
 
             reply.Code = 200;
             reply.Message = "A confirmation email was sent to your account.";
