@@ -85,6 +85,8 @@ export const getTransformedData = (
             ];
         }
     });
+
+    // check if in the form details there are old details that don't have any answer
     var toBeDeleted = oldDetails.filter((old) => {
         if (!form.values.details.map((d) => d.id).includes(old.id)) {
             return old.id;

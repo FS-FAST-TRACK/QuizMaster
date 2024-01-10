@@ -194,10 +194,6 @@ export default function QuestionDetails({
     });
 
     useEffect(() => {
-        populateOldDetails();
-    }, [questionId]);
-
-    useEffect(() => {
         if (oldDetails) {
             form.setInitialValues({ details: oldDetails });
             form.setValues({ details: oldDetails });
@@ -207,11 +203,44 @@ export default function QuestionDetails({
     const populateOldDetails = useCallback(async () => {
         try {
             const res = await fetchQuestionDetails({ questionId: questionId });
-            setOldDetails(res.data);
+            // filter out the question details
+            var filteredDetails: QuestionDetail[] = res.data;
+
+            // special block of code to handle options positioning
+            if (questionTypeId === PuzzleData.id.toString()) {
+                try {
+                    // get the answer detail for puzzle questions
+                    var answerDetail = filteredDetails.find((q) =>
+                        q.detailTypes.includes("answer")
+                    );
+                    var answerDescription = answerDetail!.qDetailDesc;
+
+                    const answer: number[] = JSON.parse(
+                        answerDescription[0] !== "["
+                            ? `[${answerDescription}]`
+                            : answerDescription
+                    );
+                    var filteredDetails = answer.map(
+                        (id) => filteredDetails.find((d) => d.id === id)!
+                    );
+                } catch (error) {
+                    notification({
+                        type: "error",
+                        title: "This puzzle queston doesn't have an answer.",
+                    });
+                    throw new Error("No answer found");
+                }
+            }
+
+            setOldDetails(filteredDetails);
         } catch (error) {
             redirectToError();
         }
     }, [questionId]);
+
+    useEffect(() => {
+        populateOldDetails();
+    }, [questionId, populateOldDetails]);
 
     const updateDetails = useCallback(async () => {
         const {
@@ -243,7 +272,7 @@ export default function QuestionDetails({
                 });
                 return res;
             } catch (error) {
-                throw new Error("Failed to patch question details");
+                throw new Error("Failed to post question details");
             }
         });
         const deleteRequests = questionDetailsDeleteIds.map((detailId) => {
@@ -254,7 +283,7 @@ export default function QuestionDetails({
                 });
                 return res;
             } catch (error) {
-                throw new Error("Failed to patch question details");
+                throw new Error("Failed to delete question details");
             }
         });
 
@@ -270,11 +299,64 @@ export default function QuestionDetails({
                     type: "success",
                     title: "Successfuly updated question details.",
                 });
+
+                return { postRes, updateRes, deleteRes };
             })
             .catch(() => {
                 notification({ type: "error", title: "Something went wrong" });
                 redirectToError();
             });
+
+        // special code added to handle puzzle question positioning.
+        if (questionTypeId === PuzzleData.id.toString()) {
+            try {
+                const res = await fetchQuestionDetails({
+                    questionId: questionId,
+                });
+
+                // get the question details
+                const details: QuestionDetail[] = res.data;
+
+                // get the answer Details
+                const answerDetail = details.find((qd) =>
+                    qd.detailTypes.includes("answer")
+                );
+
+                var newAnswer: number[] = [];
+                form.values.details.forEach((d) => {
+                    if (d.id) {
+                        newAnswer = [...newAnswer, d.id];
+                    } else {
+                        const detail = details.find(
+                            (d2) =>
+                                d2.qDetailDesc.trim().toLocaleLowerCase() ===
+                                    d.qDetailDesc.trim().toLocaleLowerCase() &&
+                                d2.detailTypes.includes("option")
+                        );
+                        if (detail) {
+                            newAnswer = [...newAnswer, detail.id];
+                        }
+                    }
+                });
+
+                const answerRes = await patchQuestionDetail({
+                    questionId: questionId,
+                    id: answerDetail!.id,
+                    patchRequest: [
+                        {
+                            op: "replace",
+                            value: `[${newAnswer.toString()}]`,
+                            path: "qDetailDesc",
+                        },
+                    ],
+                });
+            } catch (error) {
+                notification({
+                    type: "error",
+                    title: "Something went wrong when updating the puzzle questions answer",
+                });
+            }
+        }
         form.resetDirty();
         populateOldDetails();
     }, [form]);

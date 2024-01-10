@@ -57,6 +57,7 @@ export default function PuzzleQuestionDetails({
         };
     }, []);
     const x = form.values.details.map((item, index) => {
+        if (!item.detailTypes.includes("option")) return null;
         return (
             <CustomDraggable
                 key={index}
@@ -124,18 +125,12 @@ function CustomDraggable({
         details: QuestionDetail[];
     }>;
 }) {
-    const [draggableId, setDraggableId] = useState(`draggable-${index}`);
-    useEffect(() => {
-        return () => {
-            setDraggableId(`draggable-${index}`);
-        };
-    }, []);
-
-    if (!item.detailTypes.includes("option")) {
-        return;
-    }
     return (
-        <Draggable key={index} draggableId={`${draggableId}`} index={index}>
+        <Draggable
+            key={item.id || index}
+            draggableId={`draggable-${item.id || index}`}
+            index={index}
+        >
             {(provided, snapshot) => (
                 <div
                     ref={provided.innerRef}
