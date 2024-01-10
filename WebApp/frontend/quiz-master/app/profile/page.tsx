@@ -4,11 +4,14 @@ import EditField from "@/components/Commons/profile/EditField";
 import EditFieldWithButton from "@/components/Commons/profile/EditFieldWithButton";
 import SaveCancelButton from "@/components/Commons/profile/SaveCancelButton";
 import {
+    DeleteAccount,
+    UpdatePassword,
     getAccountInfo,
     getUserInfo,
     saveUserDetails,
     updateEmail,
 } from "@/lib/hooks/profile";
+import { notification } from "@/lib/notifications";
 import { IAccount, useAccountStore } from "@/store/ProfileStore";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
@@ -25,6 +28,7 @@ export default function Page() {
     const { setAccount, getAccount, getRoles, setRoles } = useAccountStore();
     const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
     function updateChanges() {
         const account = getAccount();
@@ -57,6 +61,30 @@ export default function Page() {
         );
     }
 
+    async function handleUpdatePassword(password: Array<string>) {
+        return await UpdatePassword(
+            getAccount()?.id as Number,
+            password,
+            setEditToggled,
+            handleErrorOnUpdateUserDetails
+        );
+    }
+
+    function onDeleteAccount() {
+        DeleteAccount(getAccount()?.id as Number).then(
+            ({ message, success }) => {
+                if (success) {
+                    notification({
+                        type: "success",
+                        title: message,
+                    });
+                } else {
+                    handleErrorOnUpdateUserDetails(message);
+                }
+            }
+        );
+    }
+
     useEffect(() => {
         (async () => {
             const { userData, roles } = await getUserInfo();
@@ -86,6 +114,19 @@ export default function Page() {
                 }}
                 onClose={() => {
                     setShowErrorModal(false);
+                }}
+            />
+            <PromptModal
+                title="Delete Account"
+                body={"Are you sure you want to delete this account?"}
+                action="Ok"
+                opened={showDeleteModal}
+                onConfirm={() => {
+                    setShowDeleteModal(false);
+                    onDeleteAccount();
+                }}
+                onClose={() => {
+                    setShowDeleteModal(false);
                 }}
             />
             <div>
@@ -169,6 +210,8 @@ export default function Page() {
                         value=""
                         inputType="password"
                         changeBtnTitle="Change Password"
+                        onError={handleErrorOnUpdateUserDetails}
+                        onSave={handleUpdatePassword}
                     />
                 </div>
                 <div className="pt-5 font-bold flex items-center pb-2 text-[#3C3C3C]">
@@ -182,7 +225,12 @@ export default function Page() {
                         cannot be undone.
                     </p>
                 </div>
-                <button className="bg-red-500 text-white rounded text-[15px] p-2 mt-4">
+                <button
+                    onClick={() => {
+                        setShowDeleteModal(true);
+                    }}
+                    className="bg-red-500 text-white rounded text-[15px] p-2 mt-4"
+                >
                     Delete my account
                 </button>
             </div>

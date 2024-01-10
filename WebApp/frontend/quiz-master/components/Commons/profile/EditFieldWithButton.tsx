@@ -1,6 +1,17 @@
 "use client";
 import { Dispatch, SetStateAction, useState } from "react";
 import SaveCancelButton from "./SaveCancelButton";
+import { validatorFactory } from "@/lib/validation/creators";
+import {
+    isRequired,
+    mustBeEmail,
+    mustHaveDigit,
+    mustHaveLowerCase,
+    mustHaveSpecialCharacter,
+    mustHaveUpperCase,
+} from "@/lib/validation/regex";
+import { validate } from "@/lib/validation/validate";
+
 export default function EditFieldWithButton({
     title,
     value,
@@ -9,19 +20,23 @@ export default function EditFieldWithButton({
     inputType,
     onSave,
     onCancel,
+    onError,
 }: {
     title: string;
     value: string;
     onInput?: Dispatch<SetStateAction<string>>;
     changeBtnTitle?: string;
     inputType?: string;
-    onSave?: (s: Array<string>) => void;
+    onSave?: (s: Array<string>) => void | Promise<boolean>;
     onCancel?: () => void;
+    onError?: (message: string) => void;
 }) {
     const [editting, setEditting] = useState<boolean>(false);
     const [currentPassword, setCurrentPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [confirmEnabled, setConfirmDisabled] = useState<boolean>(true);
+
     return (
         <div className="relative w-[100%]">
             <p className={`${editting && "font-bold"}`}>{title}</p>
@@ -124,33 +139,79 @@ export default function EditFieldWithButton({
                         <div className="block ml-2 ">
                             <SaveCancelButton
                                 className="h-[32px] items-center"
+                                enabled={confirmEnabled}
                                 onSave={() => {
                                     if (inputType === "password") {
-                                        if (currentPassword === "") {
-                                            alert("Current password is empty");
+                                        const maxChar = validatorFactory(
+                                            50,
+                                            "max"
+                                        );
+                                        const passWordMinChar =
+                                            validatorFactory(8, "min");
+                                        const validators = [
+                                            isRequired,
+                                            passWordMinChar,
+                                            maxChar,
+                                            mustHaveLowerCase,
+                                            mustHaveUpperCase,
+                                            mustHaveDigit,
+                                            mustHaveSpecialCharacter,
+                                        ];
+                                        // check empty
+                                        if (!currentPassword) {
+                                            onError &&
+                                                onError(
+                                                    "Current password is empty"
+                                                );
                                             return;
                                         }
+                                        // check if old password is same as new
                                         if (currentPassword === newPassword) {
-                                            alert(
-                                                "Old password cannot be the same as new password"
-                                            );
+                                            onError &&
+                                                onError(
+                                                    "Old password cannot be the same as new password"
+                                                );
                                             return;
                                         }
+                                        const validatePassword = validate(
+                                            newPassword,
+                                            validators
+                                        );
+                                        if (null != validatePassword) {
+                                            onError &&
+                                                onError(validatePassword);
+                                            return;
+                                        }
+                                        // check if new and confirm is matched
                                         if (newPassword !== confirmPassword) {
-                                            alert(
-                                                "New Password and Confirm Password must match"
-                                            );
+                                            onError &&
+                                                onError(
+                                                    "New Password and Confirm Password must match"
+                                                );
                                             return;
                                         }
-                                        onSave &&
-                                            onSave([
-                                                currentPassword,
-                                                newPassword,
-                                            ]);
-                                        setEditting(false);
+                                        if (onSave != null) {
+                                            setConfirmDisabled(false);
+                                            Promise.resolve(
+                                                onSave([
+                                                    currentPassword,
+                                                    newPassword,
+                                                ])
+                                            ).then((res) => {
+                                                if (res) setEditting(false);
+                                                setConfirmDisabled(true);
+                                            });
+                                        }
                                     } else {
-                                        onSave && onSave([value]);
-                                        setEditting(false);
+                                        if (onSave != null) {
+                                            setConfirmDisabled(false);
+                                            Promise.resolve(
+                                                onSave([value])
+                                            ).then((res) => {
+                                                if (res) setEditting(false);
+                                                setConfirmDisabled(true);
+                                            });
+                                        }
                                     }
                                 }}
                                 onCancel={() => {

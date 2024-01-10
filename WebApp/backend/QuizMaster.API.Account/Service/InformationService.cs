@@ -570,11 +570,24 @@ namespace QuizMaster.API.Account.Service
                 return await Task.FromResult(reply);
             }
 
+            PasswordHasher<UserAccount> hasher = new();
+
+            // check if password is correct
+            var passwordVerification = hasher.VerifyHashedPassword(existingUser, existingUser.PasswordHash, request.CurrentPassword);
+            if (PasswordVerificationResult.Success != passwordVerification) 
+            {
+                reply.Code = 400;
+                reply.Message = "Incorrect Password";
+
+
+                return await Task.FromResult(reply);
+            }
+
             string token = _passwordHandler.GenerateToken(request.Id.ToString(), request.CurrentPassword, request.NewPassword);
-            _emailSenderService.SendEmail(existingUser.Email, token);
+            Task.Run(() => { _emailSenderService.SendEmail(existingUser.Email, token); });
 
             reply.Code = 200;
-            reply.Message = "A confirmation email was sent to account.";
+            reply.Message = "A confirmation email was sent to your account.";
 
             
             return await Task.FromResult(reply);

@@ -1,7 +1,8 @@
-import { QUIZMASTER_ACCOUNT_GET, QUIZMASTER_ACCOUNT_PATCH, QUIZMASTER_AUTH_GET_COOKIE_INFO } from "@/api/api-routes";
+import { QUIZMASTER_ACCOUNT_DELETE, QUIZMASTER_ACCOUNT_GET, QUIZMASTER_ACCOUNT_PASSWORD_RESET_POST, QUIZMASTER_ACCOUNT_PATCH, QUIZMASTER_AUTH_GET_COOKIE_INFO } from "@/api/api-routes";
 import { IAccount, UserAccount } from "@/store/ProfileStore";
 import { Dispatch, SetStateAction } from "react";
 import { notification } from "../notifications";
+import { signOut } from "next-auth/react";
 
 export async function getUserInfo(){
   try{
@@ -53,6 +54,23 @@ export async function updateEmail(id: Number, newEmail: string, ErrorCallback: (
 
 export async function saveUserDetails(account: IAccount, setEditToggle: Dispatch<SetStateAction<boolean>>, ErrorCallback: (message: string) => void){
   // apply patch
+  console.log("called")
+  if(!account.firstName || !account.lastName || !account.userName){
+    ErrorCallback("Make sure that the fields are not empty");
+    return
+  }
+  if(account.firstName && account.firstName.length < 3){
+    ErrorCallback("Firstname must have at least 3 characters");
+    return
+  }
+  if(account.lastName && account.lastName.length < 3){
+    ErrorCallback("Lastname must have at least 3 characters");
+    return
+  }
+  if(account.userName && account.userName.length < 5){
+    ErrorCallback("Username must have at least 5 characters");
+    return
+  }
   let payload = new Array<object>;
   for(let prop in account){
     if(prop === "id") continue;
@@ -76,4 +94,26 @@ export async function saveUserDetails(account: IAccount, setEditToggle: Dispatch
 function validateEmail(email: string) {
     const res = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
     return res.test(String(email).toLowerCase());
+}
+
+export async function UpdatePassword(id: Number,password: Array<string>, setEditToggle: Dispatch<SetStateAction<boolean>>, ErrorCallback: (message: string) => void){
+  const response = await fetch(QUIZMASTER_ACCOUNT_PASSWORD_RESET_POST(id), {
+    method:"POST", 
+    credentials: "include", 
+    headers: {"content-type":"application/json"},
+    body:JSON.stringify({currentPassword: password[0], newPassword: password[1]})});
+    const data = await response.json()
+  if(response.status !== 200){
+    ErrorCallback(data.message);
+    return false;
+  }else {setEditToggle(false);notification(data); return true;}
+}
+
+
+export async function DeleteAccount(id: Number){
+  await fetch(`${QUIZMASTER_ACCOUNT_DELETE}${id}`, {
+    method:"DELETE", 
+    credentials: "include"});
+  signOut();
+  return {message:"Delete account success", success:true};
 }
