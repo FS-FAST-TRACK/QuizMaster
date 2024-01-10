@@ -95,6 +95,7 @@ export default function MultipleChoiceQuestionDetail({
                             });
                             return;
                         }
+                        form.clearFieldError("options");
                         form.insertListItem("options", {
                             value: "",
                             isAnswer: false,

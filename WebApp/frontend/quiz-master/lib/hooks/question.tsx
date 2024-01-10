@@ -222,7 +222,7 @@ export async function postQuestion({
         if (!isSuccess) {
             const data = await res.json();
             response.message = data.message;
-
+            response.type = "fail";
             return response;
         }
         const questionData: Question = await res.json();

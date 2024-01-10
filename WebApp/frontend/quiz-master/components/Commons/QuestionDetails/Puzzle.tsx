@@ -120,6 +120,7 @@ export default function PuzzleQuestionDetails({
                             });
                             return;
                         }
+                        form.clearFieldError("options");
                         form.insertListItem("options", {
                             value: "",
                             isAnswer: false,
