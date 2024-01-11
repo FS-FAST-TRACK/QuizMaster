@@ -27,6 +27,10 @@
     }
 }
 
+.layout {
+    border: 1px solid red;
+}
+
 .mantine-TextInput-input {
     height: 46px !important;
 

@@ -11,6 +11,9 @@
         "test:watch": "jest --watchAll"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.5.1",
+        "@fortawesome/free-solid-svg-icons": "^6.5.1",
+        "@fortawesome/react-fontawesome": "^0.2.0",
         "@heroicons/react": "^2.0.18",
         "@mantine/core": "^7.1.5",
         "@mantine/form": "^7.1.5",
@@ -29,6 +32,7 @@
         "react": "^18",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^18",
+        "react-export-table-to-excel": "^1.0.6",
         "react-hot-toast": "^2.4.1",
         "typescript": "^5",
         "zod": "^3.22.4",

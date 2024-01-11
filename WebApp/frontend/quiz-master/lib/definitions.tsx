@@ -1,3 +1,5 @@
+import { User } from "next-auth";
+
 export type Question = {
     id: number;
     qAudio: string;
@@ -103,13 +105,11 @@ export type QuestionFilterProps = {
     filterByCategories: number[];
     filterByDifficulties: number[];
     filterByTypes: number[];
-}
+};
 export interface CategoryResourceParameter extends ResourceParameter {
-    
     isGetAll?: boolean;
 }
 export interface DifficultyResourceParameter extends ResourceParameter {
-    
     isGetAll?: boolean;
 }
 export type PaginationMetadata = {
@@ -132,7 +132,7 @@ export type SetDTO = {
     qSetDesc: string;
     qSetName: string;
     questions: number[];
-}
+};
 export type QuestionSet = {
     questionId: number;
     setId: number;
@@ -150,4 +150,25 @@ export type PatchItem = {
     path: string;
     op: string;
     value: any;
+};
+
+export type UserAuditTrail = {
+    UserAuditTrailId: number;
+    UserId: number;
+    Action: string;
+    Timestamp: Date;
+    Details: string;
+    UserRole: string;
+    Type: string;
+};
+
+export type UserAudit = {
+    userAuditTrailId: number;
+    userId: number;
+    action: String;
+    timestamp: Date;
+    details: String;
+    userRole: String;
+    oldValues: String;
+    newValues: String;
 };

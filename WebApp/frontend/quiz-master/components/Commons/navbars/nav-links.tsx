@@ -59,6 +59,23 @@ const links = [
         href: "/reports",
         icon: DocumentTextIcon,
     },
+    {
+        key: "audit",
+        label: "Audit",
+        icon: DocumentTextIcon,
+        links: [
+            {
+                key: "account-audit",
+                label: "Account Audit",
+                href: "/account-audit",
+            },
+            {
+                key: "media-audit",
+                label: "Media Audit",
+                href: "/media-audit",
+            },
+        ],
+    },
 ];
 
 export default function NavLinks() {
