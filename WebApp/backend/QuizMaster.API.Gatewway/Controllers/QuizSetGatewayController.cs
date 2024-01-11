@@ -17,6 +17,7 @@ using QuizMaster.Library.Common.Models.QuizSession;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using QuizMaster.API.Gateway.Helper;
+using QuizMaster.Library.Common.Entities.Roles;
 
 namespace QuizMaster.API.Gateway.Controllers
 {
@@ -285,7 +286,15 @@ namespace QuizMaster.API.Gateway.Controllers
         public async Task<IActionResult> CreateRoom(CreateRoomDTO roomDTO)
         {
             var request = new CreateRoomRequest { Room = JsonConvert.SerializeObject(roomDTO) };
-            var reply = await roomChannelClient.CreateRoomAsync(request);
+            var token = this.GetToken();
+            AuthStore authStore = await GetAuthStoreInfo(token ?? "");
+            var headers = new Metadata
+            {
+                { "username", authStore.UserData.UserName ?? "unknown" },
+                { "id", authStore.UserData.Id.ToString() ?? "unknown" },
+                { "role",  authStore.Roles.ToString() ?? "unknown" }
+            };
+            var reply = await roomChannelClient.CreateRoomAsync(request, headers);
 
             if (reply.Code == 200)
             {
