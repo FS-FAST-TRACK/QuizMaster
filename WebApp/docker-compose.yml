@@ -84,7 +84,7 @@ services:
       - GrpcServerConfiguration:Quiz_Category_Service=https://backend_api_quiz:6005
       - GrpcServerConfiguration:Session_Service=https://backend_api_quizsession:6006
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
-      - Kestrel:Endpoints:Https:Url=http://*:80
+      - Kestrel:Endpoints:Https:Url=https://*:443
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
       - Kestrel:Certificates:Default:Password=123456
     networks:
@@ -175,6 +175,7 @@ services:
       - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
       - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
       - AppSettings:RabbitMq_Hostname=rabbitmq
+      - AppSettings:Monitoring_Service=https://backend_api_monitoring:6004
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:6006
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
