@@ -8,10 +8,10 @@ import {
     PaginationMetadata,
     Question,
     QuestionFilterProps,
-    QuestionResourceParameter,
     ResourceParameter,
 } from "@/lib/definitions";
 import { fetchQuestions } from "@/lib/hooks/question";
+import { notification } from "@/lib/notifications";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Anchor, Breadcrumbs } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -53,16 +53,26 @@ export default function Page() {
     });
 
     const getQuestions = useCallback(async () => {
-        var questionsFetch = await fetchQuestions({
-            questionResourceParameter: {
-                ...form.values,
-                ...questionFilters,
-                exludeQuestionsIds: undefined,
-            },
-        });
-
-        setQuestions(questionsFetch.data);
-        setPaginationMetadata(questionsFetch.paginationMetadata);
+        try {
+            var response = await fetchQuestions({
+                questionResourceParameter: {
+                    ...form.values,
+                    ...questionFilters,
+                    exludeQuestionsIds: undefined,
+                },
+            });
+            if (response.type === "success") {
+                setQuestions(response.data?.questions!);
+                setPaginationMetadata(response.data?.paginationMetada);
+            } else {
+                notification({
+                    type: "error",
+                    title: "Failed to fetch questions",
+                });
+            }
+        } catch {
+            notification({ type: "error", title: "Something went wrong." });
+        }
     }, [form.values, questionFilters]);
 
     useEffect(() => {
@@ -84,6 +94,12 @@ export default function Page() {
 
         [questionFilters, form]
     );
+
+    const onDeleteCallBack = useCallback(() => {
+        open();
+        getQuestions();
+        close();
+    }, [form.values, questionFilters]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -126,6 +142,7 @@ export default function Page() {
                 setSelectedRow={() => null}
                 loading={visible}
                 callInQuestionsPage="questions"
+                onDeleteCallBack={onDeleteCallBack}
             />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>

@@ -24,7 +24,10 @@ import PromptModal from "../modals/PromptModal";
 import QuesitonCard from "../cards/QuestionCard";
 import QuestionModal from "../modals/ViewQuestionModal";
 import ViewQuestionModal from "../modals/ViewQuestionModal";
+import { deleteQuestion as removeQuestion } from "@/lib/hooks/question";
 import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
+import { notification } from "@/lib/notifications";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function QuestionTable({
     questions,
@@ -32,16 +35,20 @@ export default function QuestionTable({
     setSelectedRow,
     loading,
     callInQuestionsPage,
+    onDeleteCallBack,
 }: {
     questions: Question[];
     message?: string;
     setSelectedRow: Dispatch<SetStateAction<number[]>>;
     loading: boolean;
     callInQuestionsPage: string | "";
+    onDeleteCallBack?: () => void;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
     const { getQuestionTypeDescription } = useQuestionTypesStore();
+    const router = useRouter();
+    const pathName = usePathname();
 
     const [deleteQuestion, setDeleteQuestion] = useState<Question>();
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -56,12 +63,23 @@ export default function QuestionTable({
     }, [selectedRows]);
 
     const handelDelete = useCallback(async () => {
-        const res = await fetch(
-            `${QUIZMASTER_QUESTION_DELETE}/${deleteQuestion?.id}`,
-            {
-                method: "DELETE",
+        if (deleteQuestion) {
+            try {
+                const res = await removeQuestion({ id: deleteQuestion.id });
+                if (res.type === "success") {
+                    notification({ type: "success", title: res.message });
+                } else {
+                    notification({ type: "error", title: res.message });
+                }
+                setDeleteQuestion(undefined);
+
+                if (onDeleteCallBack) {
+                    onDeleteCallBack();
+                }
+            } catch (error) {
+                notification({ type: "error", title: "Something went wrong" });
             }
-        );
+        }
     }, [deleteQuestion]);
 
     const rows = questions.map((question) => (

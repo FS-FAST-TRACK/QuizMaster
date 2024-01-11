@@ -1,14 +1,29 @@
-export type Question = {
+export interface QuestionCore {
     id: number;
     qAudio: string;
+    qCategoryId: any;
+    qDifficultyId: any;
+    qTypeId: any;
+    qImage: string;
+    qStatement: string;
+    qTime: any;
+    details: QuestionDetail[];
+}
+
+export interface Question extends QuestionCore {
     qCategoryId: number;
     qDifficultyId: number;
     qTypeId: number;
-    qImage: string;
-    qStatement: string;
     qTime: number;
     details: QuestionDetail[];
-};
+}
+
+export interface QuestionEdit extends QuestionCore {
+    qCategoryId: string;
+    qDifficultyId: string;
+    qTypeId: string;
+    qTime: string;
+}
 export type QuestionDetail = {
     id: number;
     qDetailDesc: string;
@@ -103,13 +118,11 @@ export type QuestionFilterProps = {
     filterByCategories: number[];
     filterByDifficulties: number[];
     filterByTypes: number[];
-}
+};
 export interface CategoryResourceParameter extends ResourceParameter {
-    
     isGetAll?: boolean;
 }
 export interface DifficultyResourceParameter extends ResourceParameter {
-    
     isGetAll?: boolean;
 }
 export type PaginationMetadata = {
@@ -132,7 +145,7 @@ export type SetDTO = {
     qSetDesc: string;
     qSetName: string;
     questions: number[];
-}
+};
 export type QuestionSet = {
     questionId: number;
     setId: number;
