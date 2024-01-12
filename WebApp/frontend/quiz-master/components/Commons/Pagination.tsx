@@ -11,9 +11,11 @@ const pageSizes = ["10", "20", "30", "40", "50"];
 export default function CustomPagination({
     form,
     metadata,
+    totalPages,
 }: {
     form: UseFormReturnType<ResourceParameter>;
-    metadata: PaginationMetadata | undefined;
+    metadata?: PaginationMetadata;
+    totalPages?: number;
 }) {
     return (
         <div className="flex flex-col md:flex-row items-center md:justify-end gap-5 md:gap-10">
@@ -31,7 +33,7 @@ export default function CustomPagination({
                 />
             </div>
             <Pagination
-                total={metadata?.totalPages || 1}
+                total={metadata?.totalPages || totalPages || 1}
                 siblings={1}
                 {...form.getInputProps("pageNumber")}
             />
