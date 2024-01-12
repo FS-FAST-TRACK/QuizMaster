@@ -1,30 +1,37 @@
 "use client";
 
-import {
-    Button,
-    Container,
-    PasswordInput,
-    Text,
-    TextInput,
-} from "@mantine/core";
-import {
-    isEmail,
-    isNotEmpty,
-    matches,
-    matchesField,
-    useForm,
-} from "@mantine/form";
+import { Button, PasswordInput, TextInput, Tooltip } from "@mantine/core";
+import { matchesField, useForm } from "@mantine/form";
 import logo from "/public/quiz-master-logo.png";
-import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { notification } from "@/lib/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import { redirect } from "next/navigation";
-import { useCallback } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { validatorFactory } from "@/lib/validation/creators";
+import {
+    isRequired,
+    mustBeEmail,
+    mustHaveDigit,
+    mustHaveLowerCase,
+    mustHaveSpecialCharacter,
+    mustHaveUpperCase,
+    userNameValidator,
+} from "@/lib/validation/regex";
+import { validate } from "@/lib/validation/validate";
+import { register } from "@/lib/hooks/auth";
+import { useErrorRedirection } from "@/utils/errorRedirection";
+
+const maxChar = validatorFactory(50, "max");
+const minChar = validatorFactory(3, "min");
+const passWordMinChar = validatorFactory(8, "min");
 
 const RegisterForm = () => {
     const [open, handlers] = useDisclosure(false);
+    const [visible, handlePasswordVissibility] = useDisclosure(false);
+    const [tooltipLabel, setTooltipLabel] = useState<ReactNode | undefined>();
+    const { redirectToError } = useErrorRedirection();
 
     const form = useForm({
         initialValues: {
@@ -35,45 +42,44 @@ const RegisterForm = () => {
             password: "",
             confirmPassword: "",
         },
-        validateInputOnChange: true,
+        validateInputOnBlur: true,
         validate: {
             firstName: (value) => {
-                if (value.length > 50) {
-                    return "Max of 50 characters.";
-                }
-                return isNotEmpty("First name is required")(value);
+                const validators = [isRequired, minChar, maxChar];
+                return validate(value, validators);
             },
             lastName: (value) => {
-                if (value.length > 50) {
-                    return "Max of 50 characters.";
-                }
-                return isNotEmpty("Last name is required")(value);
+                const validators = [isRequired, minChar, maxChar];
+                return validate(value, validators);
             },
             userName: (value) => {
-                if (value.length > 50) {
-                    return "Max of 50 characters";
-                }
-                return isNotEmpty("Username is required")(value);
+                const validators = [
+                    isRequired,
+                    minChar,
+                    maxChar,
+                    userNameValidator,
+                ];
+                return validate(value, validators);
             },
             email: (value) => {
-                if (value.length > 250) {
-                    return "Max of 250 characters";
-                }
-                return isEmail("Invalid Email")(value);
+                const validators = [isRequired, minChar, maxChar, mustBeEmail];
+                return validate(value, validators);
             },
             password: (value) => {
-                if (value.length > 100) {
-                    return "Max of 100 characters.";
-                }
-                return isNotEmpty("Password is required")(value);
+                const validators = [
+                    isRequired,
+                    passWordMinChar,
+                    maxChar,
+                    mustHaveLowerCase,
+                    mustHaveUpperCase,
+                    mustHaveDigit,
+                    mustHaveSpecialCharacter,
+                ];
+                return validate(value, validators);
             },
             confirmPassword: matchesField("password", "Passwords do not match"),
         },
     });
-
-    const handleRedirect = useCallback(() => {
-        redirect("/auth/login");
-    }, [open]);
 
     const signUp = async (newUser: {
         firstName: string;
@@ -84,36 +90,30 @@ const RegisterForm = () => {
     }) => {
         handlers.open();
         try {
-            const response = await fetch(
-                `${process.env.QUIZMASTER_GATEWAY}/gateway/api/account/create`,
-                {
-                    method: "POST",
-                    body: JSON.stringify(newUser),
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            const response = await register(newUser);
 
-            const data = await response.json();
-
-            console.log(data, response.status);
-            if (response.status < 300) {
-                signIn("credentials", {
-                    jwt: data.token,
-                });
+            if (response.statusCode < 300) {
+                notification({ type: "success", title: response.message });
+                redirect("/auth/login");
             } else {
-                notification({ type: "error", title: data.message });
+                notification({ type: "error", title: response.message });
             }
         } catch (e) {
             notification({
                 type: "error",
                 title: "Something went wrong",
             });
+            redirectToError();
         }
         handlers.close();
     };
+    useEffect(() => {
+        if (!form.isValid()) {
+            setTooltipLabel(<div>Fill up the missing fields.</div>);
+        } else {
+            setTooltipLabel(<div>Create your account now!</div>);
+        }
+    }, [form.values]);
 
     return (
         <div className="bg-white p-5 md:p-[64px] w-full max-w-[550px] rounded-[16px] flex flex-col gap-[32px]  items-center shadow-[0px_4px_4px_rgba(0,0,0,.25)]">
@@ -128,6 +128,7 @@ const RegisterForm = () => {
             <form
                 className="space-y-5 w-full flex-col flex gap-[40px]"
                 onSubmit={form.onSubmit((e) => {
+                    console.log("HEELo");
                     signUp(form.values);
                 })}
             >
@@ -169,6 +170,8 @@ const RegisterForm = () => {
                         name="password"
                         id="password"
                         {...form.getInputProps("password")}
+                        visible={visible}
+                        onVisibilityChange={handlePasswordVissibility.toggle}
                     />
                     <PasswordInput
                         radius="6px"
@@ -176,22 +179,26 @@ const RegisterForm = () => {
                         name="confirmPassword"
                         id="confirmPassword"
                         {...form.getInputProps("confirmPassword")}
+                        visible={visible}
+                        onVisibilityChange={handlePasswordVissibility.toggle}
                     />
                 </div>
 
                 <div className=" flex flex-col justify-center items-center gap-[8px]">
-                    <Button
-                        size="18px"
-                        h="52px"
-                        fw={700}
-                        color="#FF6633"
-                        type="submit"
-                        fullWidth
-                        radius={6}
-                        disabled={open}
-                    >
-                        {open ? "Creating Account..." : "Create account"}
-                    </Button>
+                    <Tooltip label={tooltipLabel}>
+                        <Button
+                            size="18px"
+                            h="52px"
+                            fw={700}
+                            color="#FF6633"
+                            type="submit"
+                            fullWidth
+                            radius={6}
+                            disabled={open}
+                        >
+                            {open ? "Creating Account..." : "Create account"}
+                        </Button>
+                    </Tooltip>
                     <p className="text-sm">
                         Already have an account?{" "}
                         <Link

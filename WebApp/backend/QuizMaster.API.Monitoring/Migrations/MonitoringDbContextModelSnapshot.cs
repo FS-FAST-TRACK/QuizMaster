@@ -286,6 +286,50 @@ namespace QuizMaster.API.Monitoring.Migrations
                     b.ToTable("QuizSetAuditTrails");
                 });
 
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.RoomAuditTrail", b =>
+                {
+                    b.Property<int>("RoomAuditTrailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoomAuditTrailId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RoomAuditTrailId");
+
+                    b.ToTable("RoomAuditTrails");
+                });
+
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.UserAuditTrail", b =>
                 {
                     b.Property<int>("UserAuditTrailId")
@@ -316,6 +360,10 @@ namespace QuizMaster.API.Monitoring.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserRole")
                         .IsRequired()

@@ -61,20 +61,9 @@ const links = [
     },
     {
         key: "audit",
-        label: "Audit",
+        label: "Audit Logs",
         icon: DocumentTextIcon,
-        links: [
-            {
-                key: "account-audit",
-                label: "Account Audit",
-                href: "/account-audit",
-            },
-            {
-                key: "media-audit",
-                label: "Media Audit",
-                href: "/media-audit",
-            },
-        ],
+        href: "/audit",
     },
 ];
 

@@ -8,10 +8,10 @@ import {
     PaginationMetadata,
     Question,
     QuestionFilterProps,
-    QuestionResourceParameter,
     ResourceParameter,
 } from "@/lib/definitions";
 import { fetchQuestions } from "@/lib/hooks/question";
+import { notification } from "@/lib/notifications";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Anchor, Breadcrumbs } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -53,16 +53,22 @@ export default function Page() {
     });
 
     const getQuestions = useCallback(async () => {
-        var questionsFetch = await fetchQuestions({
-            questionResourceParameter: {
-                ...form.values,
-                ...questionFilters,
-                exludeQuestionsIds: undefined,
-            },
-        });
-
-        setQuestions(questionsFetch.data);
-        setPaginationMetadata(questionsFetch.paginationMetadata);
+        try {
+            var response = await fetchQuestions({
+                questionResourceParameter: {
+                    ...form.values,
+                    ...questionFilters,
+                    exludeQuestionsIds: undefined,
+                },
+            });
+            if (response.type === "success") {
+                setQuestions(response.data?.questions!);
+                setPaginationMetadata(response.data?.paginationMetada);
+            } else {
+            }
+        } catch {
+            notification({ type: "error", title: "Something went wrong." });
+        }
     }, [form.values, questionFilters]);
 
     useEffect(() => {

@@ -1,4 +1,8 @@
 import {
+    QUIZMASTER_QUESTION,
+    QUIZMASTER_QUESTIONDETAIL_GET_QUESTIONDETAILS,
+} from "@/api/api-routes";
+import {
     PatchItem,
     QuestionDetail,
     QuestionDetailCreateDto,
@@ -85,7 +89,7 @@ export async function getQuestionDetails({
 }) {
     try {
         const { data } = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail`
+            `${QUIZMASTER_QUESTION}/${questionId}/${QUIZMASTER_QUESTIONDETAIL_GET_QUESTIONDETAILS}`
         ).then(async (res) => {
             var data: QuestionDetail[];
 

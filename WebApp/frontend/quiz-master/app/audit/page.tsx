@@ -1,16 +1,34 @@
 "use client";
 
 import { Modal, Pagination, Select, Table, TextInput } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDownloadExcel } from "react-export-table-to-excel";
 import { useDisclosure } from "@mantine/hooks";
-import { UserAudit, UserAuditTrail } from "@/lib/definitions";
-import { fetchUserAudit } from "@/lib/hooks/accountAudit";
+import { AuditTrail, UserAudit, UserAuditTrail } from "@/lib/definitions";
+
+import AuditTable from "@/components/Commons/AuditTable/AuditTable";
+import { fetchAudit } from "@/lib/hooks/audit";
+import {
+    QUIZMASTER_ACCOUNT_GET,
+    QUIZMASTER_MONITORING_AUDIT_GET,
+    QUIZMASTER_MONITORING_MEDIA_GET,
+    QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET,
+    QUIZMASTER_MONITORING_QUIZ_SET_GET,
+    QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET,
+    QUIZMASTER_MONITORING_ROOM_GET,
+    QUIZMASTER_MONITORING_USER_GET,
+} from "@/api/api-routes";
+import {
+    actionValues,
+    propertyHeadersToSearch,
+    selectTypeValues,
+} from "./accountDefinitions";
 
 export default function Page() {
     const tableRef = useRef(null);
 
     const currentDate = new Date();
+
     const currentDateAsString = currentDate.toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
@@ -35,29 +53,22 @@ export default function Page() {
         sheet: "Users",
     });
 
-    const startDate = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1
-    );
-
+    const [actionTypeValue, setActionTypeValue] = useState<string[]>();
     const [searchedText, setSearchedText] = useState("");
-
-    const propertyHeadersToSearch = [
-        "userAuditTrailId",
-        "action",
-        "details",
-        "userRole",
-    ];
-
-    const [userAudit, setUserAudit] = useState<UserAudit[]>([]);
-    const [filteredData, setFilteredData] = useState<UserAudit[]>([]);
+    const [auditType, setAuditType] = useState<string | null>("Account");
+    const [userAudit, setUserAudit] = useState<AuditTrail[]>([]);
+    const [filteredData, setFilteredData] = useState<AuditTrail[]>([]);
     const [userType, setUserType] = useState<string | null>("All");
+    const [actionType, setActionType] = useState<string | null>("All");
 
     useEffect(() => {
+        setUserType("All");
+        setActionType("All");
+        setActionTypeValue(actionValues(auditType));
         const fetchData = async () => {
             try {
-                const { data } = await fetchUserAudit();
+                const { data } = await fetchAudit(setUriAudit(auditType));
+                console.log(data);
                 setUserAudit(data);
                 setFilteredData(data);
             } catch (err) {
@@ -65,10 +76,49 @@ export default function Page() {
             }
         };
         fetchData();
-    }, []);
+    }, [auditType]);
 
-    const filteredDataByDateAndSearch = () => {
-        const filtered = userAudit.filter((entry) => {
+    const setUriAudit = (type: string | null) => {
+        switch (type) {
+            case "Account":
+                return QUIZMASTER_MONITORING_USER_GET;
+            case "Media":
+                return QUIZMASTER_MONITORING_MEDIA_GET;
+            case "Quiz Category":
+                return QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET;
+            case "Quiz Difficulty":
+                return QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET;
+            case "Quiz Set Audit":
+                return QUIZMASTER_MONITORING_QUIZ_SET_GET;
+            case "Room Audit":
+                return QUIZMASTER_MONITORING_ROOM_GET;
+            default:
+                return "";
+        }
+    };
+
+    const filterByUserType = useCallback(
+        (entry: AuditTrail) => {
+            return (
+                userType === "All" ||
+                entry.userRole.toLowerCase() === userType?.toLowerCase()
+            );
+        },
+        [userType]
+    );
+
+    const filterByActionType = useCallback(
+        (entry: AuditTrail) => {
+            return (
+                actionType === "All" ||
+                entry.action.toLowerCase() === actionType?.toLowerCase()
+            );
+        },
+        [actionType]
+    );
+
+    const filteredDataByDateAndSearch = useMemo(() => {
+        return userAudit.filter((entry) => {
             const entryTimestamp = new Date(entry.timestamp);
             const startOfDayFirstDate = new Date(formattedFirstDate);
             const endOfDayCurrentDate = new Date(formattedCurrentDate);
@@ -77,6 +127,9 @@ export default function Page() {
             const isDateInRange =
                 entryTimestamp >= startOfDayFirstDate &&
                 entryTimestamp <= endOfDayCurrentDate;
+
+            const userTypeFilter = filterByUserType(entry);
+            const actionTypeFilter = filterByActionType(entry);
 
             const isTextMatched = propertyHeadersToSearch.some((header) => {
                 const entryValue = entry[header];
@@ -90,28 +143,31 @@ export default function Page() {
                 return isMatched;
             });
 
-            if (userType == "All") {
-                return isDateInRange && isTextMatched;
-            } else {
-                const filterByUserType =
-                    entry.userRole.toLowerCase() == userType?.toLowerCase();
-
-                return isDateInRange && isTextMatched && filterByUserType;
-            }
+            return (
+                isDateInRange &&
+                isTextMatched &&
+                userTypeFilter &&
+                actionTypeFilter
+            );
         });
-
-        setFilteredData(filtered);
-    };
+    }, [
+        userAudit,
+        formattedFirstDate,
+        formattedCurrentDate,
+        searchedText,
+        filterByUserType,
+        filterByActionType,
+    ]);
 
     useEffect(() => {
-        filteredDataByDateAndSearch();
-    }, [formattedFirstDate, formattedCurrentDate, searchedText, userType]);
+        setFilteredData(filteredDataByDateAndSearch);
+    }, [filteredDataByDateAndSearch]);
 
     return (
         <div className="w-full h-full flex justify-center">
-            <div className="w-[90%]  h-full py-5">
-                <div className="w-full  flex items-center justify-between gap-5 className ">
-                    <div className="w-[60%] flex flex-col gap-1 p-1.5 ">
+            <div className="w-[90%]  h-full py-5 overflow-x-auto ">
+                <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2">
+                    <div className="w-full md:w-[50%] flex flex-col gap-2  ">
                         <h1 className="text-sm font-medium">Search Logs</h1>
                         <input
                             type="text"
@@ -120,24 +176,35 @@ export default function Page() {
                             className="p-2 px-2 rounded-sm border border-gray-200 shadow-sm text-sm font-light"
                         />
                     </div>
-                    <div className="flex justify-end className">
-                        <div className="flex gap-3 flex-end className  w-[90%]">
+                    <div className="w-full md:w-[40%] flex justify-start md:justify-end ">
+                        <div className="flex gap-3 md:flex-end w-full md:w-[90%]">
                             <Select
                                 label="Action"
                                 size="sm"
+                                className="text-sm"
+                                onChange={setActionType}
+                                value={actionType}
+                                defaultValue={"All"}
                                 placeholder="Pick value"
-                                data={["React", "Angular", "Vue", "Svelte"]}
+                                data={actionTypeValue}
                             />
+
                             <Select
                                 label="Type"
                                 placeholder="Pick value"
-                                data={["React", "Angular", "Vue", "Svelte"]}
+                                defaultValue={auditType}
+                                value={auditType}
+                                onChange={(value) => {
+                                    setAuditType(value);
+                                }}
+                                data={selectTypeValues}
                             />
                             <Select
                                 label="Users"
                                 placeholder="Pick value"
+                                defaultValue={userType}
                                 value={userType}
-                                onChange={(value) => setUserType(value)}
+                                onChange={setUserType}
                                 data={["All", "User", "Admin"]}
                             />
                         </div>
@@ -147,8 +214,8 @@ export default function Page() {
                 <div className=" mt-5 w-full">
                     <div>
                         <h1 className="text-sm font-medium">Date Range</h1>
-                        <div className="w-full  flex items-center justify-between className">
-                            <div className="flex gap-3 p-1.5">
+                        <div className="w-full  flex items-center justify-between className flex-wrap gap-y-2">
+                            <div className="flex gap-3 ">
                                 <div className="relative">
                                     <input
                                         name="start"
@@ -197,67 +264,11 @@ export default function Page() {
                     </div>
                 </div>
 
-                <div className="relative overflow-x-auto mt-5 rounded-lg border border-gray-200 h-[70%] bg-white ">
-                    <table
-                        className="w-full text-sm text-left rtl:text-right "
-                        ref={tableRef}
-                    >
-                        <thead className="text-xs text-gray-700  border border-gray-200  ">
-                            <tr>
-                                <th scope="col" className="px-6 py-3">
-                                    Trail ID
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    User
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Timestamp
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Type
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Action
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Details
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredData.map((user: UserAudit) => (
-                                <tr className="bg-white border-b ">
-                                    <td className="px-6 py-4 font-medium">
-                                        {user.userAuditTrailId}
-                                    </td>
-                                    <td className="px-6 py-4 font-medium">
-                                        {user.userRole}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {user.timestamp.toString()}
-                                    </td>
-                                    <td className="px-6 py-4">{user.action}</td>
-                                    <td className="px-6 py-4">{user.action}</td>
-                                    <td className="px-6 py-4">
-                                        {user.details}
-                                    </td>
-                                    <td className="px-3 py-4">
-                                        <button>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                height="16"
-                                                width="14"
-                                                viewBox="0 0 448 512"
-                                            >
-                                                <path d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <AuditTable
+                    tableRef={tableRef}
+                    data={filteredData}
+                    auditType={auditType}
+                />
             </div>
         </div>
     );

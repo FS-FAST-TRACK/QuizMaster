@@ -148,6 +148,7 @@ namespace QuizMaster.API.Account.Service
             var auditRegistrationEvent = new RegistrationEvent
             {
                 UserId = userAccount.Id,
+                Username = userAccount.UserName,
                 Action = "User Registration",
                 Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                 Details = "User account successfully created",
@@ -208,6 +209,7 @@ namespace QuizMaster.API.Account.Service
             var auditPartialRegistrationEvent = new PartialRegistrationEvent
             {
                 UserId = user.Id,
+                Username = user.UserName,
                 Action = "User Partial Registration",
                 Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                 Details = "User account partially created",
@@ -270,6 +272,7 @@ namespace QuizMaster.API.Account.Service
                 var deleteEvent = new DeleteEvent
                 {
                     UserId = int.Parse(userId!),
+                    Username = userNameClaim,
                     Action = "User Deletion",
                     Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                     Details = $"User account deleted by: {userNameClaim}",
@@ -319,6 +322,17 @@ namespace QuizMaster.API.Account.Service
             // Capture the old values before updating the user
             var oldValues = JsonConvert.SerializeObject(existingUser);
 
+            var serializedOldValues = JsonConvert.SerializeObject(new 
+            {
+                existingUser.Id,
+                existingUser.LastName,
+                existingUser.FirstName,
+                existingUser.Email,
+                existingUser.UserName,
+                existingUser.PasswordHash,
+                existingUser.PhoneNumber
+            });
+
             try
             {
                 var result = await _userManager.UpdateAsync(user);
@@ -331,15 +345,27 @@ namespace QuizMaster.API.Account.Service
 
                     var newValues = JsonConvert.SerializeObject(user);
 
+                    var serializedNewValues = JsonConvert.SerializeObject(new
+                    {
+                        user.Id,
+                        user.LastName,
+                        user.FirstName,
+                        user.Email,
+                        user.UserName,
+                        user.PasswordHash,
+                        user.PhoneNumber
+                    });
+
                     var updateEvent = new UpdateEvent
                     {
                         UserId = int.Parse(userId!),
+                        Username = userNameClaim,
                         Action = "User Update",
                         Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                         Details = $"User account updated by: {userNameClaim}",
                         Userrole = userRoles,
-                        OldValues = oldValues,
-                        NewValues = newValues
+                        OldValues = serializedOldValues,
+                        NewValues = serializedNewValues
                     };
 
                     var updateRequest = new LogUpdateEventRequest
@@ -484,6 +510,7 @@ namespace QuizMaster.API.Account.Service
             var setAdminEvent = new SetAdminEvent
             {
                 UserId = int.Parse(userId!),
+                Username = userNameClaim,
                 Action = setAdmin ? "Set Admin" : "Remove Admin",
                 Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                 Details = setAdmin ? "User set to admin role" : "User removed from admin role",

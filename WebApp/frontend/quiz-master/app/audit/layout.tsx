@@ -6,8 +6,8 @@ const Layout = () => {
     return (
         <div className="flex h-screen w-full">
             <SideNav />
-            <div className="w-full h-screen flex flex-col bg-[#F8F9FA]">
-                <PageHeader>Account Audit</PageHeader>
+            <div className="w-full  h-screen flex flex-col bg-[#F8F9FA]">
+                <PageHeader>Audit Logs</PageHeader>
                 <Page />
             </div>
         </div>

@@ -178,33 +178,34 @@ export default function Page() {
         open();
 
         // Post question
-        postQuestion({
-            question: questionCreateDto,
-            image: fileImage,
-            audio: fileAudio,
-        })
-            .then((res) => {
-                console.log(res, "hello");
-                // Notify for successful post
+        try {
+            const response = await postQuestion({
+                question: questionCreateDto,
+                image: fileImage,
+                audio: fileAudio,
+            });
+
+            // Notify for successful post
+            if (response.type === "success") {
                 notification({
                     type: "success",
-                    title: "Question Create Successfuly",
+                    title: response.message,
                 });
                 // redirect to qeustions page
                 router.push("/questions");
-            })
-            .catch((err) => {
-                console.log("EHE");
-                // notify for error
+            } else {
                 notification({
                     type: "error",
-                    title: "Failed to create question",
+                    title: response.message,
                 });
-            })
-            .finally(() => {
-                // close loading overlay
-                close();
+            }
+        } catch {
+            notification({
+                type: "error",
+                title: "Something went wrong.",
             });
+        }
+        close();
     }, [form.values, fileAudio, fileImage]);
 
     return (

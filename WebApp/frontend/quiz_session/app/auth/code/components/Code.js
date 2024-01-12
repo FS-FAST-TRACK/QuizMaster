@@ -4,6 +4,8 @@ import React from "react";
 import { useConnection } from "@/app/util/store";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { submitAnswer } from "@/app/util/api";
+import { submitPin } from "../../util/handlers";
 
 export default function Code() {
   const { connection } = useConnection();
@@ -14,13 +16,7 @@ export default function Code() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      connection.invoke("JoinRoom", Number.parseInt(code));
-      params.set("roomPin", Number.parseInt(code));
-      push(`/room?${params.toString()}`);
-    } catch (ex) {
-      console.log(ex);
-    }
+    submitPin(connection, code, params, push);
   };
 
   return (
