@@ -10,10 +10,7 @@ export default function PuzzleQuestionDetails({
         <div className="flex flex-col gap-2 max-w-96">
             <InputLabel>Items Arrange in the Correct Order</InputLabel>
             {details?.map((item, index) => {
-                if (
-                    !item.detailTypes.includes("option") &&
-                    !item.detailTypes.includes("answer")
-                ) {
+                if (!item.detailTypes.includes("option")) {
                     return;
                 }
                 return (
