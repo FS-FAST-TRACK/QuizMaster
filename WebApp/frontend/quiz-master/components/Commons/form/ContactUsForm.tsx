@@ -23,25 +23,15 @@ export default function ContactUsForm() {
         validateInputOnChange: true,
         validate: {
             firstName: (value) =>
-                value.length < 1
-                    ? "Question Statement must not be empty."
-                    : null,
+                value.length < 1 ? "First Name must not be empty." : null,
             lastName: (value) =>
-                value.length < 1
-                    ? "Question Statement must not be empty."
-                    : null,
+                value.length < 1 ? "Last Name must not be empty." : null,
             email: (value) =>
-                value.length < 1
-                    ? "Question Statement must not be empty."
-                    : null,
+                value.length < 1 ? "Email must not be empty." : null,
             phoneNumber: (value) =>
-                value.length < 1
-                    ? "Question Statement must not be empty."
-                    : null,
+                value.length < 1 ? "Phone Number must not be empty." : null,
             message: (value) =>
-                value.length < 1
-                    ? "Question Statement must not be empty."
-                    : null,
+                value.length < 1 ? "Message must not be empty." : null,
         },
     });
 

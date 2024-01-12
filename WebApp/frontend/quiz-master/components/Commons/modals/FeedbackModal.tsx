@@ -24,7 +24,7 @@ export default function FeedbackModal({
         validate: {
             rate: (value) => (value === 0 ? "Rate must not zero." : null),
             comment: (value) =>
-                value.length < 1 ? "System Info must not be empty." : null,
+                value.length < 1 ? "Comment must not be empty." : null,
         },
     });
 
@@ -57,14 +57,14 @@ export default function FeedbackModal({
                                 {rate > feedbackDetails.values.rate ? (
                                     <Image
                                         src={star}
-                                        alt="Contact Us"
+                                        alt="Star"
                                         width={40}
                                         height={40}
                                     />
                                 ) : (
                                     <Image
                                         src={starFill}
-                                        alt="Contact Us"
+                                        alt="Star"
                                         width={40}
                                         height={40}
                                     />
