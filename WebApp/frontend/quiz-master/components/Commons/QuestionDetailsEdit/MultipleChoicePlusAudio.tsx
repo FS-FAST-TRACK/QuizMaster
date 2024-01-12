@@ -1,4 +1,9 @@
-import { QuestionCreateValues, QuestionValues } from "@/lib/definitions";
+import {
+    QuestionCreateValues,
+    QuestionDetail,
+    QuestionEdit,
+    QuestionValues,
+} from "@/lib/definitions";
 import { InputLabel, Select, TextInput, Title } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import MultipleChoiceQuestionDetail from "./MultipleChoice";
@@ -7,8 +12,13 @@ import { patchQuestionDetail } from "@/lib/hooks/questionDetails";
 export default function MultipleChoicePlusAudioQuestionDetail({
     form,
 }: {
-    form: UseFormReturnType<QuestionValues>;
+    form: UseFormReturnType<{
+        details: QuestionDetail[];
+    }>;
 }) {
+    const textToAudioIndex = form.values.details.findIndex((detail) =>
+        detail.detailTypes.includes("textToAudio")
+    );
     return (
         <div>
             <Title order={5}>Audio Translate</Title>
@@ -17,28 +27,8 @@ export default function MultipleChoicePlusAudioQuestionDetail({
                 variant="filled"
                 withAsterisk
                 {...form.getInputProps(
-                    `questionDetailDtos.${form.values.questionDetailDtos.findIndex(
-                        (detail) => detail.detailTypes.includes("textToAudio")
-                    )}.qDetailDesc`
+                    `details.${textToAudioIndex}.qDetailDesc`
                 )}
-                onBlur={() => {
-                    const qDetail = form.values.questionDetailDtos.find(
-                        (qDetail) => qDetail.detailTypes.includes("textToAudio")
-                    );
-                    if (qDetail && qDetail?.qDetailDesc !== "") {
-                        patchQuestionDetail({
-                            questionId: form.values.id,
-                            id: qDetail.id,
-                            patchRequest: [
-                                {
-                                    path: "/qDetailDesc",
-                                    op: "replace",
-                                    value: qDetail.qDetailDesc,
-                                },
-                            ],
-                        });
-                    }
-                }}
             />
             <Select
                 variant="filled"
@@ -51,39 +41,12 @@ export default function MultipleChoicePlusAudioQuestionDetail({
                     { value: "JAPAN", label: "Japanese" },
                 ]}
                 {...form.getInputProps(
-                    `questionDetailDtos.${form.values.questionDetailDtos.findIndex(
-                        (detail) => detail.detailTypes.includes("language")
+                    `details.${form.values.details.findIndex((detail) =>
+                        detail.detailTypes.includes("language")
                     )}.qDetailDesc`
                 )}
                 clearable
                 required
-                onChange={(value) => {
-                    const qDetail = form.values.questionDetailDtos.find(
-                        (qDetail) => qDetail.detailTypes.includes("language")
-                    );
-                    const qDetailIndex =
-                        form.values.questionDetailDtos.findIndex((qDetail) =>
-                            qDetail.detailTypes.includes("language")
-                        );
-                    if (qDetail && value) {
-                        patchQuestionDetail({
-                            questionId: form.values.id,
-                            id: qDetail.id,
-                            patchRequest: [
-                                {
-                                    path: "/qDetailDesc",
-                                    op: "replace",
-                                    value: qDetail.qDetailDesc,
-                                },
-                            ],
-                        }).then(() => {
-                            form.setFieldValue(
-                                `questionDetailDtos.${qDetailIndex}.qDetailDesc`,
-                                value
-                            );
-                        });
-                    }
-                }}
             />
             <MultipleChoiceQuestionDetail form={form} />
         </div>

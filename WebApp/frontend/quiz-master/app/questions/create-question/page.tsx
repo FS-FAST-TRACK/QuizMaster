@@ -78,10 +78,24 @@ export default function Page() {
         validate: {
             qStatement: (value) =>
                 value.length < 1
-                    ? "Question Statement must not be empty."
+                    ? "Question statement must not be empty."
                     : null,
             qCategoryId: (value, values) =>
-                value?.length === 0 ? "Question Category is required." : null,
+                !value || value?.length === 0
+                    ? "Question category is required."
+                    : null,
+            qDifficultyId: (value, values) =>
+                !value || value?.length === 0
+                    ? "Question difficulty is required."
+                    : null,
+            qTypeId: (value, values) =>
+                !value || value?.length === 0
+                    ? "Question type is required."
+                    : null,
+            qTime: (value, values) =>
+                !value || value?.length === 0
+                    ? "Time limit is required."
+                    : null,
             interval: (value, values) => {
                 if (parseInt(values.qTypeId) !== SliderData.id) {
                     return null;
@@ -248,6 +262,7 @@ export default function Page() {
                         clearable
                         required
                         classNames={styles}
+                        allowDeselect={false}
                     />
                     <Select
                         variant="filled"
@@ -263,6 +278,7 @@ export default function Page() {
                         {...form.getInputProps("qDifficultyId")}
                         clearable
                         required
+                        allowDeselect={false}
                     />
                     <Select
                         variant="filled"
@@ -278,6 +294,7 @@ export default function Page() {
                         classNames={styles}
                         clearable
                         required
+                        allowDeselect={false}
                     />
                 </div>
 
