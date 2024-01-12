@@ -12,6 +12,8 @@ service AccountService {
 	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
 	rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountReply);
 	rpc SetAdminAccount(SetAccountAdminRequest) returns (SetAccountAdminResponse);
+	rpc UpdateUserPassword(UpdatePasswordRequest) returns (SetAccountAdminResponse);
+	rpc UpdateUserPasswordConfirm(ConfirmUpdatePasswordRequest) returns (SetAccountAdminResponse);
 }
  
 // Get account by id
@@ -120,4 +122,14 @@ message SetAccountAdminRequest{
 message SetAccountAdminResponse{
 	int32 code = 1;
 	string message = 2;
+}
+
+message UpdatePasswordRequest{
+	int32 id = 1;
+	string currentPassword = 2;
+	string newPassword = 3;
+}
+
+message ConfirmUpdatePasswordRequest{
+	string confirmationToken = 1;
 }

@@ -66,7 +66,7 @@ export async function createCategory({
             },
             credentials: "include",
         }).then((res) => {
-            if (res.status !== 201) {
+            if (res.status >= 300) {
                 throw new Error("Failed to create category data.");
             }
             return res;

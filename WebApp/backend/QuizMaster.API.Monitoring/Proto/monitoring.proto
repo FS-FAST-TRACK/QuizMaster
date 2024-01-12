@@ -23,6 +23,7 @@ message RegistrationEvent {
   string userrole = 5;
   string oldValues = 6;
   string newValues = 7;
+  string username = 8;
 }
 message PartialRegistrationEvent {
   int32 userId = 1;
@@ -32,6 +33,7 @@ message PartialRegistrationEvent {
   string userrole = 5;
   string oldValues = 6;
   string newValues = 7;
+  string username = 8;
 }
 message SetAdminEvent {
   int32 userId = 1;
@@ -41,6 +43,7 @@ message SetAdminEvent {
   string userrole = 5;
   string oldValues = 6;
   string newValues = 7;
+  string username = 8;
 }
 message PasswordChangeEvent {
   int32 userId = 1;
@@ -50,6 +53,7 @@ message PasswordChangeEvent {
   string oldPassword = 5;
   string newPassword = 6;
   string userrole = 7;
+  string username = 8;
 }
 message DeleteEvent {
   int32 userId = 1;
@@ -59,6 +63,7 @@ message DeleteEvent {
   string userrole = 5;
   string oldValues = 6;
   string newValues = 7;
+  string username = 8;
 }
 message UpdateEvent {
   int32 userId = 1;
@@ -68,6 +73,7 @@ message UpdateEvent {
   string userrole = 5;
   string oldValues = 6;
   string newValues = 7;
+  string username = 8;
 }
 
 message LogRegistrationEventRequest {

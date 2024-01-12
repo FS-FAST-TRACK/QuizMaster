@@ -12,8 +12,10 @@ export default function UserNavBar() {
     return (
         <div className="flex border-t">
             <div className="grow transition-all duration-300 items-center py-3 text-sm font-medium hover:bg-[--primary-200] px-3">
-                <div className="text-sm font-medium">{user?.username}</div>
-                <div className="text-xs text-gray-500 ">{user?.email}</div>
+                <Link href="/profile">
+                    <div className="text-sm font-medium">{user?.username}</div>
+                    <div className="text-xs text-gray-500 ">{user?.email}</div>
+                </Link>
             </div>
             <Link href="/auth/signout" className="hover:bg-[--primary]">
                 <ArrowRightOnRectangleIcon className="h-full w-auto aspect-square py-4" />
