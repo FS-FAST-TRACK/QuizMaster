@@ -63,13 +63,13 @@ export default function QuizRoomTable() {
                         }
                     />
                 </Table.Td>
-
                 <Table.Td
                     className="cursor-pointer"
                     onClick={() => setViewQuizRoom(quizRoom)}
                 >
                     {quizRoom.qRoomDesc}
                 </Table.Td>
+                <Table.Td>{quizRoom.qRoomPin}</Table.Td>
                 <Table.Td>{quizRoom.dateCreated.toDateString()}</Table.Td>
                 <Table.Td>
                     {quizRoom.dateUpdated?.toDateString() || "null"}
@@ -106,6 +106,7 @@ export default function QuizRoomTable() {
                             />
                         </Table.Th>
                         <Table.Th>Room Name</Table.Th>
+                        <Table.Th>Pin</Table.Th>
                         <Table.Th>Created on</Table.Th>
                         <Table.Th>Updated on</Table.Th>
                         <Table.Th>Sets</Table.Th>
