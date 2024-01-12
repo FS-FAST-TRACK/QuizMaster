@@ -27,4 +27,4 @@ FROM base AS final
 WORKDIR /app
 COPY QuizMaster.API.Gatewway/localhost_cert.pfx ./localhost_cert.pfx
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "QuizMaster.API.Gateway.dll", "https://*:80"]
+ENTRYPOINT ["dotnet", "QuizMaster.API.Gateway.dll", "https://*:443;http://*:80;"]

@@ -15,12 +15,16 @@ namespace QuizMaster.API.Account.Service
         private readonly UserManager<UserAccount> _userManager;
         private readonly IMapper _mapper;
         private readonly AuditService.AuditServiceClient _auditServiceClient;
+        private readonly EmailSenderService _emailSenderService;
+        private readonly PasswordHandler _passwordHandler;
 
-        public InformationService(UserManager<UserAccount> userManager, IMapper mapper, AuditService.AuditServiceClient auditServiceClient)
+        public InformationService(UserManager<UserAccount> userManager, IMapper mapper, AuditService.AuditServiceClient auditServiceClient, EmailSenderService emailSenderService, PasswordHandler passwordHandler)
         {
             _userManager = userManager;
             _mapper = mapper;
             _auditServiceClient = auditServiceClient;
+            _emailSenderService = emailSenderService;
+            _passwordHandler = passwordHandler;
         }
 
         public override async Task<AccountOrNotFound> GetAccountById(GetAccountByIdRequest request, ServerCallContext context)
@@ -148,6 +152,7 @@ namespace QuizMaster.API.Account.Service
             var auditRegistrationEvent = new RegistrationEvent
             {
                 UserId = userAccount.Id,
+                Username = userAccount.UserName,
                 Action = "User Registration",
                 Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                 Details = "User account successfully created",
@@ -208,6 +213,7 @@ namespace QuizMaster.API.Account.Service
             var auditPartialRegistrationEvent = new PartialRegistrationEvent
             {
                 UserId = user.Id,
+                Username = user.UserName,
                 Action = "User Partial Registration",
                 Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                 Details = "User account partially created",
@@ -270,6 +276,7 @@ namespace QuizMaster.API.Account.Service
                 var deleteEvent = new DeleteEvent
                 {
                     UserId = int.Parse(userId!),
+                    Username = userNameClaim,
                     Action = "User Deletion",
                     Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                     Details = $"User account deleted by: {userNameClaim}",
@@ -319,6 +326,17 @@ namespace QuizMaster.API.Account.Service
             // Capture the old values before updating the user
             var oldValues = JsonConvert.SerializeObject(existingUser);
 
+            var serializedOldValues = JsonConvert.SerializeObject(new 
+            {
+                existingUser.Id,
+                existingUser.LastName,
+                existingUser.FirstName,
+                existingUser.Email,
+                existingUser.UserName,
+                existingUser.PasswordHash,
+                existingUser.PhoneNumber
+            });
+
             try
             {
                 var result = await _userManager.UpdateAsync(user);
@@ -331,15 +349,27 @@ namespace QuizMaster.API.Account.Service
 
                     var newValues = JsonConvert.SerializeObject(user);
 
+                    var serializedNewValues = JsonConvert.SerializeObject(new
+                    {
+                        user.Id,
+                        user.LastName,
+                        user.FirstName,
+                        user.Email,
+                        user.UserName,
+                        user.PasswordHash,
+                        user.PhoneNumber
+                    });
+
                     var updateEvent = new UpdateEvent
                     {
                         UserId = int.Parse(userId!),
+                        Username = userNameClaim,
                         Action = "User Update",
                         Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                         Details = $"User account updated by: {userNameClaim}",
                         Userrole = userRoles,
-                        OldValues = oldValues,
-                        NewValues = newValues
+                        OldValues = serializedOldValues,
+                        NewValues = serializedNewValues
                     };
 
                     var updateRequest = new LogUpdateEventRequest
@@ -484,6 +514,7 @@ namespace QuizMaster.API.Account.Service
             var setAdminEvent = new SetAdminEvent
             {
                 UserId = int.Parse(userId!),
+                Username = userNameClaim,
                 Action = setAdmin ? "Set Admin" : "Remove Admin",
                 Timestamp = DateTimeHelper.GetPhilippinesTimestamp(),
                 Details = setAdmin ? "User set to admin role" : "User removed from admin role",
@@ -507,6 +538,86 @@ namespace QuizMaster.API.Account.Service
                 // Handle any exceptions that occur during the gRPC call and log them
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        public override async Task<SetAccountAdminResponse> UpdateUserPasswordConfirm(ConfirmUpdatePasswordRequest request, ServerCallContext context)
+        {
+            var reply = new SetAccountAdminResponse();
+
+            var (userId, currentPassword, newPassword) = _passwordHandler.GetPassword(request.ConfirmationToken);
+
+            if (string.IsNullOrEmpty(userId))
+                userId = "-1";
+            // Find the existing user to capture old values
+            var existingUser = await _userManager.FindByIdAsync(userId);
+
+            if (existingUser == null)
+            {
+                reply.Code = 404;
+                reply.Message = "Account not found";
+                return await Task.FromResult(reply);
+            }
+
+            var updatePasswordResult = await _userManager.ChangePasswordAsync(existingUser, currentPassword, newPassword);
+
+            if(!updatePasswordResult.Succeeded)
+            {
+                reply.Code = 400;
+                reply.Message = "Failed to update password";
+            }
+            else
+            {
+                reply.Code = 200;
+                reply.Message = "Password was updated successfully";
+            }
+
+
+            return await Task.FromResult(reply);
+        }
+
+        // Update Password
+        public override async Task<SetAccountAdminResponse> UpdateUserPassword(UpdatePasswordRequest request, ServerCallContext context)
+        {
+            var reply = new SetAccountAdminResponse();
+
+            // Find the existing user to capture old values
+            var existingUser = await _userManager.FindByIdAsync(request.Id.ToString());
+
+            if (existingUser == null)
+            {
+                reply.Code = 404;
+                reply.Message = "Account not found";
+                return await Task.FromResult(reply);
+            }
+
+            if (request.CurrentPassword.Equals(request.NewPassword))
+            {
+                reply.Code = 400;
+                reply.Message = "New Password should not be the same as Current Password";
+                return await Task.FromResult(reply);
+            }
+
+            PasswordHasher<UserAccount> hasher = new();
+
+            // check if password is correct
+            var passwordVerification = hasher.VerifyHashedPassword(existingUser, existingUser.PasswordHash, request.CurrentPassword);
+            if (PasswordVerificationResult.Success != passwordVerification) 
+            {
+                reply.Code = 400;
+                reply.Message = "Incorrect Password";
+
+
+                return await Task.FromResult(reply);
+            }
+
+            string token = _passwordHandler.GenerateToken(request.Id.ToString(), request.CurrentPassword, request.NewPassword);
+            Task.Run(() => { _emailSenderService.SendEmail(existingUser.Email, existingUser.FirstName, token); });
+
+            reply.Code = 200;
+            reply.Message = "A confirmation email was sent to your account.";
+
+            
+            return await Task.FromResult(reply);
         }
 
     }
