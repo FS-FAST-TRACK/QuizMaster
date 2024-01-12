@@ -23,7 +23,7 @@ export default async function HeadNav() {
                 </Link>
                 <Link href="/">Home</Link>
                 <Link href="/system-info">About</Link>
-                <Link href="/contact-us">About</Link>
+                <Link href="/contact-us">Contact Us</Link>
             </div>
             <div className="flex grow flex-row justify-between space-x-0"></div>
             {session ? (
