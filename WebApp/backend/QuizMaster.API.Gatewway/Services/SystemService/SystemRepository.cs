@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QuizMaster.API.Gateway.Models.System;
 using QuizMaster.API.Gateway.SystemData.Contexts;
 
-namespace QuizMaster.API.Gateway.Services.System
+namespace QuizMaster.API.Gateway.Services.SystemService
 {
     public class SystemRepository
     {
@@ -17,7 +17,7 @@ namespace QuizMaster.API.Gateway.Services.System
 
         public async Task EditSystemAboutAsync(AboutModel model)
         {
-            SystemAbout? systemAbout = await dbContext.SystemAboutData.FindAsync(new SystemAbout { Id = 1 });
+            SystemAbout? systemAbout = await dbContext.SystemAboutData.Where(s => s.Id == 1).FirstAsync();
             systemAbout ??= new SystemAbout { Id = 1 };
 
             _mapper.Map(model, systemAbout);
@@ -27,7 +27,7 @@ namespace QuizMaster.API.Gateway.Services.System
 
         public async Task EditSystemContactInformationAsync(ContactModel model)
         {
-            SystemContact? systemContact = await dbContext.SystemContactData.FindAsync(new SystemContact { Id = 1 });
+            SystemContact? systemContact = await dbContext.SystemContactData.Where(s => s.Id == 1).FirstAsync();
             systemContact ??= new SystemContact {  Id = 1 };
 
             _mapper.Map(model, systemContact);
@@ -37,12 +37,12 @@ namespace QuizMaster.API.Gateway.Services.System
 
         public async Task<AboutModel> GetSystemAboutAsync()
         {
-            return _mapper.Map<AboutModel>(await dbContext.SystemAboutData.FindAsync(new SystemAbout { Id = 1 }));
+            return _mapper.Map<AboutModel>(await dbContext.SystemAboutData.Where(s => s.Id == 1).FirstAsync());
         }
 
         public async Task<ContactModel> GetContactInformationAsync()
         {
-            return _mapper.Map<ContactModel>(await dbContext.SystemContactData.FindAsync(new SystemContact { Id = 1 }));
+            return _mapper.Map<ContactModel>(await dbContext.SystemContactData.Where(s => s.Id == 1).FirstAsync());
         }
 
         public async Task SaveReachingContactAsync(SubmitContactModel model)

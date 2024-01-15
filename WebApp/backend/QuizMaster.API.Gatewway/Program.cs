@@ -12,7 +12,8 @@ using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
-using QuizMaster.API.Gateway.Services.System;
+using QuizMaster.API.Gateway.Services.Email;
+using QuizMaster.API.Gateway.Services.SystemService;
 using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gatewway.Controllers;
 using QuizMaster.API.Quiz.Services.Workers;
@@ -75,6 +76,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Configuring strongly typed settings object
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<GrpcServerConfiguration>(builder.Configuration.GetSection("GrpcServerConfiguration"));
 
 // register the services
@@ -84,6 +86,7 @@ builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
 builder.Services.AddSingleton<RabbitMqRepository>();
 builder.Services.AddScoped<AccountGatewayController>();
 builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
+builder.Services.AddScoped<EmailService>();
 
 
 // configure cookie authentication
