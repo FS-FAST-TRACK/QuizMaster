@@ -88,7 +88,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
                         Old Values
                     </h1>
 
-                    <p className="p-3 text-gray-700 text-sm">
+                    <p className="p-3 text-gray-700 text-xs">
                         {auditTrail?.oldValues == ""
                             ? "No Old Values"
                             : auditTrail?.oldValues}
@@ -99,10 +99,10 @@ const AuditTable: React.FC<AuditTableProps> = ({
                     <h1 className="border-b border-gray-200 text-gray-500 text-sm p-3">
                         New Values
                     </h1>
-                    <p className="p-3 text-gray-700 text-sm">
+                    <p className="p-3 text-gray-700 text-xs flex overflow-hidden">
                         {auditTrail?.newValues === ""
                             ? "No New Values"
-                            : formatNewValues(auditTrail?.newValues)}
+                            : auditTrail?.newValues}
                     </p>
                 </div>
             </Modal>
@@ -139,11 +139,11 @@ const AuditTable: React.FC<AuditTableProps> = ({
                             <td className="px-6 py-4 font-medium">
                                 {user.userAuditTrailId}
                             </td>
-                            <td className="px-6 py-4 font-medium flex flex-col gap-2 justify-center">
+                            <td className="px-6 font-medium ">
                                 <p className="font-semibold text-xs">
                                     {user.userName}
                                 </p>
-                                <p className="text-xs font-light">
+                                <p className="text-xs font-light mt-2">
                                     {user.userRole}
                                 </p>
                             </td>

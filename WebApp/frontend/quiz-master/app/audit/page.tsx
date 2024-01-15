@@ -9,10 +9,18 @@ import { AuditTrail, UserAudit, UserAuditTrail } from "@/lib/definitions";
 import AuditTable from "@/components/Commons/AuditTable/AuditTable";
 import { fetchAudit } from "@/lib/hooks/audit";
 import {
+    QUIZMASTER_MONITORING_MEDIA_GET,
+    QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET,
+    QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET,
+    QUIZMASTER_MONITORING_QUIZ_SET_GET,
+    QUIZMASTER_MONITORING_ROOM_GET,
+    QUIZMASTER_MONITORING_USER_GET,
+} from "@/api/api-routes";
+
+import {
     actionValues,
     propertyHeadersToSearch,
     selectTypeValues,
-    setUriAudit,
 } from "./accountDefinitions";
 
 export default function Page() {
@@ -44,6 +52,25 @@ export default function Page() {
         filename: `Account Audit - ${formattedFirstDate} - ${formattedCurrentDate}`,
         sheet: "Users",
     });
+
+    const setUriAudit = (type: string | null) => {
+        switch (type) {
+            case "Account":
+                return QUIZMASTER_MONITORING_USER_GET;
+            case "Media":
+                return QUIZMASTER_MONITORING_MEDIA_GET;
+            case "Quiz Category":
+                return QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET;
+            case "Quiz Difficulty":
+                return QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET;
+            case "Quiz Set Audit":
+                return QUIZMASTER_MONITORING_QUIZ_SET_GET;
+            case "Room Audit":
+                return QUIZMASTER_MONITORING_ROOM_GET;
+            default:
+                return "";
+        }
+    };
 
     useEffect(() => {
         setUserType("All");
