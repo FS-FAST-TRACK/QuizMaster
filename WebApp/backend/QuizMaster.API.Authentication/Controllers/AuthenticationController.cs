@@ -57,7 +57,7 @@ namespace QuizMaster.API.Authentication.Controllers
         [Authorize]
         [HttpGet]
         [Route("info")]
-        public IActionResult GetCookieInfo()
+        public async Task<IActionResult> GetCookieInfo()
         {
             // grab the claims identity
             var tokenClaim = User.Claims.ToList().FirstOrDefault(e => e.Type == "token");
@@ -69,7 +69,11 @@ namespace QuizMaster.API.Authentication.Controllers
             // get the AuthStore based on token
             var authStore = _authenticationServices.Validate(token);
 
-            if (authStore == null) return NotFound(new { Message = "No information found based on the token provided" });
+            if (authStore == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return NotFound(new { Message = "No information found based on the token provided" });
+            }
 
             return Ok(new { Message = "Info", authStore });
         }

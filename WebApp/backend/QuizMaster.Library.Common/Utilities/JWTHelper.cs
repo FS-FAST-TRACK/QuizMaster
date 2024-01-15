@@ -45,22 +45,29 @@ namespace QuizMaster.Library.Common.Utilities
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(secretKey);
 
-            tokenHandler.ValidateToken(jsonWebToken, new TokenValidationParameters
+            try
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                // set clock skew to zero so token expire exactly at token expiration time
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+                tokenHandler.ValidateToken(jsonWebToken, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    // set clock skew to zero so token expire exactly at token expiration time
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
 
-            var jwtToken = (JwtSecurityToken)validatedToken;
-            Dictionary<string, string> payload = new Dictionary<string, string>();
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                Dictionary<string, string> payload = new();
 
-            jwtToken.Claims.ToList().ForEach(c => payload.Add(c.Type, c.Value));
+                jwtToken.Claims.ToList().ForEach(c => payload.Add(c.Type, c.Value));
 
-            return payload;
+                return payload;
+            }
+            catch
+            {
+                return new Dictionary<string, string>();
+            }
         }
     }
 }
