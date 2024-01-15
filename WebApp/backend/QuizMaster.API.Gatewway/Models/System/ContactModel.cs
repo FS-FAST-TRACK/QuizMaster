@@ -13,6 +13,6 @@ namespace QuizMaster.API.Gateway.Models.System
         [Key]
         public int Id { get; set; } = 0;
 
-        public SystemContact DEFAULT = new() { Id = 1, Email = "admin.quizmaster@gmail.com", Contact = "09205195701" };
+        public static SystemContact DEFAULT = new() { Id = 1, Email = "admin.quizmaster@gmail.com", Contact = "09205195701" };
     }
 }

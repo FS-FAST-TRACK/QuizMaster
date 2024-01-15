@@ -17,6 +17,6 @@ namespace QuizMaster.API.Gateway.Models.System
         [Key]
         public int Id { get; set; } = 0;
 
-        public SystemAbout DEFAULT => new() { Id = 1, Description = "Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et.", Version = "1.0.0" };
+        public static SystemAbout DEFAULT => new() { Id = 1, Description = "Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et.", Version = "1.0.0" };
     }
 }

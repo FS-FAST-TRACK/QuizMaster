@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using QuizMaster.API.Authentication.Configuration;
@@ -11,6 +12,7 @@ using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gatewway.Controllers;
 using QuizMaster.API.Quiz.Services.Workers;
 
@@ -27,7 +29,7 @@ builder.Services.AddSignalR();
 builder.Services.AddCors(o => 
     o.AddDefaultPolicy(builder => 
     builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
-
+builder.Services.AddDbContext<SystemDbContext>(option => option.UseSqlite("Data Source=SystemData\\System.db"));
 builder.Services.AddScoped<SessionHub>();
 builder.Services.AddSingleton<SessionHandler>();
 builder.Services.AddSingleton<QuizHandler>();
@@ -138,5 +140,13 @@ app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod(
 
 app.MapControllers();
 app.MapHub<SessionHub>("/gateway/hub/session");
+
+// Initialize the Database
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var systemDbContext = services.GetRequiredService<SystemDbContext>();
+    systemDbContext.Database.EnsureCreated();
+}
 
 app.Run();
