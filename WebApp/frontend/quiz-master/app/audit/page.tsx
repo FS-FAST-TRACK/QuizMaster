@@ -9,31 +9,23 @@ import { AuditTrail, UserAudit, UserAuditTrail } from "@/lib/definitions";
 import AuditTable from "@/components/Commons/AuditTable/AuditTable";
 import { fetchAudit } from "@/lib/hooks/audit";
 import {
-    QUIZMASTER_ACCOUNT_GET,
-    QUIZMASTER_MONITORING_AUDIT_GET,
-    QUIZMASTER_MONITORING_MEDIA_GET,
-    QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET,
-    QUIZMASTER_MONITORING_QUIZ_SET_GET,
-    QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET,
-    QUIZMASTER_MONITORING_ROOM_GET,
-    QUIZMASTER_MONITORING_USER_GET,
-} from "@/api/api-routes";
-import {
     actionValues,
     propertyHeadersToSearch,
     selectTypeValues,
+    setUriAudit,
 } from "./accountDefinitions";
 
 export default function Page() {
     const tableRef = useRef(null);
-
     const currentDate = new Date();
 
-    const currentDateAsString = currentDate.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    });
+    const [actionTypeValue, setActionTypeValue] = useState<string[]>();
+    const [searchedText, setSearchedText] = useState("");
+    const [auditType, setAuditType] = useState<string | null>("Account");
+    const [userAudit, setUserAudit] = useState<AuditTrail[]>([]);
+    const [filteredData, setFilteredData] = useState<AuditTrail[]>([]);
+    const [userType, setUserType] = useState<string | null>("All");
+    const [actionType, setActionType] = useState<string | null>("All");
 
     const [formattedFirstDate, setFormattedFirstDate] = useState(
         `${new Date().getFullYear()}-${String(
@@ -49,17 +41,9 @@ export default function Page() {
 
     const { onDownload } = useDownloadExcel({
         currentTableRef: tableRef.current,
-        filename: `Account Audit - ${currentDateAsString}`,
+        filename: `Account Audit - ${formattedFirstDate} - ${formattedCurrentDate}`,
         sheet: "Users",
     });
-
-    const [actionTypeValue, setActionTypeValue] = useState<string[]>();
-    const [searchedText, setSearchedText] = useState("");
-    const [auditType, setAuditType] = useState<string | null>("Account");
-    const [userAudit, setUserAudit] = useState<AuditTrail[]>([]);
-    const [filteredData, setFilteredData] = useState<AuditTrail[]>([]);
-    const [userType, setUserType] = useState<string | null>("All");
-    const [actionType, setActionType] = useState<string | null>("All");
 
     useEffect(() => {
         setUserType("All");
@@ -77,25 +61,6 @@ export default function Page() {
         };
         fetchData();
     }, [auditType]);
-
-    const setUriAudit = (type: string | null) => {
-        switch (type) {
-            case "Account":
-                return QUIZMASTER_MONITORING_USER_GET;
-            case "Media":
-                return QUIZMASTER_MONITORING_MEDIA_GET;
-            case "Quiz Category":
-                return QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET;
-            case "Quiz Difficulty":
-                return QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET;
-            case "Quiz Set Audit":
-                return QUIZMASTER_MONITORING_QUIZ_SET_GET;
-            case "Room Audit":
-                return QUIZMASTER_MONITORING_ROOM_GET;
-            default:
-                return "";
-        }
-    };
 
     const filterByUserType = useCallback(
         (entry: AuditTrail) => {
@@ -118,7 +83,7 @@ export default function Page() {
     );
 
     const filteredDataByDateAndSearch = useMemo(() => {
-        return userAudit.filter((entry) => {
+        return userAudit.filter((entry: any) => {
             const entryTimestamp = new Date(entry.timestamp);
             const startOfDayFirstDate = new Date(formattedFirstDate);
             const endOfDayCurrentDate = new Date(formattedCurrentDate);

@@ -2,7 +2,7 @@ import { AuditTableProps, AuditTrail } from "@/lib/definitions";
 import { TrueORFalseData } from "@/lib/questionTypeData";
 import { Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const AuditTable: React.FC<AuditTableProps> = ({
     data,
@@ -13,12 +13,16 @@ const AuditTable: React.FC<AuditTableProps> = ({
     const [opened, { open, close }] = useDisclosure(false);
     const [auditTrail, setAuditTrail] = useState<AuditTrail>();
 
+    useEffect(() => {
+        setShowOptions(false);
+    }, [opened]);
+
     const formatNewValues = (newValuesString: any) => {
         try {
             const newValues = JSON.parse(newValuesString);
-            return Object.keys(newValues)
-                .map((key) => `${key}: ${newValues[key]}`)
-                .join("\n");
+            return Object.keys(newValues).map(
+                (key) => `${key}: ${newValues[key]}`
+            );
         } catch (error) {
             console.error("Error parsing newValues:", error);
             return "Invalid New Values";
@@ -179,7 +183,7 @@ const AuditTable: React.FC<AuditTableProps> = ({
                                     </button>
                                     {showOptions ? (
                                         <button
-                                            className="absolute  bottom-0 left-2 py-1 text-xs border mt-2 border-gray-200 shadow-md px-3 rounded-sm"
+                                            className="absolute bottom-0 left-2 py-1 text-xs border mt-2 border-gray-200 shadow-md px-3 rounded-sm"
                                             onClick={open}
                                         >
                                             More Details
