@@ -12,6 +12,7 @@ using QuizMaster.API.Authentication.Services.Worker;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
+using QuizMaster.API.Gateway.Services.System;
 using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gatewway.Controllers;
 using QuizMaster.API.Quiz.Services.Workers;
@@ -33,6 +34,7 @@ builder.Services.AddDbContext<SystemDbContext>(option => option.UseSqlite("Data 
 builder.Services.AddScoped<SessionHub>();
 builder.Services.AddSingleton<SessionHandler>();
 builder.Services.AddSingleton<QuizHandler>();
+builder.Services.AddScoped<SystemRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
