@@ -22,8 +22,9 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly EmailService emailService;
         private readonly GrpcChannel _authChannel;
         private readonly AuthService.AuthServiceClient _authChannelClient;
+        private readonly ILogger<SystemController> logger;
 
-        public SystemController(SystemRepository systemRepository, EmailService emailService, IOptions<GrpcServerConfiguration> options)
+        public SystemController(SystemRepository systemRepository, EmailService emailService, IOptions<GrpcServerConfiguration> options, ILogger<SystemController> logger)
         {
             this.systemRepository = systemRepository;
             this.emailService = emailService;
@@ -32,6 +33,7 @@ namespace QuizMaster.API.Gateway.Controllers
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
+            this.logger = logger;
         }
 
         // Get System About
@@ -85,15 +87,31 @@ namespace QuizMaster.API.Gateway.Controllers
             await systemRepository.SaveReachingContactAsync(model);
 
             #region Send Email
-            Task.Run(() =>
+            // I'll run this in a thread
+            var contactInformation = await systemRepository.GetContactInformationAsync();
+            Task.Run(async () =>
             {
-                var clientEmail = EmailDefaults.SUBMIT_CONTACT_CLIENT(model.Emai);
-                var adminEmailCopy = EmailDefaults.SUBMIT_CONTACT_ADMIN("", model.Firstname + " " + model.Lastname, model.Message);
+                // Lets try sending the email the the user authenticated, otherwise we'll send it to the email specified in the model
+                var token = this.GetToken();
+                var email = model.Email;
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var authStore = await GetAuthStoreInfo(token);
+                    if (authStore != null) email = authStore.UserData.Email;
+                }
 
+                // Create the templates and send the corresponding emails
+                var clientEmail = EmailDefaults.SUBMIT_CONTACT_CLIENT(email);
                 emailService.SendEmail(clientEmail);
-                emailService.SendEmailToAdmin(adminEmailCopy);
+
+                logger.LogInformation("Sending Email Copy to: " + contactInformation.Email);
+                var registeredAdminContactCopy = EmailDefaults.SUBMIT_CONTACT_ADMIN(contactInformation.Email, model.Firstname + " " + model.Lastname, model.Message);
+                emailService.SendEmail(registeredAdminContactCopy);
+                emailService.SendEmailToAdmin(registeredAdminContactCopy);
             });
             #endregion
+
+
 
             return Ok(new { Status = "Success", Message = "Successfully submitted a contact request." });
         }
@@ -117,10 +135,12 @@ namespace QuizMaster.API.Gateway.Controllers
             await systemRepository.SaveReviewsAsync(model);
 
             #region Send Email
+            var contactInformation = await systemRepository.GetContactInformationAsync();
+            // I'll run this in a separate thread
             Task.Run(async () =>
             {
                 var token = this.GetToken();
-                if(!string.IsNullOrEmpty(token))
+                if (!string.IsNullOrEmpty(token))
                 {
                     var AuthStore = await GetAuthStoreInfo(token);
 
@@ -128,24 +148,42 @@ namespace QuizMaster.API.Gateway.Controllers
                     {
                         var clientEmail = EmailDefaults.SUBMIT_REVIEW_CLIENT(AuthStore.UserData.Email, model.Comment, model.StarRating);
                         emailService.SendEmail(clientEmail);
+
                     }
                 }
-                
+                /*
+                 * 
+                 * This code right here will send an email to the SMTP account, which I commented it out first since we priority on
+                 * the admin that will receive the email must be the email specified in the contact us
                 var adminEmailCopy = EmailDefaults.SUBMIT_REVIEW_ADMIN("", model.Comment, model.StarRating);
-
-                
                 emailService.SendEmailToAdmin(adminEmailCopy);
+                */
+                var registeredAdminContactCopy = EmailDefaults.SUBMIT_REVIEW_ADMIN(contactInformation.Email, model.Comment, model.StarRating);
+                logger.LogInformation("Sending Email Copy to: " + contactInformation.Email);
+                emailService.SendEmail(registeredAdminContactCopy);
+                emailService.SendEmailToAdmin(registeredAdminContactCopy);
             });
             #endregion
 
             return Ok(new { Status = "Success", Message = "Successfully submitted a system review." });
         }
+
         // Get All Submitted Review
+        [QuizMasterAdminAuthorization]
         [HttpGet("review")]
         public async Task<IActionResult> GetAllReviewsAsync() 
         {
             return Ok(new { Status = "Success", Message = "Retrieved System Reviews", Data = await systemRepository.GetReviewsAsync() });
         }
+
+        [HttpGet("review/client")]
+        public async Task<IActionResult> GetAllReviewsClientCopyAsync()
+        {
+            var data = await systemRepository.GetReviewsAsync();
+            data = data.Where(r => r.StarRating >= 4).ToList();
+            return Ok(new { Status = "Success", Message = "Retrieved System Reviews", Data = data });
+        }
+
 
 
         private async Task<AuthStore> GetAuthStoreInfo(string token)
