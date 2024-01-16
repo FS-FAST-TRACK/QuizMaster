@@ -8,10 +8,12 @@ export const propertyHeadersToSearch = [
 export const selectTypeValues = [
     "Account",
     "Media",
-    "Quiz Difficulty",
-    "Quiz Category",
-    "Quiz Set Audit",
-    "Room Audit",
+    "Question Difficulty",
+    "Question Category",
+    "Question Type ",
+    "Question",
+    "Quiz Set",
+    "Quiz Room",
 ];
 
 // start of action type values

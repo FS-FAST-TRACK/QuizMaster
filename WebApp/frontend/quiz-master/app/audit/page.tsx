@@ -10,9 +10,11 @@ import AuditTable from "@/components/Commons/AuditTable/AuditTable";
 import { fetchAudit } from "@/lib/hooks/audit";
 import {
     QUIZMASTER_MONITORING_MEDIA_GET,
+    QUIZMASTER_MONITORING_QUESTION_GET,
     QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET,
     QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET,
     QUIZMASTER_MONITORING_QUIZ_SET_GET,
+    QUIZMASTER_MONITORING_QUIZ_TYPE_GET,
     QUIZMASTER_MONITORING_ROOM_GET,
     QUIZMASTER_MONITORING_USER_GET,
 } from "@/api/api-routes";
@@ -59,11 +61,15 @@ export default function Page() {
                 return QUIZMASTER_MONITORING_USER_GET;
             case "Media":
                 return QUIZMASTER_MONITORING_MEDIA_GET;
-            case "Quiz Category":
-                return QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET;
-            case "Quiz Difficulty":
+            case "Question Difficulty":
                 return QUIZMASTER_MONITORING_QUIZ_DIFFICULTY_GET;
-            case "Quiz Set Audit":
+            case "Question Category":
+                return QUIZMASTER_MONITORING_QUIZ_CATEGORY_GET;
+            case "Question Type":
+                return QUIZMASTER_MONITORING_QUIZ_TYPE_GET;
+            case "Question":
+                return QUIZMASTER_MONITORING_QUESTION_GET;
+            case "Quiz Set":
                 return QUIZMASTER_MONITORING_QUIZ_SET_GET;
             case "Room Audit":
                 return QUIZMASTER_MONITORING_ROOM_GET;
