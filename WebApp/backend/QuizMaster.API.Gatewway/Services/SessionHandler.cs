@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Models.Report;
+using QuizMaster.API.Gateway.Services.ReportService;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
@@ -25,7 +27,10 @@ namespace QuizMaster.API.Gateway.Services
         private List<string> ClientsSubmittedAnswers;
         private Dictionary<int, QuizRoom> ActiveRooms;
         private Dictionary<int, IEnumerable<QuizParticipant>> RoomEliminatedParticipants;
-        public SessionHandler()
+        private Dictionary<string, string> SessionId;
+        private readonly ReportServiceHandler ReportHandler;
+
+        public SessionHandler(ReportServiceHandler reportServiceHandler)
         {
             connectionGroupPair = new();
             participantLinkedConnectionId = new();
@@ -36,6 +41,20 @@ namespace QuizMaster.API.Gateway.Services
             ClientsSubmittedAnswers = new();
             ActiveRooms = new();
             RoomEliminatedParticipants = new();
+            SessionId = new();
+            ReportHandler = reportServiceHandler;
+        }
+
+        public string GenerateSessionId(string roomPin)
+        {
+            Guid guid = Guid.NewGuid();
+            SessionId[roomPin] = guid.ToString();
+            return SessionId[roomPin];
+        }
+
+        public string GetSessionId(string roomPin)
+        {
+            return SessionId[roomPin];
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
@@ -245,7 +264,7 @@ namespace QuizMaster.API.Gateway.Services
             }
             //await hub.Clients.Client(connectionId).SendAsync("notif", "Answer Submitted");
             // get the question data
-            #region GettingQuestionData
+            #region Saving Answer
             var gRpcRequest = new SetRequest() { Id = questionId };
             var gRpcReply = await grpcClient.GetQuestionAsync(gRpcRequest);
             if (gRpcReply == null) return "Failed to retrieve question information";
@@ -258,28 +277,57 @@ namespace QuizMaster.API.Gateway.Services
             var answers = questionData.details.Where(a => a.DetailTypes.Where(dt => dt.DTypeDesc.ToLower() == "answer").Select(Dt => Dt.DTypeDesc).ToList().Count > 0).Select(d => d.QDetailDesc).ToList();
 
             bool correct = false;
-            foreach(string Qanswer in answers)
+            if(questionData.question.QTypeId == 6)
             {
-                if(Qanswer.ToLower() == answer.ToLower())
+                // try checking if puzzle type is correct
+                correct = true;
+                List<string> _answers = JsonConvert.DeserializeObject<List<string>>(answer) ?? new List<string>();
+                
+                for(int index = 0; index < _answers.Count(); index++)
                 {
-                    correct = true;
-                    break;
+                    if(index < answers.Count)
+                    {
+                        if (answers[index] != _answers[index])
+                        {
+                            correct = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (string Qanswer in answers)
+                {
+                    if (Qanswer.ToLower() == answer.ToLower())
+                    {
+                        correct = true;
+                        break;
+                    }
                 }
             }
 
+            QuizParticipant? participantData;
+            // get the participant data
+            participantData = GetLinkedParticipantInConnectionId(connectionId);
+            if (participantData == null) return "Participant data not found";
+
             if (correct)
             {
-                // get the participant data
-                var participantData = GetLinkedParticipantInConnectionId(connectionId);
-                if (participantData == null) return "Participant data not found";
-
                 // increment score by 1
                 participantData.Score += 1;
-
-                
             }
             // Hold Submission of Answer
             HoldClientAnswerSubmission(connectionId);
+            // Save Report
+            ReportHandler.SaveParticipantAnswer(new ParticipantAnswerReport() 
+            {
+                SessionId = GetSessionId(answer),
+                ParticipantName = participantData.QParticipantDesc,
+                Answer = answer,
+                QuestionId = questionData.question.Id,
+                ScreenshotLink = ""
+            });
             #endregion
             return "Answer submitted";
         }
