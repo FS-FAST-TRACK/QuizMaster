@@ -1,3 +1,26 @@
+export interface UserInfo {
+    message: string,
+    info: {
+        userData: {
+            id: number,
+            lastName: string,
+            firstName: string,
+            email: string,
+            userName: string,
+            activeData: string,
+            dateCreated: string,
+            dateUpdated: string,
+            updatedByUser: string,
+            phoneNumber: string,
+            phoneNumberConfirmed: string,
+        }
+        roles: string[],
+        validUntil: Date,
+        issuedDate: Date,
+    }
+    
+}
+
 export interface QuestionCore {
     id: number;
     qAudio: string;

@@ -8,8 +8,10 @@ import {
     QuestionSet,
     Set,
     SystemInfoDto,
+    UserInfo,
 } from "./definitions";
 import {
+    QUIZMASTER_AUTH_GET_COOKIE_INFO,
     QUIZMASTER_MEDIA_GET_DOWNLOAD,
     QUIZMASTER_QCATEGORY_GET_CATEGORIES,
     QUIZMASTER_QUESTION_GET_QUESTION,
@@ -19,6 +21,29 @@ import {
     QUIZMASTER_SET_GET_SETS,
     QUIZMASTER_SYSTEM_GET_SYSTEM_INFO,
 } from "@/api/api-routes";
+
+export async function fetchLoginUser() {
+    try {
+        const token = localStorage.getItem("token"); //just temporary
+        var apiUrl = `${QUIZMASTER_AUTH_GET_COOKIE_INFO}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }).then(async (res) => {
+            var data: UserInfo;
+            data = await res.json();
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question data.");
+    }
+}
 
 export async function fetchCategories(
     questionResourceParameter?: CategoryResourceParameter
@@ -102,7 +127,6 @@ export async function fetchSet({ setId }: { setId: number }) {
     try {
         const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SET}${setId}`;
-        console.log(token);
 
         const data = await fetch(apiUrl, {
             credentials: "include",

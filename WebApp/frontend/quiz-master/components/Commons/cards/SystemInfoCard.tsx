@@ -16,9 +16,7 @@ export default function SystemInfoCard({ email }: { email: string }) {
     const [openEditInfoModal, setOpenEditInfoModal] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(email);
         fetchSystemInfo().then((res) => {
-            console.log(res);
             setSystemInfo(res);
         });
     }, [openEditInfoModal]);
