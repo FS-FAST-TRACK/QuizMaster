@@ -10,7 +10,7 @@ export default async function HeadNav() {
     return (
         <div className="flex flex-row w-full gap-10 h-10 text-white transition-all duration-500">
             <div className="flex flex-row rounded-3xl items-center gap-10">
-                <Link href="/dashboard">
+                <Link href="/dashboard" className="hidden lg:block">
                     <div className="text-white">
                         <Image
                             src={logo}

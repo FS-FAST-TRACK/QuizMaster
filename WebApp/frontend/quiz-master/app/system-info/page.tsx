@@ -11,13 +11,16 @@ export default async function SystemInfo() {
 
     return (
         <div className="flex flex-row gap-5">
-            <SystemInfoCard email={`${session?.user.email}`} />
-            <div className="hidden sm:block">
+            <div className="flex flex-col lg:w-2/3 gap-2">
+                <SystemInfoCard email={`${session?.user.email}`} />
+            </div>
+
+            <div className="hidden lg:block xl:block w-1/3 relative h-[23rem]">
                 <Image
                     src={quizMasterIcon}
                     alt="QuizMaster Icon"
-                    width={1000}
-                    height={1000}
+                    layout="fill"
+                    objectFit="cover"
                 />
             </div>
         </div>

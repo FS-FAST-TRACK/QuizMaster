@@ -165,8 +165,11 @@ export type PatchItem = {
     value: any;
 };
 export type SystemInfoDto = {
-    systemInfo: string;
+    description: string;
     version: string;
+    web_link: string;
+    mobile_link: string;
+    ios_link: string;
 }
 
 export type ContactUsCreateValues = {

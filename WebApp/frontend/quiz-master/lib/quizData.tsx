@@ -17,6 +17,7 @@ import {
     QUIZMASTER_SET_GET_SETQUESTION,
     QUIZMASTER_SET_GET_SETQUESTIONS,
     QUIZMASTER_SET_GET_SETS,
+    QUIZMASTER_SYSTEM_GET_SYSTEM_INFO,
 } from "@/api/api-routes";
 
 export async function fetchCategories(
@@ -203,11 +204,26 @@ export async function fetchMedia(id: string) {
     }
 }
 
-export function fetchSystemInfo() {
-    let systemInfo = {
-        version: "1.0.0", 
-        systemInfo:"Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et."
-    };
+export async function fetchSystemInfo() {
 
-    return systemInfo;
+    try {
+        var apiUrl = `${QUIZMASTER_SYSTEM_GET_SYSTEM_INFO}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(async (res) => {
+            var data: SystemInfoDto;
+            const resJson = await res.json();
+            data = resJson.data;
+            
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question data.");
+    }
 }

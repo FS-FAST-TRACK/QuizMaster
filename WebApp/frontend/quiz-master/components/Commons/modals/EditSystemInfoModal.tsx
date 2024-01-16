@@ -19,20 +19,29 @@ export default function EditSystemInfoModal({
     const systemDetails = useForm<SystemInfoDto>({
         initialValues: {
             version: `${systemInfo?.version}`,
-            systemInfo: `${systemInfo?.systemInfo}`,
+            description: `${systemInfo?.description}`,
+            web_link: `${systemInfo?.web_link}`,
+            mobile_link: `${systemInfo?.mobile_link}`,
+            ios_link: `${systemInfo?.ios_link}`,
         },
         clearInputErrorOnChange: true,
         validateInputOnChange: true,
         validate: {
             version: (value) =>
                 value.length < 1 ? "Version must not be empty." : null,
-            systemInfo: (value) =>
+            description: (value) =>
                 value.length < 1 ? "System Info must not be empty." : null,
         },
     });
 
     const handelSubmit = useCallback(async () => {
-        UpdateSystemInfo({ systemDetails: systemDetails.values });
+        UpdateSystemInfo({ systemDetails: systemDetails.values }).then(
+            (res) => {
+                if (res.status < 300) {
+                    onClose();
+                }
+            }
+        );
     }, [systemDetails.values]);
 
     return (
@@ -46,14 +55,14 @@ export default function EditSystemInfoModal({
                     Edit System Information
                 </div>
             }
-            size="md"
+            size="lg"
         >
             <div className="space-y-8">
                 <TextInput
                     label="Version"
                     required
                     variant="filled"
-                    placeholder="Email"
+                    placeholder="Version"
                     {...systemDetails.getInputProps("version")}
                 />
                 <Textarea
@@ -62,7 +71,28 @@ export default function EditSystemInfoModal({
                     variant="filled"
                     placeholder="Phone Number"
                     rows={10}
-                    {...systemDetails.getInputProps("systemInfo")}
+                    {...systemDetails.getInputProps("description")}
+                />
+                <TextInput
+                    label="Web Link"
+                    required
+                    variant="filled"
+                    placeholder="Web Link"
+                    {...systemDetails.getInputProps("web_link")}
+                />
+                <TextInput
+                    label="Mobile Link"
+                    required
+                    variant="filled"
+                    placeholder="Mobile Link"
+                    {...systemDetails.getInputProps("mobile_link")}
+                />
+                <TextInput
+                    label="iOS Link"
+                    required
+                    variant="filled"
+                    placeholder="iOS Link"
+                    {...systemDetails.getInputProps("ios_link")}
                 />
                 <div className="flex gap-2">
                     <Button
