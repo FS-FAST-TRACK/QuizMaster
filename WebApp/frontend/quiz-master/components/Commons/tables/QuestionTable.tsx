@@ -27,10 +27,7 @@ import ViewQuestionModal from "../modals/ViewQuestionModal";
 import { deleteQuestion as removeQuestion } from "@/lib/hooks/question";
 import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
 import { notification } from "@/lib/notifications";
-<<<<<<< HEAD
-=======
 import { usePathname, useRouter } from "next/navigation";
->>>>>>> develop
 
 export default function QuestionTable({
     questions,
@@ -75,13 +72,10 @@ export default function QuestionTable({
                     notification({ type: "error", title: res.message });
                 }
                 setDeleteQuestion(undefined);
-<<<<<<< HEAD
-=======
 
                 if (onDeleteCallBack) {
                     onDeleteCallBack();
                 }
->>>>>>> develop
             } catch (error) {
                 notification({ type: "error", title: "Something went wrong" });
             }

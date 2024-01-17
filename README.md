@@ -8,12 +8,15 @@ To ignite the spirit of friendly competition, knowledge exploration, and persona
 
 At QuizMasters, our mission is to provide a dynamic and engaging platform for individuals of all ages and backgrounds to come together, test their knowledge, and celebrate learning. We strive to make the QuizMasters Web and Mobile Application a space where participants can challenge themselves, showcase their expertise, and learn from others. Through this platform, we aim to foster a sense of camaraderie, encourage intellectual development, and inspire a thirst for knowledge in an inclusive and accessible manner.
 
-### Build Status (Github Actions)
+## Build Status (Github Actions)
+
+### Backend
 
 | [![QuizMaster - Account API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.account.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.account.yml)              | [![QuizMaster - Auth API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.auth.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.auth.yml)    |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [![QuizMaster - Monitoring API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.monitoring.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.monitoring.yml)     | [![QuizMaster - Quiz API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quiz.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quiz.yml)    |
 | [![QuizMaster - Quiz Session API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quizsession.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quizsession.yml) | [![QuizMaster - Media API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.media.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.media.yml) |
+| [![QuizMaster - Gateway API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.gateway.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.gateway.yml)              |
 
 ### Technology Stacks
 
