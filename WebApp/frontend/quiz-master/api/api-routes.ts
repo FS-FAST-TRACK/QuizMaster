@@ -5,12 +5,9 @@ const QUIZMASTER_ACCOUNT_POST = `${QUIZMASTER_ACCOUNT}/create`;
 const QUIZMASTER_ACCOUNT_POST_PARTIAL = `${QUIZMASTER_ACCOUNT}/create_partial`;
 const QUIZMASTER_ACCOUNT_DELETE = `${QUIZMASTER_ACCOUNT}/delete/`;
 const QUIZMASTER_ACCOUNT_PATCH = `${QUIZMASTER_ACCOUNT}/update/`;
-<<<<<<< HEAD
-=======
 const QUIZMASTER_ACCOUNT_PASSWORD_RESET_POST = (id: Number) => {
     return `${QUIZMASTER_ACCOUNT}/${id}/update_password`;
 };
->>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c
 const QUIZMASTER_ACCOUNT_POST_SET_ADMIN = `${QUIZMASTER_ACCOUNT}/set_admin/`;
 //#endregion
 
@@ -43,11 +40,7 @@ const QUIZMASTER_QUESTION_PATCH = `${QUIZMASTER_QUESTION}/update_qustion/`;
 
 //#region Difficulty API endpoints
 const QUIZMASTER_QDIFFICULTY = `${process.env.QUIZMASTER_GATEWAY}/api/gateway/question/difficulty`;
-<<<<<<< HEAD
-const QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES = `${QUIZMASTER_QDIFFICULTY}/get_all_difficulty`;
-=======
 const QUIZMASTER_QDIFFICULTY_GET_DIFFICULTIES = `${QUIZMASTER_QDIFFICULTY}/get_difficulties`;
->>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c
 const QUIZMASTER_QDIFFICULTY_GET_DIFFICULTY = `${QUIZMASTER_QDIFFICULTY}/get_difficulty/`;
 const QUIZMASTER_QDIFFICULTY_POST = `${QUIZMASTER_QDIFFICULTY}/add_difficulty`;
 const QUIZMASTER_QDIFFICULTY_DELETE = `${QUIZMASTER_QDIFFICULTY}/delete_difficulty/`;
@@ -67,8 +60,6 @@ const QUIZMASTER_QCATEGORY_GET_CATEGORY = `${QUIZMASTER_QCATEGORY}/get_category/
 const QUIZMASTER_QCATEGORY_POST = `${QUIZMASTER_QCATEGORY}/create_category`;
 const QUIZMASTER_QCATEGORY_DELETE = `${QUIZMASTER_QCATEGORY}/delete/`;
 const QUIZMASTER_QCATEGORY_PATCH = `${QUIZMASTER_QCATEGORY}/update_category/`;
-<<<<<<< HEAD
-=======
 //#endregion
 
 //#region Question Detail API endpoints
@@ -78,7 +69,6 @@ const QUIZMASTER_QUESTIONDETAIL_GET_QUESTIONDETAIL = `${QUIZMASTER_QUESTIONDETAI
 const QUIZMASTER_QUESTIONDETAIL_POST = `${QUIZMASTER_QUESTIONDETAIL}/add_question_detail`;
 const QUIZMASTER_QUESTIONDETAIL_DELETE = `${QUIZMASTER_QUESTIONDETAIL}/delete_question_detail/`;
 const QUIZMASTER_QUESTIONDETAIL_PATCH = `${QUIZMASTER_QUESTIONDETAIL}/update_qustion_detail/`;
->>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c
 //#endregion
 
 //#region Set API endpoints
@@ -90,22 +80,12 @@ const QUIZMASTER_SET_GET_SET = `${QUIZMASTER_SET}/`;
 const QUIZMASTER_SET_GET_SETQUESTIONS = `${QUIZMASTER_SET}/all_question_set`;
 const QUIZMASTER_SET_GET_SETQUESTION = `${QUIZMASTER_SET}/get_question_set/`;
 const QUIZMASTER_SET_PUT = `${QUIZMASTER_SET}/update_set/`;
-<<<<<<< HEAD
-const QUIZMASTER_SET_DELETE = `${QUIZMASTER_SET}/delete/`;
-//#endregion
-
-//Monitoring
-
-const QUIZMASTER_MONITORING_USER_AUDIT_GET = `${process.env.QUIZMASTER_MONITORING}/api/audit/user/all`;
-
-=======
 const QUIZMASTER_SET_DELETE = `${QUIZMASTER_SET}/delete_set/`;
 //#endregion
 
 // #region Hub
 const QUIZMASTER_GATEWAY_SESSION_HUB = `${process.env.QUIZMASTER_GATEWAY}/gateway/hub/session`;
 //#endregion
->>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c
 export {
     QUIZMASTER_ACCOUNT_GET,
     QUIZMASTER_ACCOUNT_POST,
@@ -155,9 +135,5 @@ export {
     QUIZMASTER_SET_POST_SUBMIT_ANSWER,
     QUIZMASTER_SET_PUT,
     QUIZMASTER_SET_DELETE,
-<<<<<<< HEAD
-    QUIZMASTER_MONITORING_USER_AUDIT_GET,
-=======
     QUIZMASTER_GATEWAY_SESSION_HUB,
->>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c
 };
