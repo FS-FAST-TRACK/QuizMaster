@@ -65,10 +65,13 @@ export default function Page() {
                 setQuestions(response.data?.questions!);
                 setPaginationMetadata(response.data?.paginationMetada);
             } else {
+<<<<<<< HEAD
+=======
                 notification({
                     type: "error",
                     title: "Failed to fetch questions",
                 });
+>>>>>>> develop
             }
         } catch {
             notification({ type: "error", title: "Something went wrong." });

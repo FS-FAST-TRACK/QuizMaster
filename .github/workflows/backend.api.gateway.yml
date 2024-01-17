@@ -1,4 +1,4 @@
-name: QuizMaster - Quiz Session API
+name: QuizMaster - Gateway API
 
 on:
   push:
