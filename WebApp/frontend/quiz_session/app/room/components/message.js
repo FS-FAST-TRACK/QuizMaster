@@ -19,15 +19,10 @@ export default function Message() {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-    connection.invoke("Chat", message, roomPin);
-    setMessage("");
-=======
     if (message) {
       connection.invoke("Chat", message, roomPin);
       setMessage("");
     }
->>>>>>> develop
   };
   return (
     <form
