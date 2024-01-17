@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-import { User } from "next-auth";
 import { RefObject } from "react";
 
-export type Question = {
-=======
 export interface QuestionCore {
->>>>>>> develop
     id: number;
     qAudio: string;
     qCategoryId: any;

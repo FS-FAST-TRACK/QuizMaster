@@ -66,11 +66,7 @@ export async function createCategory({
             },
             credentials: "include",
         }).then((res) => {
-<<<<<<< HEAD
-            if (res.status !== 201) {
-=======
             if (res.status >= 300) {
->>>>>>> develop
                 throw new Error("Failed to create category data.");
             }
             return res;
