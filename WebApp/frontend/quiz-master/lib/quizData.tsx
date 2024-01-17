@@ -7,7 +7,6 @@ import {
     QuestionDetail,
     QuestionSet,
     Set,
-    SystemInfoDto,
 } from "./definitions";
 import {
     QUIZMASTER_MEDIA_GET_DOWNLOAD,
@@ -126,6 +125,7 @@ export async function fetchAllSetQuestions() {
     try {
         const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
+        console.log(token);
 
         const data = await fetch(apiUrl, {
             credentials: "include",
@@ -205,8 +205,9 @@ export async function fetchMedia(id: string) {
 
 export function fetchSystemInfo() {
     let systemInfo = {
-        version: "1.0.0", 
-        systemInfo:"Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et."
+        version: "1.0.0",
+        systemInfo:
+            "Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et.",
     };
 
     return systemInfo;

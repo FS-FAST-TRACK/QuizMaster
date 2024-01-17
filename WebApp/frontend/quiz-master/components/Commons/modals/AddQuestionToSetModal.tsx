@@ -70,7 +70,11 @@ export default function AddQuestionToSetModal({
             setPaginationMetadata(response.data?.paginationMetada);
         } else {
         }
+<<<<<<< HEAD
+    }, []);
+=======
     }, [form.values]);
+>>>>>>> develop
     //Get questions not yet added
     useEffect(() => {
         open();

@@ -1,4 +1,11 @@
+<<<<<<< HEAD
+import { User } from "next-auth";
+import { RefObject } from "react";
+
+export type Question = {
+=======
 export interface QuestionCore {
+>>>>>>> develop
     id: number;
     qAudio: string;
     qCategoryId: any;
@@ -179,9 +186,28 @@ export type UserAudit = {
     userAuditTrailId: number;
     userId: number;
     action: String;
+    username: String;
     timestamp: Date;
     details: String;
     userRole: String;
     oldValues: String;
     newValues: String;
 };
+
+export type AuditTrail = {
+    userAuditTrailId: number;
+    userId: number;
+    action: String;
+    userName: String;
+    timestamp: Date;
+    details: String;
+    userRole: String;
+    oldValues: String;
+    newValues: String;
+};
+
+export interface AuditTableProps {
+    data: AuditTrail[];
+    tableRef: RefObject<HTMLTableElement>;
+    auditType: string | null;
+}

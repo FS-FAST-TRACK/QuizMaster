@@ -121,8 +121,13 @@ namespace QuizMaster.API.Gateway.Services
                         await Task.Delay(1000);
                     }
                 }
+<<<<<<< HEAD
+
+                if (room.ShowLeaderboardEachRound() && setIndex+1 < quizSets.Count)
+=======
                 setIndex++;
                 if (room.ShowLeaderboardEachRound() && setIndex < quizSets.Count)
+>>>>>>> develop
                 {
                     await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying leaderboards");
                     await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores

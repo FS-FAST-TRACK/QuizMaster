@@ -1,8 +1,8 @@
-import { QUIZMASTER_MONITORING_USER_AUDIT_GET } from "@/api/api-routes";
+import { QUIZMASTER_MONITORING_AUDIT_GET } from "@/api/api-routes";
 
-export async function fetchUserAudit() {
+export async function fetchAudit(uri: string) {
     try {
-        var apiUrl = `https://localhost:7065/api/audit/user/all`;
+        var apiUrl = `${uri}`;
 
         const response = await fetch(apiUrl);
 
