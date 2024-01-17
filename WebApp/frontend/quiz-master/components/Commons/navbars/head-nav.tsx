@@ -10,19 +10,15 @@ import { UserInfo } from "@/lib/definitions";
 
 export default function HeadNav() {
     const [userInfo, setUserInfo] = useState<UserInfo>();
-    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
     useEffect(() => {
         fetchLoginUser().then((res) => {
-            setUserInfo(res);
-
-            res.info.roles.map((role) => {
-                if (role === "Administrator") {
-                    setIsAdmin(true);
-                }
-            });
+            if (res !== null && res !== undefined) {
+                setUserInfo(res);
+            }
         });
     }, []);
+
     return (
         <div className="flex flex-row w-full gap-10 h-10 text-white transition-all duration-500">
             <div className="flex flex-row rounded-3xl items-center gap-10">
@@ -51,13 +47,13 @@ export default function HeadNav() {
                         height={20}
                         priority
                     />
-                    <p>{userInfo.info.userData.userName}</p>
+                    <p>{userInfo?.info?.userData?.userName}</p>
                 </div>
             ) : (
                 <div className="flex flex-row rounded-3xl items-center gap-10">
-                    <Link href="#">Login</Link>
+                    <Link href="/auth/login">Login</Link>
                     <div className="bg-[#FF7F2A] p-2 rounded">
-                        <Link href="#">Sign Up</Link>
+                        <Link href="/auth/signup">Sign Up</Link>
                     </div>
                 </div>
             )}

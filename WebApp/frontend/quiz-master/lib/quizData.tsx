@@ -35,8 +35,15 @@ export async function fetchLoginUser() {
             },
         }).then(async (res) => {
             var data: UserInfo;
-            data = await res.json();
+            const resJson = await res.json();
+            if(resJson?.status === 401) {
+                return null;
+            }
+            data = resJson;
+            console.log(data);
             return data;
+        }).catch(e => {
+            console.log("unauth");
         });
         return data;
     } catch (error) {

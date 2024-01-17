@@ -6,8 +6,8 @@ import androidIcon from "/public/android-icon.png";
 import appleIcon from "/public/apple-icon.png";
 import editIcon from "/public/edit-icon.svg";
 import Image from "next/image";
-import { SystemInfoDto } from "@/lib/definitions";
-import { fetchSystemInfo } from "@/lib/quizData";
+import { SystemInfoDto, UserInfo } from "@/lib/definitions";
+import { fetchLoginUser, fetchSystemInfo } from "@/lib/quizData";
 import EditSystemInfoModal from "../modals/EditSystemInfoModal";
 import Link from "next/link";
 
@@ -16,16 +16,35 @@ export default function SystemInfoCard({ email }: { email: string }) {
     const [openEditInfoModal, setOpenEditInfoModal] = useState<boolean>(false);
 
     useEffect(() => {
+        fetchLoginUser();
+    }, []);
+    useEffect(() => {
         fetchSystemInfo().then((res) => {
             setSystemInfo(res);
         });
     }, [openEditInfoModal]);
 
+    const [userInfo, setUserInfo] = useState<UserInfo>();
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+    useEffect(() => {
+        fetchLoginUser().then((res) => {
+            if (res !== null && res !== undefined) {
+                setUserInfo(res);
+            }
+            res?.info?.roles.map((role) => {
+                if (role === "Administrator") {
+                    setIsAdmin(true);
+                }
+            });
+        });
+    }, []);
+
     return (
         <>
             <div className="flex flex-row gap-2">
                 <p className=" font-bold text-2xl">About QuizMaster</p>
-                {email === "admin@gmail.com" ? (
+                {isAdmin ? (
                     <div
                         className="flex flex-row justify-center items-center w-32 p-2 bg-[#169B47] gap-2 rounded-md hover:bg-[#00E154] hover:cursor-pointer"
                         onClick={() => {
