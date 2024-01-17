@@ -12,11 +12,18 @@ At QuizMasters, our mission is to provide a dynamic and engaging platform for in
 
 ### Backend
 
-| [![QuizMaster - Account API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.account.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.account.yml)              | [![QuizMaster - Auth API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.auth.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.auth.yml)    |
+| Microservices CLI                                                                                                                                                                                                                  | Microservices CLI                                                                                                                                                                                               |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![QuizMaster - Account API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.account.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.account.yml)              | [![QuizMaster - Auth API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.auth.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.auth.yml)    |
 | [![QuizMaster - Monitoring API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.monitoring.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.monitoring.yml)     | [![QuizMaster - Quiz API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quiz.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quiz.yml)    |
 | [![QuizMaster - Quiz Session API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quizsession.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.quizsession.yml) | [![QuizMaster - Media API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.media.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.media.yml) |
 | [![QuizMaster - Gateway API](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.gateway.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/backend.api.gateway.yml)              |
+
+### Frontend
+
+| Website CLI                                                                                                                                                                                                                                          | Game CLI                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![QuizMaster - Frontend/Website](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/frontend.api.quizmaster-frontend.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/frontend.api.quizmaster-frontend.yml) | [![QuizMaster - Frontend/Game](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/frontend.api.quizmaster-session.yml/badge.svg)](https://github.com/FS-FAST-TRACK/QuizMaster/actions/workflows/frontend.api.quizmaster-session.yml) |
 
 ### Technology Stacks
 
@@ -24,7 +31,7 @@ At QuizMasters, our mission is to provide a dynamic and engaging platform for in
 | ------------- | ------------- | ------------ |
 | C#            | Next.js       | React-Native |
 | ASP.NET Core  | TailwindCSS   | NativeWind   |
-| Microservices |
-| API           |
+| Microservices | Zustand       | Zustand      |
+| API           | NextAuth      |
 | RabbitMQ      |
 | gRPC          |
