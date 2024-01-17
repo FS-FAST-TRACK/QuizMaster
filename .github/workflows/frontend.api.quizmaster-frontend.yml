@@ -1,0 +1,33 @@
+name: QuizMaster - Frontend/Website
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: WebApp/frontend/quiz-master
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: WebApp/frontend/quiz-master
+        run: npm install
+
+      # - name: Run Code Linting
+      #   working-directory: WebApp/frontend/quiz-master
+      #   run: npm run lint
+
+      - name: Build Code
+        working-directory: WebApp/frontend/quiz-master
+        run: npm run build
