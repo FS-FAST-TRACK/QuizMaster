@@ -34,15 +34,11 @@ namespace QuizMaster.API.QuizSession
             });
             builder.Services.AddScoped(sp =>
             {
-<<<<<<< HEAD
-                var channel = GrpcChannel.ForAddress("https://localhost:7065");
-=======
                 var handler = new HttpClientHandler();
                 handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
                 // Creating Scoped Service Room Audit service
                 var channel = GrpcChannel.ForAddress(builder.Configuration["AppSettings:Monitoring_Service"], new GrpcChannelOptions { HttpHandler = handler });
->>>>>>> develop
                 return new RoomAuditService.RoomAuditServiceClient(channel);
             });
             builder.Services.AddControllers();
