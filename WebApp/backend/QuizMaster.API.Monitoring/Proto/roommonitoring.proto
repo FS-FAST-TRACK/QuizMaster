@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option csharp_namespace = "QuizMaster.API.Monitoring.Proto";
+
+package audit;
+
+import "google/protobuf/empty.proto";
+
+
+service RoomAuditService {
+	rpc LogCreateRoomEvent (LogCreateRoomEventRequest) returns (google.protobuf.Empty);
+	rpc LogUpdateRoomEvent (LogUpdateRoomEventRequest) returns (google.protobuf.Empty);
+	rpc LogDeleteRoomEvent (LogDeleteRoomEventRequest) returns (google.protobuf.Empty);
+}
+
+message CreateRoomEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message UpdateRoomEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message DeleteRoomEvent {
+  int32 userId = 1;
+  string username = 2;
+  string action = 3;
+  string timestamp = 4;
+  string details = 5;
+  string userrole = 6;
+  string oldValues = 7;
+  string newValues = 8;
+}
+
+message LogCreateRoomEventRequest {
+	CreateRoomEvent event = 1;
+}
+
+message LogUpdateRoomEventRequest {
+	UpdateRoomEvent event = 1;
+}
+
+message LogDeleteRoomEventRequest {
+	DeleteRoomEvent event = 1;
+}

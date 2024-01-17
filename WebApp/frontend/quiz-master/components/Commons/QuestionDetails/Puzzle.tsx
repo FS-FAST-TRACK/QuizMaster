@@ -9,6 +9,7 @@ import { UseFormReturnType } from "@mantine/form";
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from "@/styles/input.module.css";
+import { notification } from "@/lib/notifications";
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "var(--primary-100)" : "white",
@@ -110,12 +111,21 @@ export default function PuzzleQuestionDetails({
                     color="gray"
                     size="lg"
                     className="border-4 outline-2 outline-gray-800 w-full"
-                    onClick={() =>
+                    onClick={() => {
+                        if (form.values.options.length >= 10) {
+                            notification({
+                                type: "info",
+                                title: "Items are limited up to 10.",
+                                message: "Unable to add another item",
+                            });
+                            return;
+                        }
+                        form.clearFieldError("options");
                         form.insertListItem("options", {
                             value: "",
                             isAnswer: false,
-                        })
-                    }
+                        });
+                    }}
                 >
                     <PlusCircleIcon className="w-6" />
                 </Button>

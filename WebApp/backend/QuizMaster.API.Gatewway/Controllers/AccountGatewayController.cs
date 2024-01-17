@@ -16,6 +16,7 @@ using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Attributes;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Models;
+using QuizMaster.Library.Common.Models.Accounts;
 
 namespace QuizMaster.API.Gatewway.Controllers
 {
@@ -361,7 +362,39 @@ namespace QuizMaster.API.Gatewway.Controllers
             return Ok(new ResponseDto { Type = "Success", Message = updateReply.Message });
         }
 
-        //[QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
+        [HttpPost]
+        [Route("account/{id}/update_password")]
+        public async Task<IActionResult> UpdatePassword(int id, [FromBody] ChangePasswordDTO passwordDTO)
+        {
+            var updatePasswordRequest = new UpdatePasswordRequest() { CurrentPassword = passwordDTO.CurrentPassword, Id = id, NewPassword = passwordDTO.NewPassword};
+
+            var response = await _channelClient.UpdateUserPasswordAsync(updatePasswordRequest);
+
+            if(response.Code != 200)
+            {
+                return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+            }
+            return Ok(new ResponseDto {  Type = "Success", Message = response.Message});
+        }
+
+        [HttpGet]
+        [Route("account/update_password/{token}")]
+        public async Task<IActionResult> ConfirmUpdatePassword(string token)
+        {
+            
+            var updatePasswordRequest = new ConfirmUpdatePasswordRequest () { ConfirmationToken = token  };
+
+            var response = await _channelClient.UpdateUserPasswordConfirmAsync(updatePasswordRequest);
+
+            if (response.Code != 200)
+            {
+                return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+            }
+            return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+        }
+
+        [QuizMasterAdminAuthorization]
         [HttpPost]
         [Route("account/set_admin/{username}")]
         public async Task<IActionResult> SetAdmin(string username, [FromQuery] bool setAdmin = false)
@@ -429,7 +462,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         // Return id username already exist
         private ActionResult ReturnUserNameAlreadyExist()
         {
-            return BadRequest(new ResponseDto
+            return StatusCode( StatusCodes.Status409Conflict,new ResponseDto
             {
                 Type = "Error",
                 Message = "UserName already exist."
@@ -439,7 +472,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         // Return if user doesn't exist
         private ActionResult ReturnUserDoesNotExist()
         {
-            return BadRequest(new ResponseDto
+            return StatusCode(StatusCodes.Status409Conflict, new ResponseDto
             {
                 Type = "Error",
                 Message = "User doesn't exist."
@@ -450,7 +483,7 @@ namespace QuizMaster.API.Gatewway.Controllers
         // Return if email already exist
         private ActionResult ReturnEmailAlreadyExist()
         {
-            return BadRequest(new ResponseDto
+            return StatusCode(StatusCodes.Status409Conflict, new ResponseDto
             {
                 Type = "Error",
                 Message = "Email already exist."

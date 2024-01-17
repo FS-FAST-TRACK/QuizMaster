@@ -1,24 +1,21 @@
 "use client";
 
-import {
-    Button,
-    Container,
-    Input,
-    PasswordInput,
-    Text,
-    TextInput,
-} from "@mantine/core";
+import { Button, Input, PasswordInput, Text, TextInput } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
 import logo from "/public/quiz-master-logo.png";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { notification } from "@/lib/notifications";
 import { useDisclosure } from "@mantine/hooks";
-import { QUIZMASTER_AUTH_POST_LOGIN } from "@/api/api-routes";
+import { login } from "@/lib/hooks/auth";
+import { useErrorRedirection } from "@/utils/errorRedirection";
 
 const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
+    const router = useRouter();
+    const { redirectToError } = useErrorRedirection();
+
     const form = useForm({
         initialValues: {
             username: "",
@@ -33,32 +30,25 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
 
     const [open, handlers] = useDisclosure(false);
 
-    const login = async (username: string, password: string) => {
+    const handleLogin = async (username: string, password: string) => {
         handlers.open();
         try {
-            const response = await fetch(`${QUIZMASTER_AUTH_POST_LOGIN}`, {
-                method: "POST",
-                body: JSON.stringify({ username, password }),
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const response = await login({ username, password });
 
-            const data = await response.json();
-            console.log(data);
             // Sign In the user if response is with 200
-            if (response.status < 300) {
-                localStorage.setItem("token", data.token); //this is just temporary.
+            if (response.type === "success") {
+                localStorage.setItem("token", response.data.token); //this is just temporary.
+                notification({ type: "success", title: response.message });
                 await signIn("credentials", {
-                    jwt: data.token,
+                    jwt: response.data.token,
                 });
-                redirect(callbackUrl);
+                router.push(callbackUrl);
             } else {
-                notification({ type: "error", title: data.message });
+                notification({ type: "error", title: response.message });
             }
         } catch (e) {
-            console.log(e);
+            notification({ type: "error", title: "Something went wrong" });
+            redirectToError();
         }
         handlers.close();
     };
@@ -76,7 +66,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
             <form
                 className="space-y-5 w-full flex-col flex gap-[40px]"
                 onSubmit={form.onSubmit((e) => {
-                    login(e.username, e.password);
+                    handleLogin(e.username, e.password);
                 })}
             >
                 <div className="flex flex-col gap-[15px]">

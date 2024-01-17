@@ -1,5 +1,5 @@
 export const submitAnswer = ({ id, answer, connectionId }) => {
-  fetch("https://localhost:7081/gateway/api/set/submitAnswer", {
+  fetch("https://localhost:7081/gateway/api/room/submitAnswer", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -7,9 +7,5 @@ export const submitAnswer = ({ id, answer, connectionId }) => {
       Answer: answer,
       connectionId,
     }),
-  })
-    .then((r) => r.json())
-    .then((d) => {
-      console.log(d.message);
-    });
+  });
 };

@@ -9,6 +9,10 @@ using QuizMaster.API.QuizSession.Services.Grpc;
 using QuizMaster.API.QuizSession.Services.Repositories;
 using QuizMaster.API.QuizSession.Services.Workers;
 
+/*
+ * You have any issues? Contact Jayharron: jabejar@fullscale.io for more info :D
+ * Date: 1/11/2024
+ */
 namespace QuizMaster.API.QuizSession
 {
     public class Program
@@ -21,8 +25,21 @@ namespace QuizMaster.API.QuizSession
             builder.Services.AddGrpc();
             builder.Services.AddScoped(sp =>
             {
-                var channel = GrpcChannel.ForAddress("https://localhost:7065");
+                var handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                
+                // Creating Scoped Service Quiz Audit service
+                var channel = GrpcChannel.ForAddress(builder.Configuration["AppSettings:Monitoring_Service"], new GrpcChannelOptions { HttpHandler = handler });
                 return new QuizAuditService.QuizAuditServiceClient(channel);
+            });
+            builder.Services.AddScoped(sp =>
+            {
+                var handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+                // Creating Scoped Service Room Audit service
+                var channel = GrpcChannel.ForAddress(builder.Configuration["AppSettings:Monitoring_Service"], new GrpcChannelOptions { HttpHandler = handler });
+                return new RoomAuditService.RoomAuditServiceClient(channel);
             });
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

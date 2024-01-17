@@ -1,4 +1,9 @@
-import { QuestionCreateValues, QuestionValues } from "@/lib/definitions";
+import {
+    QuestionCreateValues,
+    QuestionDetail,
+    QuestionEdit,
+    QuestionValues,
+} from "@/lib/definitions";
 import { patchQuestionDetail } from "@/lib/hooks/questionDetails";
 import { Checkbox, InputLabel, Text } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
@@ -6,49 +11,14 @@ import { UseFormReturnType } from "@mantine/form";
 export default function TrueOrFalseQuestionDetail({
     form,
 }: {
-    form: UseFormReturnType<QuestionValues>;
+    form: UseFormReturnType<{
+        details: QuestionDetail[];
+    }>;
 }) {
-    const patchtDetail = (
-        detailType:
-            | "answer"
-            | "option"
-            | "minimum"
-            | "maximum"
-            | "language"
-            | "interval"
-            | "range"
-            | "textToAudio",
-        value: string
-    ) => {
-        const qDetail = form.values.questionDetailDtos.find((qDetail) =>
-            qDetail.detailTypes.includes(detailType)
-        );
-        const index = form.values.questionDetailDtos.findIndex((qDetail) =>
-            qDetail.detailTypes.includes(detailType)
-        );
-        if (
-            form.isValid(`questionDetailDtos.${index}.qDetailDesc`) &&
-            qDetail &&
-            qDetail?.qDetailDesc !== ""
-        ) {
-            patchQuestionDetail({
-                questionId: form.values.id,
-                id: qDetail.id,
-                patchRequest: [
-                    {
-                        path: "/qDetailDesc",
-                        op: "replace",
-                        value: value,
-                    },
-                ],
-            }).then(() => {
-                form.setFieldValue(
-                    `questionDetailDtos.${index}.qDetailDesc`,
-                    value
-                );
-            });
-        }
-    };
+    const index = form.values.details.findIndex((qD) =>
+        qD.detailTypes.includes("answer")
+    );
+
     return (
         <div>
             <InputLabel>Choices</InputLabel>
@@ -61,16 +31,23 @@ export default function TrueOrFalseQuestionDetail({
                             radius="xl"
                             color="var(--primary)"
                             checked={
-                                form.values.questionDetailDtos.find((qDetail) =>
-                                    qDetail.detailTypes.includes("answer")
-                                )?.qDetailDesc === "true"
+                                form.values.details
+                                    .find((qDetail) =>
+                                        qDetail.detailTypes.includes("answer")
+                                    )
+                                    ?.qDetailDesc.toLowerCase() === "true"
                             }
-                            onChange={() => {
-                                patchtDetail("answer", "true");
+                            onChange={(e) => {
+                                if (e.target.checked) {
+                                    form.setFieldValue(
+                                        `details.${index}.qDetailDesc`,
+                                        "true"
+                                    );
+                                }
                             }}
                         />
                         <Text className="grow">True</Text>
-                        {form.values.questionDetailDtos.find((qDetail) =>
+                        {form.values.details.find((qDetail) =>
                             qDetail.detailTypes.includes("answer")
                         )?.qDetailDesc === "true" ? (
                             <Text
@@ -94,18 +71,28 @@ export default function TrueOrFalseQuestionDetail({
                             radius="xl"
                             color="var(--primary)"
                             checked={
-                                form.values.questionDetailDtos.find((qDetail) =>
-                                    qDetail.detailTypes.includes("answer")
-                                )?.qDetailDesc === "false"
+                                form.values.details
+                                    .find((qDetail) =>
+                                        qDetail.detailTypes.includes("answer")
+                                    )
+                                    ?.qDetailDesc.toLocaleLowerCase() ===
+                                "false"
                             }
-                            onChange={() => {
-                                patchtDetail("answer", "false");
+                            onChange={(e) => {
+                                if (e.target.checked) {
+                                    form.setFieldValue(
+                                        `details.${index}.qDetailDesc`,
+                                        "false"
+                                    );
+                                }
                             }}
                         />
                         <Text className="grow">False</Text>
-                        {form.values.questionDetailDtos.find((qDetail) =>
-                            qDetail.detailTypes.includes("answer")
-                        )?.qDetailDesc === "false" ? (
+                        {form.values.details
+                            .find((qDetail) =>
+                                qDetail.detailTypes.includes("answer")
+                            )
+                            ?.qDetailDesc.toLowerCase() === "false" ? (
                             <Text
                                 size="sm"
                                 style={{

@@ -39,7 +39,7 @@ namespace QuizMaster.API.Authentication.Services.Auth
             if (userAccount.Id == -1) { userAccount = repository.GetUserByEmail(authRequest.Email); }
             if (userAccount.Id == -1) { return new() { Token = null }; };
             */
-            if (retrieveUserInformation.Account.Id == -1) { return new() { Token = null }; };
+            if (retrieveUserInformation.Account.Id == -1 || !retrieveUserInformation.Account.ActiveData) { return new() { Token = null }; };
 
             // attributes to store in the JWT token
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();

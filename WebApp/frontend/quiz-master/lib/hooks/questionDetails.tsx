@@ -1,8 +1,26 @@
 import {
+    QUIZMASTER_QUESTION,
+    QUIZMASTER_QUESTIONDETAIL_DELETE,
+    QUIZMASTER_QUESTIONDETAIL_GET_QUESTIONDETAILS,
+    QUIZMASTER_QUESTIONDETAIL_PATCH,
+    QUIZMASTER_QUESTIONDETAIL_POST,
+} from "@/api/api-routes";
+import {
     PatchItem,
     QuestionDetail,
     QuestionDetailCreateDto,
 } from "../definitions";
+import { CustomResponse } from "@/api/definitions";
+
+interface PatchQuestionDetailResponse extends CustomResponse {
+    data: undefined;
+}
+
+interface MultipleQuestionDetailUpdateResponse extends CustomResponse {
+    data: {
+        id: number;
+    };
+}
 
 export async function patchQuestionDetail({
     questionId,
@@ -14,19 +32,67 @@ export async function patchQuestionDetail({
     patchRequest: PatchItem[];
 }) {
     try {
-        await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail/${id}`,
+        const res = await fetch(
+            `${QUIZMASTER_QUESTION}/${questionId}/${QUIZMASTER_QUESTIONDETAIL_PATCH}${id}`,
             {
                 method: "PATCH",
                 mode: "cors",
+                credentials: "include",
                 body: JSON.stringify(patchRequest),
                 headers: {
                     "Content-Type": "application/json",
                 },
             }
         );
+        var isSuccess = res.status < 300;
+        const data = await res.json();
+        var response: PatchQuestionDetailResponse = {
+            statusCode: res.status,
+            type: isSuccess ? "success" : "fail",
+            message: isSuccess
+                ? "Succesfuly update question detail. "
+                : data.message,
+            data: undefined,
+        };
+        return response;
     } catch (error) {
         throw new Error("Failed to update questionDetail");
+    }
+}
+
+export async function fetchQuestionDetails({
+    questionId,
+}: {
+    questionId: number;
+}) {
+    try {
+        var apiUrl = `${QUIZMASTER_QUESTION}/${questionId}/${QUIZMASTER_QUESTIONDETAIL_GET_QUESTIONDETAILS}`;
+
+        const response = await fetch(apiUrl, {
+            credentials: "include",
+        });
+        const isSuccess = response.status < 300;
+
+        var returnRes: CustomResponse = {
+            statusCode: response.status,
+            type: isSuccess ? "success" : "fail",
+            message: "",
+            data: [],
+        };
+
+        if (!isSuccess) {
+            var error = await response.json();
+            returnRes.message = error.message;
+            return returnRes;
+        }
+
+        var data: QuestionDetail[];
+        data = await response.json();
+        returnRes.data = data;
+        return returnRes;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question details.");
     }
 }
 
@@ -39,7 +105,7 @@ export async function postQuestionDetail({
 }) {
     try {
         var data = fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail`,
+            `${QUIZMASTER_QUESTION}/${questionId}/${QUIZMASTER_QUESTIONDETAIL_POST}`,
             {
                 method: "POST",
                 mode: "cors",
@@ -47,6 +113,7 @@ export async function postQuestionDetail({
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
             }
         ).then(async (res) => {
             var qDetail: QuestionDetail;
@@ -68,9 +135,10 @@ export async function deleteQuestionDetail({
 }) {
     try {
         fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail/${id}`,
+            `${QUIZMASTER_QUESTION}/${questionId}/${QUIZMASTER_QUESTIONDETAIL_DELETE}${id}`,
             {
                 method: "DELETE",
+                credentials: "include",
             }
         );
     } catch (error) {
@@ -85,7 +153,7 @@ export async function getQuestionDetails({
 }) {
     try {
         const { data } = await fetch(
-            `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail`
+            `${QUIZMASTER_QUESTION}/${questionId}/${QUIZMASTER_QUESTIONDETAIL_GET_QUESTIONDETAILS}`
         ).then(async (res) => {
             var data: QuestionDetail[];
 

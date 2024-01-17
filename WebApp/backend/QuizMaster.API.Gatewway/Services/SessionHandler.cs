@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
@@ -7,6 +8,7 @@ using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 
 namespace QuizMaster.API.Gateway.Services
@@ -65,8 +67,9 @@ namespace QuizMaster.API.Gateway.Services
             if (connectionGroupPair.ContainsKey(connectionId))
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
-                await hub.Clients.Group(connectionGroupPair[connectionId]).SendAsync(channel, new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
-
+                var roomPin = connectionGroupPair[connectionId];
+                await hub.Clients.Group(roomPin).SendAsync(channel, disconnectMessage);
+                
                 if (sendParticipantData)
                 {
                     IEnumerable<object> participants = GetParticipantLinkedConnectionsInAGroup(connectionGroupPair[connectionId]).Select(p => new { p.UserId, p.QParticipantDesc });
@@ -400,5 +403,6 @@ namespace QuizMaster.API.Gateway.Services
 
             return info;
         }
+
     }
 }

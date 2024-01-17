@@ -1,10 +1,6 @@
 "use client";
 
-import {
-    QuestionCreateValues,
-    QuestionDetail,
-    QuestionValues,
-} from "@/lib/definitions";
+import { QuestionDetail } from "@/lib/definitions";
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
     Button,
@@ -14,22 +10,18 @@ import {
     Text,
     Tooltip,
 } from "@mantine/core";
-import { UseFormReturnType, useForm } from "@mantine/form";
-import { useCallback, useEffect, useState } from "react";
+import { UseFormReturnType } from "@mantine/form";
 import styles from "./MultipleChoice.module.css";
-import { fetchQuestionDetails } from "@/lib/quizData";
-import {
-    deleteQuestionDetail,
-    patchQuestionDetail,
-    postQuestionDetail,
-} from "@/lib/hooks/questionDetails";
+import { notification } from "@/lib/notifications";
 
 export default function MultipleChoiceQuestionDetail({
     form,
 }: {
-    form: UseFormReturnType<QuestionValues>;
+    form: UseFormReturnType<{
+        details: QuestionDetail[];
+    }>;
 }) {
-    const optionFields = form.values.questionDetailDtos.map((item, index) => {
+    const optionFields = form.values.details.map((item, index) => {
         if (!item.detailTypes.includes("option")) {
             return;
         }
@@ -50,39 +42,15 @@ export default function MultipleChoiceQuestionDetail({
                             checked={item.detailTypes.includes("answer")}
                             onChange={(e) => {
                                 if (e.target.checked) {
-                                    patchQuestionDetail({
-                                        questionId: form.values.id,
-                                        id: item.id,
-                                        patchRequest: [
-                                            {
-                                                path: "/detailTypes",
-                                                op: "replace",
-                                                value: ["answer", "option"],
-                                            },
-                                        ],
-                                    }).then(() => {
-                                        form.setFieldValue(
-                                            `questionDetailDtos.${index}.detailTypes`,
-                                            ["answer", "option"]
-                                        );
-                                    });
+                                    form.setFieldValue(
+                                        `details.${index}.detailTypes`,
+                                        ["answer", "option"]
+                                    );
                                 } else {
-                                    patchQuestionDetail({
-                                        questionId: form.values.id,
-                                        id: item.id,
-                                        patchRequest: [
-                                            {
-                                                path: "/detailTypes",
-                                                op: "replace",
-                                                value: ["answer", "option"],
-                                            },
-                                        ],
-                                    }).then(() => {
-                                        form.setFieldValue(
-                                            `questionDetailDtos.${index}.detailTypes`,
-                                            ["option"]
-                                        );
-                                    });
+                                    form.setFieldValue(
+                                        `details.${index}.detailTypes`,
+                                        ["option"]
+                                    );
                                 }
                             }}
                         />
@@ -105,15 +73,7 @@ export default function MultipleChoiceQuestionDetail({
                                 <TrashIcon
                                     className="w-6 cursor-pointer"
                                     onClick={() => {
-                                        deleteQuestionDetail({
-                                            questionId: form.values.id,
-                                            id: item.id,
-                                        }).then(() => {
-                                            form.removeListItem(
-                                                "questionDetailDtos",
-                                                index
-                                            );
-                                        });
+                                        form.removeListItem("details", index);
                                     }}
                                 />
                             </Tooltip>
@@ -121,31 +81,10 @@ export default function MultipleChoiceQuestionDetail({
                     }
                     leftSectionPointerEvents="visible"
                     rightSectionPointerEvents="visible"
-                    {...form.getInputProps(
-                        `questionDetailDtos.${index}.qDetailDesc`
-                    )}
-                    onBlur={() => {
-                        if (item.qDetailDesc !== "") {
-                            patchQuestionDetail({
-                                questionId: form.values.id,
-                                id: item.id,
-                                patchRequest: [
-                                    {
-                                        path: "/qDetailDesc",
-                                        op: "replace",
-                                        value: item.qDetailDesc,
-                                    },
-                                ],
-                            });
-                        }
-                    }}
+                    {...form.getInputProps(`details.${index}.qDetailDesc`)}
                 />
                 <Input.Error>
-                    {
-                        form.getInputProps(
-                            `questionDetailDtos.${index}.qDetailDesc`
-                        ).error
-                    }
+                    {form.getInputProps(`details.${index}.qDetailDesc`).error}
                 </Input.Error>
             </div>
         );
@@ -162,22 +101,28 @@ export default function MultipleChoiceQuestionDetail({
                     size="lg"
                     className="border-4 outline-2 outline-gray-800"
                     onClick={() => {
-                        postQuestionDetail({
-                            questionId: form.values.id,
-                            questionDetail: {
-                                qDetailDesc: "Choice1",
-                                detailTypes: ["option"],
-                            },
-                        }).then((res) => {
-                            console.log(res);
-                            form.insertListItem("questionDetailDtos", res);
+                        if (
+                            form.values.details.filter((qD) =>
+                                qD.detailTypes.includes("option")
+                            ).length >= 10
+                        ) {
+                            notification({
+                                type: "info",
+                                title: "Choices are limited up to 10.",
+                                message: "Unable to add another choice",
+                            });
+                            return;
+                        }
+                        form.insertListItem("details", {
+                            qDetailDesc: "",
+                            detailTypes: ["option"],
                         });
                     }}
                 >
                     <PlusCircleIcon className="w-6" />
                 </Button>
             </div>
-            <Input.Error>{form.getInputProps("options").error}</Input.Error>
+            <Input.Error>{form.getInputProps("details").error}</Input.Error>
         </div>
     );
 }

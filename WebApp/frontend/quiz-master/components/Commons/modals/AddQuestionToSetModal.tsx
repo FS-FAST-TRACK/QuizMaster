@@ -1,28 +1,23 @@
-import { Box, Button, Modal, TextInput } from "@mantine/core";
+import { Button, Modal } from "@mantine/core";
 import {
     Dispatch,
-    ReactNode,
     SetStateAction,
     useCallback,
     useEffect,
     useState,
 } from "react";
-import style from "@/styles/input.module.css";
 import { useRouter } from "next/navigation";
-import { notifications } from "@mantine/notifications";
-import notificationStyles from "../../../styles/notification.module.css";
 import Pagination from "@/components/Commons/Pagination";
 import {
     PaginationMetadata,
     Question,
     QuestionFilterProps,
-    QuestionResourceParameter,
     ResourceParameter,
 } from "@/lib/definitions";
 import QuestionTable from "../tables/QuestionTable";
-import { fetchQuestion, fetchQuestions } from "@/lib/quizData";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
+import { fetchQuestion, fetchQuestions } from "@/lib/hooks/question";
 
 export type CategoryCreateDto = {
     qCategoryDesc: string;
@@ -62,22 +57,25 @@ export default function AddQuestionToSetModal({
             pageNumber: 1,
         },
     });
-
+    const populateQuestions = useCallback(async () => {
+        var response = await fetchQuestions({
+            questionResourceParameter: {
+                ...form.values,
+                ...questionFilters,
+                exludeQuestionsIds: questions.map((q) => q.id),
+            },
+        });
+        if (response.type === "success") {
+            setQuestionsNotYetAdded(response.data?.questions!);
+            setPaginationMetadata(response.data?.paginationMetada);
+        } else {
+        }
+    }, [form.values]);
     //Get questions not yet added
     useEffect(() => {
         open();
         if (opened) {
-            const fetchQuestion = fetchQuestions({
-                questionResourceParameter: {
-                    ...form.values,
-                    ...questionFilters,
-                    exludeQuestionsIds: questions.map((q) => q.id),
-                },
-            });
-            fetchQuestion.then((res) => {
-                setPaginationMetadata(res.paginationMetadata);
-                setQuestionsNotYetAdded(res.data);
-            });
+            populateQuestions();
         }
         close();
     }, [form.values, opened]);
@@ -85,7 +83,18 @@ export default function AddQuestionToSetModal({
     const handelSubmit = useCallback(async () => {
         selectedRows.map(async (row) => {
             await fetchQuestion({ questionId: row }).then((res) => {
-                setQuestions((prev) => [...prev, res.data]);
+                console.log(res.data?.question);
+                setQuestions((prev) => {
+                    const newQuestion = res.data?.question;
+
+                    // Check if newQuestion is defined before updating the state
+                    if (newQuestion) {
+                        return [...prev, newQuestion];
+                    }
+
+                    // If newQuestion is undefined, return the previous state
+                    return prev;
+                });
             });
         });
         onClose();

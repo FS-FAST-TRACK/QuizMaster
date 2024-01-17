@@ -3,6 +3,7 @@ import "./globals.css";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import "@mantine/core/styles.css";
 import StartConnection from "./components/welcome";
+import { Notifications } from "@mantine/notifications";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,9 +18,16 @@ export default function RootLayout({ children }) {
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={`${inter.className} w-screen h-screen bg-wall`}>
+      <body
+        className={`${inter.className} w-screen h-screen bg-wall overflow-x-hidden`}
+      >
         <StartConnection />
         <MantineProvider withGlobalSyles withNormalizeCss>
+          <Notifications
+            position="top-right"
+            zIndex={1000}
+            className="absolute top-4 right-4"
+          />
           {children}
         </MantineProvider>
       </body>

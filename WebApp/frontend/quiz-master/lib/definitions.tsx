@@ -1,16 +1,35 @@
+<<<<<<< HEAD
 import { User } from "next-auth";
 
 export type Question = {
+=======
+export interface QuestionCore {
+>>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c
     id: number;
     qAudio: string;
+    qCategoryId: any;
+    qDifficultyId: any;
+    qTypeId: any;
+    qImage: string;
+    qStatement: string;
+    qTime: any;
+    details: QuestionDetail[];
+}
+
+export interface Question extends QuestionCore {
     qCategoryId: number;
     qDifficultyId: number;
     qTypeId: number;
-    qImage: string;
-    qStatement: string;
     qTime: number;
     details: QuestionDetail[];
-};
+}
+
+export interface QuestionEdit extends QuestionCore {
+    qCategoryId: string;
+    qDifficultyId: string;
+    qTypeId: string;
+    qTime: string;
+}
 export type QuestionDetail = {
     id: number;
     qDetailDesc: string;
@@ -151,6 +170,7 @@ export type PatchItem = {
     op: string;
     value: any;
 };
+<<<<<<< HEAD
 
 export type UserAuditTrail = {
     UserAuditTrailId: number;
@@ -172,3 +192,27 @@ export type UserAudit = {
     oldValues: String;
     newValues: String;
 };
+=======
+export type SystemInfoDto = {
+    systemInfo: string;
+    version: string;
+}
+
+export type ContactUsCreateValues = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    message: string;
+};
+
+export type ContactDetails = {
+    email: string;
+    phoneNumber: string;
+}
+
+export type Feedback = {
+    rate: number;
+    comment: string;
+}
+>>>>>>> 1d4aa3629c1947a5c46f9c91e90a61af8d821f8c

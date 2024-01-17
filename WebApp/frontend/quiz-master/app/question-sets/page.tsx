@@ -13,7 +13,7 @@ import {
     ResourceParameter,
     Set,
 } from "@/lib/definitions";
-import { fetchQuestions, fetchSets } from "@/lib/quizData";
+import { fetchSets } from "@/lib/quizData";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Anchor, Breadcrumbs } from "@mantine/core";
 import { useForm } from "@mantine/form";

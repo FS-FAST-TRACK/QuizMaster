@@ -30,6 +30,7 @@ namespace QuizMaster.API.Monitoring.Services
                     var userAuditTrail = new UserAuditTrail
                     {
                         UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
                         Action = request.Event.Action,
                         Timestamp = timestamp,
                         Details = request.Event.Details,
@@ -68,6 +69,7 @@ namespace QuizMaster.API.Monitoring.Services
                     var userAuditTrail = new UserAuditTrail
                     {
                         UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
                         Action = request.Event.Action,
                         Timestamp = timestamp,
                         Details = request.Event.Details,
@@ -142,6 +144,7 @@ namespace QuizMaster.API.Monitoring.Services
                     var userAuditTrail = new UserAuditTrail
                     {
                         UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
                         Action = request.Event.Action,
                         Timestamp = timestamp,
                         Details = request.Event.Details,
@@ -181,6 +184,7 @@ namespace QuizMaster.API.Monitoring.Services
                     var userAuditTrail = new UserAuditTrail
                     {
                         UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
                         Action = request.Event.Action,
                         Timestamp = timestamp,
                         Details = request.Event.Details,
@@ -220,6 +224,7 @@ namespace QuizMaster.API.Monitoring.Services
                     var userAuditTrail = new UserAuditTrail
                     {
                         UserId = request.Event.UserId,
+                        UserName = request.Event.Username,
                         Action = request.Event.Action,
                         Timestamp = timestamp,
                         Details = request.Event.Details,
