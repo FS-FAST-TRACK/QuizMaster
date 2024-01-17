@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     PaginationMetadata,
     Question,
@@ -65,27 +66,6 @@ export async function fetchQuestion({ questionId }: { questionId: number }) {
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch question data.");
-    }
-}
-
-export async function fetchQuestionDetails({
-    questionId,
-}: {
-    questionId: number;
-}) {
-    try {
-        var apiUrl = `${process.env.QUIZMASTER_QUIZ}/api/question/${questionId}/question-detail`;
-
-        const { data } = await fetch(apiUrl).then(async (res) => {
-            var data: QuestionDetail[];
-            data = await res.json();
-            return { data };
-        });
-
-        return { data };
-    } catch (error) {
-        console.error("Database Error:", error);
-        throw new Error("Failed to fetch question details.");
     }
 }
 
@@ -200,7 +180,9 @@ export async function fetchSetQuestions({ setId }: { setId: number }) {
 
 export async function fetchMedia(id: string) {
     try {
-        const data = await fetch(`${QUIZMASTER_MEDIA_GET_DOWNLOAD}${id}`)
+        const data = await fetch(`${QUIZMASTER_MEDIA_GET_DOWNLOAD}${id}`, {
+            credentials: "include",
+        })
             .then(async (res) => {
                 if (res.status === 404) {
                     throw new Error(`Media with id ${id} not found`);
@@ -219,4 +201,14 @@ export async function fetchMedia(id: string) {
     } catch (error) {
         throw new Error("Failed to fetch media.");
     }
+}
+
+export function fetchSystemInfo() {
+    let systemInfo = {
+        version: "1.0.0",
+        systemInfo:
+            "Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et.",
+    };
+
+    return systemInfo;
 }

@@ -121,8 +121,13 @@ namespace QuizMaster.API.Gateway.Services
                         await Task.Delay(1000);
                     }
                 }
+<<<<<<< HEAD
 
                 if (room.ShowLeaderboardEachRound() && setIndex+1 < quizSets.Count)
+=======
+                setIndex++;
+                if (room.ShowLeaderboardEachRound() && setIndex < quizSets.Count)
+>>>>>>> develop
                 {
                     await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying leaderboards");
                     await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores
@@ -130,7 +135,7 @@ namespace QuizMaster.API.Gateway.Services
                 }
 
                 // before going to new set, do some elimination if toggled
-                if (room.IsEliminationRound() && ++setIndex < quizSets.Count)
+                if (room.IsEliminationRound() && setIndex < quizSets.Count)
                 {
                     await EliminateParticipantsAsync(hub, handler, roomPin, adminData);
                     await hub.Clients.Client(hostConnectionId).SendAsync("notif", "Elimination, reducing population to half");

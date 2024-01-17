@@ -27,6 +27,10 @@ import ViewQuestionModal from "../modals/ViewQuestionModal";
 import { deleteQuestion as removeQuestion } from "@/lib/hooks/question";
 import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
 import { notification } from "@/lib/notifications";
+<<<<<<< HEAD
+=======
+import { usePathname, useRouter } from "next/navigation";
+>>>>>>> develop
 
 export default function QuestionTable({
     questions,
@@ -34,16 +38,20 @@ export default function QuestionTable({
     setSelectedRow,
     loading,
     callInQuestionsPage,
+    onDeleteCallBack,
 }: {
     questions: Question[];
     message?: string;
     setSelectedRow: Dispatch<SetStateAction<number[]>>;
     loading: boolean;
     callInQuestionsPage: string | "";
+    onDeleteCallBack?: () => void;
 }) {
     const { getQuestionCategoryDescription } = useQuestionCategoriesStore();
     const { getQuestionDifficultyDescription } = useQuestionDifficultiesStore();
     const { getQuestionTypeDescription } = useQuestionTypesStore();
+    const router = useRouter();
+    const pathName = usePathname();
 
     const [deleteQuestion, setDeleteQuestion] = useState<Question>();
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -67,6 +75,13 @@ export default function QuestionTable({
                     notification({ type: "error", title: res.message });
                 }
                 setDeleteQuestion(undefined);
+<<<<<<< HEAD
+=======
+
+                if (onDeleteCallBack) {
+                    onDeleteCallBack();
+                }
+>>>>>>> develop
             } catch (error) {
                 notification({ type: "error", title: "Something went wrong" });
             }

@@ -29,11 +29,14 @@ namespace QuizMaster.API.Account
                 var channel = GrpcChannel.ForAddress(builder.Configuration["ApplicationSettings:Service_MonitoringGRPC"], new GrpcChannelOptions { HttpHandler = handler });
                 return new AuditService.AuditServiceClient(channel);
             });
+			
 			builder.Services.AddLogging();
             // configure strongly typed app settings object
             builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-			builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddScoped<EmailSenderService>();
+			builder.Services.AddSingleton<PasswordHandler>();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 			builder.Services.AddDbContext<AccountDbContext>(
 				dbContextOptions => dbContextOptions.UseSqlServer(

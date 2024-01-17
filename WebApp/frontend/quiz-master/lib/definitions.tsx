@@ -1,17 +1,36 @@
+<<<<<<< HEAD
 import { User } from "next-auth";
 import { RefObject } from "react";
 
 export type Question = {
+=======
+export interface QuestionCore {
+>>>>>>> develop
     id: number;
     qAudio: string;
+    qCategoryId: any;
+    qDifficultyId: any;
+    qTypeId: any;
+    qImage: string;
+    qStatement: string;
+    qTime: any;
+    details: QuestionDetail[];
+}
+
+export interface Question extends QuestionCore {
     qCategoryId: number;
     qDifficultyId: number;
     qTypeId: number;
-    qImage: string;
-    qStatement: string;
     qTime: number;
     details: QuestionDetail[];
-};
+}
+
+export interface QuestionEdit extends QuestionCore {
+    qCategoryId: string;
+    qDifficultyId: string;
+    qTypeId: string;
+    qTime: string;
+}
 export type QuestionDetail = {
     id: number;
     qDetailDesc: string;

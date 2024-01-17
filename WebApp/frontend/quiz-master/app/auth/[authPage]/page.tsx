@@ -16,7 +16,12 @@ export default function Page({
     const searchParams = useSearchParams();
 
     const authPage = params.authPage || "login";
+<<<<<<< HEAD
     const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+=======
+    const callbackUrl =
+        searchParams.get("callbackUrl") || "http://localhost:3000/dashboard";
+>>>>>>> develop
     const { status } = useSession();
 
     if (status === "loading") {

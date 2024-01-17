@@ -1,4 +1,9 @@
-import { DetailType, QuestionDetail, QuestionValues } from "@/lib/definitions";
+import {
+    DetailType,
+    QuestionDetail,
+    QuestionEdit,
+    QuestionValues,
+} from "@/lib/definitions";
 import {
     Bars4Icon,
     PlusCircleIcon,
@@ -15,6 +20,8 @@ import {
 } from "react-beautiful-dnd";
 import styles from "@/styles/input.module.css";
 import { patchQuestionDetail } from "@/lib/hooks/questionDetails";
+import PuzzleInput from "../inputs/PuzzleInput";
+import { notification } from "@/lib/notifications";
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "var(--primary-100)" : "white",
@@ -26,24 +33,10 @@ const getListStyle = (isDraggingOver: boolean) => ({
 export default function PuzzleQuestionDetails({
     form,
 }: {
-    form: UseFormReturnType<QuestionValues>;
+    form: UseFormReturnType<{
+        details: QuestionDetail[];
+    }>;
 }) {
-    const patchtDetail = (id: number, desc: string) => {
-        if (desc !== "") {
-            patchQuestionDetail({
-                questionId: form.values.id,
-                id: id,
-                patchRequest: [
-                    {
-                        path: "/qDetailDesc",
-                        op: "replace",
-                        value: desc,
-                    },
-                ],
-            });
-        }
-    };
-
     const onDragEnd = (result: DropResult) => {
         // dropped outside the list'
 
@@ -51,7 +44,7 @@ export default function PuzzleQuestionDetails({
             return;
         }
 
-        form.reorderListItem("questionDetailDtos", {
+        form.reorderListItem("details", {
             from: result.source.index,
             to: result.destination.index,
         });
@@ -63,7 +56,17 @@ export default function PuzzleQuestionDetails({
             setDroppableId("droppableID");
         };
     }, []);
-
+    const x = form.values.details.map((item, index) => {
+        if (!item.detailTypes.includes("option")) return null;
+        return (
+            <CustomDraggable
+                key={index}
+                form={form}
+                index={index}
+                item={item}
+            />
+        );
+    });
     return (
         <div className="flex flex-col max-w-96">
             <InputLabel>Choices</InputLabel>
@@ -75,18 +78,7 @@ export default function PuzzleQuestionDetails({
                             ref={provided.innerRef}
                             style={getListStyle(snapshot.isDraggingOver)}
                         >
-                            {form.values.questionDetailDtos.map(
-                                (item, index) => {
-                                    return (
-                                        <CustomDraggable
-                                            key={index}
-                                            form={form}
-                                            index={index}
-                                            item={item}
-                                        />
-                                    );
-                                }
-                            )}
+                            {x}
                             {provided.placeholder}
                         </div>
                     )}
@@ -96,12 +88,24 @@ export default function PuzzleQuestionDetails({
                     color="gray"
                     size="lg"
                     className="border-4 outline-2 outline-gray-800 w-full"
-                    onClick={() =>
-                        form.insertListItem("questionDetailDtos", {
-                            value: "",
-                            isAnswer: false,
-                        })
-                    }
+                    onClick={() => {
+                        if (
+                            form.values.details.filter((qD) =>
+                                qD.detailTypes.includes("option")
+                            ).length >= 10
+                        ) {
+                            notification({
+                                type: "info",
+                                title: "Items are limited up to 10.",
+                                message: "Unable to add another item",
+                            });
+                            return;
+                        }
+                        form.insertListItem("details", {
+                            qDetailDesc: "",
+                            detailTypes: ["option"],
+                        });
+                    }}
                 >
                     <PlusCircleIcon className="w-6" />
                 </Button>
@@ -117,34 +121,16 @@ function CustomDraggable({
 }: {
     item: QuestionDetail;
     index: number;
-    form: UseFormReturnType<QuestionValues>;
+    form: UseFormReturnType<{
+        details: QuestionDetail[];
+    }>;
 }) {
-    const [draggableId, setDraggableId] = useState(`draggable-${index}`);
-    useEffect(() => {
-        return () => {
-            setDraggableId(`draggable-${index}`);
-        };
-    }, []);
-    const patchtDetail = (id: number, desc: string) => {
-        if (desc !== "") {
-            patchQuestionDetail({
-                questionId: form.values.id,
-                id: id,
-                patchRequest: [
-                    {
-                        path: "/qDetailDesc",
-                        op: "replace",
-                        value: desc,
-                    },
-                ],
-            });
-        }
-    };
-    if (!item.detailTypes.includes("answer")) {
-        return;
-    }
     return (
-        <Draggable key={index} draggableId={draggableId} index={index}>
+        <Draggable
+            key={item.id || index}
+            draggableId={`draggable-${item.id || index}`}
+            index={index}
+        >
             {(provided, snapshot) => (
                 <div
                     ref={provided.innerRef}
@@ -155,33 +141,13 @@ function CustomDraggable({
                         margin: `0 0 8px 0`,
                         ...provided.draggableProps.style,
                     }}
+                    className="relative"
                 >
-                    <Input
-                        size="lg"
-                        leftSection={<Bars4Icon className="w-6" />}
-                        classNames={styles}
-                        rightSectionWidth={40}
-                        rightSection={
-                            <Tooltip label="Remove">
-                                <TrashIcon
-                                    className="w-6 cursor-pointer"
-                                    onClick={() =>
-                                        form.removeListItem(
-                                            "qDetailDesc",
-                                            index
-                                        )
-                                    }
-                                />
-                            </Tooltip>
-                        }
-                        leftSectionPointerEvents="visible"
-                        rightSectionPointerEvents="visible"
-                        {...form.getInputProps(
-                            `questionDetailDtos.${index}.qDetailDesc`
-                        )}
-                        onBlur={() => {
-                            patchtDetail(item.id, item.qDetailDesc);
+                    <PuzzleInput
+                        onRemove={() => {
+                            form.removeListItem("details", index);
                         }}
+                        {...form.getInputProps(`details.${index}.qDetailDesc`)}
                     />
                 </div>
             )}

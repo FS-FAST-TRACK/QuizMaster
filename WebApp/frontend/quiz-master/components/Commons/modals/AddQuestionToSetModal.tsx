@@ -70,7 +70,11 @@ export default function AddQuestionToSetModal({
             setPaginationMetadata(response.data?.paginationMetada);
         } else {
         }
+<<<<<<< HEAD
     }, []);
+=======
+    }, [form.values]);
+>>>>>>> develop
     //Get questions not yet added
     useEffect(() => {
         open();
@@ -83,7 +87,18 @@ export default function AddQuestionToSetModal({
     const handelSubmit = useCallback(async () => {
         selectedRows.map(async (row) => {
             await fetchQuestion({ questionId: row }).then((res) => {
-                setQuestions((prev) => [...prev, res.data]);
+                console.log(res.data?.question);
+                setQuestions((prev) => {
+                    const newQuestion = res.data?.question;
+
+                    // Check if newQuestion is defined before updating the state
+                    if (newQuestion) {
+                        return [...prev, newQuestion];
+                    }
+
+                    // If newQuestion is undefined, return the previous state
+                    return prev;
+                });
             });
         });
         onClose();

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using QuizMaster.API.Account.Models;
 using QuizMaster.API.Account.Proto;
+using QuizMaster.API.Gateway.Models.System;
 using QuizMaster.API.Quiz.Models;
 using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.SeedData;
@@ -26,6 +27,10 @@ namespace QuizMaster.API.Gatewway
             CreateMap<Question, QuestionDto>().ReverseMap();
             CreateMap<Question, QuestionDto>();
             CreateMap<QuestionCategory, CategoryDto>().ReverseMap();
+            CreateMap<SubmitContactModel, ContactReaching>().ReverseMap();
+            CreateMap<AboutModel, SystemAbout>().ReverseMap();
+            CreateMap<ContactModel, SystemContact>().ReverseMap();
+            CreateMap<ReviewModel, Reviews>().ReverseMap();
     //        CreateMap<QuestionCreateDto, Question>()
     //.ForMember(destination => destination.QAnswer, act => act.MapFrom(src =>
     //src.QTypeId == QuestionTypes.MultipleChoiceSeedData.Id

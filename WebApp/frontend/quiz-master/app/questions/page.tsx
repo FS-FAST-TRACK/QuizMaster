@@ -65,6 +65,13 @@ export default function Page() {
                 setQuestions(response.data?.questions!);
                 setPaginationMetadata(response.data?.paginationMetada);
             } else {
+<<<<<<< HEAD
+=======
+                notification({
+                    type: "error",
+                    title: "Failed to fetch questions",
+                });
+>>>>>>> develop
             }
         } catch {
             notification({ type: "error", title: "Something went wrong." });
@@ -90,6 +97,12 @@ export default function Page() {
 
         [questionFilters, form]
     );
+
+    const onDeleteCallBack = useCallback(() => {
+        open();
+        getQuestions();
+        close();
+    }, [form.values, questionFilters]);
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -132,6 +145,7 @@ export default function Page() {
                 setSelectedRow={() => null}
                 loading={visible}
                 callInQuestionsPage="questions"
+                onDeleteCallBack={onDeleteCallBack}
             />
             <Pagination form={form} metadata={paginationMetadata} />
         </div>
