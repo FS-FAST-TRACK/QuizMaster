@@ -1,10 +1,11 @@
 import { Button, Modal, Textarea } from "@mantine/core";
 import { Feedback } from "@/lib/definitions";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "@mantine/form";
 import star from "/public/star.svg";
 import starFill from "/public/star-fill.svg";
 import Image from "next/image";
+import { postReachOut } from "@/lib/hooks/contact-us";
 
 export default function FeedbackModal({
     onClose,
@@ -16,19 +17,21 @@ export default function FeedbackModal({
     const rates: number[] = [1, 2, 3, 4, 5];
     const feedbackDetails = useForm<Feedback>({
         initialValues: {
-            rate: 0,
+            starRating: 0,
             comment: "",
         },
         clearInputErrorOnChange: true,
         validateInputOnChange: true,
         validate: {
-            rate: (value) => (value === 0 ? "Rate must not zero." : null),
+            starRating: (value) => (value === 0 ? "Rate must not zero." : null),
             comment: (value) =>
                 value.length < 1 ? "Comment must not be empty." : null,
         },
     });
 
-    const handelSubmit = useCallback(async () => {}, [feedbackDetails.values]);
+    const handelSubmit = useCallback(async () => {
+        postReachOut({ feedbackForm: feedbackDetails.values });
+    }, [feedbackDetails.values]);
 
     return (
         <Modal
@@ -51,10 +54,13 @@ export default function FeedbackModal({
                                 key={rate}
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    feedbackDetails.setFieldValue("rate", rate);
+                                    feedbackDetails.setFieldValue(
+                                        "starRating",
+                                        rate
+                                    );
                                 }}
                             >
-                                {rate > feedbackDetails.values.rate ? (
+                                {rate > feedbackDetails.values.starRating ? (
                                     <Image
                                         src={star}
                                         alt="Star"

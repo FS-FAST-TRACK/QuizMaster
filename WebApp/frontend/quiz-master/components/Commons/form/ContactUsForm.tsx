@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ContactUsCreateValues } from "@/lib/definitions";
 import { Button, TextInput, Textarea } from "@mantine/core";
 import styles from "@/styles/input.module.css";
@@ -8,11 +8,14 @@ import Link from "next/link";
 import { useForm } from "@mantine/form";
 import { postContactUs } from "@/lib/hooks/contact-us";
 import FeedbackModal from "../modals/FeedbackModal";
+import { fetchLoginUser } from "@/lib/quizData";
 
 export default function ContactUsForm() {
     const [openFeedbackModal, setOpenFeedbackModal] = useState<boolean>(false);
+    const [userId, setUserId] = useState<number>(0);
     const form = useForm<ContactUsCreateValues>({
         initialValues: {
+            userId: userId,
             firstName: "",
             lastName: "",
             email: "",
@@ -34,6 +37,14 @@ export default function ContactUsForm() {
                 value.length < 1 ? "Message must not be empty." : null,
         },
     });
+
+    useEffect(() => {
+        fetchLoginUser().then((res) => {
+            if (res) {
+                setUserId(res?.info.userData.id);
+            }
+        });
+    }, []);
 
     const handelSubmit = useCallback(async () => {
         postContactUs({ contactForm: form.values });
@@ -76,6 +87,7 @@ export default function ContactUsForm() {
                     withAsterisk
                     classNames={styles}
                     placeholder="Email"
+                    autoComplete="email"
                     {...form.getInputProps("email")}
                 />
             </div>

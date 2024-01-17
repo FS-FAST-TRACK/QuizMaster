@@ -4,7 +4,7 @@ import Link from "next/link";
 import { DifficultyCardBody } from "../cards/DifficultyCard";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
-import { UpdateContactDetails, postContactUs } from "@/lib/hooks/contact-us";
+import { UpdateContactDetails } from "@/lib/hooks/contact-us";
 
 export default function UpdateContactInfoModal({
     contactInfo,
@@ -18,20 +18,26 @@ export default function UpdateContactInfoModal({
     const contactDetails = useForm<ContactDetails>({
         initialValues: {
             email: `${contactInfo?.email}`,
-            phoneNumber: `${contactInfo?.phoneNumber}`,
+            contact: `${contactInfo?.contact}`,
         },
         clearInputErrorOnChange: true,
         validateInputOnChange: true,
         validate: {
             email: (value) =>
                 value.length < 1 ? "Email must not be empty." : null,
-            phoneNumber: (value) =>
+            contact: (value) =>
                 value.length < 1 ? "Phone number must not be empty." : null,
         },
     });
 
     const handelSubmit = useCallback(async () => {
-        UpdateContactDetails({ contactForm: contactDetails.values });
+        UpdateContactDetails({ contactForm: contactDetails.values }).then(
+            (res) => {
+                if (res.status === 200) {
+                    onClose();
+                }
+            }
+        );
     }, [contactDetails.values]);
 
     return (
@@ -60,7 +66,7 @@ export default function UpdateContactInfoModal({
                     required
                     variant="filled"
                     placeholder="Phone Number"
-                    {...contactDetails.getInputProps("phoneNumber")}
+                    {...contactDetails.getInputProps("contact")}
                 />
                 <div className="flex gap-2">
                     <Button

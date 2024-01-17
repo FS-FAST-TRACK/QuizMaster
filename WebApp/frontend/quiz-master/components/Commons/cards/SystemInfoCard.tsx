@@ -11,27 +11,19 @@ import { fetchLoginUser, fetchSystemInfo } from "@/lib/quizData";
 import EditSystemInfoModal from "../modals/EditSystemInfoModal";
 import Link from "next/link";
 
-export default function SystemInfoCard({ email }: { email: string }) {
+export default function SystemInfoCard() {
     const [systemInfo, setSystemInfo] = useState<SystemInfoDto>();
     const [openEditInfoModal, setOpenEditInfoModal] = useState<boolean>(false);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-    useEffect(() => {
-        fetchLoginUser();
-    }, []);
     useEffect(() => {
         fetchSystemInfo().then((res) => {
             setSystemInfo(res);
         });
     }, [openEditInfoModal]);
 
-    const [userInfo, setUserInfo] = useState<UserInfo>();
-    const [isAdmin, setIsAdmin] = useState<boolean>(false);
-
     useEffect(() => {
         fetchLoginUser().then((res) => {
-            if (res !== null && res !== undefined) {
-                setUserInfo(res);
-            }
             res?.info?.roles.map((role) => {
                 if (role === "Administrator") {
                     setIsAdmin(true);

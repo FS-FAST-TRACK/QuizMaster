@@ -9,6 +9,7 @@ import {
     Set,
     SystemInfoDto,
     UserInfo,
+    ContactDetails,
 } from "./definitions";
 import {
     QUIZMASTER_AUTH_GET_COOKIE_INFO,
@@ -19,6 +20,7 @@ import {
     QUIZMASTER_SET_GET_SETQUESTION,
     QUIZMASTER_SET_GET_SETQUESTIONS,
     QUIZMASTER_SET_GET_SETS,
+    QUIZMASTER_SYSTEM_GET_CONTACT_INFO,
     QUIZMASTER_SYSTEM_GET_SYSTEM_INFO,
 } from "@/api/api-routes";
 
@@ -40,10 +42,9 @@ export async function fetchLoginUser() {
                 return null;
             }
             data = resJson;
-            console.log(data);
             return data;
         }).catch(e => {
-            console.log("unauth");
+            console.log("unauthorized");
         });
         return data;
     } catch (error) {
@@ -247,6 +248,30 @@ export async function fetchSystemInfo() {
             },
         }).then(async (res) => {
             var data: SystemInfoDto;
+            const resJson = await res.json();
+            data = resJson.data;
+            
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch question data.");
+    }
+}
+
+export async function fetchContactInfo() {
+
+    try {
+        var apiUrl = `${QUIZMASTER_SYSTEM_GET_CONTACT_INFO}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(async (res) => {
+            var data: ContactDetails;
             const resJson = await res.json();
             data = resJson.data;
             

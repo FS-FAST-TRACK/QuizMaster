@@ -196,6 +196,7 @@ export type SystemInfoDto = {
 }
 
 export type ContactUsCreateValues = {
+    userId: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -205,10 +206,10 @@ export type ContactUsCreateValues = {
 
 export type ContactDetails = {
     email: string;
-    phoneNumber: string;
+    contact: string;
 }
 
 export type Feedback = {
-    rate: number;
+    starRating: number;
     comment: string;
 }

@@ -19,7 +19,6 @@ export async function UpdateSystemInfo({
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log(res);
         if (res.status === 200) {
             return res;
         } else {
