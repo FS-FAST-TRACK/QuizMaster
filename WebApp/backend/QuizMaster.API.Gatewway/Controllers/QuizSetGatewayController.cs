@@ -95,6 +95,13 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new {  Message });
         }
 
+        [HttpPost("room/submitScreenshot")]
+        public IActionResult SubmitScreenshot([FromBody] SubmitScreenshotDTO screenshotDTO)
+        {
+            string Message = SessionHandler.SubmitScreenshot(roomChannelClient, screenshotDTO.ConnectionId, screenshotDTO.QuestionId, screenshotDTO.ScreenshotLink);
+            return Ok(new { Message });
+        }
+
         [QuizMasterAdminAuthorization]
         [HttpGet("set/all_set")]
         public async Task<IActionResult> GetAllSet()

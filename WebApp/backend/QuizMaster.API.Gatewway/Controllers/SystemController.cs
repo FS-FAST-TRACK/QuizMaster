@@ -8,8 +8,10 @@ using QuizMaster.API.Gateway.Attributes;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Helper;
 using QuizMaster.API.Gateway.Helper.Email;
+using QuizMaster.API.Gateway.Models.Report;
 using QuizMaster.API.Gateway.Models.System;
 using QuizMaster.API.Gateway.Services.Email;
+using QuizMaster.API.Gateway.Services.ReportService;
 using QuizMaster.API.Gateway.Services.SystemService;
 using QuizMaster.API.Gatewway.Controllers;
 
@@ -23,8 +25,9 @@ namespace QuizMaster.API.Gateway.Controllers
         private readonly GrpcChannel _authChannel;
         private readonly AuthService.AuthServiceClient _authChannelClient;
         private readonly ILogger<SystemController> logger;
+        private readonly ReportRepository reportRepository;
 
-        public SystemController(SystemRepository systemRepository, EmailService emailService, IOptions<GrpcServerConfiguration> options, ILogger<SystemController> logger)
+        public SystemController(SystemRepository systemRepository, EmailService emailService, IOptions<GrpcServerConfiguration> options, ILogger<SystemController> logger, ReportRepository reportRepository)
         {
             this.systemRepository = systemRepository;
             this.emailService = emailService;
@@ -34,6 +37,7 @@ namespace QuizMaster.API.Gateway.Controllers
             _authChannel = GrpcChannel.ForAddress(options.Value.Authentication_Service, new GrpcChannelOptions { HttpHandler = handler });
             _authChannelClient = new AuthService.AuthServiceClient(_authChannel);
             this.logger = logger;
+            this.reportRepository = reportRepository;
         }
 
         // Get System About
@@ -182,6 +186,19 @@ namespace QuizMaster.API.Gateway.Controllers
             var data = await systemRepository.GetReviewsAsync();
             data = data.Where(r => r.StarRating >= 4).ToList();
             return Ok(new { Status = "Success", Message = "Retrieved System Reviews", Data = data });
+        }
+
+        [QuizMasterAdminAuthorization]
+        [HttpGet("quiz_reports")]
+        public IActionResult GetAllReportsAsync()
+        {
+            var data = reportRepository.GetQuizReports();
+            foreach(var report in data)
+            {
+                report.ParticipantAnswerReports = JsonConvert.DeserializeObject<IEnumerable<ParticipantAnswerReport>>(report.ParticipantAnswerReportsJSON);
+                report.LeaderboardReports = JsonConvert.DeserializeObject<IEnumerable<LeaderboardReport>>(report.LeaderboardReportsJSON);
+            }
+            return Ok(new { Status = "Success", Message = "Retrieved System Reports", Data = data});
         }
 
 

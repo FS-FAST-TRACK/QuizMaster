@@ -29,7 +29,7 @@ namespace QuizMaster.API.Gateway.Services
             this.reportServiceHandler = reportServiceHandler;
             this.serviceProvider = serviceProvider;
         }
-        public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room)
+        public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room, string sessionId)
         {
             int roomId = room.Id;
             string hostConnectionId = hub.Context.ConnectionId;
@@ -62,7 +62,6 @@ namespace QuizMaster.API.Gateway.Services
             }
 
             handler.AddActiveRoom(room.QRoomPin, room); // register the room to be started | set to active
-            handler.GenerateSessionId(roomPin); // once started, generate a session Id, will be used for report tracking
             int setIndex = 0;
             foreach (var Qset in quizSets)
             {
@@ -154,7 +153,7 @@ namespace QuizMaster.API.Gateway.Services
             handler.RemoveActiveRoom(room.QRoomPin); // Quiz ended, can restart | Set to inactive
 
             // Save the Participant's Scores and reset their data's
-            await SaveQuizRoomDataAsync(handler, hostConnectionId, roomId, roomPin, startTime, quizSets, leaderboards);
+            await SaveQuizRoomDataAsync(handler, hostConnectionId, roomId, roomPin, startTime, quizSets, leaderboards, sessionId);
             // Clear
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
@@ -231,7 +230,7 @@ namespace QuizMaster.API.Gateway.Services
             return leaderboardReports;
         }
 
-        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions, IEnumerable<LeaderboardReport> leaderboardReports)
+        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions, IEnumerable<LeaderboardReport> leaderboardReports, string sessionId)
         {
             var host = handler.GetLinkedParticipantInConnectionId(hostConnectionId);
             if (host == null) return;
@@ -251,7 +250,7 @@ namespace QuizMaster.API.Gateway.Services
             // Save the Session Data
             QuizRoomData quizRoomData = new QuizRoomData();
             quizRoomData.QRoomId = roomId;
-            quizRoomData.SessionId = handler.GetSessionId(roomPin);
+            quizRoomData.SessionId = sessionId;
             quizRoomData.HostId = host.UserId;
             quizRoomData.SetQuizRoomJSON = JsonConvert.SerializeObject(Setquestions);
             quizRoomData.ParticipantsJSON = JsonConvert.SerializeObject(participants);
@@ -264,7 +263,9 @@ namespace QuizMaster.API.Gateway.Services
 
             // Generate the Report Data
             QuizReport quizReport = new();
-            quizReport.NoOfParticipants = participantData.Count();
+            quizReport.NoOfParticipants = participantData.Count() - 1; // Exclude the host
+            quizReport.HostId = host.UserId;
+            quizReport.HostName = host.QParticipantDesc;
             quizReport.RoomId = roomId;
             quizReport.StartTime = startTime;
             quizReport.EndTime = quizRoomData.EndedDateTime;

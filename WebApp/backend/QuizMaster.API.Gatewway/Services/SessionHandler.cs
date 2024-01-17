@@ -322,7 +322,7 @@ namespace QuizMaster.API.Gateway.Services
             // Save Report
             ReportHandler.SaveParticipantAnswer(new ParticipantAnswerReport() 
             {
-                SessionId = GetSessionId(answer),
+                SessionId = GetSessionId(userGroup),
                 ParticipantName = participantData.QParticipantDesc,
                 Answer = answer,
                 QuestionId = questionData.question.Id,
@@ -332,7 +332,44 @@ namespace QuizMaster.API.Gateway.Services
             return "Answer submitted";
         }
 
-        
+        public string SubmitScreenshot(QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string screenshotLink)
+        {
+            /*
+             * If the current displayed questionId is not the same as passed questionId
+             * deny the request and do not update the participant score
+             */
+
+            // retrieve the current group of the user
+            string? userGroup = GetConnectionGroup(connectionId);
+            if (userGroup == null) return "Not in session";
+
+            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return "Not in session";
+
+            int? currentQuestionIdDisplayed = RoomCurrentQuestionDisplayed.GetValueOrDefault(userGroup);
+            if (currentQuestionIdDisplayed == null) return "Not in session";
+            if (questionId != currentQuestionIdDisplayed)
+            {
+                return "Question Expired, your screenshot is declined";
+            }
+
+            #region Saving Screenshot
+            QuizParticipant? participantData;
+            // get the participant data
+            participantData = GetLinkedParticipantInConnectionId(connectionId);
+            if (participantData == null) return "Participant data not found";
+
+            // Get the report
+            var participantAnswerReport = ReportHandler.GetParticipantAnswerReport(participantData.QParticipantDesc, GetSessionId(userGroup), questionId);
+            if(participantAnswerReport != null)
+            {
+                // Update the link
+                participantAnswerReport.ScreenshotLink = screenshotLink;
+            }
+            #endregion
+            return "Screenshot Saved";
+        }
+
+
 
         public async Task AuthenticateConnectionId(SessionHub hub, AuthService.AuthServiceClient _authChannelClient, string connectionId, string token)
         {
