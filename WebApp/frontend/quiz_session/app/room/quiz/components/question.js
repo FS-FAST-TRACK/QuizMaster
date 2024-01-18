@@ -35,7 +35,7 @@ export default function Question() {
   const [leaderBoard, setLeaderBoard] = useState([]);
   const { connectionId } = useConnectionId();
 
-  const { push, back } = useRouter();
+  const { back } = useRouter();
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
@@ -56,7 +56,7 @@ export default function Question() {
     //   */
     //   setQuestion(question);
     // });
-
+    console.log(question);
     if (leader.length > 0) {
       if (isStop) {
         setIsFinished(true);
@@ -101,7 +101,9 @@ export default function Question() {
         <TypeAnswer question={question} connectionId={connectionId} />
       )}
       {question?.question.qTypeId === 5 && <Slider />}
-      {question?.question.qTypeId === 6 && <DragAndDrop />}
+      {question?.question.qTypeId === 6 && (
+        <DragAndDrop question={question} connectionId={connectionId} />
+      )}
     </div>
   );
 }

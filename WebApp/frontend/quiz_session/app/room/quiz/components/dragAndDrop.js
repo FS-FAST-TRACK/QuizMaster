@@ -1,19 +1,30 @@
 "use client";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useState, useEffect } from "react";
 import { cardsData } from "../util/Data";
 import { Button } from "@mantine/core";
 import drag from "@/public/icons/drag.png";
 import Image from "next/image";
+import { submitAnswer } from "@/app/util/api";
 
-export default function DragAndDrop() {
+export default function DragAndDrop({ question, connectionId }) {
   const [data, setData] = useState([]);
   const [answer, setAnswer] = useState([]);
   const [droppableId, setDroppableId] = useState("droppable");
+  const [answerDetail, setAnswerDetail] = useState();
 
   const maxNewDataItems = 4;
   useEffect(() => {
-    setData(cardsData);
+    const options = question?.details;
+
+    // Copy all elements except the last one
+    const copiedData = [...options?.slice(0, options?.length - 1)];
+    //Get the number of possible answers
+    const lastElement = options[options.length - 1];
+    const detail = JSON.parse(lastElement.qDetailDesc);
+    setAnswerDetail(detail.length);
+
+    setData(copiedData);
     setDroppableId("droppableId");
   }, []);
 
@@ -77,34 +88,45 @@ export default function DragAndDrop() {
     // }
   };
 
+  const handleSubmit = () => {
+    console.log("On Submit");
+    console.log(answer);
+    const arrayOfIds = answer?.map((opt) => opt.id);
+    console.log(arrayOfIds);
+    const idsString = JSON.stringify(arrayOfIds);
+
+    console.log(idsString);
+    let id = question.question.id;
+    submitAnswer({ id, answer: idsString, connectionId });
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="w-full h-full  items-center flex flex-col">
+      <div className="w-full h-full  items-center flex flex-col p-4">
         <div className="flex flex-col w-full h-full">
           <div className="flex-grow items-center justify-center flex flex-col">
             <div className="text-white">Puzzle</div>
             <div className="font-bold text-xl text-white">
-              Arrange the following steps in the correct order to perform a
-              bubble sort on an array
+              {question?.question.qStatement}
             </div>
-            <div className="w-full">
+            <div className="w-full flex justify-center">
               <Droppable droppableId={`${droppableId} answer`}>
                 {(provided) => (
                   <div
-                    className="flex w-full flex-col items-center"
+                    className="flex w-1/2 flex-col items-center "
                     {...provided.droppableProps}
                     ref={provided.innerRef}
                   >
-                    <div className=" w-full items-center flex flex-col ">
-                      {answer?.map((component, index) => (
+                    <div className=" w-full  items-center flex flex-col  ">
+                      {answer?.map((option, index) => (
                         <Draggable
-                          key={component.id}
-                          draggableId={`droppable${component.id}`}
+                          key={option.id}
+                          draggableId={`droppable${option.id}`}
                           index={index}
                         >
                           {(provided) => (
                             <div
-                              className="bg-white flex w-1/2    items-center text-xl font-bold p-1 m-2 text-green_text shadow-lg rounded-lg px-2"
+                              className="bg-white flex w-full    items-center text-xl font-bold p-1 m-2 text-green_text shadow-lg rounded-lg px-2"
                               {...provided.dragHandleProps}
                               {...provided.draggableProps}
                               ref={provided.innerRef}
@@ -113,7 +135,7 @@ export default function DragAndDrop() {
                                 <Image src={drag} className="" />
                               </div>
                               <div className="flex-grow  justify-center  flex">
-                                {component?.option}
+                                {option?.qDetailDesc}
                               </div>
                             </div>
                           )}
@@ -121,33 +143,35 @@ export default function DragAndDrop() {
                       ))}
                     </div>
                     {Array.from({
-                      length: Math.max(0, maxNewDataItems - answer.length),
+                      length: Math.max(0, answerDetail - answer.length),
                     }).map((_, index) => (
                       <div
                         key={`placeholder-${index}`}
-                        className="bg-dark_green flex w-1/2  justify-center m-2 h-10"
+                        className="bg-dark_green flex w-full  justify-center m-2 h-10 rounded-lg"
                       ></div>
                     ))}
-                    {provided.placeholder}
                   </div>
                 )}
               </Droppable>
             </div>
           </div>
 
-          <div className="w-f flex items-center flex-row h-fit flex-wrap p-2 ">
-            <Droppable droppableId={`${droppableId} option`}>
+          <div className="w-full flex items-center flex-col h-1/4 flex-wrap p-2  ">
+            <Droppable
+              droppableId={`${droppableId} option`}
+              direction="vertical"
+            >
               {(provided) => (
                 <div
-                  className="flex w-full  flex-col items-center "
+                  className="flex w-full flex-row items-center  "
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                 >
                   <div className="w-full grid grid-cols-2 place-content-center  ">
-                    {data?.map((component, index) => (
+                    {data?.map((option, index) => (
                       <Draggable
-                        key={component?.id}
-                        draggableId={`droppable${component?.id}`}
+                        key={option?.id}
+                        draggableId={`droppable${option?.id}`}
                         index={index}
                       >
                         {(provided) => (
@@ -161,22 +185,20 @@ export default function DragAndDrop() {
                               <Image src={drag} className="" />
                             </div>
                             <div className="flex-grow  justify-center  flex">
-                              {component?.option}
+                              {option?.qDetailDesc}
                             </div>
                           </div>
                         )}
                       </Draggable>
                     ))}
                   </div>
-
-                  {provided.placeholder}
                 </div>
               )}
             </Droppable>
           </div>
           <div className=" w-full justify-center flex">
             <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-              <Button fullWidth color={"yellow"}>
+              <Button fullWidth color={"yellow"} onClick={handleSubmit}>
                 Sumbit
               </Button>
             </div>
