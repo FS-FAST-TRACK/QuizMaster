@@ -83,7 +83,6 @@ export default function AddQuestionToSetModal({
     const handelSubmit = useCallback(async () => {
         selectedRows.map(async (row) => {
             await fetchQuestion({ questionId: row }).then((res) => {
-                console.log(res.data?.question);
                 setQuestions((prev) => {
                     const newQuestion = res.data?.question;
 
