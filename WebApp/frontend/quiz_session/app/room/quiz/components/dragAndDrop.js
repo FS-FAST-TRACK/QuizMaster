@@ -12,6 +12,7 @@ export default function DragAndDrop({ question, connectionId }) {
   const [answer, setAnswer] = useState([]);
   const [droppableId, setDroppableId] = useState("droppable");
   const [answerDetail, setAnswerDetail] = useState();
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const maxNewDataItems = 4;
   useEffect(() => {
@@ -97,6 +98,7 @@ export default function DragAndDrop({ question, connectionId }) {
 
     console.log(idsString);
     let id = question.question.id;
+    setIsSubmitted(true);
     submitAnswer({ id, answer: idsString, connectionId });
   };
 
@@ -110,7 +112,10 @@ export default function DragAndDrop({ question, connectionId }) {
               {question?.question.qStatement}
             </div>
             <div className="w-full flex justify-center">
-              <Droppable droppableId={`${droppableId} answer`}>
+              <Droppable
+                droppableId={`${droppableId} answer`}
+                isDropDisabled={isSubmitted}
+              >
                 {(provided) => (
                   <div
                     className="flex w-1/2 flex-col items-center "
@@ -198,7 +203,12 @@ export default function DragAndDrop({ question, connectionId }) {
           </div>
           <div className=" w-full justify-center flex">
             <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-              <Button fullWidth color={"yellow"} onClick={handleSubmit}>
+              <Button
+                fullWidth
+                color={"yellow"}
+                onClick={handleSubmit}
+                disabled={isSubmitted}
+              >
                 Sumbit
               </Button>
             </div>

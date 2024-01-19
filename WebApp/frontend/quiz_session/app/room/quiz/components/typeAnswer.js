@@ -5,8 +5,11 @@ import { submitAnswer } from "@/app/util/api";
 
 export default function TypeAnswer({ question, connectionId }) {
   const [answer, setAnswer] = useState();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const handleSubmit = () => {
     let id = question.question.id;
+    setIsSubmitted(true);
     submitAnswer({ id, answer, connectionId });
   };
   return (
@@ -26,10 +29,17 @@ export default function TypeAnswer({ question, connectionId }) {
             onChange={(e) => {
               setAnswer(e.target.value);
             }}
+            disabled={isSubmitted}
           />
         </div>
         <div className="w-1/4">
-          <Button fullWidth color={"yellow"} size="xl" onClick={handleSubmit}>
+          <Button
+            fullWidth
+            color={"yellow"}
+            size="xl"
+            onClick={handleSubmit}
+            disabled={isSubmitted}
+          >
             Sumbit
           </Button>
         </div>

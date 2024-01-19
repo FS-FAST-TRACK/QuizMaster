@@ -4,7 +4,9 @@ import { Button, Slider } from "@mantine/core";
 import { submitAnswer } from "@/app/util/api";
 
 export default function SliderPuzzle({ question, connectionId }) {
-  const [answer, setAnswer] = useState();
+  const [answer, setAnswer] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const details = question?.details;
   const min = parseInt(details[0].qDetailDesc, 10);
   const max = parseInt(details[1].qDetailDesc, 10);
@@ -12,6 +14,7 @@ export default function SliderPuzzle({ question, connectionId }) {
 
   const handleSubmit = () => {
     let id = question.question.id;
+    setIsSubmitted(true);
     submitAnswer({ id, answer: answer.toString(), connectionId });
   };
   return (
@@ -35,13 +38,19 @@ export default function SliderPuzzle({ question, connectionId }) {
           size="xl"
           defaultValue={min}
           onChangeEnd={setAnswer}
+          disabled={isSubmitted}
         />
         <div>{max}</div>
       </div>
 
       <div className=" w-full justify-center flex">
         <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-          <Button fullWidth color={"yellow"} onClick={handleSubmit}>
+          <Button
+            fullWidth
+            color={"yellow"}
+            onClick={handleSubmit}
+            disabled={isSubmitted}
+          >
             Sumbit
           </Button>
         </div>
