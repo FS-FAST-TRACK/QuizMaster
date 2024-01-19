@@ -4,7 +4,7 @@ import { Button, Slider } from "@mantine/core";
 import { submitAnswer } from "@/app/util/api";
 
 export default function SliderPuzzle({ question, connectionId }) {
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState("0");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const details = question?.details;
@@ -26,21 +26,31 @@ export default function SliderPuzzle({ question, connectionId }) {
         </div>
       </div>
 
-      <div className="flex flex-row items-center flex-grow w-full text-white text-xl font-bold space-x-2 ">
-        <div>{min}</div>
-        <Slider
-          color="rgba(209, 209, 209, 1)"
-          labelAlwaysOn
-          min={min}
-          max={max}
-          step={interval}
-          className="w-full p-20"
-          size="xl"
-          defaultValue={min}
-          onChangeEnd={setAnswer}
-          disabled={isSubmitted}
-        />
-        <div>{max}</div>
+      <div className="flex-grow w-full text-white text-xl font-bold space-x-2 flex-col flex justify-center">
+        <div className="w-full flex justify-center items-center  flex-col ">
+          <div>Your Answer</div>
+
+          <div className="w-full flex justify-center items-center text-3xl font-bold ">
+            {answer}
+          </div>
+        </div>
+
+        <div className="flex flex-row items-center ">
+          <div>{min}</div>
+          <Slider
+            color="rgba(209, 209, 209, 1)"
+            labelAlwaysOn
+            min={min}
+            max={max}
+            step={interval}
+            className="w-full p-20"
+            size="xl"
+            defaultValue={min}
+            onChangeEnd={setAnswer}
+            disabled={isSubmitted}
+          />
+          <div>{max}</div>
+        </div>
       </div>
 
       <div className=" w-full justify-center flex">

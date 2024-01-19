@@ -76,17 +76,18 @@ export default function Question() {
     return <Interval leaderBoard={leaderBoard} />;
   } else if (isFinished) {
     return (
-      <>
-        <ReactConfetti width={width} height={height} />
-        <Leaderboard leaderBoard={leaderBoard} />
-        <Button
-          onClick={() =>
-            goBackToLoby(params, connection, back, setResetLeader, setStart)
-          }
-        >
-          Go back to Loby
-        </Button>
-      </>
+      // <>
+      //   <ReactConfetti width={width} height={height} />
+      //   <Leaderboard leaderBoard={leaderBoard} />
+      //   <Button
+      //     onClick={() =>
+      //       goBackToLoby(params, connection, back, setResetLeader, setStart)
+      //     }
+      //   >
+      //     Go back to Loby
+      //   </Button>
+      // </>
+      <Slider question={question} connectionId={connectionId} />
     );
   }
   return (

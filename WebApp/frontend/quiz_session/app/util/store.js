@@ -66,3 +66,12 @@ export const useLeaderboard = create((set) => ({
     set({ leader: [] });
   },
 }));
+
+export const useMetaData = create((set) => ({
+  metadata: undefined,
+  setMetadata: (data) => {
+    console.log("store");
+    console.log(data);
+    set({ metadata: data });
+  },
+}));
