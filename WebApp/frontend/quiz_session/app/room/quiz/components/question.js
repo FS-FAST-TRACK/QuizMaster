@@ -100,7 +100,9 @@ export default function Question() {
       {question?.question.qTypeId === 4 && (
         <TypeAnswer question={question} connectionId={connectionId} />
       )}
-      {question?.question.qTypeId === 5 && <Slider />}
+      {question?.question.qTypeId === 5 && (
+        <Slider question={question} connectionId={connectionId} />
+      )}
       {question?.question.qTypeId === 6 && (
         <DragAndDrop question={question} connectionId={connectionId} />
       )}

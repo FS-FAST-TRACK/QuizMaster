@@ -1,32 +1,47 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Button, Slider } from "@mantine/core";
+import { submitAnswer } from "@/app/util/api";
 
-export default function SliderPuzzle() {
+export default function SliderPuzzle({ question, connectionId }) {
+  const [answer, setAnswer] = useState();
+  const details = question?.details;
+  const min = parseInt(details[0].qDetailDesc, 10);
+  const max = parseInt(details[1].qDetailDesc, 10);
+  const interval = parseInt(details[2].qDetailDesc, 10);
+
+  const handleSubmit = () => {
+    let id = question.question.id;
+    submitAnswer({ id, answer: answer.toString(), connectionId });
+  };
   return (
     <div className="w-full flex flex-col h-full p-5 flex-grow">
-      <div className="flex flex-col items-center flex-grow w-full">
+      <div className="flex flex-col items-center  w-full ">
         <div className="text-white">Slider</div>
         <div className="text-white text-2xl font-bold flex flex-wrap text-center  ">
-          In what year was the programming language Python first released?
+          {question?.question.qStatement}
         </div>
       </div>
 
-      <div className="flex flex-row items-center flex-grow w-full text-black space-x-2">
-        <div>1989</div>
+      <div className="flex flex-row items-center flex-grow w-full text-white text-xl font-bold space-x-2 ">
+        <div>{min}</div>
         <Slider
           color="rgba(209, 209, 209, 1)"
           labelAlwaysOn
-          min={1989}
-          max={2000}
+          min={min}
+          max={max}
+          step={interval}
           className="w-full p-20"
           size="xl"
+          defaultValue={min}
+          onChangeEnd={setAnswer}
         />
-        <div>2000</div>
+        <div>{max}</div>
       </div>
 
       <div className=" w-full justify-center flex">
         <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-          <Button fullWidth color={"yellow"}>
+          <Button fullWidth color={"yellow"} onClick={handleSubmit}>
             Sumbit
           </Button>
         </div>
