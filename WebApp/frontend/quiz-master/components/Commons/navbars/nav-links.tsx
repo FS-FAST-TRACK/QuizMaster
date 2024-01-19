@@ -59,6 +59,12 @@ const links = [
         href: "/reports",
         icon: DocumentTextIcon,
     },
+    {
+        key: "audit",
+        label: "Audit Logs",
+        icon: DocumentTextIcon,
+        href: "/audit",
+    },
 ];
 
 export default function NavLinks() {

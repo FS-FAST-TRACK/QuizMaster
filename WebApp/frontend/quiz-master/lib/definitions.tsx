@@ -1,3 +1,5 @@
+import { RefObject } from "react";
+
 export interface QuestionCore {
     id: number;
     qAudio: string;
@@ -164,25 +166,43 @@ export type PatchItem = {
     op: string;
     value: any;
 };
-export type SystemInfoDto = {
-    systemInfo: string;
-    version: string;
-}
 
-export type ContactUsCreateValues = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-    message: string;
+export type UserAuditTrail = {
+    UserAuditTrailId: number;
+    UserId: number;
+    Action: string;
+    Timestamp: Date;
+    Details: string;
+    UserRole: string;
+    Type: string;
 };
 
-export type ContactDetails = {
-    email: string;
-    phoneNumber: string;
-}
+export type UserAudit = {
+    userAuditTrailId: number;
+    userId: number;
+    action: String;
+    username: String;
+    timestamp: Date;
+    details: String;
+    userRole: String;
+    oldValues: String;
+    newValues: String;
+};
 
-export type Feedback = {
-    rate: number;
-    comment: string;
+export type AuditTrail = {
+    userAuditTrailId: number;
+    userId: number;
+    action: String;
+    userName: String;
+    timestamp: Date;
+    details: String;
+    userRole: String;
+    oldValues: String;
+    newValues: String;
+};
+
+export interface AuditTableProps {
+    data: AuditTrail[];
+    tableRef: RefObject<HTMLTableElement>;
+    auditType: string | null;
 }

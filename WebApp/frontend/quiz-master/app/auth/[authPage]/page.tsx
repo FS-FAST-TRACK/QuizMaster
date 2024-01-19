@@ -16,8 +16,7 @@ export default function Page({
     const searchParams = useSearchParams();
 
     const authPage = params.authPage || "login";
-    const callbackUrl =
-        searchParams.get("callbackUrl") || "http://localhost:3000/dashboard";
+    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
     const { status } = useSession();
 
     if (status === "loading") {

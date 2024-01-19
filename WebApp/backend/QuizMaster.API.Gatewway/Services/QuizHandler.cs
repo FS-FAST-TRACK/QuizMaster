@@ -121,6 +121,7 @@ namespace QuizMaster.API.Gateway.Services
                         await Task.Delay(1000);
                     }
                 }
+
                 setIndex++;
                 if (room.ShowLeaderboardEachRound() && setIndex < quizSets.Count)
                 {
