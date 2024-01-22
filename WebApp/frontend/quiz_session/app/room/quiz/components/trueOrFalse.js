@@ -1,11 +1,19 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
 import { submitAnswer } from "@/app/util/api";
+import { downloadImage } from "@/app/util/api";
+import { useDisclosure } from "@mantine/hooks";
+import ImageModal from "./modal";
+import QuestionImage from "./questionImage";
 
 export default function TrueOrFalse({ question, connectionId }) {
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [hasImage, setHasImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState();
+  const [previousStatement, setPreviousStatement] = useState(null);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const handleSubmit = () => {
     let id = question.question.id;
@@ -17,13 +25,37 @@ export default function TrueOrFalse({ question, connectionId }) {
       setPick(answer);
     }
   };
+
+  useEffect(() => {
+    if (question?.question.qImage) {
+      downloadImage({
+        url: question.question.qImage,
+        setImageUrl: setImageUrl,
+        setHasImage: setHasImage,
+      });
+      setHasImage(true);
+    }
+  }, [question?.question.qImage, previousStatement]);
+
+  useEffect(() => {
+    if (question?.question.qStatement !== previousStatement) {
+      setPick();
+      setIsSubmitted(false);
+      setImageUrl();
+      setHasImage(false);
+      setPreviousStatement(question?.question.qStatement);
+    }
+  }, [question?.question.qStatement]);
+
   return (
     <div className="w-full flex flex-col  h-full bg-green-600 p-5 ">
+      <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center flex-grow justify-center ">
         <div className="text-white">True or False</div>
         <div className="text-white text-2xl font-bold flex flex-wrap text-center  ">
           {question?.question.qStatement}.
         </div>
+        {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
 
       <div className="w-full grid grid-cols-2 place-content-center ">

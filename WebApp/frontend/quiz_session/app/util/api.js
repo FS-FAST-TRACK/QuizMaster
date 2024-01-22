@@ -12,7 +12,7 @@ export const submitAnswer = ({ id, answer, connectionId }) => {
   });
 };
 
-export const downloadImage = async ({ url, setImageUrl }) => {
+export const downloadImage = async ({ url, setImageUrl, setHasImage }) => {
   try {
     const authToken = localStorage.getItem("token");
 
@@ -32,8 +32,10 @@ export const downloadImage = async ({ url, setImageUrl }) => {
     } else {
       // Handle errors
       console.error("Error downloading image:", response.statusText);
+      setHasImage(false);
     }
   } catch (error) {
     console.error("Error downloading image:", error);
+    setHasImage(false);
   }
 };

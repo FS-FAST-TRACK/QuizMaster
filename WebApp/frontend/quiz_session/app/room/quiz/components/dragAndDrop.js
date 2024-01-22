@@ -1,11 +1,14 @@
 "use client";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useState, useEffect } from "react";
-import { cardsData } from "../util/Data";
 import { Button } from "@mantine/core";
 import drag from "@/public/icons/drag.png";
 import Image from "next/image";
 import { submitAnswer } from "@/app/util/api";
+import { downloadImage } from "@/app/util/api";
+import { useDisclosure } from "@mantine/hooks";
+import ImageModal from "./modal";
+import QuestionImage from "./questionImage";
 
 export default function DragAndDrop({ question, connectionId }) {
   const [data, setData] = useState([]);
@@ -13,21 +16,42 @@ export default function DragAndDrop({ question, connectionId }) {
   const [droppableId, setDroppableId] = useState("droppable");
   const [answerDetail, setAnswerDetail] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [hasImage, setHasImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState();
+  const [previousStatement, setPreviousStatement] = useState(null);
+  const [opened, { open, close }] = useDisclosure(false);
 
-  const maxNewDataItems = 4;
   useEffect(() => {
-    const options = question?.details;
+    if (question?.question.qImage) {
+      downloadImage({
+        url: question.question.qImage,
+        setImageUrl: setImageUrl,
+        setHasImage: setHasImage,
+      });
+      setHasImage(true);
+    }
+  }, [question?.question.qImage, previousStatement]);
 
-    // Copy all elements except the last one
-    const copiedData = [...options?.slice(0, options?.length - 1)];
-    //Get the number of possible answers
-    const lastElement = options[options.length - 1];
-    const detail = JSON.parse(lastElement.qDetailDesc);
-    setAnswerDetail(detail.length);
+  useEffect(() => {
+    if (question?.question.qStatement !== previousStatement) {
+      const options = question?.details;
 
-    setData(copiedData);
-    setDroppableId("droppableId");
-  }, []);
+      // Copy all elements except the last one
+      const copiedData = [...options?.slice(0, options?.length - 1)];
+      //Get the number of possible answers
+      const lastElement = options[options.length - 1];
+      const detail = JSON.parse(lastElement.qDetailDesc);
+      setAnswerDetail(detail.length);
+
+      setData(copiedData);
+      setDroppableId("droppableId");
+      setAnswer([]);
+      setIsSubmitted(false);
+      setHasImage(false);
+      setImageUrl();
+      setPreviousStatement(question?.question.qStatement);
+    }
+  }, [question?.question.qStatement]);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -60,8 +84,7 @@ export default function DragAndDrop({ question, connectionId }) {
         updatedNewData.splice(destinationIndex, 0, movedItem);
         setData(updatedNewData);
       } else {
-        if (answer.length + 1 > maxNewDataItems) {
-          console.log("lapas");
+        if (answer.length + 1 > answerDetail) {
           return;
         }
         const updatedData = [...data];
@@ -73,20 +96,6 @@ export default function DragAndDrop({ question, connectionId }) {
         setAnswer(() => updatedNewData);
       }
     }
-
-    // if (source.droppableId === destination.droppableId) {
-    //   const newData = [...data];
-    //   const el = newData.splice(source.index, 1);
-    //   newData.splice(destination.index, 0, ...el);
-    //   setData(newData);
-    // } else {
-    //   const newData = [...data];
-    //   const oldIndex = parseInt(source.droppableId.split("droppable")[1]);
-    //   const newIndex = parseInt(destination.droppableId.split("droppable")[1]);
-    //   const el = newData[oldIndex].components.splice(source.index, 1);
-    //   newData[newIndex].components.splice(destination.index, 0, ...el);
-    //   setData(newData);
-    // }
   };
 
   const handleSubmit = () => {
@@ -104,10 +113,12 @@ export default function DragAndDrop({ question, connectionId }) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
+      <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="w-full h-full  items-center flex flex-col p-4">
         <div className="flex flex-col w-full h-full">
           <div className="flex-grow items-center justify-center flex flex-col">
             <div className="text-white">Puzzle</div>
+            {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
             <div className="font-bold text-xl text-white">
               {question?.question.qStatement}
             </div>
