@@ -13,6 +13,7 @@ using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.Gateway.Services.Email;
+using QuizMaster.API.Gateway.Services.ReportService;
 using QuizMaster.API.Gateway.Services.SystemService;
 using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gatewway.Controllers;
@@ -32,6 +33,8 @@ builder.Services.AddCors(o =>
     o.AddDefaultPolicy(builder => 
     builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddDbContext<SystemDbContext>(option => option.UseSqlite("Data Source=SystemData\\System.db"));
+builder.Services.AddSingleton<ReportServiceHandler>();
+builder.Services.AddScoped<ReportRepository>();
 builder.Services.AddScoped<SessionHub>();
 builder.Services.AddSingleton<SessionHandler>();
 builder.Services.AddSingleton<QuizHandler>();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using QuizMaster.API.Gateway.Models.Report;
 using QuizMaster.API.Gateway.Models.System;
 
 namespace QuizMaster.API.Gateway.SystemData.Contexts
@@ -10,6 +11,7 @@ namespace QuizMaster.API.Gateway.SystemData.Contexts
         public DbSet<SystemContact> SystemContactData { get; set; }
         public DbSet<Reviews> SystemReviews { get; set; }
         public DbSet<ContactReaching> SystemReachingContacts { get; set; }
+        public DbSet<QuizReport> QuizReports { get; set; }
 
         public SystemDbContext(DbContextOptions<SystemDbContext> options) : base(options) { }
 
