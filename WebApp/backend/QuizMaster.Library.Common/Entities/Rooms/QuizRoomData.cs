@@ -21,6 +21,8 @@ namespace QuizMaster.Library.Common.Entities.Rooms
         // Participants
         public string ParticipantsJSON { get; set; } = string.Empty;
 
+        public string SessionId { get; set; } = string.Empty;
+
         public DateTime StartedDateTime { get; set; }
         public DateTime EndedDateTime { get; set; }
         public int HostId { get; set; }

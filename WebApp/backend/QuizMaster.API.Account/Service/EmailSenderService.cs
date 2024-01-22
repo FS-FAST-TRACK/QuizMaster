@@ -52,7 +52,7 @@ namespace QuizMaster.API.Account.Service
             cursor: pointer;
             text-decoration: none;
           ""
-          href='https://localhost:7081/gateway/api/account/update_password/{token}'
+          href='{_settings.GatewayHost}/gateway/api/account/update_password/{token}'
         >
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Confirm Reset
           Password&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

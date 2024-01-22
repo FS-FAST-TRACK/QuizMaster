@@ -4,6 +4,9 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Models.Report;
+using QuizMaster.API.Gateway.Services.ReportService;
+using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gateway.Utilities;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -17,12 +20,16 @@ namespace QuizMaster.API.Gateway.Services
     {
         private GrpcChannel _channel;
         private QuizRoomService.QuizRoomServiceClient _channelClient;
-        public QuizHandler(IOptions<GrpcServerConfiguration> options)
+        private readonly ReportServiceHandler reportServiceHandler;
+        private readonly IServiceProvider serviceProvider;
+        public QuizHandler(IOptions<GrpcServerConfiguration> options, ReportServiceHandler reportServiceHandler, IServiceProvider serviceProvider)
         {
             _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
+            this.reportServiceHandler = reportServiceHandler;
+            this.serviceProvider = serviceProvider;
         }
-        public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room)
+        public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room, string sessionId)
         {
             int roomId = room.Id;
             string hostConnectionId = hub.Context.ConnectionId;
@@ -142,12 +149,12 @@ namespace QuizMaster.API.Gateway.Services
             //await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
             
             SetParticipantsEndTime(handler, roomPin); // End participant time
-            await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, true); // send scores
+            var leaderboards = await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, true); // send scores
             handler.RemoveRoomDataCurrentDisplayed(roomPin); // clear the last question
             handler.RemoveActiveRoom(room.QRoomPin); // Quiz ended, can restart | Set to inactive
 
             // Save the Participant's Scores and reset their data's
-            await SaveQuizRoomDataAsync(handler, hostConnectionId, roomId, roomPin, startTime, quizSets);
+            await SaveQuizRoomDataAsync(handler, hostConnectionId, roomId, roomPin, startTime, quizSets, leaderboards, sessionId);
             // Clear
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
@@ -191,16 +198,19 @@ namespace QuizMaster.API.Gateway.Services
             }
         }
 
-        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData, bool isStop)
+        public async Task<List<LeaderboardReport>> SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData, bool isStop)
         {
             List<QuizParticipant> participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).ToList();
             participants.AddRange(handler.GetEliminatedParticipants(Convert.ToInt32(roomPin)));
             int limitDisplayed = room.DisplayTop10Only() ? 10 : participants.Count();
 
+            List<LeaderboardReport> leaderboardReports = new();
+
             var leaderboard = participants.OrderByDescending(p => p.Score).Take(limitDisplayed).Select(person => {
                 if (adminData.UserId != person.UserId)
                 {
                     string eliminated = handler.IsParticipantEliminated(Convert.ToInt32(roomPin), person) ? "Eliminated" : string.Empty;
+                    leaderboardReports.Add(new LeaderboardReport() { ParticipantName = person.QParticipantDesc, Score = person.Score, SessionId = handler.GetSessionId(roomPin) });
                     return new ScoreDTO() { Name = person.QParticipantDesc, Score = person.Score, Eleminated = eliminated };
                 }
                 return null;
@@ -218,10 +228,10 @@ namespace QuizMaster.API.Gateway.Services
             //    await hub.Clients.Group(roomPin).SendAsync("leaderboard",  score);
             //}
 
-
+            return leaderboardReports;
         }
 
-        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions)
+        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions, IEnumerable<LeaderboardReport> leaderboardReports, string sessionId)
         {
             var host = handler.GetLinkedParticipantInConnectionId(hostConnectionId);
             if (host == null) return;
@@ -237,8 +247,11 @@ namespace QuizMaster.API.Gateway.Services
 
             if(participantData == null) return;
 
+
+            // Save the Session Data
             QuizRoomData quizRoomData = new QuizRoomData();
             quizRoomData.QRoomId = roomId;
+            quizRoomData.SessionId = sessionId;
             quizRoomData.HostId = host.UserId;
             quizRoomData.SetQuizRoomJSON = JsonConvert.SerializeObject(Setquestions);
             quizRoomData.ParticipantsJSON = JsonConvert.SerializeObject(participants);
@@ -248,6 +261,24 @@ namespace QuizMaster.API.Gateway.Services
 
             var rpcPayloadSaveQuizRoomData = new Data { Value = JsonConvert.SerializeObject(quizRoomData) };
             await _channelClient.SaveRoomDataAsync(rpcPayloadSaveQuizRoomData);
+
+            // Generate the Report Data
+            QuizReport quizReport = new();
+            quizReport.NoOfParticipants = participantData.Count() - 1; // Exclude the host
+            quizReport.HostId = host.UserId;
+            quizReport.HostName = host.QParticipantDesc;
+            quizReport.RoomId = roomId;
+            quizReport.StartTime = startTime;
+            quizReport.EndTime = quizRoomData.EndedDateTime;
+            quizReport.ParticipantAnswerReportsJSON = JsonConvert.SerializeObject(reportServiceHandler.GetParticipantAnswerReports(handler.GetSessionId(roomPin)));
+            quizReport.LeaderboardReportsJSON = JsonConvert.SerializeObject(leaderboardReports);
+
+            // Since we cannot instantiate scoped object in singleton, we will call the service provider and get the service
+            using var scope = serviceProvider.CreateScope();
+            var reportRepository = scope.ServiceProvider.GetService<ReportRepository>();
+
+            // Save the Report Data
+            reportRepository?.SaveReport(quizReport);
         }
 
         public async Task<IEnumerable<QuizRoomData>> GetQuizRoomDatasAsync()

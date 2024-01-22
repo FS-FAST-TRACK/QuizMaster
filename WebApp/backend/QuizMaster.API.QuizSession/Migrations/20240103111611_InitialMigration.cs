@@ -82,6 +82,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                     QRoomId = table.Column<int>(type: "INTEGER", nullable: false),
                     SetQuizRoomJSON = table.Column<string>(type: "TEXT", nullable: false),
                     ParticipantsJSON = table.Column<string>(type: "TEXT", nullable: false),
+                    SessionId = table.Column<string>(type: "TEXT", nullable: false),
                     StartedDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EndedDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     HostId = table.Column<int>(type: "INTEGER", nullable: false),

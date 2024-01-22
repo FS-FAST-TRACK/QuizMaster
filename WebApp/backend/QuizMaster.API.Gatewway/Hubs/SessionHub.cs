@@ -459,7 +459,8 @@ namespace QuizMaster.API.Gateway.Hubs
                 await Clients.Group(roomPin).SendAsync("start", true);
                 //await SessionHandler.StartQuiz(this, _channelClient, roomId.ToString());
                 await Task.Delay(500);
-                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, quizRoom);
+                var sessionId = SessionHandler.GenerateSessionId(roomPin); // once started, generate a session Id, will be used for report tracking
+                await QuizHandler.StartQuiz(this, SessionHandler, _channelClient, quizRoom, sessionId);
             }
             catch (Exception ex)
             {
