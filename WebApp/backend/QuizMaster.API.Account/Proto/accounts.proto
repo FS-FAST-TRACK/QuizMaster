@@ -12,6 +12,7 @@ service AccountService {
 	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
 	rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountReply);
 	rpc SetAdminAccount(SetAccountAdminRequest) returns (SetAccountAdminResponse);
+	rpc ResetPassword(UpdatePasswordRequest) returns (SetAccountAdminResponse);
 	rpc UpdateUserPassword(UpdatePasswordRequest) returns (SetAccountAdminResponse);
 	rpc UpdateUserPasswordConfirm(ConfirmUpdatePasswordRequest) returns (SetAccountAdminResponse);
 }
