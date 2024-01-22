@@ -389,9 +389,11 @@ namespace QuizMaster.API.Gatewway.Controllers
 
             if (response.Code != 200)
             {
-                return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+                //return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+                return BadRequest("<html><body><h1>Failed to update password, either token has expired or this link has already been consumed.</h1><p>TODO: UI design</p></body></html>");
             }
-            return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+            //return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+            return Ok("<html><body><h1>Password was successfully updated</h1><p>TODO: UI design</p></body></html>");
         }
 
         [QuizMasterAdminAuthorization]
