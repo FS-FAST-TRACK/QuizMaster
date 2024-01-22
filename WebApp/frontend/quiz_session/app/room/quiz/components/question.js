@@ -40,23 +40,6 @@ export default function Question() {
   const params = new URLSearchParams(searchParams);
 
   useEffect(() => {
-    // connection.on("question", (question) => {
-    //   /*
-    //    question - question.question.qStatement
-    //    answers - question.details.qDetailDesc
-    //    type - question.question.qTypeId
-
-    //    Type Questions
-    //    1 - Multiple Choice
-    //    2 - Multiple Choice + Audio
-    //    3 - True or False
-    //    4 - Type Answer
-    //    5 - Slider
-    //    6 - Puzzle
-    //   */
-    //   setQuestion(question);
-    // });
-    console.log(question);
     if (leader.length > 0) {
       if (isStop) {
         setIsFinished(true);
@@ -76,22 +59,21 @@ export default function Question() {
     return <Interval leaderBoard={leaderBoard} />;
   } else if (isFinished) {
     return (
-      // <>
-      //   <ReactConfetti width={width} height={height} />
-      //   <Leaderboard leaderBoard={leaderBoard} />
-      //   <Button
-      //     onClick={() =>
-      //       goBackToLoby(params, connection, back, setResetLeader, setStart)
-      //     }
-      //   >
-      //     Go back to Loby
-      //   </Button>
-      // </>
-      <Slider question={question} connectionId={connectionId} />
+      <>
+        <ReactConfetti width={width} height={height} />
+        <Leaderboard leaderBoard={leaderBoard} />
+        <Button
+          onClick={() =>
+            goBackToLoby(params, connection, back, setResetLeader, setStart)
+          }
+        >
+          Go back to Loby
+        </Button>
+      </>
     );
   }
   return (
-    <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow ">
+    <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow  ">
       {question?.question.qTypeId === 1 && (
         <MulitpleChoice question={question} connectionId={connectionId} />
       )}
