@@ -314,7 +314,7 @@ namespace QuizMaster.API.Gateway.Services
                     {
                         participantLinkedConnectionId.QEndDate = DateTime.Now;
                         // remove the connectionId from the group
-                        await handler.RemoveClientFromGroups(hub, connectionId, $"{participantLinkedConnectionId.QParticipantDesc} was eliminated", channel: "notification");
+                        await handler.RemoveClientFromGroups(hub, connectionId, $"{participantLinkedConnectionId.QParticipantDesc} was eliminated");
                         await hub.Clients.Client(connectionId).SendAsync("notif", "You are eliminated");
                         //await hub.Clients.Group(roomPin).SendAsync("notif", $"{participantLinkedConnectionId.QParticipantDesc} was eliminated");
                         // add to eliminated participant

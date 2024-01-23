@@ -412,7 +412,7 @@ namespace QuizMaster.API.Gateway.Hubs
             var participantData = SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId);
             if (participantData == null) { return; }
             var group = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false, channel:"notif");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false);
             SessionHandler.UnbindConnectionId(Context.ConnectionId);
 
             if (group != null)
