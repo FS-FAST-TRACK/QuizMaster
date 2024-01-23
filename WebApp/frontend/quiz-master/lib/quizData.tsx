@@ -256,7 +256,7 @@ export async function fetchSystemInfo() {
         return data;
     } catch (error) {
         console.error("Database Error:", error);
-        throw new Error("Failed to fetch question data.");
+        throw new Error("Failed to fetch system info.");
     }
 }
 
@@ -280,6 +280,6 @@ export async function fetchContactInfo() {
         return data;
     } catch (error) {
         console.error("Database Error:", error);
-        throw new Error("Failed to fetch question data.");
+        throw new Error("Failed to fetch contact info.");
     }
 }

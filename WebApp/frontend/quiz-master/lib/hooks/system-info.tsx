@@ -19,13 +19,14 @@ export async function UpdateSystemInfo({
                 Authorization: `Bearer ${token}`,
             },
         });
+        const data = await res.json();
         if (res.status === 200) {
-            return res;
+            return data;
         } else {
             throw new Error("Failed to update system info");
         }
     } catch (error) {
-        throw new Error("Failed to update question.");
+        throw new Error("Failed to update system info.");
     }
     
 }

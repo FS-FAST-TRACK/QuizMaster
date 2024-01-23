@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
 import { UpdateContactDetails, postContactUs } from "@/lib/hooks/contact-us";
 import { UpdateSystemInfo } from "@/lib/hooks/system-info";
+import { notification } from "@/lib/notifications";
 
 export default function EditSystemInfoModal({
     systemInfo,
@@ -25,23 +26,34 @@ export default function EditSystemInfoModal({
             ios_link: `${systemInfo?.ios_link}`,
         },
         clearInputErrorOnChange: true,
-        validateInputOnChange: true,
+        validateInputOnBlur: true,
         validate: {
             version: (value) =>
                 value.length < 1 ? "Version must not be empty." : null,
             description: (value) =>
                 value.length < 1 ? "System Info must not be empty." : null,
+            web_link: (value) =>
+                value.length < 1 ? "Website link must not be empty." : null,
+            mobile_link: (value) =>
+                value.length < 1 ? "Mobile link must not be empty." : null,
+            ios_link: (value) =>
+                value.length < 1 ? "iOS link must not be empty." : null,
         },
     });
 
     const handelSubmit = useCallback(async () => {
-        UpdateSystemInfo({ systemDetails: systemDetails.values }).then(
-            (res) => {
-                if (res.status < 300) {
+        UpdateSystemInfo({ systemDetails: systemDetails.values })
+            .then((res) => {
+                if (res.status === "Success") {
+                    notification({ type: "success", title: res.message });
                     onClose();
+                } else {
+                    notification({ type: "error", title: res.message });
                 }
-            }
-        );
+            })
+            .catch((res) => {
+                notification({ type: "error", title: ":" + res.message });
+            });
     }, [systemDetails.values]);
 
     return (
@@ -57,7 +69,13 @@ export default function EditSystemInfoModal({
             }
             size="lg"
         >
-            <div className="space-y-8">
+            <form
+                className="space-y-8"
+                onSubmit={systemDetails.onSubmit(() => {
+                    handelSubmit();
+                })}
+                onReset={() => systemDetails.reset()}
+            >
                 <TextInput
                     label="Version"
                     required
@@ -69,7 +87,7 @@ export default function EditSystemInfoModal({
                     label="System Info"
                     required
                     variant="filled"
-                    placeholder="Phone Number"
+                    placeholder="System Info"
                     rows={10}
                     {...systemDetails.getInputProps("description")}
                 />
@@ -95,18 +113,14 @@ export default function EditSystemInfoModal({
                     {...systemDetails.getInputProps("ios_link")}
                 />
                 <div className="flex gap-2">
-                    <Button
-                        variant="filled"
-                        color="orange"
-                        onClick={handelSubmit}
-                    >
+                    <Button variant="filled" color="orange" type="submit">
                         Submit
                     </Button>
                     <Button variant="outline" color="gray" onClick={onClose}>
                         Close
                     </Button>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }

@@ -5,6 +5,7 @@ import { DifficultyCardBody } from "../cards/DifficultyCard";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
 import { UpdateContactDetails } from "@/lib/hooks/contact-us";
+import { notification } from "@/lib/notifications";
 
 export default function UpdateContactInfoModal({
     contactInfo,
@@ -31,13 +32,18 @@ export default function UpdateContactInfoModal({
     });
 
     const handelSubmit = useCallback(async () => {
-        UpdateContactDetails({ contactForm: contactDetails.values }).then(
-            (res) => {
-                if (res.status === 200) {
+        UpdateContactDetails({ contactForm: contactDetails.values })
+            .then((res) => {
+                if (res.status === "Success") {
+                    notification({ type: "success", title: res.message });
                     onClose();
+                } else {
+                    notification({ type: "error", title: res.message });
                 }
-            }
-        );
+            })
+            .catch(() => {
+                notification({ type: "error", title: "Something went wrong" });
+            });
     }, [contactDetails.values]);
 
     return (

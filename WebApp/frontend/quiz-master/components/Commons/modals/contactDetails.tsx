@@ -8,6 +8,7 @@ import Link from "next/link";
 import UpdateContactInfoModal from "./UpdateContactInfoModal";
 import { ContactDetails } from "@/lib/definitions";
 import { fetchContactInfo, fetchLoginUser } from "@/lib/quizData";
+import { notification } from "@/lib/notifications";
 
 export default function ContactDetails({ email }: { email?: string }) {
     const [contactDetails, setContactDetails] = useState<ContactDetails>();
@@ -26,9 +27,13 @@ export default function ContactDetails({ email }: { email?: string }) {
     }, []);
 
     useEffect(() => {
-        fetchContactInfo().then((res) => {
-            setContactDetails(res);
-        });
+        fetchContactInfo()
+            .then((res) => {
+                setContactDetails(res);
+            })
+            .catch((res) => {
+                notification({ type: "error", title: res.message });
+            });
     }, [openEditContactInfo]);
 
     return (

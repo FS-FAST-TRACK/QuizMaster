@@ -1,11 +1,12 @@
-import { Button, Modal, Textarea } from "@mantine/core";
+import { Button, Input, Modal, Textarea } from "@mantine/core";
 import { Feedback } from "@/lib/definitions";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
 import star from "/public/star.svg";
 import starFill from "/public/star-fill.svg";
 import Image from "next/image";
 import { postReachOut } from "@/lib/hooks/contact-us";
+import { notification } from "@/lib/notifications";
 
 export default function FeedbackModal({
     onClose,
@@ -14,6 +15,7 @@ export default function FeedbackModal({
     opened: boolean;
     onClose: () => void;
 }) {
+    const [onSubmit, setOnSubmit] = useState<boolean>(false);
     const rates: number[] = [1, 2, 3, 4, 5];
     const feedbackDetails = useForm<Feedback>({
         initialValues: {
@@ -21,16 +23,31 @@ export default function FeedbackModal({
             comment: "",
         },
         clearInputErrorOnChange: true,
-        validateInputOnChange: true,
+        validateInputOnBlur: true,
         validate: {
-            starRating: (value) => (value === 0 ? "Rate must not zero." : null),
+            starRating: (value) => (value === 0 ? "Minimum star is 1." : null),
             comment: (value) =>
                 value.length < 1 ? "Comment must not be empty." : null,
         },
     });
 
+    useEffect(() => {
+        setOnSubmit(false);
+    }, [feedbackDetails.values.starRating]);
+
     const handelSubmit = useCallback(async () => {
-        postReachOut({ feedbackForm: feedbackDetails.values });
+        postReachOut({ feedbackForm: feedbackDetails.values })
+            .then((res) => {
+                console.log(res);
+                if (res.status === "Success") {
+                    notification({ type: "success", title: res.message });
+                } else {
+                    notification({ type: "error", title: res.message });
+                }
+            })
+            .catch(() => {
+                notification({ type: "error", title: "Something went wrong" });
+            });
     }, [feedbackDetails.values]);
 
     return (
@@ -46,7 +63,13 @@ export default function FeedbackModal({
             }
             size="md"
         >
-            <div className="space-y-8">
+            <form
+                className="space-y-8"
+                onSubmit={feedbackDetails.onSubmit(() => {
+                    handelSubmit();
+                })}
+                onReset={() => feedbackDetails.reset()}
+            >
                 <div className="flex flex-row w-full gap-2 items-center justify-center">
                     {rates.map((rate) => {
                         return (
@@ -80,30 +103,38 @@ export default function FeedbackModal({
                     })}
                 </div>
 
+                {!feedbackDetails.isValid("starRating") && onSubmit ? (
+                    <Input.Label style={{ color: "red", opacity: 0.7 }}>
+                        Note: Minimum star is 1.
+                    </Input.Label>
+                ) : null}
+
                 <div>
-                    <p className=" text-sm">
-                        Do you have any thoughts to share?
-                    </p>
                     <Textarea
-                        label=""
-                        required
+                        label="Do you have any thoughts to share?"
                         variant="filled"
                         placeholder="Comment"
+                        required
                         rows={10}
                         {...feedbackDetails.getInputProps("comment")}
                     />
                 </div>
-                <div className="flex w-full gap-2">
+                <div
+                    className="flex w-full gap-2"
+                    onClick={() => {
+                        setOnSubmit(true);
+                    }}
+                >
                     <Button
                         variant="filled"
                         color="orange"
                         fullWidth
-                        onClick={handelSubmit}
+                        type="submit"
                     >
                         Submit
                     </Button>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }

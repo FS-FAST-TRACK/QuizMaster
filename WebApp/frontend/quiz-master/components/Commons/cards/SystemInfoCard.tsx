@@ -10,6 +10,7 @@ import { SystemInfoDto, UserInfo } from "@/lib/definitions";
 import { fetchLoginUser, fetchSystemInfo } from "@/lib/quizData";
 import EditSystemInfoModal from "../modals/EditSystemInfoModal";
 import Link from "next/link";
+import { notification } from "@/lib/notifications";
 
 export default function SystemInfoCard() {
     const [systemInfo, setSystemInfo] = useState<SystemInfoDto>();
@@ -17,9 +18,13 @@ export default function SystemInfoCard() {
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
     useEffect(() => {
-        fetchSystemInfo().then((res) => {
-            setSystemInfo(res);
-        });
+        fetchSystemInfo()
+            .then((res) => {
+                setSystemInfo(res);
+            })
+            .catch((res) => {
+                notification({ type: "error", title: res.message });
+            });
     }, [openEditInfoModal]);
 
     useEffect(() => {
@@ -33,7 +38,7 @@ export default function SystemInfoCard() {
     }, []);
 
     return (
-        <>
+        <div>
             <div className="flex flex-row gap-2">
                 <p className=" font-bold text-2xl">About QuizMaster</p>
                 {isAdmin ? (
@@ -54,10 +59,18 @@ export default function SystemInfoCard() {
                     </div>
                 ) : null}
             </div>
+
             <p className="font-thin text-xs">version {systemInfo?.version}</p>
             <p className=" font-thin text-base pt-3 ">
                 {systemInfo?.description}
             </p>
+            {openEditInfoModal && (
+                <EditSystemInfoModal
+                    systemInfo={systemInfo}
+                    opened={openEditInfoModal}
+                    onClose={() => setOpenEditInfoModal(false)}
+                />
+            )}
             <div className="flex flex-col pt-5 gap-2">
                 <p className="font-thin text-xs">Avaliable on:</p>
                 <div className="flex flex-row gap-3">
@@ -99,13 +112,6 @@ export default function SystemInfoCard() {
                     </Link>
                 </div>
             </div>
-            {openEditInfoModal && (
-                <EditSystemInfoModal
-                    systemInfo={systemInfo}
-                    opened={openEditInfoModal}
-                    onClose={() => setOpenEditInfoModal(false)}
-                />
-            )}
-        </>
+        </div>
     );
 }

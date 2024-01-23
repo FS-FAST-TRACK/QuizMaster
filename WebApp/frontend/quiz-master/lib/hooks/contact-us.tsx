@@ -19,8 +19,9 @@ export async function postContactUs({
                 Authorization: `Bearer ${token}`,
             },
         });
+        const data = await res.json();
         if (res.status === 200) {
-            return res;
+            return data;
         } else {
             throw new Error("Failed to update contact info");
         }
@@ -47,13 +48,14 @@ export async function UpdateContactDetails({
                 Authorization: `Bearer ${token}`,
             },
         });
+        const data = await res.json();
         if (res.status === 200) {
-            return res;
+            return data;
         } else {
-            throw new Error("Failed to update system info");
+            throw new Error("Failed to update contact info");
         }
     } catch (error) {
-        throw new Error("Failed to update question.");
+        throw new Error("Failed to update contact info.");
     }
 }
 
@@ -73,9 +75,9 @@ export async function postReachOut({
                 "Content-Type": "application/json",
             },
         });
-        console.log(await res.json());
+        const data = await res.json();
         if (res.status === 200) {
-            return res;
+            return data;
         } else {
             throw new Error("Failed to send review");
         }
