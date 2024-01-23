@@ -7,6 +7,7 @@ using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Models.Report;
 using QuizMaster.API.Gateway.Services.ReportService;
+using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
@@ -88,6 +89,7 @@ namespace QuizMaster.API.Gateway.Services
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
                 var roomPin = connectionGroupPair[connectionId];
                 await hub.Clients.Group(roomPin).SendAsync(channel, disconnectMessage);
+                await hub.Clients.Group(roomPin).SendAsync("chat", new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
                 
                 if (sendParticipantData)
                 {

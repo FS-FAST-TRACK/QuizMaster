@@ -10,7 +10,7 @@ export default function Leaderboard({ leaderBoard }) {
           <div className="font-bold">Leaderboard</div>
           <div className="flex flex-row space-x-1">
             <Image src={user} width={25} height={20} />
-            <div>20</div>
+            <div>{leaderBoard.length}</div>
           </div>
         </div>
         <div className="space-y-3">

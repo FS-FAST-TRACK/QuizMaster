@@ -26,6 +26,7 @@ export default function Login() {
           const data = await r.json();
           await connection.invoke("Login", data.token);
           localStorage.setItem("username", username.toLowerCase());
+          localStorage.setItem("token", data.token);
 
           push("/auth/code");
         } catch (error) {

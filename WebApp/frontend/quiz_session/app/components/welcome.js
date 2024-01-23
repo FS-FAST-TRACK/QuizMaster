@@ -13,6 +13,7 @@ import {
   useStart,
   useQuestion,
   useLeaderboard,
+  useMetaData,
 } from "../util/store";
 import { notifications } from "@mantine/notifications";
 
@@ -24,6 +25,7 @@ export default function Welcome() {
   const { setChat } = useChat();
   const { setQuestion } = useQuestion();
   const { setLeaderboard } = useLeaderboard();
+  const { setMetadata } = useMetaData();
 
   useEffect(() => {
     setConnection();
@@ -73,6 +75,7 @@ export default function Welcome() {
           //metadata
           connection.on("metadata", (metadata) => {
             console.log(metadata);
+            setMetadata(metadata);
           });
         })
         .catch((err) => {
