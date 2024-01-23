@@ -167,6 +167,29 @@ export type PatchItem = {
     value: any;
 };
 
+export type SystemInfoDto = {
+    systemInfo: string;
+    version: string;
+}
+
+export type ContactUsCreateValues = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    message: string;
+};
+
+export type ContactDetails = {
+    email: string;
+    phoneNumber: string;
+}
+
+export type Feedback = {
+    rate: number;
+    comment: string;
+}
+
 export type UserAuditTrail = {
     UserAuditTrailId: number;
     UserId: number;
