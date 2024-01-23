@@ -77,6 +77,9 @@ export default function Question() {
       {question?.question.qTypeId === 1 && (
         <MulitpleChoice question={question} connectionId={connectionId} />
       )}
+      {question?.question.qTypeId === 2 && (
+        <MultipleChoiceAudio question={question} connectionId={connectionId} />
+      )}
       {question?.question.qTypeId === 3 && (
         <TrueOrFalse question={question} connectionId={connectionId} />
       )}

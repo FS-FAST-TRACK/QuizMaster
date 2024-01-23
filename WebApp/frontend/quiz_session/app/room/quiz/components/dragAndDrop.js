@@ -176,6 +176,7 @@ export default function DragAndDrop({ question, connectionId }) {
             <Droppable
               droppableId={`${droppableId} option`}
               direction="vertical"
+              isDropDisabled={isSubmitted}
             >
               {(provided) => (
                 <div
