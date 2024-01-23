@@ -378,6 +378,22 @@ namespace QuizMaster.API.Gatewway.Controllers
             return Ok(new ResponseDto {  Type = "Success", Message = response.Message});
         }
 
+        [QuizMasterAuthorization]
+        [HttpPost]
+        [Route("account/{id}/reset_password")]
+        public async Task<IActionResult> ResetPassword(int id)
+        {
+            var updatePasswordRequest = new UpdatePasswordRequest() { Id = id };
+
+            var response = await _channelClient.ResetPasswordAsync(updatePasswordRequest);
+
+            if (response.Code != 200)
+            {
+                return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+            }
+            return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+        }
+
         [HttpGet]
         [Route("account/update_password/{token}")]
         public async Task<IActionResult> ConfirmUpdatePassword(string token)
@@ -390,10 +406,12 @@ namespace QuizMaster.API.Gatewway.Controllers
             if (response.Code != 200)
             {
                 //return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
-                return BadRequest("<html><body><h1>Failed to update password, either token has expired or this link has already been consumed.</h1><p>TODO: UI design</p></body></html>");
+                TempData["message"] = "Failed to update password, either the token expired or the link was clicked";
+                return View("~/Views/PasswordChange/Index.cshtml");
             }
             //return Ok(new ResponseDto { Type = "Success", Message = response.Message });
-            return Ok("<html><body><h1>Password was successfully updated</h1><p>TODO: UI design</p></body></html>");
+            TempData["message"] = "Update password was successful";
+            return View("~/Views/PasswordChange/Index.cshtml");
         }
 
         [QuizMasterAdminAuthorization]

@@ -91,6 +91,9 @@ builder.Services.AddScoped<AccountGatewayController>();
 builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
 builder.Services.AddScoped<EmailService>();
 
+// Use razor pages
+builder.Services.AddRazorPages();
+
 
 // configure cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
