@@ -64,10 +64,12 @@ namespace QuizMaster.API.Gatewway.Controllers
             }
 
             var account = JsonConvert.DeserializeObject<UserAccount>(response.GetAccountByIdReply.Account);
+            var roles = JsonConvert.DeserializeObject<IEnumerable<string>>(response.GetAccountByIdReply.Roles);
+            UserAndRolesDTO Account_WithRoles = _mapper.Map<UserAndRolesDTO>(account);
+            Account_WithRoles.Roles = roles;
 
-            return Ok(_mapper.Map<AccountDto>(account));
+            return Ok(Account_WithRoles);
         }
-
         /// <summary>
         /// Get all account API
         /// </summary>
@@ -508,6 +510,11 @@ namespace QuizMaster.API.Gatewway.Controllers
                 Type = "Error",
                 Message = "Email already exist."
             });
+        }
+
+        public sealed class UserAndRolesDTO : AccountDto
+        {
+            public IEnumerable<string> Roles { get; set; }
         }
     }
 }
