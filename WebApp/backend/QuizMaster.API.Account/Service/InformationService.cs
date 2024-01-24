@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
+using QuizMaster.Library.Common.Entities.Details;
 using QuizMaster.Library.Common.Helpers;
 
 namespace QuizMaster.API.Account.Service
@@ -41,6 +42,7 @@ namespace QuizMaster.API.Account.Service
             else
             {
                 success.Account = JsonConvert.SerializeObject(user);
+                success.Roles = JsonConvert.SerializeObject(await _userManager.GetRolesAsync(user));
                 response.GetAccountByIdReply = success;
             }
 

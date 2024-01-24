@@ -8,6 +8,7 @@ using QuizMaster.API.Quiz.Protos;
 using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.Library.Common.Entities.Accounts;
 using QuizMaster.Library.Common.Entities.Questionnaire;
+using static QuizMaster.API.Gatewway.Controllers.AccountGatewayController;
 
 namespace QuizMaster.API.Gatewway
 {
@@ -18,6 +19,7 @@ namespace QuizMaster.API.Gatewway
             CreateMap<AccountCreateDto, CreateAccountRequest>();
             CreateMap<AccountCreatePartialDto, CreateAccountPartialRquest>();
             CreateMap<UserAccount, AccountDto>().ReverseMap();
+            CreateMap<UserAccount, UserAndRolesDTO>().ReverseMap();
             CreateMap<AccountCreateDto, UserAccount>().ReverseMap();
             CreateMap<CategoryCreateDto, QuestionCategory>().ReverseMap();
             CreateMap<Question, QuestionDto>();

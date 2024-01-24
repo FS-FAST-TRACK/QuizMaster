@@ -82,13 +82,13 @@ namespace QuizMaster.API.Gateway.Services
                 connectionGroupPair.Remove(connectionId);
             }
         }
-        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, string channel = "chat", bool sendParticipantData = true)
+        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, bool sendParticipantData = true)
         {
             if (connectionGroupPair.ContainsKey(connectionId))
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
                 var roomPin = connectionGroupPair[connectionId];
-                await hub.Clients.Group(roomPin).SendAsync(channel, disconnectMessage);
+                await hub.Clients.Group(roomPin).SendAsync("notif", disconnectMessage); // removed chat, set to notif
                 await hub.Clients.Group(roomPin).SendAsync("chat", new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
                 
                 if (sendParticipantData)

@@ -261,6 +261,9 @@ namespace QuizMaster.API.Gateway.Hubs
                 await Clients.Client(connId).SendAsync("chat", new { Message = "You are kicked from the room", Name = "bot", IsAdmin = false });
                 await SessionHandler.RemoveClientFromGroups(this, connId, $"{quizParticipant.QParticipantDesc} was kicked by admin");
                 SessionHandler.UnbindConnectionId(connId);
+                IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(roomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
+                await Clients.Group($"{roomPin}").SendAsync("participants", participants);
+                await Clients.Client(connId).SendAsync("kicked", "/* Triggered, you are kicked boyo */");
             }
 
         }
@@ -412,7 +415,7 @@ namespace QuizMaster.API.Gateway.Hubs
             var participantData = SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId);
             if (participantData == null) { return; }
             var group = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false, channel:"notif");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false);
             SessionHandler.UnbindConnectionId(Context.ConnectionId);
 
             if (group != null)

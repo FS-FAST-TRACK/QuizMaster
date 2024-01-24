@@ -25,6 +25,7 @@ message GetAccountByIdRequest {
 // Reply account by id
 message GetAccountByIdReply{
 	string account= 1;
+	string roles=2;
 }
 
 // Reply account or not found
