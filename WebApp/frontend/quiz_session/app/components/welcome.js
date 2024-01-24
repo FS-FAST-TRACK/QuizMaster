@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import logo1 from "@/public/logo/Logo1.svg";
 import { useEffect } from "react";
-import { ConnectToHub } from "../util/Connections";
 import {
   useConnection,
   useParticipants,
@@ -16,8 +13,12 @@ import {
   useMetaData,
 } from "../util/store";
 import { notifications } from "@mantine/notifications";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Welcome() {
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
   const { connection, setConnection } = useConnection();
   const { setParticipants } = useParticipants();
   const { setConnectionId } = useConnectionId();
@@ -26,6 +27,7 @@ export default function Welcome() {
   const { setQuestion } = useQuestion();
   const { setLeaderboard } = useLeaderboard();
   const { setMetadata } = useMetaData();
+  const { push } = useRouter();
 
   useEffect(() => {
     setConnection();
@@ -77,6 +79,17 @@ export default function Welcome() {
             console.log(metadata);
             setMetadata(metadata);
           });
+
+          const token = params.get("token");
+          const username = params.get("name");
+
+          if (token && username && connection.state === "Connected") {
+            connection.invoke("Login", token);
+            localStorage.setItem("username", username.toLowerCase());
+            push("/auth/code");
+          } else {
+            push("/auth");
+          }
         })
         .catch((err) => {
           console.error("Error starting connection:", err);
@@ -85,14 +98,17 @@ export default function Welcome() {
   }, [connection]);
 
   return (
-    <>
-      {/* <div className="bg-white w-1/4 h-1/4 rounded-lg">
-        <Image
-          src={logo1}
-          alt="Quis Master Logo"
-          className="w-full h-full p-5"
-        />
-      </div> */}
-    </>
+    // <div>
+    //   {/* <div className="bg-white w-1/4 h-1/4 rounded-lg">
+    //     <Image
+    //       src={logo1}
+    //       alt="Quis Master Logo"
+    //       className="w-full h-full p-5"
+    //     />
+    //   </div> */}
+    //   <div>{params.get("name")}</div>
+    //   <div>{params.get("token")}</div>
+    // </div>
+    <></>
   );
 }
