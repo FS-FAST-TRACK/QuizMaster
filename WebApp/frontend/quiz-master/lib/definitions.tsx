@@ -213,3 +213,9 @@ export type Feedback = {
     starRating: number;
     comment: string;
 }
+
+export type Review = {
+    id: number;
+    starRating: number;
+    comment: string;
+}

@@ -10,6 +10,7 @@ import {
     SystemInfoDto,
     UserInfo,
     ContactDetails,
+    Review,
 } from "./definitions";
 import {
     QUIZMASTER_AUTH_GET_COOKIE_INFO,
@@ -20,8 +21,10 @@ import {
     QUIZMASTER_SET_GET_SETQUESTION,
     QUIZMASTER_SET_GET_SETQUESTIONS,
     QUIZMASTER_SET_GET_SETS,
+    QUIZMASTER_SYSTEM_ADMIN_GET_REVIEW,
     QUIZMASTER_SYSTEM_GET_CONTACT_INFO,
     QUIZMASTER_SYSTEM_GET_SYSTEM_INFO,
+    QUIZMASTER_SYSTEM_USER_GET_REVIEW,
 } from "@/api/api-routes";
 
 export async function fetchLoginUser() {
@@ -281,5 +284,53 @@ export async function fetchContactInfo() {
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Failed to fetch contact info.");
+    }
+}
+
+export async function fetchReviewsForAdmin() {
+    try {
+        const token = localStorage.getItem("token");
+        var apiUrl = `${QUIZMASTER_SYSTEM_ADMIN_GET_REVIEW}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }).then(async (res) => {
+            var data: Review[];
+            const resJson = await res.json();
+            data = resJson.data;
+            
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch reviews.");
+    }
+}
+
+export async function fetchReviewsForClient() {
+    try {
+        var apiUrl = `${QUIZMASTER_SYSTEM_USER_GET_REVIEW}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(async (res) => {
+            var data: Review[];
+            const resJson = await res.json();
+            data = resJson.data;
+            
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch reviews.");
     }
 }

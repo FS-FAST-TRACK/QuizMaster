@@ -13,7 +13,6 @@ import { notification } from "@/lib/notifications";
 
 export default function ContactUsForm() {
     const [openFeedbackModal, setOpenFeedbackModal] = useState<boolean>(false);
-    const [userInfo, setUserInfo] = useState<UserInfo>();
     const form = useForm<ContactUsCreateValues>({
         initialValues: {
             userId: 0,
