@@ -18,6 +18,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Interval from "./interval";
 import { useQuestion, useLeaderboard, useStart } from "@/app/util/store";
 import { goBackToLoby } from "@/app/auth/util/handlers";
+import TimeProgress from "./progress";
+import Header from "./header";
 
 export default function Question() {
   const { width, height } = useWindowSize();
@@ -30,7 +32,7 @@ export default function Question() {
   const [leaderBoard, setLeaderBoard] = useState([]);
   const { connectionId } = useConnectionId();
 
-  const { back } = useRouter();
+  const { push } = useRouter();
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
@@ -59,7 +61,7 @@ export default function Question() {
         <Leaderboard leaderBoard={leaderBoard} />
         <Button
           onClick={() =>
-            goBackToLoby(params, connection, back, setResetLeader, setStart)
+            goBackToLoby(params, connection, push, setResetLeader, setStart)
           }
         >
           Go back to Loby
@@ -68,25 +70,32 @@ export default function Question() {
     );
   }
   return (
-    <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow  ">
-      {question?.question.qTypeId === 1 && (
-        <MulitpleChoice question={question} connectionId={connectionId} />
-      )}
-      {question?.question.qTypeId === 2 && (
-        <MultipleChoiceAudio question={question} connectionId={connectionId} />
-      )}
-      {question?.question.qTypeId === 3 && (
-        <TrueOrFalse question={question} connectionId={connectionId} />
-      )}
-      {question?.question.qTypeId === 4 && (
-        <TypeAnswer question={question} connectionId={connectionId} />
-      )}
-      {question?.question.qTypeId === 5 && (
-        <Slider question={question} connectionId={connectionId} />
-      )}
-      {question?.question.qTypeId === 6 && (
-        <DragAndDrop question={question} connectionId={connectionId} />
-      )}
-    </div>
+    <>
+      <TimeProgress />
+      <Header />
+      <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow  ">
+        {question?.question.qTypeId === 1 && (
+          <MulitpleChoice question={question} connectionId={connectionId} />
+        )}
+        {question?.question.qTypeId === 2 && (
+          <MultipleChoiceAudio
+            question={question}
+            connectionId={connectionId}
+          />
+        )}
+        {question?.question.qTypeId === 3 && (
+          <TrueOrFalse question={question} connectionId={connectionId} />
+        )}
+        {question?.question.qTypeId === 4 && (
+          <TypeAnswer question={question} connectionId={connectionId} />
+        )}
+        {question?.question.qTypeId === 5 && (
+          <Slider question={question} connectionId={connectionId} />
+        )}
+        {question?.question.qTypeId === 6 && (
+          <DragAndDrop question={question} connectionId={connectionId} />
+        )}
+      </div>
+    </>
   );
 }

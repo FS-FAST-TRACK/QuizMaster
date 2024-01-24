@@ -31,7 +31,7 @@ export const timeFormater = (seconds) => {
 export const goBackToLoby = (
   params,
   connection,
-  back,
+  push,
   setResetLeader,
   setStart
 ) => {
@@ -40,7 +40,7 @@ export const goBackToLoby = (
     connection.invoke("GetRoomParticipants", code);
     setResetLeader();
     setStart(false);
-    back();
+    push("http://localhost:3000/dashboard");
   } catch (ex) {
     console.log(ex);
   }
