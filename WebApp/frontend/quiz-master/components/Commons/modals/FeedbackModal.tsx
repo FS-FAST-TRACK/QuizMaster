@@ -41,6 +41,7 @@ export default function FeedbackModal({
                 console.log(res);
                 if (res.status === "Success") {
                     notification({ type: "success", title: res.message });
+                    onClose();
                 } else {
                     notification({ type: "error", title: res.message });
                 }

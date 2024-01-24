@@ -28,8 +28,19 @@ export default function EditSystemInfoModal({
         clearInputErrorOnChange: true,
         validateInputOnBlur: true,
         validate: {
-            version: (value) =>
-                value.length < 1 ? "Version must not be empty." : null,
+            version: (value) => {
+                if (!value) {
+                    return "Version must not be empty.";
+                }
+
+                const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
+
+                if (!versionRegex.test(value)) {
+                    return "Invalid version format. Use the format x.y.z (e.g., 1.0.0)";
+                }
+
+                return null;
+            },
             description: (value) =>
                 value.length < 1 ? "System Info must not be empty." : null,
             web_link: (value) =>

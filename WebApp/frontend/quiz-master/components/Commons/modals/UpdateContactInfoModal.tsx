@@ -22,12 +22,25 @@ export default function UpdateContactInfoModal({
             contact: `${contactInfo?.contact}`,
         },
         clearInputErrorOnChange: true,
-        validateInputOnChange: true,
+        validateInputOnBlur: true,
         validate: {
-            email: (value) =>
-                value.length < 1 ? "Email must not be empty." : null,
-            contact: (value) =>
-                value.length < 1 ? "Phone number must not be empty." : null,
+            email: (value) => {
+                if (!value) {
+                    return "Email must not be empty.";
+                }
+                return /^\S+@\S+$/.test(value) ? null : "Invalid email.";
+            },
+            contact: (value) => {
+                if (!value) {
+                    return "Phone Number must not be empty.";
+                }
+
+                const phoneNumberRegex = /^09\d{9}$/;
+
+                return phoneNumberRegex.test(value)
+                    ? null
+                    : "Invalid phone number (Must start with 09 and a total of 11 digits).";
+            },
         },
     });
 
