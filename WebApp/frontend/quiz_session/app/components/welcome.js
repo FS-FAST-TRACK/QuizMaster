@@ -16,6 +16,7 @@ import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Progress } from "@mantine/core";
+import CryptoJS from "crypto-js";
 
 export default function Welcome() {
   const searchParams = useSearchParams();
@@ -82,8 +83,15 @@ export default function Welcome() {
             setMetadata(metadata);
           });
 
-          const token = params.get("token");
+          const encryptedToken = params.get("token");
+          const bytes = CryptoJS.AES.decrypt(
+            encryptedToken.toString(),
+            "secret_key"
+          );
+          console.log(bytes);
+          const token = bytes.toString(CryptoJS.enc.Utf8);
           const username = params.get("name");
+          console.log(token);
 
           let loggedIn = false;
 
