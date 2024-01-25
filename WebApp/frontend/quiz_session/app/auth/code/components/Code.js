@@ -28,6 +28,7 @@ export default function Code() {
           onChange={(e) => {
             setCode(e.target.value);
           }}
+          autoFocus={true}
         />
         <button
           className="w-full bg-button py-2 text-white text-lg font-bold rounded-lg"

@@ -29,8 +29,9 @@ export default function MulitpleChoice({ question, connectionId }) {
   useEffect(() => {
     if (question?.question.qImage) {
       downloadImage({
-        url: question.question.qImage,
+        id: question.question.qImage,
         setImageUrl: setImageUrl,
+        setHasImage: setHasImage,
       });
       setHasImage(true);
     }
