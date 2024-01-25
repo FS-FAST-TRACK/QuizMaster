@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useConnection,
   useParticipants,
@@ -15,6 +15,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Progress } from "@mantine/core";
 
 export default function Welcome() {
   const searchParams = useSearchParams();
@@ -28,6 +29,7 @@ export default function Welcome() {
   const { setLeaderboard } = useLeaderboard();
   const { setMetadata } = useMetaData();
   const { push } = useRouter();
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     setConnection();
@@ -83,13 +85,35 @@ export default function Welcome() {
           const token = params.get("token");
           const username = params.get("name");
 
+          let loggedIn = false;
+
           if (token && username && connection.state === "Connected") {
             connection.invoke("Login", token);
             localStorage.setItem("username", username.toLowerCase());
-            push("/auth/code");
+            loggedIn = true;
           } else {
-            push("/auth");
+            loggedIn = false;
           }
+
+          const id = setInterval(() => {
+            setProgress((prevProgress) => {
+              if (prevProgress >= 100) {
+                clearInterval(id);
+                if (loggedIn) {
+                  push("/auth/code");
+                } else {
+                  push("/auth");
+                }
+
+                return 100;
+              }
+              return prevProgress + 1; // Increase the progress by 1 unit
+            });
+          }, 20); // Update the progress every 20 milliseconds
+
+          return () => {
+            clearInterval(id); // Cleanup when component unmounts
+          };
         })
         .catch((err) => {
           console.error("Error starting connection:", err);
@@ -109,6 +133,8 @@ export default function Welcome() {
     //   <div>{params.get("name")}</div>
     //   <div>{params.get("token")}</div>
     // </div>
-    <></>
+    <>
+      <Progress value={progress}></Progress>
+    </>
   );
 }
