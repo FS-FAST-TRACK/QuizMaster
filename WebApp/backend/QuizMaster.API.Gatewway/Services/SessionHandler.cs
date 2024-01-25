@@ -284,7 +284,7 @@ namespace QuizMaster.API.Gateway.Services
                 // try checking if puzzle type is correct
                 correct = true;
                 List<string> _answers = JsonConvert.DeserializeObject<List<string>>(answer) ?? new List<string>();
-                List<string> _correct = JsonConvert.DeserializeObject<List<string>>(answer) ?? new List<string>();
+                List<string> _correct = JsonConvert.DeserializeObject<List<string>>(answers[0]) ?? new List<string>();
                 
                 for(int index = 0; index < _answers.Count(); index++)
                 {
