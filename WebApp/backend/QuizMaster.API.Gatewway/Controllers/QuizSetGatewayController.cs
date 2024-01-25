@@ -311,7 +311,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return BadRequest(new { Message = "Failed to create room", gRPC_Reply = reply });
         }
 
-        [QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("room/getAllRooms")]
         public async Task<IActionResult> GetAllRoomsAsync()
         {
@@ -334,7 +334,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "No rooms to retrieve"});
         }
 
-        [QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("room/getRoomByPin/{RoomPin}")]
         public async Task<IActionResult> GetRoomByPinAsync(int RoomPin, bool isId = false)
         {
@@ -371,7 +371,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "No room to retrieve" });
         }
 
-        [QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("room/getRoomById/{RoomId}")]
         public async Task<IActionResult> GetRoomByIdAsync(int RoomId)
         {
