@@ -90,6 +90,7 @@ export default function Welcome() {
           if (token && username && connection.state === "Connected") {
             connection.invoke("Login", token);
             localStorage.setItem("username", username.toLowerCase());
+            localStorage.setItem("token", token);
             loggedIn = true;
           } else {
             loggedIn = false;

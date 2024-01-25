@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConnection, useConnectionId } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
+import { partialLogin } from "@/app/util/api";
 
 export default function Login() {
   const { connection } = useConnection();
@@ -15,38 +16,7 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    fetch("https://localhost:7081/gateway/api/account/create_partial", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, userName }),
-    }).then((r) => {
-      if (r.status === 200) {
-        try {
-          fetch("https://localhost:7081/gateway/api/auth/partialLogin", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, userName }),
-          }).then(async (r) => {
-            if (r.status === 200) {
-              const data = await r.json();
-              await connection.invoke("Login", data.token);
-              localStorage.setItem("username", userName.toLowerCase());
-
-              push("/auth/code");
-            }
-          });
-        } catch (error) {
-          console.error("SignalR error:", error);
-        }
-      } else {
-        notifications.show({
-          title: "Email or username already used ",
-        });
-      }
-    });
+    partialLogin({ email, userName, connection, push, notifications });
   };
   return (
     <form onSubmit={handleLogin}>
