@@ -18,6 +18,7 @@ module.exports = {
         silver: "#E2E2E2",
         bronze: "#E9A67B",
         dark_green: "#148E42",
+        score_result: "#888888",
       },
     },
   },
