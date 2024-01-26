@@ -57,7 +57,9 @@ export default function Page() {
         var categoriesFetch = fetchCategories(form.values);
         categoriesFetch.then((res) => {
             setCategories(res.data);
-            setPaginationMetadata(res.paginationMetadata);
+            if (res.paginationMetadata !== null) {
+                setPaginationMetadata(res.paginationMetadata);
+            }
         });
     }, [form.values]);
 
