@@ -2,16 +2,11 @@
 import React from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-<<<<<<< HEAD
-import CryptoJS, { enc } from "crypto-js";
-=======
 import CryptoJS from "crypto-js";
->>>>>>> quiz_session_UI
 
 export default function Game() {
     const { data: session } = useSession();
     const user = session?.user;
-<<<<<<< HEAD
 
     function encodeUTF8(input: string) {
         return encodeURIComponent(input);
@@ -34,17 +29,8 @@ export default function Game() {
     return (
         <Link
             href={`http://localhost:3001?name=${user?.username}&token=${encodedEncryptedToken}`}
-=======
-    const encryptedToken: string = CryptoJS.AES.encrypt(
-        localStorage.getItem("token") || "",
-        "secret_key"
-    ).toString();
-    return (
-        <Link
-            href={`http://localhost:3001?name=${user?.username}&token=${encryptedToken}`}
->>>>>>> quiz_session_UI
         >
-            {encryptedToken.valueOf()}
+            room
         </Link>
     );
 }
