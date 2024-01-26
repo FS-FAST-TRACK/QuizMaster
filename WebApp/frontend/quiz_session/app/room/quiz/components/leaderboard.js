@@ -33,9 +33,9 @@ export default function Leaderboard({ leaderBoard }) {
               )} flex flex-row p-2 rounded-lg`}
               key={index}
             >
-              <div className=" w-10">{index + 1}</div>
-              <div className=" flex-grow">{score.name}</div>
-              <div>{score.score}</div>
+              <div className=" w-10 font-bold ">{index + 1}</div>
+              <div className=" flex-grow font-bold">{score.name}</div>
+              <div className="text-score_result">{score.score}</div>
             </div>
           ))}
         </div>

@@ -59,13 +59,18 @@ export default function Question() {
       <>
         <ReactConfetti width={width} height={height} />
         <Leaderboard leaderBoard={leaderBoard} />
-        <Button
-          onClick={() =>
-            goBackToLoby(params, connection, push, setResetLeader, setStart)
-          }
-        >
-          Go back to Loby
-        </Button>
+        <div className="p-6 justify-between flex">
+          <div></div> {/* Add an empty div to push the button to the right */}
+          <Button
+            onClick={() =>
+              goBackToLoby(params, connection, push, setResetLeader, setStart)
+            }
+            className={"w-10"}
+            color="yellow"
+          >
+            Go Back to Dashboard
+          </Button>
+        </div>
       </>
     );
   }

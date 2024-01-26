@@ -19,6 +19,7 @@ export default function Game() {
     const utf8EncodedToken = encodeUTF8(token);
 
     // Encrypt the UTF-8 encoded token using CryptoJS AES
+    //TODO: SECRET KEY SHOULD BE REPLACED
     const encryptedToken = CryptoJS.AES.encrypt(
         utf8EncodedToken,
         "secret_key"

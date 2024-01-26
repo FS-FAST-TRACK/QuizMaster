@@ -42,6 +42,9 @@ export default function Welcome() {
         .then(() => {
           //notif
           connection.on("notif", (message) => {
+            if (message === "Failed to authenticate") {
+              push("/auth");
+            }
             notifications.show({
               title: message,
             });
@@ -89,6 +92,7 @@ export default function Welcome() {
           let loggedIn = false;
 
           if (token && username && connection.state === "Connected") {
+            //TODO: SECRET KEY SHOULD BE REPLACED
             const decrypToken = CryptoJS.AES.decrypt(
               token.toString(),
               "secret_key"
