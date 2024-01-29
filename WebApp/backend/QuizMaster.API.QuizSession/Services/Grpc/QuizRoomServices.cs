@@ -287,6 +287,33 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);
         }
 
+        public override async Task<RoomResponse> DeactivateRoomRequest(DeactivateRoom request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var room = await _context.QuizRooms.Where(r => r.Id == request.Id).FirstOrDefaultAsync();
+                if (room == null)
+                {
+                    reply.Code = 404;
+                    reply.Message = $"Room with room pin {request.Id} does not exists";
+                }
+                else
+                {
+                    room.ActiveData = false;
+                    _context.SaveChanges();
+
+                    reply.Code = 200;
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code=500;
+                reply.Message=ex.Message;
+            }
+            return await Task.FromResult(reply);
+        }
+
 
         // In room, get all the Sets
         public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)

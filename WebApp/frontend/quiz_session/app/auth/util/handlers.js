@@ -1,9 +1,11 @@
+import { notifications } from "@mantine/notifications";
+
 export const submitPin = (connection, code, params, push) => {
   try {
     connection.invoke("JoinRoom", Number.parseInt(code));
     connection.on("JoinFailed", (isFailed) => {
       if (isFailed) {
-        alert("Incorrect pin");
+        notifications.show({ title: "Room does not exist" });
       } else {
         params.set("roomPin", Number.parseInt(code));
         push(`/room?${params.toString()}`);
