@@ -19,20 +19,25 @@ export default function Login() {
     partialLogin({ email, userName, connection, push, notifications });
   };
   return (
-    <form onSubmit={handleLogin}>
-      <label>Email</label>
-      <input
-        placeholder="example@example.com"
-        className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
-        onChange={(e) => setEmail(e.target.value)}
-        autoFocus={true}
-      />
-      <label>Username</label>
-      <input
-        placeholder="username"
-        className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
-        onChange={(e) => setUserName(e.target.value)}
-      />
+    <form onSubmit={handleLogin} className="space-y-4">
+      <div>
+        <label>Email</label>
+        <input
+          placeholder="example@example.com"
+          className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
+          onChange={(e) => setEmail(e.target.value)}
+          autoFocus={true}
+        />
+      </div>
+
+      <div>
+        <label>Username</label>
+        <input
+          placeholder="username"
+          className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
+          onChange={(e) => setUserName(e.target.value)}
+        />
+      </div>
 
       <button
         className="w-full bg-button py-2 text-white text-lg font-bold rounded-lg"
