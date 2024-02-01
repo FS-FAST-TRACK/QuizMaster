@@ -147,7 +147,7 @@ namespace QuizMaster.API.Gateway.Services
 
             }
             //await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
-            
+            _channelClient.DeactivateRoomRequest(new DeactivateRoom { Id = room.Id });
             SetParticipantsEndTime(handler, roomPin); // End participant time
             var leaderboards = await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, true); // send scores
             handler.RemoveRoomDataCurrentDisplayed(roomPin); // clear the last question

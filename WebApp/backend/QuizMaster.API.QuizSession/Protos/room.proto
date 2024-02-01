@@ -14,6 +14,7 @@ service QuizRoomService{
 	rpc GetRoomData(Data) returns (RoomResponse);
 	rpc GetAllRoomData(Data) returns (RoomResponse);
 	rpc SaveParticipants(Data) returns (RoomResponse);
+	rpc DeactivateRoomRequest(DeactivateRoom) returns (RoomResponse);
 }
 
 message Data{
@@ -38,4 +39,8 @@ message RoomsEmptyRequest{}
 
 message SetRequest{
 	int32 id=1;
+}
+
+message DeactivateRoom{
+	int32 id =1;
 }
