@@ -113,7 +113,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(response.Message);
             }
 
-            return Ok(JsonConvert.DeserializeObject<Set[]>(response.Data));
+            return Ok(JsonConvert.DeserializeObject<object[]>(response.Data));
         }
 
         [QuizMasterAdminAuthorization]
