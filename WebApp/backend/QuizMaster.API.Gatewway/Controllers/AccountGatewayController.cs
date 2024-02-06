@@ -88,7 +88,26 @@ namespace QuizMaster.API.Gatewway.Controllers
                 users.Add(response.ResponseStream.Current);
             }
 
-            return Ok(users);
+            var usersWithRoles = new List<object>();
+            foreach (var user in users)
+            {
+                object u = new
+                {
+                    id = user.Id,
+                    lastName = user.LastName,
+                    firstName = user.FirstName,
+                    email = user.Email,
+                    userName = user.UserName,
+                    activeData = user.ActiveData,
+                    dateCreated = user.DateCreated,
+                    dateUpdated = user.DateUpdated,
+                    updatedByUser = user.UpdatedByUser,
+                    roles = JsonConvert.DeserializeObject<IEnumerable<string>>(user.Roles)
+                };
+                usersWithRoles.Add(u);
+            }
+
+            return Ok(usersWithRoles);
         }
 
         /// <summary>
