@@ -269,7 +269,7 @@ namespace QuizMaster.API.Gateway.Hubs
         }
 
 
-        public async Task Chat(string chat, string roomId)
+        public async Task Chat(string chat, int roomId)
         {
             string connectionId = Context.ConnectionId;
 
@@ -282,8 +282,8 @@ namespace QuizMaster.API.Gateway.Hubs
             if (participantData == null) { return; }
             // send chat only to group
             if (SessionHandler.IsAdmin(connectionId))
-                await Clients.Group(roomId).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = true });
-            else await Clients.Group(roomId).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = false });
+                await Clients.Group(roomId.ToString()).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = true });
+            else await Clients.Group(roomId.ToString()).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = false });
         }
 
         public async Task JoinRoom(int RoomPin)
