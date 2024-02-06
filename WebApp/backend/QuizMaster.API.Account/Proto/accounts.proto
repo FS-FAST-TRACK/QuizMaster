@@ -56,6 +56,7 @@ message AllUserReply{
 	string dateCreated = 7;
 	string dateUpdated = 8;
 	string updatedByUser = 9;
+	string roles = 10;
 }
 
 // Request check username

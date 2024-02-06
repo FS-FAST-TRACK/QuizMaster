@@ -70,6 +70,7 @@ namespace QuizMaster.API.Account.Service
                 reply.DateCreated = user.DateCreated.ToString();
                 reply.DateUpdated = user.DateUpdated != null ? user.DateUpdated.ToString() : "";
                 reply.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
+                reply.Roles = JsonConvert.SerializeObject(await _userManager.GetRolesAsync(user));
 
                 await responseStream.WriteAsync(reply);
             }
