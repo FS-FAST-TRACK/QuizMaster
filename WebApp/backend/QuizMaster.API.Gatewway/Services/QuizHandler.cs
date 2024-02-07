@@ -24,7 +24,10 @@ namespace QuizMaster.API.Gateway.Services
         private readonly IServiceProvider serviceProvider;
         public QuizHandler(IOptions<GrpcServerConfiguration> options, ReportServiceHandler reportServiceHandler, IServiceProvider serviceProvider)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler});
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             this.reportServiceHandler = reportServiceHandler;
             this.serviceProvider = serviceProvider;
