@@ -109,6 +109,30 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
         }
 
+        public override async Task<RoomResponse> GetSetQuizRoom(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var roomId = request.Id;
+                var setQuizRoom = await _context.SetQuizRooms.Where(qR => qR.QRoomId == roomId).ToListAsync();
+                
+               
+
+                reply.Code = 200;
+                reply.Data = JsonConvert.SerializeObject(setQuizRoom);
+
+                return await Task.FromResult(reply);
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Message = ex.Message;
+
+                return await Task.FromResult(reply);
+            }
+        }
+
 
         public override async Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
         {
@@ -207,7 +231,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             try
             {
-                var allRooms = _context.QuizRooms.Where(a=>a.ActiveData).ToArray();
+                var allRooms = _context.QuizRooms.ToArray();
 
                 reply.Code = 200;
                 reply.Data = JsonConvert.SerializeObject(allRooms);
