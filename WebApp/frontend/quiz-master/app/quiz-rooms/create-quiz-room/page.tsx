@@ -81,6 +81,8 @@ export default function Page() {
 
         toast(response.message);
 
+        // TODO add a redirect after creating a new quiz room
+
         close();
     }, [form.values]);
 

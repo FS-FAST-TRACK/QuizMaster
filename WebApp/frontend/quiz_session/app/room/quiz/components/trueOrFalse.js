@@ -106,7 +106,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
             disabled={isSubmitted}
             onClick={handleSubmit}
           >
-            Sumbit
+            Submit
           </Button>
         </div>
       </div>

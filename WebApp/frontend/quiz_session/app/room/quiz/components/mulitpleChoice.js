@@ -100,7 +100,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
             onClick={handleSubmit}
             disabled={isSubmitted}
           >
-            Sumbit
+            Submit
           </Button>
         </div>
       </div>

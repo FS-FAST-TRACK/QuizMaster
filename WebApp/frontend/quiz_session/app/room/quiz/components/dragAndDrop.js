@@ -233,7 +233,7 @@ function DragAndDrop({ question, connectionId }, ref) {
                 onClick={handleSubmit}
                 disabled={isSubmitted}
               >
-                Sumbit
+                Submit
               </Button>
             </div>
           </div>

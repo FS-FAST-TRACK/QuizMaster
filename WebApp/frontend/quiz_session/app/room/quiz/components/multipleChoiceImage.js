@@ -45,7 +45,7 @@ export default function MultipleChoiceAudio() {
       <div className=" w-full justify-center flex">
         <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
           <Button fullWidth color={"yellow"}>
-            Sumbit
+            Submit
           </Button>
         </div>
       </div>
