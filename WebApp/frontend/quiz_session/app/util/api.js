@@ -1,11 +1,6 @@
-export const BASE_URL =
-  process.env.QUIZMASTER_GATEWAY ??
-  process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY ??
-  "https://central-notably-tadpole.ngrok-free.app";
+export const BASE_URL = process.env.QUIZMASTER_GATEWAY;
 
 export const submitAnswer = ({ id, answer, connectionId }) => {
-  console.log("Submit Answe");
-  console.log(answer);
   fetch(`${BASE_URL}/gateway/api/room/submitAnswer`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
