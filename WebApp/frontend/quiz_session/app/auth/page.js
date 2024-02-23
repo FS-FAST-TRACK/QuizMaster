@@ -3,6 +3,7 @@ import Image from "next/image";
 import logo1 from "@/public/logo/Logo1.svg";
 import Login from "./componts/Login";
 import Link from "next/link";
+import { ADMIN_URL } from "../util/api";
 
 export default function page() {
   return (
@@ -19,10 +20,7 @@ export default function page() {
       </div>
       <div className="flex-row flex space-x-1">
         <div>Already have an account?</div>
-        <Link
-          href={"http://localhost:3000/auth/login"}
-          className="text-blue-500"
-        >
+        <Link href={`${ADMIN_URL}/auth/login`} className="text-blue-500">
           {" "}
           Login
         </Link>

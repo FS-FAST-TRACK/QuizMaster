@@ -1,4 +1,5 @@
 export const BASE_URL = process.env.QUIZMASTER_GATEWAY;
+export const ADMIN_URL = process.env.QUIZMASTER_ADMIN;
 
 export const submitAnswer = ({ id, answer, connectionId }) => {
   fetch(`${BASE_URL}/gateway/api/room/submitAnswer`, {
