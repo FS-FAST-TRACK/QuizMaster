@@ -1,4 +1,29 @@
+<<<<<<< HEAD
+export interface UserInfo {
+    message: string,
+    info: {
+        userData: {
+            id: number,
+            lastName: string,
+            firstName: string,
+            email: string,
+            userName: string,
+            activeData: string,
+            dateCreated: string,
+            dateUpdated: string,
+            updatedByUser: string,
+            phoneNumber: string,
+            phoneNumberConfirmed: string,
+        }
+        roles: string[],
+        validUntil: Date,
+        issuedDate: Date,
+    }
+    
+}
+=======
 import { RefObject } from "react";
+>>>>>>> ddafdc411be225c0a273f899cf189de627569e42
 
 export interface QuestionCore {
     id: number;
@@ -167,6 +192,40 @@ export type PatchItem = {
     op: string;
     value: any;
 };
+<<<<<<< HEAD
+export type SystemInfoDto = {
+    description: string;
+    version: string;
+    web_link: string;
+    mobile_link: string;
+    ios_link: string;
+}
+
+export type ContactUsCreateValues = {
+    userId: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    message: string;
+};
+
+export type ContactDetails = {
+    email: string;
+    contact: string;
+}
+
+export type Feedback = {
+    starRating: number;
+    comment: string;
+}
+
+export type Review = {
+    id: number;
+    starRating: number;
+    comment: string;
+}
+=======
 
 export type UserAuditTrail = {
     UserAuditTrailId: number;
@@ -207,3 +266,4 @@ export interface AuditTableProps {
     tableRef: RefObject<HTMLTableElement>;
     auditType: string | null;
 }
+>>>>>>> ddafdc411be225c0a273f899cf189de627569e42

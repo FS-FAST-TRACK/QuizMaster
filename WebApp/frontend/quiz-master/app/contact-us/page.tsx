@@ -13,7 +13,7 @@ export default async function ContactUs() {
                 <p className="text-sm pt-3">
                     If you have any inquiries, get in touch with us. Just fill
                     in the necessary fields on the form and we would be happy to
-                    hear your thoughts out
+                    hear your thoughts out.
                 </p>
                 <div>
                     <Image
