@@ -1,6 +1,6 @@
 "use client";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
 import drag from "@/public/icons/drag.png";
 import Image from "next/image";
