@@ -35,7 +35,7 @@ const QUIZMASTER_QUESTION_GET_QUESTIONS = `${QUIZMASTER_QUESTION}/get_questions`
 const QUIZMASTER_QUESTION_GET_QUESTION = `${QUIZMASTER_QUESTION}/get_question/`;
 const QUIZMASTER_QUESTION_POST = `${QUIZMASTER_QUESTION}/add_question`;
 const QUIZMASTER_QUESTION_DELETE = `${QUIZMASTER_QUESTION}/delete_question/`;
-const QUIZMASTER_QUESTION_PATCH = `${QUIZMASTER_QUESTION}/update_qustion/`;
+const QUIZMASTER_QUESTION_PATCH = `${QUIZMASTER_QUESTION}/update_question/`;
 //#endregion
 
 //#region Difficulty API endpoints
