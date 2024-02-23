@@ -7,7 +7,7 @@ services:
     container_name: backend_api_account
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.Account/Dockerfile
+      dockerfile: QuizMaster.API.Account/Dockerfile
     ports:
       - 5001:80
       - 6001:443
@@ -36,7 +36,7 @@ services:
     hostname: backend_api_authentication
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.Authentication/Dockerfile
+      dockerfile: QuizMaster.API.Authentication/Dockerfile
     ports:
       - 5002:80
       - 6002:443
@@ -64,7 +64,7 @@ services:
     container_name: backend_api_gateway
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.Gatewway/Dockerfile
+      dockerfile: QuizMaster.API.Gatewway/Dockerfile
     ports:
       - 5000:80
       - 7081:443
@@ -95,7 +95,7 @@ services:
     container_name: backend_api_media
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.Media/Dockerfile
+      dockerfile: QuizMaster.API.Media/Dockerfile
     ports:
       - 5003:80
       - 6003:443
@@ -115,7 +115,7 @@ services:
     container_name: backend_api_monitoring
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.Monitoring/Dockerfile
+      dockerfile: QuizMaster.API.Monitoring/Dockerfile
     ports:
       - 5004:80
       - 6004:443
@@ -136,7 +136,7 @@ services:
     container_name: backend_api_quiz
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.Quiz/Dockerfile
+      dockerfile: QuizMaster.API.Quiz/Dockerfile
     ports:
       - 5005:80
       - 6005:443
@@ -164,7 +164,7 @@ services:
     container_name: backend_api_quizsession
     build:
       context: backend/
-      dockerfile: /QuizMaster.API.QuizSession/Dockerfile
+      dockerfile: QuizMaster.API.QuizSession/Dockerfile
     ports:
       - 5006:80
       - 6006:443
