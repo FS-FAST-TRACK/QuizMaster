@@ -2,7 +2,8 @@
 
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { create } from "zustand";
-import { BASE_URL } from "./api";
+
+export const BASE_URL = process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY;
 
 //connection
 export const useConnection = create((set, get) => ({

@@ -7,8 +7,14 @@ import { useQuizRoomsStore } from "@/store/QuizRoomStore";
 import PromptModal from "../modals/PromptModal";
 
 export default function QuizRoomTable() {
-    const { quizRooms, getPaginatedRooms, pageNumber, pageSize, searchQuery } =
-        useQuizRoomsStore();
+    const pageNumber = useQuizRoomsStore((state) => state.pageNumber);
+    const searchQuery = useQuizRoomsStore((state) => state.searchQuery);
+    const pageSize = useQuizRoomsStore((state) => state.pageSize);
+    const quizRooms = useQuizRoomsStore((state) => state.quizRooms);
+    const getPaginatedRooms = useQuizRoomsStore(
+        (state) => state.getPaginatedRooms
+    );
+
     const [paginatedRooms, setPaginatedRooms] = useState<QuizRoom[]>([]);
     const [deleteQuizRoom, setDeleteQuizRoom] = useState<QuizRoom>();
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -34,7 +40,7 @@ export default function QuizRoomTable() {
         setPaginatedRooms(
             getPaginatedRooms({ pageNumber, pageSize, searchQuery })
         );
-    }, [quizRooms, pageNumber, pageSize, searchQuery]);
+    }, [pageNumber, pageSize, searchQuery, quizRooms]);
 
     const rows =
         quizRooms &&
