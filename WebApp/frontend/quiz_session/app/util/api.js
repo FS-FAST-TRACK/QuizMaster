@@ -1,4 +1,5 @@
-export const BASE_URL = process.env.QUIZMASTER_GATEWAY;
+export const BASE_URL =
+  process.env.QUIZMASTER_GATEWAY ?? process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY;
 
 export const submitAnswer = ({ id, answer, connectionId }) => {
   console.log("Submit Answe");
