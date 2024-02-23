@@ -7,18 +7,23 @@ import {
     Checkbox,
     InputLabel,
     LoadingOverlay,
+    Table,
     TextInput,
     Tooltip,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import styles from "@/styles/input.module.css";
 import { CreateQuizRoom, RoomOptionTypes } from "@/lib/definitions/quizRoom";
 import { validatorFactory } from "@/lib/validation/creators";
 import { isRequired } from "@/lib/validation/regex";
 import { validate } from "@/lib/validation/validate";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { fetchSets } from "@/lib/quizData";
+import { useQuery } from "@tanstack/react-query";
+import { postQuizRoom } from "@/lib/hooks/quizRoom";
+import toast from "react-hot-toast";
 
 const items = [
     { label: "All", href: "/quiz-rooms" },
@@ -35,6 +40,9 @@ const minChar = validatorFactory(3, "min");
 
 export default function Page() {
     const [visible, { close, open }] = useDisclosure(false);
+    const [selectedQuestionSets, setSelectedQuestionSets] = useState<number[]>(
+        []
+    );
 
     const form = useForm<CreateQuizRoom>({
         initialValues: {
@@ -61,6 +69,17 @@ export default function Page() {
     // Creates new quiz room
     const handelSubmit = useCallback(async () => {
         open();
+
+        const quizRoom: CreateQuizRoom = {
+            roomName: form.values.roomName,
+            questionSets: selectedQuestionSets,
+            roomOptions: form.values.roomOptions as RoomOptionTypes,
+        };
+
+        // Call the api to create a new quiz room
+        const response = await postQuizRoom(quizRoom);
+
+        toast(response.message);
 
         close();
     }, [form.values]);
@@ -109,6 +128,15 @@ export default function Page() {
         [form.values]
     );
 
+    const {
+        data: questionSets,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["questionSets"],
+        queryFn: fetchSets,
+    });
+
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
@@ -117,7 +145,7 @@ export default function Page() {
             </div>
             <form
                 className="flex flex-col gap-8 relative"
-                onSubmit={form.onSubmit(() => {
+                onSubmit={form.onSubmit((values) => {
                     handelSubmit();
                 })}
                 onReset={() => form.reset()}
@@ -133,8 +161,93 @@ export default function Page() {
                     withAsterisk
                     classNames={styles}
                     placeholder="Room name"
-                    {...form.getInputProps("qStatement")}
+                    {...form.getInputProps("roomName")}
                 />
+
+                {isLoading ? (
+                    <InputLabel>Question Sets</InputLabel>
+                ) : questionSets === undefined ? null : (
+                    <div>
+                        <InputLabel>Question Sets</InputLabel>
+                        <Table striped>
+                            <Table.Thead>
+                                <Table.Tr>
+                                    <Table.Th>
+                                        <Checkbox
+                                            color="green"
+                                            aria-label="Select row"
+                                            checked={
+                                                selectedQuestionSets.length ===
+                                                questionSets?.length
+                                            }
+                                            onChange={(event) =>
+                                                setSelectedQuestionSets(
+                                                    event.currentTarget.checked
+                                                        ? questionSets.map(
+                                                              (questionSet) =>
+                                                                  questionSet.id
+                                                          )
+                                                        : []
+                                                )
+                                            }
+                                        />
+                                    </Table.Th>
+                                    <Table.Th>Question Set</Table.Th>
+                                    <Table.Th>Created on</Table.Th>
+                                    <Table.Th>Updated on</Table.Th>
+                                    <Table.Th>No. of questions</Table.Th>
+                                </Table.Tr>
+                            </Table.Thead>
+                            <Table.Tbody>
+                                {questionSets.map((questionSet) => (
+                                    <Table.Tr key={questionSet.id}>
+                                        <Table.Td>
+                                            <Checkbox
+                                                color="green"
+                                                aria-label="Select row"
+                                                checked={selectedQuestionSets.includes(
+                                                    questionSet.id
+                                                )}
+                                                onChange={(event) =>
+                                                    setSelectedQuestionSets(
+                                                        event.currentTarget
+                                                            .checked
+                                                            ? [
+                                                                  ...selectedQuestionSets,
+                                                                  questionSet.id,
+                                                              ]
+                                                            : selectedQuestionSets.filter(
+                                                                  (id) =>
+                                                                      id !==
+                                                                      questionSet.id
+                                                              )
+                                                    )
+                                                }
+                                            />
+                                        </Table.Td>
+                                        <Table.Td>
+                                            {questionSet.qSetName}
+                                        </Table.Td>
+                                        <Table.Td>
+                                            {new Date(
+                                                questionSet.dateCreated
+                                            ).toLocaleDateString()}
+                                        </Table.Td>
+                                        <Table.Td>
+                                            {new Date(
+                                                questionSet.dateUpdated
+                                            ).toLocaleDateString()}
+                                        </Table.Td>
+                                        <Table.Td>
+                                            {questionSet.numberOfQuestions}
+                                        </Table.Td>
+                                    </Table.Tr>
+                                ))}
+                            </Table.Tbody>
+                        </Table>
+                    </div>
+                )}
+
                 <div>
                     <InputLabel>Mode</InputLabel>
                     <div className="flex gap-10">
