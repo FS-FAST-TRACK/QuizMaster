@@ -7,10 +7,13 @@ import {
     QuestionDetail,
     QuestionSet,
     Set,
+<<<<<<< HEAD
     SystemInfoDto,
     UserInfo,
     ContactDetails,
     Review,
+=======
+>>>>>>> ddafdc411be225c0a273f899cf189de627569e42
 } from "./definitions";
 import {
     QUIZMASTER_AUTH_GET_COOKIE_INFO,
@@ -162,6 +165,7 @@ export async function fetchAllSetQuestions() {
     try {
         const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
+        console.log(token);
 
         const data = await fetch(apiUrl, {
             credentials: "include",
@@ -239,6 +243,7 @@ export async function fetchMedia(id: string) {
     }
 }
 
+<<<<<<< HEAD
 export async function fetchSystemInfo() {
 
     try {
@@ -334,3 +339,14 @@ export async function fetchReviewsForClient() {
         throw new Error("Failed to fetch reviews.");
     }
 }
+=======
+export function fetchSystemInfo() {
+    let systemInfo = {
+        version: "1.0.0",
+        systemInfo:
+            "Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et.",
+    };
+
+    return systemInfo;
+}
+>>>>>>> ddafdc411be225c0a273f899cf189de627569e42

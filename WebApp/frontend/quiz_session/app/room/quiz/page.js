@@ -6,9 +6,6 @@ import Header from "./components/header";
 export default function page() {
   return (
     <div className="h-full  flex flex-col">
-      <TimeProgress />
-      <Header />
-
       <Question />
     </div>
   );

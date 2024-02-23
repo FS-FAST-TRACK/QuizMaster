@@ -1,9 +1,11 @@
+import { notifications } from "@mantine/notifications";
+
 export const submitPin = (connection, code, params, push) => {
   try {
     connection.invoke("JoinRoom", Number.parseInt(code));
     connection.on("JoinFailed", (isFailed) => {
       if (isFailed) {
-        alert("Incorrect pin");
+        notifications.show({ title: "Room does not exist" });
       } else {
         params.set("roomPin", Number.parseInt(code));
         push(`/room?${params.toString()}`);
@@ -31,7 +33,7 @@ export const timeFormater = (seconds) => {
 export const goBackToLoby = (
   params,
   connection,
-  back,
+  push,
   setResetLeader,
   setStart
 ) => {
@@ -40,7 +42,7 @@ export const goBackToLoby = (
     connection.invoke("GetRoomParticipants", code);
     setResetLeader();
     setStart(false);
-    back();
+    push("http://localhost:3000/dashboard");
   } catch (ex) {
     console.log(ex);
   }

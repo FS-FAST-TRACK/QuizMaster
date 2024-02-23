@@ -20,7 +20,7 @@ export default function Message() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (message) {
-      connection.invoke("Chat", message, roomPin);
+      connection.invoke("Chat", message, Number.parseInt(roomPin));
       setMessage("");
     }
   };

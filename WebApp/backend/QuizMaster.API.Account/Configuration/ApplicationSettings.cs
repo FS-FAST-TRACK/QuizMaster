@@ -8,5 +8,6 @@
         public string RabbitMq_Hostname { get; set; }
         public string SMTP_EMAIL { get; set; }
         public string SMTP_PASSWORD { get; set; }
+        public string GatewayHost { get; set; }
     }
 }

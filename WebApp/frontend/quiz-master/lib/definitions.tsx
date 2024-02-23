@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export interface UserInfo {
     message: string,
     info: {
@@ -20,6 +21,9 @@ export interface UserInfo {
     }
     
 }
+=======
+import { RefObject } from "react";
+>>>>>>> ddafdc411be225c0a273f899cf189de627569e42
 
 export interface QuestionCore {
     id: number;
@@ -163,6 +167,7 @@ export type Set = {
     dateUpdated: Date;
     createdByUserId: number;
     updatedByUserId: number;
+    numberOfQuestions: number;
 };
 export type SetDTO = {
     qSetDesc: string;
@@ -187,6 +192,7 @@ export type PatchItem = {
     op: string;
     value: any;
 };
+<<<<<<< HEAD
 export type SystemInfoDto = {
     description: string;
     version: string;
@@ -219,3 +225,45 @@ export type Review = {
     starRating: number;
     comment: string;
 }
+=======
+
+export type UserAuditTrail = {
+    UserAuditTrailId: number;
+    UserId: number;
+    Action: string;
+    Timestamp: Date;
+    Details: string;
+    UserRole: string;
+    Type: string;
+};
+
+export type UserAudit = {
+    userAuditTrailId: number;
+    userId: number;
+    action: String;
+    username: String;
+    timestamp: Date;
+    details: String;
+    userRole: String;
+    oldValues: String;
+    newValues: String;
+};
+
+export type AuditTrail = {
+    userAuditTrailId: number;
+    userId: number;
+    action: String;
+    userName: String;
+    timestamp: Date;
+    details: String;
+    userRole: String;
+    oldValues: String;
+    newValues: String;
+};
+
+export interface AuditTableProps {
+    data: AuditTrail[];
+    tableRef: RefObject<HTMLTableElement>;
+    auditType: string | null;
+}
+>>>>>>> ddafdc411be225c0a273f899cf189de627569e42

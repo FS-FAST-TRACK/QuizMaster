@@ -95,6 +95,13 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new {  Message });
         }
 
+        [HttpPost("room/submitScreenshot")]
+        public IActionResult SubmitScreenshot([FromBody] SubmitScreenshotDTO screenshotDTO)
+        {
+            string Message = SessionHandler.SubmitScreenshot(roomChannelClient, screenshotDTO.ConnectionId, screenshotDTO.QuestionId, screenshotDTO.ScreenshotLink);
+            return Ok(new { Message });
+        }
+
         [QuizMasterAdminAuthorization]
         [HttpGet("set/all_set")]
         public async Task<IActionResult> GetAllSet()
@@ -106,7 +113,7 @@ namespace QuizMaster.API.Gateway.Controllers
                 return BadRequest(response.Message);
             }
 
-            return Ok(JsonConvert.DeserializeObject<Set[]>(response.Data));
+            return Ok(JsonConvert.DeserializeObject<object[]>(response.Data));
         }
 
         [QuizMasterAdminAuthorization]
@@ -304,7 +311,7 @@ namespace QuizMaster.API.Gateway.Controllers
             return BadRequest(new { Message = "Failed to create room", gRPC_Reply = reply });
         }
 
-        [QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("room/getAllRooms")]
         public async Task<IActionResult> GetAllRoomsAsync()
         {
@@ -316,6 +323,11 @@ namespace QuizMaster.API.Gateway.Controllers
                 {
                     var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(roomResponse.Data);
 
+                    var quizRoomList = new List<QuizRoom>();
+                    foreach (var item in quizRooms)
+                    {
+                        if (item.ActiveData) quizRoomList.Add(item);
+                    }
                     return Ok(new { Message = "Retrieved Rooms", Data = quizRooms });
                 }
             }
@@ -327,9 +339,9 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "No rooms to retrieve"});
         }
 
-        [QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("room/getRoomByPin/{RoomPin}")]
-        public async Task<IActionResult> GetRoomByPinAsync(int RoomPin, bool isId = false)
+        public async Task<IActionResult> GetRoomByPinAsync(int RoomPin, bool isId = false, bool isActive = true)
         {
             try
             {
@@ -341,19 +353,34 @@ namespace QuizMaster.API.Gateway.Controllers
 
                     bool containsId = false;
                     var room = new QuizRoom();
+                    object? roomObject = null;
                     foreach (QuizRoom rooms in quizRooms)
                     {
-                        if ((rooms.QRoomPin == RoomPin && !isId) || (rooms.Id == RoomPin && isId))
+                        if ((rooms.QRoomPin == RoomPin && !isId) || (rooms.Id == RoomPin && isId) && rooms.ActiveData == isActive)
                         {
                             room = rooms;
                             containsId = true;
+                            var setQuizRoom = JsonConvert.DeserializeObject<IEnumerable<SetQuizRoom>>((await roomChannelClient.GetQuizSetAsync(new SetRequest() { Id = room.Id })).Data);
+                            roomObject = new
+                            {
+                                id = room.Id,
+                                qRoomDesc = room.QRoomDesc,
+                                qRoomPin = room.QRoomPin,
+                                roomOptions = JsonConvert.DeserializeObject<IEnumerable<string>>(room.RoomOptions),
+                                activeData = room.ActiveData,
+                                dateCreated = room.DateCreated,
+                                dateUpdated = room.DateUpdated,
+                                createdByUserId = room.CreatedByUserId,
+                                updatedByUserId = room.UpdatedByUserId,
+                                set = setQuizRoom
+                            };
                             break;
                         }
                     }
 
                     if (containsId)
                     {
-                        return Ok( new { Message = $"Retrieved Room {room.QRoomDesc}", Data = room });
+                        return Ok( new { Message = $"Retrieved Room {room.QRoomDesc}", Data = roomObject });
                     }
                 }
             }
@@ -364,11 +391,11 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "No room to retrieve" });
         }
 
-        [QuizMasterAdminAuthorization]
+        [QuizMasterAuthorization]
         [HttpGet("room/getRoomById/{RoomId}")]
-        public async Task<IActionResult> GetRoomByIdAsync(int RoomId)
+        public async Task<IActionResult> GetRoomByIdAsync(int RoomId, bool isActive = true)
         {
-            return await GetRoomByPinAsync(RoomId, true);
+            return await GetRoomByPinAsync(RoomId, true, isActive: isActive);
         }
     }
 }
