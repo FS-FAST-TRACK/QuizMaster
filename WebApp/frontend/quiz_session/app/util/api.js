@@ -1,4 +1,4 @@
-const BASE_URL = "https://localhost:7081";
+export const BASE_URL = process.env.QUIZMASTER_GATEWAY;
 
 export const submitAnswer = ({ id, answer, connectionId }) => {
   console.log("Submit Answe");

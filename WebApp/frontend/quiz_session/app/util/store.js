@@ -2,6 +2,7 @@
 
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { create } from "zustand";
+import { BASE_URL } from "./api";
 
 //connection
 export const useConnection = create((set, get) => ({
@@ -11,7 +12,7 @@ export const useConnection = create((set, get) => ({
     if (get().connection !== undefined) console.log("initializing");
     set({
       connection: new HubConnectionBuilder()
-        .withUrl("https://localhost:7081/gateway/hub/session")
+        .withUrl(`${BASE_URL}/gateway/hub/session`)
         .build(),
     });
   },

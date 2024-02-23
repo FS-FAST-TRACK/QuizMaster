@@ -16,9 +16,23 @@ export default function SliderPuzzle({ question, connectionId }) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const details = question?.details;
-  const min = parseInt(details[0].qDetailDesc, 10);
-  const max = parseInt(details[1].qDetailDesc, 10);
-  const interval = parseInt(details[2].qDetailDesc, 10);
+  // const min = parseInt(details[0].qDetailDesc, 10);
+  // const max = parseInt(details[1].qDetailDesc, 10);
+  // const interval = parseInt(details[2].qDetailDesc, 10);
+
+  const maxValue = details.reduce((acc, curr) => {
+    if (parseInt(curr.qDetailDesc, 10) > acc) {
+      return parseInt(curr.qDetailDesc, 10);
+    }
+    return acc;
+  }, 0);
+
+  const minValue = details.reduce((acc, curr) => {
+    if (parseInt(curr.qDetailDesc, 10) < acc) {
+      return parseInt(curr.qDetailDesc, 10);
+    }
+    return acc;
+  }, 0);
 
   const handleSubmit = () => {
     let id = question.question.id;
@@ -68,20 +82,19 @@ export default function SliderPuzzle({ question, connectionId }) {
         </div>
 
         <div className="flex flex-row items-center ">
-          <div>{min}</div>
+          <div>{minValue}</div>
           <Slider
             color="rgba(209, 209, 209, 1)"
             labelAlwaysOn
-            min={min}
-            max={max}
-            step={interval}
+            min={minValue}
+            max={maxValue}
             className="w-full p-20"
             size="xl"
-            defaultValue={min}
+            defaultValue={minValue}
             onChangeEnd={setAnswer}
             disabled={isSubmitted}
           />
-          <div>{max}</div>
+          <div>{maxValue}</div>
         </div>
       </div>
 
