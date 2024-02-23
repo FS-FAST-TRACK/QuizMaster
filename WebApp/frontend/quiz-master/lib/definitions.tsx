@@ -142,6 +142,7 @@ export type Set = {
     dateUpdated: Date;
     createdByUserId: number;
     updatedByUserId: number;
+    numberOfQuestions: number;
 };
 export type SetDTO = {
     qSetDesc: string;
