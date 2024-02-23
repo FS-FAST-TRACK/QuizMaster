@@ -7,7 +7,9 @@ import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 
-export default function TypeAnswer({ question, connectionId }) {
+export default React.forwardRef(TypeAnswer);
+
+function TypeAnswer({ question, connectionId }, ref) {
   const [answer, setAnswer] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasImage, setHasImage] = useState(false);
@@ -15,10 +17,20 @@ export default function TypeAnswer({ question, connectionId }) {
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
 
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
-    submitAnswer({ id, answer, connectionId });
+    downloadScreenshot();
+    submitAnswer({ id, answer: pick, connectionId });
   };
 
   useEffect(() => {

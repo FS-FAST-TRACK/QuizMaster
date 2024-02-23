@@ -7,7 +7,9 @@ import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 
-export default function TrueOrFalse({ question, connectionId }) {
+export default React.forwardRef(TrueOrFalse);
+
+function TrueOrFalse({ question, connectionId }, ref) {
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasImage, setHasImage] = useState(false);
@@ -15,11 +17,22 @@ export default function TrueOrFalse({ question, connectionId }) {
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
 
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
+    downloadScreenshot();
     submitAnswer({ id, answer: pick, connectionId });
   };
+
   const handlePick = (answer) => {
     if (!isSubmitted) {
       setPick(answer);

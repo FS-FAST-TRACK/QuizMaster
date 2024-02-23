@@ -7,7 +7,9 @@ import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 
-export default function SliderPuzzle({ question, connectionId }) {
+export default React.forwardRef(SliderPuzzle);
+
+function SliderPuzzle({ question, connectionId }, ref) {
   const [answer, setAnswer] = useState("0");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasImage, setHasImage] = useState(false);
@@ -34,10 +36,20 @@ export default function SliderPuzzle({ question, connectionId }) {
     return acc;
   }, 0);
 
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
-    submitAnswer({ id, answer: answer.toString(), connectionId });
+    downloadScreenshot();
+    submitAnswer({ id, answer: pick, connectionId });
   };
 
   useEffect(() => {

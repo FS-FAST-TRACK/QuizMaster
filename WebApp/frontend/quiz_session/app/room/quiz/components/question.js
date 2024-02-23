@@ -36,6 +36,8 @@ export default function Question() {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 
+  const answersRef = React.createRef(null);
+
   useEffect(() => {
     if (leader.length > 0) {
       if (isStop) {
@@ -74,33 +76,58 @@ export default function Question() {
       </>
     );
   }
+
+  // TODO I have already scaffolded a function to handle the screenshot for every question
+  // It has to be uploaded to the server and send it to the report. Refer to Jay or someone present in the team
+
   return (
-    <>
+    <div ref={answersRef}>
       <TimeProgress />
       <Header />
       <div className="flex flex-col h-full w-full items-center space-y-5  flex-grow  ">
         {question?.question.qTypeId === 1 && (
-          <MulitpleChoice question={question} connectionId={connectionId} />
+          <MulitpleChoice
+            ref={answersRef}
+            question={question}
+            connectionId={connectionId}
+          />
         )}
         {question?.question.qTypeId === 2 && (
           <MultipleChoiceAudio
+            ref={answersRef}
             question={question}
             connectionId={connectionId}
           />
         )}
         {question?.question.qTypeId === 3 && (
-          <TrueOrFalse question={question} connectionId={connectionId} />
+          <TrueOrFalse
+            ref={answersRef}
+            question={question}
+            connectionId={connectionId}
+          />
         )}
         {question?.question.qTypeId === 4 && (
-          <TypeAnswer question={question} connectionId={connectionId} />
+          <TypeAnswer
+            ref={answersRef}
+            question={question}
+            connectionId={connectionId}
+          />
         )}
         {question?.question.qTypeId === 5 && (
-          <Slider question={question} connectionId={connectionId} />
+          <Slider
+            ref={answersRef}
+            question={question}
+            connectionId={connectionId}
+          />
         )}
         {question?.question.qTypeId === 6 && (
-          <DragAndDrop question={question} connectionId={connectionId} />
+          <DragAndDrop
+            ref={answersRef}
+            question={question}
+            connectionId={connectionId}
+          />
         )}
       </div>
-    </>
+    </div>
   );
 }

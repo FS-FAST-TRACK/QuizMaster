@@ -10,7 +10,9 @@ import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 
-export default function DragAndDrop({ question, connectionId }) {
+export default React.forwardRef(DragAndDrop);
+
+function DragAndDrop({ question, connectionId }, ref) {
   const [data, setData] = useState([]);
   const [answer, setAnswer] = useState([]);
   const [droppableId, setDroppableId] = useState("droppable");
@@ -98,6 +100,15 @@ export default function DragAndDrop({ question, connectionId }) {
     }
   };
 
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
   const handleSubmit = () => {
     console.log("On Submit");
     console.log(answer);
@@ -108,6 +119,7 @@ export default function DragAndDrop({ question, connectionId }) {
     console.log(idsString);
     let id = question.question.id;
     setIsSubmitted(true);
+    downloadScreenshot();
     submitAnswer({ id, answer: idsString, connectionId });
   };
 
