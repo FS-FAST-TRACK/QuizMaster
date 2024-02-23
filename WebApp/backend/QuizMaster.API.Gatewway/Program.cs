@@ -109,6 +109,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
         option.ExpireTimeSpan = TimeSpan.FromHours(Convert.ToInt16(builder.Configuration["AppSettings:IntExpireHour"]));
         option.SlidingExpiration = true; // renew cookie when it's about to expire,
+        option.Cookie.SameSite = SameSiteMode.None; // frontend is using different port
     });
 
 var app = builder.Build();

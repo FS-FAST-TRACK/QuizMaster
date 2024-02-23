@@ -1,8 +1,9 @@
+
 export const BASE_URL = process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY;
+export const ADMIN_URL = process.env.QUIZMASTER_ADMIN;
+
 
 export const submitAnswer = ({ id, answer, connectionId }) => {
-  console.log("Submit Answe");
-  console.log(answer);
   fetch(`${BASE_URL}/gateway/api/room/submitAnswer`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -80,9 +81,36 @@ export const partialLogin = ({
         });
       }
     } else {
-      notifications.show({
-        title: "Email or username already used ",
-      });
+      try {
+        fetch(`${BASE_URL}/gateway/api/auth/partialLogin`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, userName }),
+        })
+          .then(async (r) => {
+            if (r.status === 200) {
+              const data = await r.json();
+              await connection.invoke("Login", data.token);
+              localStorage.setItem("username", userName.toLowerCase());
+              localStorage.setItem("token", data.token);
+              push("/auth/code");
+            } else if (r.status === 401) {
+              notifications.show({
+                title: "Account is not [on-the-go]",
+              });
+            }
+          })
+          .catch((error) => {
+            notifications.show({
+              title: error,
+            });
+          });
+      } catch (error) {
+        notifications.show({
+          title: error,
+        });
+      }
     }
   });
 };
