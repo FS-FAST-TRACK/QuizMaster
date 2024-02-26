@@ -29,9 +29,13 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 builder.Services.AddLogging();
 builder.Services.AddSignalR();
-builder.Services.AddCors(o => 
-    o.AddDefaultPolicy(builder => 
-    builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddCors(o =>
+{
+    var conf = builder.Configuration.GetSection("AppSettings:CORS_ORIGINS").Get<string[]>();
+    o.AddDefaultPolicy(builder =>
+    builder.WithOrigins(conf).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+}
+    );
 builder.Services.AddDbContext<SystemDbContext>(option => option.UseSqlite("Data Source=SystemData\\System.db"));
 builder.Services.AddSingleton<ReportServiceHandler>();
 builder.Services.AddScoped<ReportRepository>();
