@@ -111,7 +111,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                         {open ? "Logging in..." : "Login"}
                     </Button>
                     <p className="text-sm">
-                        Don't have an account yet?{" "}
+                        Don&apos;t have an account yet?{" "}
                         <Link
                             href={"/auth/signup"}
                             className="font-medium hover:underline cursor-pointer"

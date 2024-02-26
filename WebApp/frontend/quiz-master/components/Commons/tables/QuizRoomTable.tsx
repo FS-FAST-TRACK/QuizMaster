@@ -74,9 +74,9 @@ export default function QuizRoomTable() {
                 <Table.Td>
                     {quizRoom.dateUpdated?.toDateString() || "null"}
                 </Table.Td>
-                <Table.Td>"Question sets count here"</Table.Td>
+                <Table.Td>&quot;Question sets count here&quot;</Table.Td>
 
-                <Table.Td>"Questions count in here"</Table.Td>
+                <Table.Td>&quot;Questions count in here&quot;</Table.Td>
             </Table.Tr>
         ));
 

@@ -65,10 +65,10 @@ export default function ReviewsCard() {
             <div className="flex flex-col gap-2 flex-1 ">
                 <p className=" font-bold text-3xl">Reviews</p>
                 <p className="text-sm pt-3">
-                    Read what our customers are saying about us. If you've
-                    experienced our products or services, we'd love to hear your
-                    feedback. Share your thoughts with us by filling out the
-                    review form below.
+                    Read what our customers are saying about us. If you&apos;ve
+                    experienced our products or services, we&apos;d love to hear
+                    your feedback. Share your thoughts with us by filling out
+                    the review form below.
                 </p>
                 <div>
                     <Image
