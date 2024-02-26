@@ -25,6 +25,12 @@ export const authOptions = {
             },
             async authorize(credentials, req) {
                 try {
+                    return {
+                        name: "name",
+                        email: "test",
+                        username: "username",
+                        role: "role",
+                    };
                     // Guard of null jwt token
                     if (!credentials?.jwt) {
                         return null;
