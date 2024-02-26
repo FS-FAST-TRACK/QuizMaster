@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import CryptoJS from "crypto-js";
+import { QUIZMASTER_SESSION_WEBSITE } from "@/api/api-routes";
 
 export default function Game() {
     const { data: session } = useSession();
@@ -28,7 +29,7 @@ export default function Game() {
     const encodedEncryptedToken = encodeURIComponent(encryptedToken);
     return (
         <Link
-            href={`http://localhost:3001?name=${user?.username}&token=${encodedEncryptedToken}`}
+            href={`${QUIZMASTER_SESSION_WEBSITE}?name=${user?.username}&token=${encodedEncryptedToken}`}
         >
             room
         </Link>
