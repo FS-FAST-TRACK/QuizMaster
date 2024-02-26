@@ -71,12 +71,9 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
             <p className="font-semibold text-[24px] ">Login to your account</p>
             <form
                 className="space-y-5 w-full flex-col flex gap-[40px]"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    form.onSubmit((e) => {
-                        handleLogin(e.username, e.password);
-                    });
-                }}
+                onSubmit={form.onSubmit((e) => {
+                    handleLogin(e.username, e.password);
+                })}
             >
                 <div className="flex flex-col gap-[15px]">
                     <Input.Wrapper className="space-y-4">
