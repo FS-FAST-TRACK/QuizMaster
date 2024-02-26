@@ -57,7 +57,10 @@ const authOptions = {
         signOut: "/",
     },
 
-    secret: process.env.NEXTAUTH_SECRET,
+    secret:
+        process.env.NEXTAUTH_SECRET ??
+        process.env.SECRET ??
+        "04e9d3fbe3c8fbfb7e5f89892751f8c5",
     callbacks: {
         jwt: async ({ token, user }: { token: JWT; user: User }) => {
             user && (token.user = user);
