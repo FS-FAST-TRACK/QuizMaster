@@ -25,13 +25,9 @@ export const authOptions = {
             },
             async authorize(credentials, req) {
                 try {
-                    return {
-                        name: "name",
-                        email: "test",
-                        username: "username",
-                        role: "role",
-                    };
                     // Guard of null jwt token
+                    console.log("Method invoked ");
+                    console.log(credentials);
                     if (!credentials?.jwt) {
                         return null;
                     }
@@ -48,7 +44,7 @@ export const authOptions = {
                         username: parsed.UserName,
                         role: parse.Roles[0].Name,
                     };
-
+                    console.log("Returning user");
                     return user as any;
                 } catch (error) {
                     console.log(error);
