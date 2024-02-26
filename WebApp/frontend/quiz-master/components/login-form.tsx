@@ -39,12 +39,15 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
             if (response.type === "success") {
                 localStorage.setItem("token", response.data.token); //this is just temporary.
                 notification({ type: "success", title: response.message });
+                console.log("token: ", response.data.token);
+                console.log("response");
+                console.log(response);
                 console.log("Before Await sign in");
                 await signIn("credentials", {
                     jwt: response.data.token,
                 });
                 console.log("After await sign in");
-                router.push(callbackUrl);
+                //router.push(callbackUrl);
             } else {
                 notification({ type: "error", title: response.message });
             }
@@ -68,9 +71,12 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
             <p className="font-semibold text-[24px] ">Login to your account</p>
             <form
                 className="space-y-5 w-full flex-col flex gap-[40px]"
-                onSubmit={form.onSubmit((e) => {
-                    handleLogin(e.username, e.password);
-                })}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.onSubmit((e) => {
+                        handleLogin(e.username, e.password);
+                    });
+                }}
             >
                 <div className="flex flex-col gap-[15px]">
                     <Input.Wrapper className="space-y-4">
