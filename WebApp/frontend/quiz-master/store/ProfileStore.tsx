@@ -25,11 +25,15 @@ export class UserAccount implements IAccount {
     constructor() {}
     parse(d: IAccount) {
         let copyOfThis = this as IAccount;
-        for (let key in copyOfThis) {
-            if (d[key as keyof IAccount] !== null) {
-                copyOfThis[key as keyof IAccount] = d[key as keyof IAccount];
-            }
-        }
+        copyOfThis.id = d.id;
+        copyOfThis.lastName = d.lastName;
+        copyOfThis.firstName = d.firstName;
+        copyOfThis.email = d.email;
+        copyOfThis.userName = d.userName;
+        copyOfThis.activeData = d.activeData;
+        copyOfThis.dateCreated = d.dateCreated;
+        copyOfThis.dateUpdated = d.dateUpdated;
+        copyOfThis.updatedByUser = d.updatedByUser;
         return copyOfThis;
     }
 }

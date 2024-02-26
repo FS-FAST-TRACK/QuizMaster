@@ -11,7 +11,7 @@ interface DataToken {
     exp: ISODateString;
     iat: ISODateString;
 }
-export const authOptions = {
+const authOptions = {
     providers: [
         CredentialsProvider({
             // The name to display on the sign in form (e.g. 'Sign in with...')
