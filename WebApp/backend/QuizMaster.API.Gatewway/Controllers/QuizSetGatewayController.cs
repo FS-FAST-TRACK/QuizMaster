@@ -295,12 +295,25 @@ namespace QuizMaster.API.Gateway.Controllers
             var request = new CreateRoomRequest { Room = JsonConvert.SerializeObject(roomDTO) };
             var token = this.GetToken();
             AuthStore authStore = await GetAuthStoreInfo(token ?? "");
-            var headers = new Metadata
+            Metadata? headers = null;
+            try
             {
-                { "username", authStore.UserData.UserName ?? "unknown" },
-                { "id", authStore.UserData.Id.ToString() ?? "unknown" },
-                { "role",  authStore.Roles.ToString() ?? "unknown" }
-            };
+                headers = new Metadata
+                {
+                    { "username", authStore.UserData.UserName ?? "unknown" },
+                    { "id", authStore.UserData.Id.ToString() ?? "unknown" },
+                    { "role",  authStore.Roles.ToString() ?? "unknown" }
+                };
+            }
+            catch
+            {
+                headers = new Metadata
+                {
+                    { "username", "unknown" },
+                    { "id", "unknown" },
+                    { "role", "unknown" }
+                };
+            }
             var reply = await roomChannelClient.CreateRoomAsync(request, headers);
 
             if (reply.Code == 200)
@@ -323,12 +336,26 @@ namespace QuizMaster.API.Gateway.Controllers
                 {
                     var quizRooms = JsonConvert.DeserializeObject<QuizRoom[]>(roomResponse.Data);
 
-                    var quizRoomList = new List<QuizRoom>();
-                    foreach (var item in quizRooms)
+                    var quizRoomList = new List<object>();
+                    foreach (var room in quizRooms)
                     {
-                        if (item.ActiveData) quizRoomList.Add(item);
+                        var setQuizRoom = JsonConvert.DeserializeObject<IEnumerable<SetQuizRoom>>((await roomChannelClient.GetQuizSetAsync(new SetRequest() { Id = room.Id })).Data);
+                        object roomObject = new
+                        {
+                            id = room.Id,
+                            qRoomDesc = room.QRoomDesc,
+                            qRoomPin = room.QRoomPin,
+                            roomOptions = JsonConvert.DeserializeObject<IEnumerable<string>>(room.RoomOptions),
+                            activeData = room.ActiveData,
+                            dateCreated = room.DateCreated,
+                            dateUpdated = room.DateUpdated,
+                            createdByUserId = room.CreatedByUserId,
+                            updatedByUserId = room.UpdatedByUserId,
+                            set = setQuizRoom
+                        };
+                        quizRoomList.Add(roomObject);
                     }
-                    return Ok(new { Message = "Retrieved Rooms", Data = quizRooms });
+                    return Ok(new { Message = "Retrieved Rooms", Data = quizRoomList });
                 }
             }
             catch (Exception ex)
@@ -337,6 +364,29 @@ namespace QuizMaster.API.Gateway.Controllers
             }
 
             return Ok(new { Message = "No rooms to retrieve"});
+        }
+
+        [QuizMasterAdminAuthorization]
+        [HttpDelete("room/delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var roomResponse = await roomChannelClient.DeactivateRoomRequestAsync(new DeactivateRoom() { Id = id });
+
+                if(roomResponse.Code == 200)
+                {
+                    return Ok(new { Message = "Room was deleted"});
+                }
+                else
+                {
+                    return BadRequest(new { Message = "Room was not deleted" });
+                }
+            }
+            catch
+            {
+                return BadRequest(new { Message = "Room was not deleted" });
+            }
         }
 
         [QuizMasterAuthorization]

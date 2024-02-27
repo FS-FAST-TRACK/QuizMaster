@@ -45,7 +45,7 @@ export default function Page() {
 
     const form = useForm<ResourceParameter>({
         initialValues: {
-            pageSize: "10",
+            pageSize: "50",
             searchQuery: "",
             pageNumber: 1,
         },

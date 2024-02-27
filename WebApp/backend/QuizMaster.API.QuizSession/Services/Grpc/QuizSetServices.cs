@@ -159,7 +159,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new QuizSetMessage();
             try
             {
-                var data = await _quizSetManager.Sets.FirstOrDefaultAsync(x => x.Id == request.Id);
+                Set? data = null;
+                for(int i = 0; i < 10; i++)
+                {
+                    data = await _quizSetManager.Sets.FirstOrDefaultAsync(x => x.Id == request.Id);
+                    if (data != null) break;
+                    await Task.Delay(1000);
+                }
                 if(data == null)
                 {
                     reply.Code = 404;

@@ -24,6 +24,7 @@ import { fetchSets } from "@/lib/quizData";
 import { useQuery } from "@tanstack/react-query";
 import { postQuizRoom } from "@/lib/hooks/quizRoom";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const items = [
     { label: "All", href: "/quiz-rooms" },
@@ -39,6 +40,7 @@ const maxChar = validatorFactory(100, "max");
 const minChar = validatorFactory(3, "min");
 
 export default function Page() {
+    const router = useRouter();
     const [visible, { close, open }] = useDisclosure(false);
     const [selectedQuestionSets, setSelectedQuestionSets] = useState<number[]>(
         []
@@ -75,10 +77,12 @@ export default function Page() {
             questionSets: selectedQuestionSets,
             roomOptions: form.values.roomOptions as RoomOptionTypes,
         };
-
         // Call the api to create a new quiz room
-        const response = await postQuizRoom(quizRoom);
-
+        const response = await postQuizRoom(quizRoom, () => {
+            setTimeout(() => {
+                router.push("/quiz-rooms");
+            }, 5000);
+        });
         toast(response.message);
 
         close();
@@ -141,7 +145,7 @@ export default function Page() {
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
             <Breadcrumbs>{items}</Breadcrumbs>
             <div className="flex flex-col md:flex-row justify-between text-2xl font-bold">
-                <h3>Create New Question</h3>
+                <h3>Create New Quiz Room</h3>
             </div>
             <form
                 className="flex flex-col gap-8 relative"
@@ -329,7 +333,14 @@ export default function Page() {
                 </div>
 
                 <div className="flex justify-end">
-                    <Button variant="transparent" color="gray" type="reset">
+                    <Button
+                        variant="transparent"
+                        color="gray"
+                        type="reset"
+                        onClick={() => {
+                            router.push("/quiz-rooms");
+                        }}
+                    >
                         Cancel
                     </Button>
                     <Button variant="filled" color="green" type="submit">

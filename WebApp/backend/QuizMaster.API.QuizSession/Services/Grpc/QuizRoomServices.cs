@@ -32,7 +32,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if (invalidId != -1)
+                if (invalidId == -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
@@ -143,7 +143,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if (invalidId != -1)
+                if (invalidId == -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
@@ -376,12 +376,15 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
             var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
+            int foundId = -1;
             foreach(var id in QuestionSetIds)
             {
-                if (!sets.Contains(id))
-                    return id;
+                if(sets.Contains(id))
+                {
+                    foundId = id; break;
+                };
             }
-            return -1;
+            return foundId ;
         }
 
         // Get Question from a set Id in a list

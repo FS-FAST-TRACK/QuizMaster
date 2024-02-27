@@ -39,15 +39,11 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
             if (response.type === "success") {
                 localStorage.setItem("token", response.data.token); //this is just temporary.
                 notification({ type: "success", title: response.message });
-                console.log("token: ", response.data.token);
-                console.log("response");
-                console.log(response);
-                console.log("Before Await sign in");
+
                 await signIn("credentials", {
                     jwt: response.data.token,
                 });
-                console.log("After await sign in");
-                //router.push(callbackUrl);
+                router.push(callbackUrl);
             } else {
                 notification({ type: "error", title: response.message });
             }

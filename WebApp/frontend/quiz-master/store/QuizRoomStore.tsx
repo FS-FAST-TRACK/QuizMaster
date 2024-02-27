@@ -29,11 +29,15 @@ interface IQuizRoomsStore {
     }) => void;
 }
 
+// Make sure that Only quizrooms with active data are shown
+const showActiveQuizRoom = (quizRoom: QuizRoom) => {
+    return quizRoom.activeData;
+};
 export const useQuizRoomsStore = create<IQuizRoomsStore>((set, get) => ({
     quizRooms: undefined,
     setQuizRooms: (fetchedQuizRooms: QuizRoom[]) => {
         set({
-            quizRooms: fetchedQuizRooms,
+            quizRooms: fetchedQuizRooms.filter(showActiveQuizRoom),
         });
     },
     getPaginatedRooms: ({
