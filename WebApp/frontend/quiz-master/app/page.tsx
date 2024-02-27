@@ -2,6 +2,7 @@ import LoginForm from "@/components/login-form";
 import LogoutButton from "@/components/logout-button";
 import { getServerSession } from "next-auth";
 import HeadNav from "@/components/Commons/navbars/head-nav";
+import HomeComponent from "./home/HomeComponent";
 
 export default async function Home() {
     const session = await getServerSession();
@@ -10,14 +11,14 @@ export default async function Home() {
         <HeadNav />
             {session ? (
                 <div className="text-sm text-stone-500 flex flex-col">
-                    logged in as: @{session.user.name}
-                    <LogoutButton />
+                    <HomeComponent />
+
                 </div>
             ) : (
                 <LoginForm callbackUrl="/dashboard" />
             )}
             
-        
+           
         </main>
     );
 }

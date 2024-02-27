@@ -1,7 +1,22 @@
+"use client";
 import Link from "next/link";
 import { ChevronLeftIcon, UserIcon } from "@heroicons/react/24/outline";
+import { UserInfo } from "@/lib/definitions";
+import React ,{ useEffect, useState } from "react";
+import { fetchLoginUser } from "@/lib/quizData";
+
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+    const [userInfo, setUserInfo] = useState<UserInfo>();
+
+    useEffect(() => {
+        fetchLoginUser().then((res) => {
+            if (res !== null && res !== undefined) {
+                setUserInfo(res);
+            }
+        });
+    }, []);
+
     return (
         <div className="flex h-screen flex-row md:overflow-hidden">
             <div className="flex-none transition w-12 md:w-64 ">
@@ -13,7 +28,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         }}
                     >
                         <Link
-                            href="/dashboard"
+                           // href="/dashboard"
+                           href={userInfo?.info?.roles?.includes('Administrator')? "/dashboard":"/"}
                             className="flex p-4 text-[14px]"
                         >
                             <ChevronLeftIcon className="w-6" />
