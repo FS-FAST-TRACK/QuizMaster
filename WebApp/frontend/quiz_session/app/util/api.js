@@ -68,6 +68,10 @@ export const partialLogin = ({
           if (r.status === 200) {
             const data = await r.json();
             await connection.invoke("Login", data.token);
+            console.log(
+              "This is the partial user data: ===================",
+              data.token
+            );
             localStorage.setItem("username", userName.toLowerCase());
             localStorage.setItem("token", data.token);
             push("/auth/code");
@@ -111,4 +115,24 @@ export const partialLogin = ({
       }
     }
   });
+};
+
+export const userInfo = async (token) => {
+  try {
+    const response = fetch(`${BASE_URL}/gateway/api/auth/info`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = response.json();
+    return data;
+  } catch (error) {
+    notifications.show({
+      title: error,
+    });
+    return "";
+  }
 };

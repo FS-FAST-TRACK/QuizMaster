@@ -6,8 +6,11 @@ import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
+import useUserTokenData from "@/app/util/useUserTokenData";
+import Participants from "../../components/participants";
 
 export default function TypeAnswer({ question, connectionId }) {
+  const { isAdmin } = useUserTokenData();
   const [answer, setAnswer] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasImage, setHasImage] = useState(false);
@@ -52,30 +55,36 @@ export default function TypeAnswer({ question, connectionId }) {
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
+      {isAdmin ? (
+        <div>
+          <Participants includeLoaderModal={false} />
+        </div>
+      ) : (
+        <div className="flex flex-row w-1/2 space-x-2">
+          <div className="w-3/4">
+            <Input
+              placeholder="Type your Answer"
+              size="xl"
+              onChange={(e) => {
+                setAnswer(e.target.value);
+              }}
+              disabled={isSubmitted}
+            />
+          </div>
+          <div className="w-1/4">
+            <Button
+              fullWidth
+              color={"yellow"}
+              size="xl"
+              onClick={handleSubmit}
+              disabled={isSubmitted}
+            >
+              Sumbit
+            </Button>
+          </div>
+        </div>
+      )}
 
-      <div className="flex flex-row w-1/2 space-x-2">
-        <div className="w-3/4">
-          <Input
-            placeholder="Type your Answer"
-            size="xl"
-            onChange={(e) => {
-              setAnswer(e.target.value);
-            }}
-            disabled={isSubmitted}
-          />
-        </div>
-        <div className="w-1/4">
-          <Button
-            fullWidth
-            color={"yellow"}
-            size="xl"
-            onClick={handleSubmit}
-            disabled={isSubmitted}
-          >
-            Sumbit
-          </Button>
-        </div>
-      </div>
       <div className=" w-full justify-center flex">
         <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg"></div>
       </div>

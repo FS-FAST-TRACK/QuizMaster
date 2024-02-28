@@ -6,8 +6,12 @@ import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
+import useUserTokenData from "@/app/util/useUserTokenData";
+import Participants from "../../components/participants";
 
 export default function SliderPuzzle({ question, connectionId }) {
+  const { isAdmin } = useUserTokenData();
+
   const [answer, setAnswer] = useState("0");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasImage, setHasImage] = useState(false);
@@ -71,45 +75,52 @@ export default function SliderPuzzle({ question, connectionId }) {
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
+      {isAdmin ? (
+        <div>
+          <Participants includeLoaderModal={false} />
+        </div>
+      ) : (
+        <div className="flex-grow w-full text-white text-xl font-bold space-x-2 flex-col flex justify-center">
+          <div className="w-full flex justify-center items-center  flex-col ">
+            <div>Your Answer</div>
 
-      <div className="flex-grow w-full text-white text-xl font-bold space-x-2 flex-col flex justify-center">
-        <div className="w-full flex justify-center items-center  flex-col ">
-          <div>Your Answer</div>
+            <div className="w-full flex justify-center items-center text-3xl font-bold ">
+              {answer}
+            </div>
+          </div>
 
-          <div className="w-full flex justify-center items-center text-3xl font-bold ">
-            {answer}
+          <div className="flex flex-row items-center ">
+            <div>{minValue}</div>
+            <Slider
+              color="rgba(209, 209, 209, 1)"
+              labelAlwaysOn
+              min={minValue}
+              max={maxValue}
+              className="w-full p-20"
+              size="xl"
+              defaultValue={minValue}
+              onChangeEnd={setAnswer}
+              disabled={isSubmitted}
+            />
+            <div>{maxValue}</div>
           </div>
         </div>
+      )}
 
-        <div className="flex flex-row items-center ">
-          <div>{minValue}</div>
-          <Slider
-            color="rgba(209, 209, 209, 1)"
-            labelAlwaysOn
-            min={minValue}
-            max={maxValue}
-            className="w-full p-20"
-            size="xl"
-            defaultValue={minValue}
-            onChangeEnd={setAnswer}
-            disabled={isSubmitted}
-          />
-          <div>{maxValue}</div>
+      {!isAdmin && (
+        <div className=" w-full justify-center flex">
+          <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
+            <Button
+              fullWidth
+              color={"yellow"}
+              onClick={handleSubmit}
+              disabled={isSubmitted}
+            >
+              Sumbit
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <div className=" w-full justify-center flex">
-        <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-          <Button
-            fullWidth
-            color={"yellow"}
-            onClick={handleSubmit}
-            disabled={isSubmitted}
-          >
-            Sumbit
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
