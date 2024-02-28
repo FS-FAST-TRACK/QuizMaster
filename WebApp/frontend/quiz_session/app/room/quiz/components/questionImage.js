@@ -14,6 +14,7 @@ export default function QuestionImage({ imageUrl, open }) {
           style={{ width: "25%", height: "auto" }}
           onClick={open}
           className="rounded-md"
+          alt={imageUrl}
         />
       ) : (
         <div className=" w-1/4 h-fit bg-dark_green flex justify-center items-center rounded-lg animate-pulse text-white p-2">
@@ -23,6 +24,7 @@ export default function QuestionImage({ imageUrl, open }) {
             height={0}
             sizes="100vw"
             className="rounded-md"
+            alt={imageUrl}
           />
         </div>
       )}

@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button, Slider } from "@mantine/core";
-import { submitAnswer } from "@/app/util/api";
+import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
+import { useScreenshot } from "use-react-screenshot";
 
 export default React.forwardRef(SliderPuzzle);
 
@@ -16,6 +17,12 @@ function SliderPuzzle({ question, connectionId }, ref) {
   const [imageUrl, setImageUrl] = useState();
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const submitScreenshot = (id, connectionId) => takeScreenShot(ref.current).then((image) => uploadScreenshot(image, id, connectionId));
 
   const details = question?.details;
   // const min = parseInt(details[0].qDetailDesc, 10);
@@ -36,19 +43,10 @@ function SliderPuzzle({ question, connectionId }, ref) {
     return acc;
   }, 0);
 
-  const download = (image, { name = "img", extension = "jpg" } = {}) => {
-    const a = document.createElement("a");
-    a.href = image;
-    a.download = createFileName(extension, name);
-    a.click();
-  };
-
-  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
-
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
-    downloadScreenshot();
+    submitScreenshot(id, connectionId);
     submitAnswer({ id, answer: pick, connectionId });
   };
 
