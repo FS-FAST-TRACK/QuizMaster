@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     >
                         <Link
                            // href="/dashboard"
-                           href={userInfo?.info?.roles?.includes('Administrator')? "/dashboard":"/"}
+                           href={userInfo?.info?.roles?.includes('Administrator')? "/dashboard":"/home"}
                             className="flex p-4 text-[14px]"
                         >
                             <ChevronLeftIcon className="w-6" />

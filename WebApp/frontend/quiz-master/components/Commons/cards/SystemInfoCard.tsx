@@ -39,7 +39,7 @@ export default function SystemInfoCard() {
 
     return (
         <div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2  ">
                 <p className=" font-bold text-2xl">About QuizMaster</p>
                 {isAdmin ? (
                     <div
