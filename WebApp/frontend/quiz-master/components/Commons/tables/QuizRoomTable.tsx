@@ -1,5 +1,12 @@
 import { QuizRoom } from "@/lib/definitions/quizRoom";
-import { Checkbox, LoadingOverlay, Popover, Table, Text } from "@mantine/core";
+import {
+    Button,
+    Checkbox,
+    LoadingOverlay,
+    Popover,
+    Table,
+    Text,
+} from "@mantine/core";
 import { useCallback, useEffect, useState } from "react";
 
 import { notification } from "@/lib/notifications";
@@ -11,17 +18,23 @@ import {
     QUIZMASTER_QUIZROOM_GET_BY_ID,
     QUIZMASTER_SET_GET_SETQUESTION,
 } from "@/api/api-routes";
-import { EllipsisVerticalIcon, TrashIcon } from "@heroicons/react/24/outline";
+import{
+    EllipsisVerticalIcon,
+    PencilIcon,
+    TrashIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default function QuizRoomTable() {
-    const {
-        quizRooms,
-        getPaginatedRooms,
-        pageNumber,
-        pageSize,
-        searchQuery,
-        setQuizRooms,
-    } = useQuizRoomsStore();
+    const pageNumber = useQuizRoomsStore((state) => state.pageNumber);
+    const searchQuery = useQuizRoomsStore((state) => state.searchQuery);
+    const pageSize = useQuizRoomsStore((state) => state.pageSize);
+    const quizRooms = useQuizRoomsStore((state) => state.quizRooms);
+    const setQuizRooms = useQuizRoomsStore((state) => state.setQuizRooms);
+    const getPaginatedRooms = useQuizRoomsStore(
+        (state) => state.getPaginatedRooms
+    );
+
     const [paginatedRooms, setPaginatedRooms] = useState<QuizRoom[]>([]);
     const [deleteQuizRoom, setDeleteQuizRoom] = useState<QuizRoom>();
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -284,6 +297,14 @@ export default function QuizRoomTable() {
                                     Remove
                                 </div>
                             </button>
+                            <Link
+                                // TODO add link to edit quiz room
+                                href={`#`}
+                                className="flex gap-2 p-2 text-[var(--success)] rounded-lg hover:text-white hover:bg-[var(--success)] "
+                            >
+                                <PencilIcon className="w-6 " />
+                                <div>Edit</div>
+                            </Link>
                         </Popover.Dropdown>
                     </Popover>
                 </Table.Td>
