@@ -5,8 +5,11 @@ import { downloadImage, submitAnswer } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
+import { createFileName, useScreenshot } from "use-react-screenshot";
 
-export default function MulitpleChoice({ question, connectionId }) {
+export default React.forwardRef(MulitpleChoice);
+
+function MulitpleChoice({ question, connectionId }, ref) {
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [imageUrl, setImageUrl] = useState();
@@ -14,9 +17,24 @@ export default function MulitpleChoice({ question, connectionId }) {
   const [hasImage, setHasImage] = useState(false);
   const [previousStatement, setPreviousStatement] = useState(null);
 
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
+    downloadScreenshot();
     submitAnswer({ id, answer: pick, connectionId });
   };
 
@@ -82,7 +100,7 @@ export default function MulitpleChoice({ question, connectionId }) {
             onClick={handleSubmit}
             disabled={isSubmitted}
           >
-            Sumbit
+            Submit
           </Button>
         </div>
       </div>

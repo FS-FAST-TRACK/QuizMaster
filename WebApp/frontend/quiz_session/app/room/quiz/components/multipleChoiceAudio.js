@@ -9,7 +9,9 @@ import { downloadImage } from "@/app/util/api";
 import QuestionImage from "./questionImage";
 import { submitAnswer } from "@/app/util/api";
 
-export default function MultipleChoiceAudio({ question, connectionId }) {
+export default React.forwardRef(MultipleChoiceAudio);
+
+function MultipleChoiceAudio({ question, connectionId }, ref) {
   console.log(question);
   const [data, setData] = useState([]);
   const [pick, setPick] = useState();
@@ -20,9 +22,24 @@ export default function MultipleChoiceAudio({ question, connectionId }) {
   const [text, setText] = useState("");
   const [previousStatement, setPreviousStatement] = useState(null);
 
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const download = (image, { name = "img", extension = "jpg" } = {}) => {
+    const a = document.createElement("a");
+    a.href = image;
+    a.download = createFileName(extension, name);
+    a.click();
+  };
+
+  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
+    downloadScreenshot();
     submitAnswer({ id, answer: pick, connectionId });
   };
 
@@ -112,7 +129,7 @@ export default function MultipleChoiceAudio({ question, connectionId }) {
             onClick={handleSubmit}
             disabled={isSubmitted}
           >
-            Sumbit
+            Submit
           </Button>
         </div>
       </div>

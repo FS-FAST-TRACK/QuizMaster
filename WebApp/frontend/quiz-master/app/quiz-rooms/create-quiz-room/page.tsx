@@ -22,9 +22,9 @@ import { validate } from "@/lib/validation/validate";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { fetchSets } from "@/lib/quizData";
 import { useQuery } from "@tanstack/react-query";
-import { postQuizRoom } from "@/lib/hooks/quizRoom";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { postQuizRoom } from "@/lib/queries/room";
 
 const items = [
     { label: "All", href: "/quiz-rooms" },
@@ -84,6 +84,8 @@ export default function Page() {
             }, 5000);
         });
         toast(response.message);
+
+        // TODO add a redirect after creating a new quiz room
 
         close();
     }, [form.values]);

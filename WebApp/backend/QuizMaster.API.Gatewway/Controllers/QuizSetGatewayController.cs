@@ -324,6 +324,14 @@ namespace QuizMaster.API.Gateway.Controllers
             return BadRequest(new { Message = "Failed to create room", gRPC_Reply = reply });
         }
 
+        [QuizMasterAdminAuthorization]
+        [HttpGet("room/proceed/{id}")]
+        public IActionResult RoomProceedNextRound(int id)
+        {
+            SessionHandler.SetPauseRoom(id, false);
+            return Ok(new { Message = "Proceed Success"});
+        }
+
         [QuizMasterAuthorization]
         [HttpGet("room/getAllRooms")]
         public async Task<IActionResult> GetAllRoomsAsync()
