@@ -11,7 +11,7 @@ export default function RoomPin() {
   return (
     <div className=" flex-row flex h-14 space-x-2">
       <div className="bg-white p-2 rounded-lg h-full justify-center items-center flex">
-        <Image src={logo1} height={30} />
+        <Image src={logo1} height={30} alt="logo" />
       </div>
       <div className="flex h-full w-fit flex-col justify-between">
         <h6 className="text-white text-sm">Room Code</h6>
@@ -19,7 +19,7 @@ export default function RoomPin() {
           <h6 className="text-white text-2xl font-bold">
             {params.get("roomPin")}
           </h6>
-          <Image src={copy} width={30} height={5} />
+          <Image src={copy} width={30} height={5} alt={copy}/>
         </div>
       </div>
     </div>

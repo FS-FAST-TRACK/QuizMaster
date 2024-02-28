@@ -15,7 +15,7 @@ export default function MultipleChoiceAudio() {
         centered
         size="xl"
       >
-        <Image src={lifo} alt="LIFO diagram" />
+        <Image src={lifo} alt="LIFO diagram 1" />
       </Modal>
       <div className="flex flex-col items-center  flex-grow">
         <div className="text-white">Multiple Choice</div>
@@ -24,7 +24,7 @@ export default function MultipleChoiceAudio() {
           Last-In-First-Out (LIFO) behavior
         </div>
         <div className="h-1/4 w-1/4 rounded-md" onClick={open}>
-          <Image src={lifo} alt="LIFO diagram" />
+          <Image src={lifo} alt="LIFO diagram 2" />
         </div>
       </div>
 

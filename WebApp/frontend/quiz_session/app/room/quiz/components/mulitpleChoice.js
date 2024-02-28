@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
-import { downloadImage, submitAnswer } from "@/app/util/api";
+import { downloadImage, submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
-import { createFileName, useScreenshot } from "use-react-screenshot";
+import { useScreenshot } from "use-react-screenshot";
 
 export default React.forwardRef(MulitpleChoice);
 
@@ -22,20 +22,13 @@ function MulitpleChoice({ question, connectionId }, ref) {
     quality: 1.0,
   });
 
-  const download = (image, { name = "img", extension = "jpg" } = {}) => {
-    const a = document.createElement("a");
-    a.href = image;
-    a.download = createFileName(extension, name);
-    a.click();
-  };
-
-  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+  const submitScreenshot = (id, connectionId) => takeScreenShot(ref.current).then((image) => uploadScreenshot(image, id, connectionId));
 
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
-    downloadScreenshot();
     submitAnswer({ id, answer: pick, connectionId });
+    submitScreenshot(id, connectionId);
   };
 
   const handlePick = (answer) => {
@@ -46,6 +39,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
 
   useEffect(() => {
     if (question?.question.qImage) {
+      if(question.question.qImage === "nothing") return;
       downloadImage({
         id: question.question.qImage,
         setImageUrl: setImageUrl,

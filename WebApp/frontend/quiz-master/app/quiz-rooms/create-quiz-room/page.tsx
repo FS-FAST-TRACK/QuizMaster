@@ -299,6 +299,7 @@ export default function Page() {
                         onChange={() => {
                             toogleOptions("allowreconnect");
                         }}
+                        disabled
                     />
                     <Checkbox
                         label="Show leaderboard each round"
@@ -320,6 +321,7 @@ export default function Page() {
                         checked={form.values.roomOptions.includes(
                             "allowjoinonquizstarted:true"
                         )}
+                        disabled
                     />
                     <Checkbox
                         id="top-10-only"

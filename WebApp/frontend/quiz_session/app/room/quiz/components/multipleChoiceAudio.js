@@ -5,9 +5,10 @@ import Image from "next/image";
 import audio from "@/public/icons/audio.png";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
-import { downloadImage } from "@/app/util/api";
+import { downloadImage, uploadScreenshot } from "@/app/util/api";
 import QuestionImage from "./questionImage";
 import { submitAnswer } from "@/app/util/api";
+import { useScreenshot } from "use-react-screenshot";
 
 export default React.forwardRef(MultipleChoiceAudio);
 
@@ -27,19 +28,12 @@ function MultipleChoiceAudio({ question, connectionId }, ref) {
     quality: 1.0,
   });
 
-  const download = (image, { name = "img", extension = "jpg" } = {}) => {
-    const a = document.createElement("a");
-    a.href = image;
-    a.download = createFileName(extension, name);
-    a.click();
-  };
-
-  const downloadScreenshot = () => takeScreenShot(ref.current).then(download);
+  const submitScreenshot = (id, connectionId) => takeScreenShot(ref.current).then((image) => uploadScreenshot(image, id, connectionId));
 
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
-    downloadScreenshot();
+    submitScreenshot(id, connectionId);
     submitAnswer({ id, answer: pick, connectionId });
   };
 
