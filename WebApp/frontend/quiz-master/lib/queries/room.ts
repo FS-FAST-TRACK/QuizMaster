@@ -25,7 +25,7 @@ export const fetchQuizRooms = async () => {
     }
 };
 
-export async function postQuizRoom(data: CreateQuizRoom) {
+export async function postQuizRoom(data: CreateQuizRoom, successCallback = () => {}) {
     try {
         const token = localStorage.getItem("token"); //just temporary
         const res = await fetch(QUIZMASTER_QUIZROOM_POST, {
@@ -35,7 +35,9 @@ export async function postQuizRoom(data: CreateQuizRoom) {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(data),
+            credentials: "include",
         });
+        successCallback();
 
         return {
             message: "Room created successfully.",
