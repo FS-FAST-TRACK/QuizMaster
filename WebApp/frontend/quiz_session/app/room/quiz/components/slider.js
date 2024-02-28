@@ -1,15 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button, Slider } from "@mantine/core";
-import { submitAnswer } from "@/app/util/api";
+import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
+import { useScreenshot } from "use-react-screenshot";
 
-export default function SliderPuzzle({ question, connectionId }) {
+export default React.forwardRef(SliderPuzzle);
+
+function SliderPuzzle({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
 
   const [answer, setAnswer] = useState("0");
@@ -18,6 +21,15 @@ export default function SliderPuzzle({ question, connectionId }) {
   const [imageUrl, setImageUrl] = useState();
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const submitScreenshot = (id, connectionId) =>
+    takeScreenShot(ref.current).then((image) =>
+      uploadScreenshot(image, id, connectionId)
+    );
 
   const details = question?.details;
   // const min = parseInt(details[0].qDetailDesc, 10);
@@ -41,7 +53,8 @@ export default function SliderPuzzle({ question, connectionId }) {
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
-    submitAnswer({ id, answer: answer.toString(), connectionId });
+    submitScreenshot(id, connectionId);
+    submitAnswer({ id, answer: pick, connectionId });
   };
 
   useEffect(() => {

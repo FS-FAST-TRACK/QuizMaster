@@ -1,16 +1,19 @@
 "use client";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
 import drag from "@/public/icons/drag.png";
 import Image from "next/image";
-import { submitAnswer } from "@/app/util/api";
+import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
+import { useScreenshot } from "use-react-screenshot";
 
-export default function DragAndDrop({ question, connectionId }) {
+export default React.forwardRef(DragAndDrop);
+
+function DragAndDrop({ question, connectionId }, ref) {
   const [data, setData] = useState([]);
   const [answer, setAnswer] = useState([]);
   const [droppableId, setDroppableId] = useState("droppable");
@@ -20,6 +23,10 @@ export default function DragAndDrop({ question, connectionId }) {
   const [imageUrl, setImageUrl] = useState();
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
 
   useEffect(() => {
     if (question?.question.qImage) {
@@ -98,6 +105,8 @@ export default function DragAndDrop({ question, connectionId }) {
     }
   };
 
+  const submitScreenshot = (id, connectionId) => takeScreenShot(ref.current).then((image) => uploadScreenshot(image, id, connectionId));
+
   const handleSubmit = () => {
     console.log("On Submit");
     console.log(answer);
@@ -108,6 +117,7 @@ export default function DragAndDrop({ question, connectionId }) {
     console.log(idsString);
     let id = question.question.id;
     setIsSubmitted(true);
+    submitScreenshot(id, connectionId);
     submitAnswer({ id, answer: idsString, connectionId });
   };
 
@@ -221,7 +231,7 @@ export default function DragAndDrop({ question, connectionId }) {
                 onClick={handleSubmit}
                 disabled={isSubmitted}
               >
-                Sumbit
+                Submit
               </Button>
             </div>
           </div>

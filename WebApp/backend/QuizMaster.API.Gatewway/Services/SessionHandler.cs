@@ -30,6 +30,7 @@ namespace QuizMaster.API.Gateway.Services
         private Dictionary<int, IEnumerable<QuizParticipant>> RoomEliminatedParticipants;
         private Dictionary<string, string> SessionId;
         private readonly ReportServiceHandler ReportHandler;
+        private Dictionary<int, bool> RoomNextSetPaused;
 
         public SessionHandler(ReportServiceHandler reportServiceHandler)
         {
@@ -43,6 +44,7 @@ namespace QuizMaster.API.Gateway.Services
             ActiveRooms = new();
             RoomEliminatedParticipants = new();
             SessionId = new();
+            RoomNextSetPaused = new();
             ReportHandler = reportServiceHandler;
         }
 
@@ -56,6 +58,19 @@ namespace QuizMaster.API.Gateway.Services
         public string GetSessionId(string roomPin)
         {
             return SessionId[roomPin];
+        }
+
+        public void SetPauseRoom(int roomId, bool Pause)
+        {
+            if(RoomNextSetPaused.ContainsKey(roomId))
+                RoomNextSetPaused[roomId] = Pause;
+            else RoomNextSetPaused.Add(roomId, Pause);
+        }
+
+        public bool GetPausedRoom(int roomId)
+        {
+            RoomNextSetPaused.TryGetValue(roomId, out bool result);
+            return result;
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)

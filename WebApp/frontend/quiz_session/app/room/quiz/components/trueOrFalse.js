@@ -1,15 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
-import { submitAnswer } from "@/app/util/api";
+import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
+import { useScreenshot } from "use-react-screenshot";
 
-export default function TrueOrFalse({ question, connectionId }) {
+export default React.forwardRef(TrueOrFalse);
+
+function TrueOrFalse({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
 
   const [pick, setPick] = useState();
@@ -18,12 +21,23 @@ export default function TrueOrFalse({ question, connectionId }) {
   const [imageUrl, setImageUrl] = useState();
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const submitScreenshot = (id, connectionId) =>
+    takeScreenShot(ref.current).then((image) =>
+      uploadScreenshot(image, id, connectionId)
+    );
 
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
+    submitScreenshot(id, connectionId);
     submitAnswer({ id, answer: pick, connectionId });
   };
+
   const handlePick = (answer) => {
     if (!isSubmitted) {
       setPick(answer);

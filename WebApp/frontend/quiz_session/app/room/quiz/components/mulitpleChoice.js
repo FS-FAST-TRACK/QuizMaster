@@ -1,14 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@mantine/core";
-import { downloadImage, submitAnswer } from "@/app/util/api";
+import { downloadImage, submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 import Participants from "../../components/participants";
 import useUserTokenData from "@/app/util/useUserTokenData";
+import { useScreenshot } from "use-react-screenshot";
 
-export default function MulitpleChoice({ question, connectionId }) {
+export default React.forwardRef(MulitpleChoice);
+
+function MulitpleChoice({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
 
   const [pick, setPick] = useState();
@@ -18,10 +21,21 @@ export default function MulitpleChoice({ question, connectionId }) {
   const [hasImage, setHasImage] = useState(false);
   const [previousStatement, setPreviousStatement] = useState(null);
 
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const submitScreenshot = (id, connectionId) =>
+    takeScreenShot(ref.current).then((image) =>
+      uploadScreenshot(image, id, connectionId)
+    );
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
     submitAnswer({ id, answer: pick, connectionId });
+    submitScreenshot(id, connectionId);
   };
 
   const handlePick = (answer) => {
@@ -32,6 +46,7 @@ export default function MulitpleChoice({ question, connectionId }) {
 
   useEffect(() => {
     if (question?.question.qImage) {
+      if (question.question.qImage === "nothing") return;
       downloadImage({
         id: question.question.qImage,
         setImageUrl: setImageUrl,

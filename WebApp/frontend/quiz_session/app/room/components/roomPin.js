@@ -10,8 +10,8 @@ export default function RoomPin() {
   const params = new URLSearchParams(searchParams);
   return (
     <div className=" flex-row flex h-14 space-x-2">
-      <div className="bg-white p-2 rounded-md h-full justify-center items-center flex">
-        <Image src={logo1} height={30} />
+      <div className="bg-white p-2 rounded-lg h-full justify-center items-center flex">
+        <Image src={logo1} height={30} alt="logo" />
       </div>
       <div className="flex h-full w-fit flex-col justify-between">
         <h6 className="text-white text-sm">Room Code</h6>

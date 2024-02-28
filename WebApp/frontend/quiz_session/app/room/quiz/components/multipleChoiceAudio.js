@@ -5,13 +5,16 @@ import Image from "next/image";
 import audio from "@/public/icons/audio.png";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
-import { downloadImage } from "@/app/util/api";
+import { downloadImage, uploadScreenshot } from "@/app/util/api";
 import QuestionImage from "./questionImage";
 import { submitAnswer } from "@/app/util/api";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
+import { useScreenshot } from "use-react-screenshot";
 
-export default function MultipleChoiceAudio({ question, connectionId }) {
+export default React.forwardRef(MultipleChoiceAudio);
+
+function MultipleChoiceAudio({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
 
   console.log(question);
@@ -24,9 +27,20 @@ export default function MultipleChoiceAudio({ question, connectionId }) {
   const [text, setText] = useState("");
   const [previousStatement, setPreviousStatement] = useState(null);
 
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const submitScreenshot = (id, connectionId) =>
+    takeScreenShot(ref.current).then((image) =>
+      uploadScreenshot(image, id, connectionId)
+    );
+
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
+    submitScreenshot(id, connectionId);
     submitAnswer({ id, answer: pick, connectionId });
   };
 

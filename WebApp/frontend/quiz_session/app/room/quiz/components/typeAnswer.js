@@ -1,26 +1,40 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button, Input } from "@mantine/core";
-import { submitAnswer } from "@/app/util/api";
+import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
+import { useScreenshot } from "use-react-screenshot";
 
-export default function TypeAnswer({ question, connectionId }) {
+export default React.forwardRef(TypeAnswer);
+
+function TypeAnswer({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
+
   const [answer, setAnswer] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [hasImage, setHasImage] = useState(false);
   const [imageUrl, setImageUrl] = useState();
   const [previousStatement, setPreviousStatement] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [image, takeScreenShot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0,
+  });
+
+  const submitScreenshot = (id, connectionId) =>
+    takeScreenShot(ref.current).then((image) =>
+      uploadScreenshot(image, id, connectionId)
+    );
 
   const handleSubmit = () => {
     let id = question.question.id;
     setIsSubmitted(true);
+    submitScreenshot(id, connectionId);
     submitAnswer({ id, answer, connectionId });
   };
 

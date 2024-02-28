@@ -73,6 +73,7 @@ export default function Welcome() {
           //question
           connection.on("question", (question) => {
             setQuestion(question);
+            setStart(true);
           });
 
           //leaderboard

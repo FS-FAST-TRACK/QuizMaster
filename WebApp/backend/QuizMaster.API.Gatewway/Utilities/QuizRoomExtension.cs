@@ -38,7 +38,7 @@ namespace QuizMaster.API.Gateway.Utilities
                 if (option.Contains("mode:"))
                 {
                     hasMode = true;
-                    roomOptions.Add(option.Split(":")[1].ToLower().Contains("elimination")?RoomOption.EliminationRound:RoomOption.EliminationRound);
+                    roomOptions.Add(option.Split(":")[1].ToLower().Contains("elimination")?RoomOption.EliminationRound:RoomOption.NormalRound);
                 }
                 // show leaderboard
                 if (option.Contains("showleaderboardeachround:"))

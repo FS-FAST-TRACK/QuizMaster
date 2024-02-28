@@ -64,6 +64,7 @@ namespace QuizMaster.API.Gateway.Services
                 return;
             }
 
+            handler.SetPauseRoom(roomId, true); // <- Pause the room when before proceeding to next round
             handler.AddActiveRoom(room.QRoomPin, room); // register the room to be started | set to active
             int setIndex = 0;
             foreach (var Qset in quizSets)
@@ -139,6 +140,18 @@ namespace QuizMaster.API.Gateway.Services
                     await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores
                     await Task.Delay(10000);
                 }
+
+                int limit = 100; // DEFAULT (300s) of 5mins, if not clicked `proceed` then continue
+                while (handler.GetPausedRoom(roomId) && limit > 0)
+                {
+                    // Adding delay so it doesn't kill the backend when looping infinitely
+                    await Task.Delay(1000); 
+                    // Notify the admin while the game is paused
+                    await hub.Clients.Client(hostConnectionId).SendAsync("paused", $"Game is paused, click proceed to start or the game will resume automatically on '{limit--} second/s'");
+                }
+
+                // Reset to true
+                handler.SetPauseRoom(roomId, true);
 
                 // before going to new set, do some elimination if toggled
                 if (room.IsEliminationRound() && setIndex < quizSets.Count)
