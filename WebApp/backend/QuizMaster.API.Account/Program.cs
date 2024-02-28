@@ -67,11 +67,9 @@ namespace QuizMaster.API.Account
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
 			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
+				//app.UseSwagger();
+				//app.UseSwaggerUI();
 			}
-            app.UseSwagger();
-            app.UseSwaggerUI();
 
             app.UseCors(options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
 

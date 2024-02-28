@@ -23,9 +23,6 @@ const nextConfig = {
     /*
       I have ignored linting and errors for now 
     */
-    typescript: {
-        ignoreBuildErrors: true,
-    },
     experimental: { serverActions: true },
 };
 

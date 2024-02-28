@@ -83,10 +83,10 @@ namespace QuizMaster.API.QuizSession
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                
+
+                //app.UseSwagger();
+                //app.UseSwaggerUI();
             }
-            app.UseSwagger();
-            app.UseSwaggerUI();
 
             app.UseRouting(); // required when use endpoints is implemented
 
