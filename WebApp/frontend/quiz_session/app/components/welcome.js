@@ -11,6 +11,7 @@ import {
   useQuestion,
   useLeaderboard,
   useMetaData,
+  useAnswer
 } from "../util/store";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
@@ -29,6 +30,7 @@ export default function Welcome() {
   const { setQuestion } = useQuestion();
   const { setLeaderboard } = useLeaderboard();
   const { setMetadata } = useMetaData();
+  const { setAnswer } = useAnswer();
   const { push } = useRouter();
   const [progress, setProgress] = useState(0);
 
@@ -83,9 +85,13 @@ export default function Welcome() {
 
           //metadata
           connection.on("metadata", (metadata) => {
-            console.log(metadata);
             setMetadata(metadata);
           });
+
+          // answer
+          connection.on("answer", (answer) => {
+            setAnswer(answer)
+          })
 
           const token = params.get("token");
           const username = params.get("name");

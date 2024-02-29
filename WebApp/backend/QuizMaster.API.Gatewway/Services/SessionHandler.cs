@@ -317,7 +317,7 @@ namespace QuizMaster.API.Gateway.Services
             {
                 foreach (string Qanswer in answers)
                 {
-                    if (Qanswer.ToLower() == answer.ToLower())
+                    if (Qanswer.ToLower().Trim() == answer.ToLower().Trim())
                     {
                         correct = true;
                         break;

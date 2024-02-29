@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, Slider } from "@mantine/core";
+import { Button, CheckIcon, Slider } from "@mantine/core";
 import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
@@ -9,11 +9,13 @@ import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
+import { useAnswer } from "@/app/util/store";
 
 export default React.forwardRef(SliderPuzzle);
 
 function SliderPuzzle({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
+  const { answer: ANSWER } = useAnswer();
 
   const [answer, setAnswer] = useState("0");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -54,7 +56,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
     let id = question.question.id;
     setIsSubmitted(true);
     submitScreenshot(id, connectionId);
-    submitAnswer({ id, answer: pick, connectionId });
+    submitAnswer({ id, answer, connectionId });
   };
 
   useEffect(() => {
@@ -89,14 +91,25 @@ function SliderPuzzle({ question, connectionId }, ref) {
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
       {isAdmin ? (
-        <div>
+        <div className="py-8">
+          { ANSWER && 
+             <div className="py-8 px-[20%]">
+              <p className="text-white">Correct answer is: </p>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon className="px-4" width={20} height={20} /></div>
+            </div>
+          }
           <Participants includeLoaderModal={false} />
         </div>
       ) : (
         <div className="flex-grow w-full text-white text-xl font-bold space-x-2 flex-col flex justify-center">
+          { ANSWER && 
+            <div className="py-8 px-[20%] w-full">
+              <p className="text-white">Correct answer is: </p>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon className="px-4" width={20} height={20} /></div>
+            </div>
+          }
           <div className="w-full flex justify-center items-center  flex-col ">
             <div>Your Answer</div>
-
             <div className="w-full flex justify-center items-center text-3xl font-bold ">
               {answer}
             </div>
@@ -127,7 +140,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
               fullWidth
               color={"yellow"}
               onClick={handleSubmit}
-              disabled={isSubmitted}
+              disabled={isSubmitted || ANSWER}
             >
               Submit
             </Button>

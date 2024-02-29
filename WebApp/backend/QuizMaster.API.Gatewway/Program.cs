@@ -85,6 +85,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<GrpcServerConfiguration>(builder.Configuration.GetSection("GrpcServerConfiguration"));
+builder.Services.Configure<QuizSettings>(builder.Configuration.GetSection("QuizSettings"));
 
 // register the services
 builder.Services.AddScoped<IRepository, Repository>();

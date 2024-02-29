@@ -1,4 +1,6 @@
+import { ADMIN_URL, BASE_URL } from "@/app/util/api";
 import { notifications } from "@mantine/notifications";
+import CryptoJS from "crypto-js";
 
 export const submitPin = (connection, code, params, push) => {
   try {
@@ -35,14 +37,35 @@ export const goBackToLoby = (
   connection,
   push,
   setResetLeader,
-  setStart
+  setStart,
+  isAdmin
 ) => {
   try {
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+
+    function encodeUTF8(input) {
+      return encodeURIComponent(input);
+    }
+
+    const utf8EncodedToken = encodeUTF8(token);
+
+    const encryptedToken = CryptoJS.AES.encrypt(
+      utf8EncodedToken,
+      "secret_key"
+    ).toString();
+
+    localStorage.clear(); //CLEAR
     const code = params.get("roomPin");
     connection.invoke("GetRoomParticipants", code);
     setResetLeader();
     setStart(false);
-    push("http://localhost:3000/dashboard");
+    
+    if(isAdmin){
+      push(`${ADMIN_URL}/dashboard`)
+    }else{
+      push(`/?name=${username}&token=${encodeURIComponent(encryptedToken)}`);
+    }
   } catch (ex) {
     console.log(ex);
   }

@@ -72,8 +72,14 @@ export const useLeaderboard = create((set) => ({
 export const useMetaData = create((set) => ({
   metadata: undefined,
   setMetadata: (data) => {
-    console.log("store");
-    console.log(data);
     set({ metadata: data });
   },
 }));
+
+// answer
+export const useAnswer = create((set) => ({
+  answer: undefined,
+  setAnswer: (data) => {
+    set({ answer: data });
+  }
+}))

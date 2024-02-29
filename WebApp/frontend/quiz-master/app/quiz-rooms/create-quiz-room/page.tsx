@@ -55,7 +55,7 @@ export default function Page() {
                 "displaytop10only:false",
                 "allowjoinonquizstarted:false",
                 "allowreconnect:false",
-                "showLeaderboardEachRound:false",
+                "showLeaderboardEachRound:true",
             ],
         },
         clearInputErrorOnChange: true,

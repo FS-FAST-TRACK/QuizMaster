@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button } from "@mantine/core";
+import { Button, CheckIcon } from "@mantine/core";
 import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
@@ -9,11 +9,13 @@ import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
+import { useAnswer } from "@/app/util/store";
 
 export default React.forwardRef(TrueOrFalse);
 
 function TrueOrFalse({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
+  const { answer: ANSWER } = useAnswer();
 
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -76,11 +78,23 @@ function TrueOrFalse({ question, connectionId }, ref) {
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
       {isAdmin ? (
-        <div>
+        <div className="py-8">
+          { ANSWER && 
+            <div className="py-8 px-[20%]">
+              <p className="text-white">Correct answer is: </p>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p><CheckIcon width={20} height={20} /></div>
+            </div>
+          }
           <Participants includeLoaderModal={false} />
         </div>
       ) : (
         <div className="w-full grid grid-cols-2 place-content-center ">
+          { ANSWER && 
+            <div className="py-8 px-[20%] col-span-2">
+              <p className="text-white">Correct answer is: </p>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p><CheckIcon width={20} height={20} /></div>
+            </div>
+          }
           <div
             className={` ${
               pick === "true"
@@ -114,7 +128,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               fullWidth
               color={"yellow"}
               size="xl"
-              disabled={isSubmitted}
+              disabled={isSubmitted || ANSWER }
               onClick={handleSubmit}
             >
               Submit
