@@ -1,14 +1,13 @@
+"use client";
+
 import React from "react";
-import logo1 from "@/public/logo/Logo1.svg";
-import Image from "next/image";
-import copy from "@/public/icons/copy.png";
-import { Loader, Button } from "@mantine/core";
-import { names } from "../util/data";
 import RoomPin from "./roomPin";
 import Participants from "./participants";
 import Start from "./start";
+import useUserTokenData from "@/app/util/useUserTokenData";
 
 export default function Room() {
+  const { isAdmin } = useUserTokenData();
   return (
     <div className=" w-full h-full p-5 flex flex-col">
       <RoomPin />
@@ -16,6 +15,13 @@ export default function Room() {
         <Participants />
       </div>
       <Start />
+      {!isAdmin && (
+        <div className="flex bottom-0 h-20 items-center justify-center animate-pulse">
+          <p className="font-regular text-white">
+            Waiting for the host to start...
+          </p>
+        </div>
+      )}
     </div>
   );
 }

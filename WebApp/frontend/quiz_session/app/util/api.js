@@ -3,7 +3,6 @@ import { createFileName } from "use-react-screenshot";
 export const BASE_URL = process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY;
 export const ADMIN_URL = process.env.QUIZMASTER_ADMIN;
 
-
 export const submitAnswer = ({ id, answer, connectionId }) => {
   fetch(`${BASE_URL}/gateway/api/room/submitAnswer`, {
     method: "POST",
@@ -71,6 +70,10 @@ export const partialLogin = ({
           if (r.status === 200) {
             const data = await r.json();
             await connection.invoke("Login", data.token);
+            console.log(
+              "This is the partial user data: ===================",
+              data.token
+            );
             localStorage.setItem("username", userName.toLowerCase());
             localStorage.setItem("token", data.token);
             push("/auth/code");
@@ -116,13 +119,36 @@ export const partialLogin = ({
   });
 };
 
-
-export const uploadScreenshot = (image, id, connectionId, { name = "img", extension = "jpg" } = {}) => {
+export const userInfo = async (token) => {
+  try {
+    const response = fetch(`${BASE_URL}/gateway/api/auth/info`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = response.json();
+    return data;
+  } catch (error) {
+    notifications.show({
+      title: error,
+    });
+    return "";
+  }
+};
+export const uploadScreenshot = (
+  image,
+  id,
+  connectionId,
+  { name = "img", extension = "jpg" } = {}
+) => {
   // const a = document.createElement("a");
   // a.href = image;
   // a.download = createFileName(extension, name);
   // a.click();
-  const blob = dataURLtoBlob(image)
+  const blob = dataURLtoBlob(image);
   const formData = new FormData();
   formData.append("File", blob, createFileName(extension, name));
   // Now you can submit this formData to your API
@@ -130,36 +156,40 @@ export const uploadScreenshot = (image, id, connectionId, { name = "img", extens
     method: "POST",
     body: formData,
     redirect: "follow",
-    credentials: "include"
+    credentials: "include",
   };
-  console.log("uploading screenshot")
+  console.log("uploading screenshot");
 
   fetch("https://localhost:7081/gateway/api/Media/upload", requestOptions)
     .then((response) => response.json())
     .then((result) => {
-
       let imageId = result.fileInformation.id;
-      if(imageId){
+      if (imageId) {
         // Submit Screenshot Link
         fetch("https://localhost:7081/gateway/api/room/submitScreenshot", {
           method: "POST",
-          headers:{"Content-Type":"application/json"},
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             questionId: id,
             connectionId,
-            screenshotLink: `https://localhost:7081/gateway/api/media/download_media/${imageId}`
+            screenshotLink: `https://localhost:7081/gateway/api/media/download_media/${imageId}`,
           }),
-          credentials: "include"
-        }).then((response) => response.json())
-        .then(r => {console.log(r)})
-        .catch((e)=> {console.error("Failed to submit screenshot: ",e)})
+          credentials: "include",
+        })
+          .then((response) => response.json())
+          .then((r) => {
+            console.log(r);
+          })
+          .catch((e) => {
+            console.error("Failed to submit screenshot: ", e);
+          });
       }
     })
     .catch((error) => console.error(error));
 };
 
 const dataURLtoBlob = (dataURL) => {
-  const parts = dataURL.split(';base64,');
+  const parts = dataURL.split(";base64,");
   const contentType = parts[0].split(":")[1];
   const raw = window.atob(parts[1]);
   const rawLength = raw.length;

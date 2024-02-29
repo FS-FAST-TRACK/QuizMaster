@@ -19,7 +19,6 @@ export default function RoomPin() {
           <h6 className="text-white text-2xl font-bold">
             {params.get("roomPin")}
           </h6>
-          <Image src={copy} width={30} height={5} alt={copy}/>
         </div>
       </div>
     </div>
