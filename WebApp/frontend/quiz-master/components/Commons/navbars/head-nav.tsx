@@ -8,8 +8,8 @@ import { fetchLoginUser } from "@/lib/quizData";
 import { UserInfo } from "@/lib/definitions";
 import {Popover,Button } from '@mantine/core';
 import chevronDown from "/public/chevronDown.svg";
+import { Divider } from "@mantine/core";
 import {
-
     ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 export default   function HeadNav() {
@@ -28,12 +28,13 @@ export default   function HeadNav() {
         });
     }, []);
     const firstName = userInfo?.info?.userData?.firstName;
-    const lastName =  userInfo?.info?.userData?.lastName;
+
  
     return (
-        <div className="flex flex-col gap-4 ">
-            <div className="flex flex-row w-full gap-10 h-10 text-white transition-all duration-500">
-                <div className="flex flex-row rounded-3xl items-center gap-10">
+
+        <div className="flex flex-col gap-4  ">
+            <div className="flex flex-row w-full gap-10  h-10 text-white transition-all duration-500">
+                <div className="flex flex-row rounded-3xl  items-center gap-10">
                     <Link href={"/home"} className="hidden lg:block">
                         <div className="text-white">
                             <Image
@@ -45,10 +46,15 @@ export default   function HeadNav() {
                             />
                         </div>
                     </Link>
-                    <Link href="/home"><b>Home</b></Link>
-                  
-                    <Link href="/system-info"><b>About</b></Link>
-                    <Link  href="/contact-us"><b>Contact Us</b></Link>
+                    <Link href="/home" passHref>
+        <span className="text-white hover:border-b-2 p-2 border-[#FF7F2A] font-bold cursor-pointer">Home</span>
+      </Link>
+      <Link href="/system-info" passHref>
+        <span className="text-white hover:border-b-2 p-2 border-[#FF7F2A] font-bold cursor-pointer">About</span>
+      </Link>
+      <Link href="/contact-us" passHref>
+        <span className="text-white hover:border-b-2 p-2 border-[#FF7F2A] font-bold cursor-pointer">Contact Us</span>
+      </Link>
                 </div>
                 <div  className="flex grow flex-row justify-between space-x-0"></div>
               
@@ -61,25 +67,25 @@ export default   function HeadNav() {
                  <Popover position="bottom" withArrow shadow="md" >
                     <Popover.Target >
       
-                        <Button  style={{backgroundColor:"transparent"}}  className=" flex flex-row justify-center items-center  h-5 p-5 mr-2 w-40 p-5  gap-2 rounded-md hover:bg-white hover:cursor-pointer" >
+                        <Button  style={{backgroundColor:"transparent"}}  className=" flex flex-row justify-center items-center  h-5 p-5 mr-2 w-40 p-5  gap-2 rounded-md  hover:cursor-pointer" >
                             <div style={{flexDirection:'row'}}>    
-                         <text className="ml-2 " >{firstName ? firstName : userInfo?.info?.userData?.userName } </text>
+                         <text className="ml-2 " style={{fontSize:18,fontWeight:'bold'}} >{firstName ? firstName : userInfo?.info?.userData?.userName } </text>
                          </div>
                          <Image
                                 src={chevronDown}
                                 alt="chevron"
                                 height={20}
-                                style={{color:'white',height:'100%',marginTop:2,marginLeft:5}}
+                                style={{color:'white',height:'100%',marginTop:2,marginLeft:8}}
                             
                             />
                          </Button>
                     </Popover.Target>
                     <Popover.Dropdown style={{paddingTop:7,paddingBottom:5,}}  >
-                    <Link    href="/profile" className="hover:bg-amber-200 flex rounded-md  hover:cursor-pointer p-3 text-center"
+                    <Link    href="/profile" className="hover:bg-[#5a5a5a30] flex rounded-md  hover:cursor-pointer p-3 text-center"
                             >
                                Profile Settings
                                 </Link>
-                                <Link href="/auth/signout" className="hover:bg-amber-200 flex rounded-md p-3 hover:cursor-pointer text-center">
+                                <Link href="/auth/signout" className="hover:bg-[#5a5a5a30] flex rounded-md p-3 hover:cursor-pointer text-center">
                                        Sign out 
                                     </Link>
                     </Popover.Dropdown>
@@ -97,7 +103,8 @@ export default   function HeadNav() {
               </div>
                 
             </div>
-         
+         <div style={{marginTop:10,marginBottom:-60}} />
         </div>
+        
     );
 }
