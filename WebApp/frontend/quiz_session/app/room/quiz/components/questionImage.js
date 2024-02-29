@@ -11,9 +11,9 @@ export default function QuestionImage({ imageUrl, open }) {
           width={0}
           height={0}
           sizes="100vw"
-          style={{ width: "25%", height: "auto" }}
+          style={{ width: 200, height: "auto" }}
           onClick={open}
-          className="rounded-md"
+          className="rounded-md shadow-md"
           alt={imageUrl}
         />
       ) : (

@@ -63,17 +63,15 @@ function TypeAnswer({ question, connectionId }, ref) {
     <div className="w-full flex flex-col h-full  items-center flex-grow p-5">
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center h-96 justify-center ">
-        <div className="text-white">Type Answer</div>
-        <div className="text-white text-2xl font-bold flex flex-wrap text-center  ">
-          {question?.question.qStatement}
+        <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
+          Type Answer
+        </div>
+        <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center">
+          {question?.question.qStatement}.
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
-      {isAdmin ? (
-        <div>
-          <Participants includeLoaderModal={false} />
-        </div>
-      ) : (
+      {!isAdmin ? (
         <div className="flex flex-row w-1/2 space-x-2">
           <div className="w-3/4">
             <Input
@@ -95,6 +93,17 @@ function TypeAnswer({ question, connectionId }, ref) {
             >
               Submit
             </Button>
+          </div>
+        </div>
+      ) : (
+        <div className=" flex w-full mt-8 items-center justify-center">
+          <div className="border-2 border-white rounded-md flex items-center  px-6 py-3">
+            <div className="animate-pulse w-3">
+              <span className="text-2xl text-white">|</span>
+            </div>
+            <p className="text-white opacity-50 w-fit font-regular sm:text-2xl md:text-3xl lg:text-text-4xl font-regular">
+              Type your answers on the text area
+            </p>
           </div>
         </div>
       )}
