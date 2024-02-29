@@ -16,6 +16,7 @@ export default function ImageModal({ opened, close, imageUrl }) {
         width={0}
         height={0}
         style={{ width: "100%", height: "100%" }}
+        alt={imageUrl}
       />
     </Modal>
   );

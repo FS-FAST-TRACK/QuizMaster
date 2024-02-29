@@ -19,6 +19,7 @@
     "axios": "^1.6.5",
     "crypto-js": "^4.2.0",
     "file-loader": "^6.2.0",
+    "jwt-decode": "^4.0.0",
     "next": "14.0.4",
     "react": "^18",
     "react-audio-player": "^0.17.0",
@@ -35,6 +36,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0"
+    "tailwindcss": "^3.3.0",
+    "use-react-screenshot": "^4.0.0"
   }
 }

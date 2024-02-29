@@ -359,7 +359,7 @@ namespace QuizMaster.API.Gateway.Hubs
                                     }
                                 }
 
-                                if (!activeRoom.AllowJoinOnQuizStarted())
+                                if (!activeRoom.AllowJoinOnQuizStarted() && joineeData == null)
                                 {
                                     await Clients.Caller.SendAsync("notif", $"Sorry but the quiz has already been started.");
                                     return;

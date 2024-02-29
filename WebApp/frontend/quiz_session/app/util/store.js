@@ -2,7 +2,8 @@
 
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { create } from "zustand";
-import { BASE_URL } from "./api";
+
+export const BASE_URL = process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY;
 
 //connection
 export const useConnection = create((set, get) => ({
@@ -71,8 +72,14 @@ export const useLeaderboard = create((set) => ({
 export const useMetaData = create((set) => ({
   metadata: undefined,
   setMetadata: (data) => {
-    console.log("store");
-    console.log(data);
     set({ metadata: data });
   },
 }));
+
+// answer
+export const useAnswer = create((set) => ({
+  answer: undefined,
+  setAnswer: (data) => {
+    set({ answer: data });
+  }
+}))

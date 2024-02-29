@@ -56,7 +56,7 @@ export const useQuizRoomsStore = create<IQuizRoomsStore>((set, get) => ({
                           ? qR.qRoomDesc
                                 .trim()
                                 .toLowerCase()
-                                .includes(searchQuery)
+                                .includes(searchQuery.toLowerCase())
                           : true
                   )
                   .slice(
@@ -98,10 +98,7 @@ export const useQuizRoomsStore = create<IQuizRoomsStore>((set, get) => ({
         }
 
         set({
-            pageNumber:
-                searchQuery !== undefined || searchQuery !== ""
-                    ? 1
-                    : pageNumber,
+            pageNumber,
             pageSize: pageSize,
             searchQuery: searchQuery,
         });

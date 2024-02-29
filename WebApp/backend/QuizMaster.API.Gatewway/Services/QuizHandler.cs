@@ -22,7 +22,8 @@ namespace QuizMaster.API.Gateway.Services
         private QuizRoomService.QuizRoomServiceClient _channelClient;
         private readonly ReportServiceHandler reportServiceHandler;
         private readonly IServiceProvider serviceProvider;
-        public QuizHandler(IOptions<GrpcServerConfiguration> options, ReportServiceHandler reportServiceHandler, IServiceProvider serviceProvider)
+        private readonly QuizSettings quizSettings;
+        public QuizHandler(IOptions<GrpcServerConfiguration> options, ReportServiceHandler reportServiceHandler, IServiceProvider serviceProvider, IOptions<QuizSettings> QuizSettingsOption)
         {
             var handler = new HttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
@@ -31,6 +32,7 @@ namespace QuizMaster.API.Gateway.Services
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
             this.reportServiceHandler = reportServiceHandler;
             this.serviceProvider = serviceProvider;
+            quizSettings = QuizSettingsOption.Value;
         }
         public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room, string sessionId)
         {
@@ -64,6 +66,7 @@ namespace QuizMaster.API.Gateway.Services
                 return;
             }
 
+            handler.SetPauseRoom(roomId, true); // <- Pause the room when before proceeding to next round
             handler.AddActiveRoom(room.QRoomPin, room); // register the room to be started | set to active
             int setIndex = 0;
             foreach (var Qset in quizSets)
@@ -98,6 +101,12 @@ namespace QuizMaster.API.Gateway.Services
                     // setting the current set info
                     details.CurrentSetName = questionSet.Set.QSetName;
                     details.CurrentSetDesc = questionSet.Set.QSetDesc;
+                    List<string> answers = new();
+                    foreach(QuestionDetail questionDetail in details.details)
+                    {
+                        if(questionDetail.DetailTypes.Where(qt => qt.DTypeDesc.Equals("answer", StringComparison.OrdinalIgnoreCase)).Any())
+                            answers.Add(questionDetail.QDetailDesc);
+                    }
                     details.details.ForEach(qD => qD.DetailTypes = new List<DetailType>());
 
                     /*
@@ -120,6 +129,7 @@ namespace QuizMaster.API.Gateway.Services
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
 
+                    // Sending Question with updated remaining time
                     for (int time = timout; time >= 0; time--)
                     {
                         details.RemainingTime = time;
@@ -130,6 +140,11 @@ namespace QuizMaster.API.Gateway.Services
 
                         await Task.Delay(1000);
                     }
+
+                    // TODO: Display answer for (n) seconds
+                    await hub.Clients.Group(roomPin).SendAsync("answer", answers);
+                    await Task.Delay(1000 * quizSettings.ShowAnswerAfterQuestionDelay);
+                    await hub.Clients.Group(roomPin).SendAsync("answer", null);
                 }
 
                 setIndex++;
@@ -137,9 +152,23 @@ namespace QuizMaster.API.Gateway.Services
                 {
                     await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying leaderboards");
                     await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores
-                    await Task.Delay(10000);
                 }
 
+                if(setIndex < quizSets.Count)
+                {
+                    int limit = quizSettings.ForceNextRoundTimeout; // DEFAULT (300s) of 5mins, if not clicked `proceed` then continue
+                    while (handler.GetPausedRoom(roomId) && limit > 0)
+                    {
+                        // Adding delay so it doesn't kill the backend when looping infinitely
+                        await Task.Delay(1000);
+                        // Notify the admin while the game is paused
+                        await hub.Clients.Client(hostConnectionId).SendAsync("paused", $"Game is paused, click proceed to start or the game will resume automatically on '{limit--} second/s'");
+                    }
+
+                    // Reset to true
+                    handler.SetPauseRoom(roomId, true);
+                }
+                    
                 // before going to new set, do some elimination if toggled
                 if (room.IsEliminationRound() && setIndex < quizSets.Count)
                 {
