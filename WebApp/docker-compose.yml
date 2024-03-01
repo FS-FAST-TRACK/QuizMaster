@@ -14,8 +14,10 @@ services:
     depends_on:
       - mssql
       - backend_api_monitoring
+    env_file:
+      - .env
     environment:
-      - ConnectionStrings:QuizMasterAccountDBConnectionString=Server=mssql;Database=QuizMasterAccount;Trusted_Connection=False;TrustServerCertificate=True;User Id=sa;Password=MsSql123
+      - ConnectionStrings:QuizMasterAccountDBConnectionString=${BACKEND_ACCOUNT_CONN_STR}
       - ApplicationSettings:RabbitMq_Account_ExchangeName=QuizMasterExchange
       - ApplicationSettings:RabbitMq_Account_RequestQueueName=QuizMasterRequestQueue
       - ApplicationSettings:RabbitMq_Account_ResponseQueueName=QuizMasterResponseQueue
@@ -75,6 +77,8 @@ services:
       - backend_api_media
       - backend_api_quiz
       - backend_api_quizsession
+    env_file:
+      - .env
     environment:
       - AppSettings:JWTSecret=__SECRET_JWT_TESTING_PURPOSE__-2c0a94bf-9ab0-4432-993f-3c0f8234e180
       - AppSettings:IntExpireHour=12
@@ -87,7 +91,9 @@ services:
       - Kestrel:Endpoints:Https:Url=https://*:443
       # - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
       # - Kestrel:Certificates:Default:Password=123456
-      - AppSettings:CORS_ORIGINS=http://localhost:3000;http://localhost:3001;http://localhost:5173;
+      - AppSettings:CORS_ORIGINS=${GATEWAY_CORS}
+      - QuizSettings:ShowAnswerAfterQuestionDelay=${SHOW_ANSWER_AFTER_QUESTION_DELAY}
+      - QuizSettings:ForceNextRoundTimeout=${FORCE_NEXT_ROUND_TIMEOUT}
     networks:
       - gateway
 
@@ -102,8 +108,10 @@ services:
       - 6003:443
     depends_on:
       - backend_api_monitoring
+    env_file:
+      - .env
     environment:
-      - ConnectionStrings:SqliteConnStr=Data Source=MediaDatabase.sqlite
+      - ConnectionStrings:SqliteConnStr=${BACKEND_MEDIA_CONN_STR}
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:6003
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
@@ -122,8 +130,10 @@ services:
       - 6004:443
     depends_on:
       - mssql
+    env_file:
+      - .env
     environment:
-      - ConnectionStrings:AuditTrailDBConnection=Server=mssql;Database=QuizMasterMonitoring;Trusted_Connection=False;TrustServerCertificate=True;User Id=sa;Password=MsSql123
+      - ConnectionStrings:AuditTrailDBConnection=${BACKEND_MONITORING_CONN_STR}
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:6004
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
@@ -145,8 +155,10 @@ services:
       - mssql
       - rabbitmq
       - backend_api_monitoring
+    env_file:
+      - .env
     environment:
-      - ConnectionStrings:QuizMasterQuestionDBConnectionString=Server=mssql;Database=QuizMasterQuiz;Trusted_Connection=False;TrustServerCertificate=True;User Id=sa;Password=MsSql123
+      - ConnectionStrings:QuizMasterQuestionDBConnectionString=${BACKEND_QUIZ_CONN_STR}
       - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
       - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
       - AppSettings:RabbitMq_Hostname=rabbitmq
@@ -171,8 +183,10 @@ services:
       - 6006:443
     depends_on:
       - rabbitmq
+    env_file:
+      - .env
     environment:
-      - ConnectionStrings:QuizMasterQuizSessionDBConnectionString=Data Source=QuizSession.db
+      - ConnectionStrings:QuizMasterQuizSessionDBConnectionString=${BACKEND_SESSION_CONN_STR}
       - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
       - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
       - AppSettings:RabbitMq_Hostname=rabbitmq
@@ -193,6 +207,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - 3001:3001
+    env_file:
+      - .env
+    environment:
+      - QUIZMASTER_GATEWAY=https://${HOST_IP}:7081
+      - QUIZMASTER_ADMIN=${HOST_PROTOCOL}://${HOST_IP}:3000
     networks:
       - gateway
 
@@ -203,11 +222,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - 3000:3000
+    env_file:
+      - .env
     environment:
-      - QUIZMASTER_SESSION=http://localhost:3001
-      - QUIZMASTER_GATEWAY=https://localhost:7081
-      - NEXTAUTH_URL=http://localhost:3000/auth/login
-      - NEXTAUTH_SECRET=298180d2-63ce-4012-98d9-5baa64a3ea99
+      - QUIZMASTER_SESSION=${HOST_PROTOCOL}://${HOST_IP}:3001
+      - QUIZMASTER_GATEWAY=http://${HOST_IP}:7081
+      - NEXTAUTH_URL=${HOST_PROTOCOL}://${HOST_IP}:3000/${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - QUIZMASTER_MONITORING=https://backend_api_monitoring:6004
     networks:
       - gateway
