@@ -16,9 +16,9 @@ export default function Participants({ includeLoaderModal = true }) {
   return (
     <>
       {includeLoaderModal && (
-        <div className=" flex  flex-col items-center space-y-2">
+        <div className=" flex  flex-col items-center space-y-2 mt-8 mb-8">
           <Loader color="rgba(255, 255, 255, 1)" size="md" />
-          <div className="text-white font-bold">
+          <div className="text-white font-regular">
             Waiting for other players...
           </div>
         </div>
@@ -28,7 +28,7 @@ export default function Participants({ includeLoaderModal = true }) {
         {names?.map((name, index) => (
           <div
             key={index}
-            className="bg-white py-2 px-5 rounded-lg text-green_text font-bold m-2"
+            className="bg-white py-2 px-5 rounded-md text-green_text font-bold m-2 shadow-sm"
           >
             {name.qParticipantDesc}
           </div>

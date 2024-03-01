@@ -17,5 +17,7 @@ export default function TimeProgress() {
       setTime(percent);
     }
   }, [question]);
-  return <Progress value={time} />;
+  return (
+    <Progress value={time} color="white" bg="green" transitionDuration={1000} />
+  );
 }
