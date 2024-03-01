@@ -23,58 +23,85 @@ export default function MultipleChoiceQuestionDetail({
     const [fomr2, setForm2] = useState(form);
 
     useEffect(() => {
-        setForm2(form);
+        const UpdatedForm = form;
+        const OutDatedForm = fomr2;
+
+        // check if there is a true options in UpdatedForm
+        let hasTrue = false;
+        for(let x = 0; x < OutDatedForm.values.options.length; x++){
+            if(UpdatedForm.values.options[x].isAnswer){
+                hasTrue = true;
+                break;
+            }
+        }
+
+        console.log("OPT - - - - OLD - - - - NEW - - - - FOCUS ")
+        OutDatedForm.values.options.map((option, index) => {
+            
+            //console.log(option.value, option.isAnswer, UpdatedForm.values.options[index].isAnswer)
+            
+            // Only update the selected answers if there is an update in the new form
+            if(hasTrue){
+                if(option.isAnswer !== UpdatedForm.values.options[index].isAnswer){
+                    UpdatedForm.values.options[index].isAnswer = true;
+                }else{
+                    UpdatedForm.values.options[index].isAnswer = false;
+                }
+            }
+        })
+
+        setForm2(UpdatedForm)
     }, [form]);
 
-    const optionFields = form.values.options.map((item, index) => (
-        <div key={index} className="h-[60px]">
-            <Input
-                size="lg"
-                itemProp="sadf"
-                classNames={styles}
-                style={{
-                    flex: 1,
-                }}
-                leftSection={
-                    <Checkbox
+    const optionFields = form.values.options.map((item, index) => {
+        return (<div key={index} className="h-[60px]">
+        <Input
+            size="lg"
+            itemProp="sadf"
+            classNames={styles}
+            style={{
+                flex: 1,
+            }}
+            leftSection={
+                <Checkbox
+                    size="sm"
+                    radius="xl"
+                    color="var(--primary)"
+                    checked={form.values.options[index].isAnswer}
+                    {...form.getInputProps(`options.${index}.isAnswer`)}
+                />
+            }
+            rightSectionWidth={item.isAnswer ? 120 : 40}
+            rightSection={
+                item.isAnswer ? (
+                    <Text
                         size="sm"
-                        radius="xl"
-                        color="var(--primary)"
-                        checked={form.values.options[index].isAnswer}
-                        {...form.getInputProps(`options.${index}.isAnswer`)}
-                    />
-                }
-                rightSectionWidth={item.isAnswer ? 120 : 40}
-                rightSection={
-                    item.isAnswer ? (
-                        <Text
-                            size="sm"
-                            style={{
-                                color: "var(--primary)",
-                            }}
-                        >
-                            Correct Answer
-                        </Text>
-                    ) : (
-                        <Tooltip label="Remove">
-                            <TrashIcon
-                                className="w-6 cursor-pointer"
-                                onClick={() =>
-                                    form.removeListItem("options", index)
-                                }
-                            />
-                        </Tooltip>
-                    )
-                }
-                leftSectionPointerEvents="visible"
-                rightSectionPointerEvents="visible"
-                {...form.getInputProps(`options.${index}.value`)}
-            />
-            <Input.Error>
-                {form.getInputProps(`options.${index}.value`).error}
-            </Input.Error>
-        </div>
-    ));
+                        style={{
+                            color: "var(--primary)",
+                        }}
+                    >
+                        Correct Answer
+                    </Text>
+                ) : (
+                    <Tooltip label="Remove">
+                        <TrashIcon
+                            className="w-6 cursor-pointer"
+                            onClick={() =>
+                                form.removeListItem("options", index)
+                            }
+                        />
+                    </Tooltip>
+                )
+            }
+            leftSectionPointerEvents="visible"
+            rightSectionPointerEvents="visible"
+            {...form.getInputProps(`options.${index}.value`)}
+        />
+        <Input.Error>
+            {form.getInputProps(`options.${index}.value`).error}
+        </Input.Error>
+    </div>)
+    });
 
     return (
         <div>

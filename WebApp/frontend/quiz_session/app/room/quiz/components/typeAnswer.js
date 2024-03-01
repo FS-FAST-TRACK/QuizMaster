@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, Input } from "@mantine/core";
+import { Button, CheckIcon, Input } from "@mantine/core";
 import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
@@ -9,11 +9,13 @@ import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
+import { useAnswer } from "@/app/util/store";
 
 export default React.forwardRef(TypeAnswer);
 
 function TypeAnswer({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
+  const { answer: ANSWER } = useAnswer();
 
   const [answer, setAnswer] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -71,41 +73,66 @@ function TypeAnswer({ question, connectionId }, ref) {
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
-      {!isAdmin ? (
-        <div className="flex flex-row w-1/2 space-x-2">
-          <div className="w-3/4">
-            <Input
-              placeholder="Type your Answer"
-              size="xl"
-              onChange={(e) => {
-                setAnswer(e.target.value);
-              }}
-              disabled={isSubmitted}
-            />
-          </div>
-          <div className="w-1/4">
-            <Button
-              fullWidth
-              color={"yellow"}
-              size="xl"
-              onClick={handleSubmit}
-              disabled={isSubmitted}
-            >
-              Submit
-            </Button>
-          </div>
+      {isAdmin ? (
+        <div className="py-8 px-[20%] w-full">
+          {ANSWER ? (
+            <div className="py-8 px-[20%]">
+              <p className="text-white">Correct answer is: </p>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
+                <p className="px-4">{ANSWER}</p>
+                <CheckIcon width={20} height={20} />
+              </div>
+            </div>
+          ) : (
+            <div className=" flex w-full mt-8 items-center justify-center">
+              <div className="border-2 border-white bg-green-700 rounded-md flex items-center  px-6 py-3">
+                <div className="animate-pulse w-3">
+                  <span className="text-2xl text-white">|</span>
+                </div>
+                <p className="text-white opacity-50 w-fit text-base font-regular">
+                  Type your answers on the text area
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        <div className=" flex w-full mt-8 items-center justify-center">
-          <div className="border-2 border-white rounded-md flex items-center  px-6 py-3">
-            <div className="animate-pulse w-3">
-              <span className="text-2xl text-white">|</span>
+        <>
+          {ANSWER && (
+            <div className="py-8 px-[20%] w-full">
+              <p className="text-white">Correct answer is: </p>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
+                <p className="px-4">{ANSWER}</p>
+                <CheckIcon width={20} height={20} />
+              </div>
             </div>
-            <p className="text-white opacity-50 w-fit font-regular sm:text-2xl md:text-3xl lg:text-text-4xl font-regular">
-              Type your answers on the text area
-            </p>
-          </div>
-        </div>
+          )}
+          {!isAdmin && (
+            <div className="flex flex-row w-1/2 space-x-2">
+              <div className="w-3/4">
+                <Input
+                  placeholder="Type your Answer"
+                  size="xl"
+                  onChange={(e) => {
+                    setAnswer(e.target.value);
+                  }}
+                  disabled={isSubmitted || ANSWER}
+                />
+              </div>
+              <div className="w-1/4">
+                <Button
+                  fullWidth
+                  color={"yellow"}
+                  size="xl"
+                  onClick={handleSubmit}
+                  disabled={isSubmitted || ANSWER}
+                >
+                  Submit
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className=" w-full justify-center flex">
