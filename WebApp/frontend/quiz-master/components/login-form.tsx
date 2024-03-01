@@ -109,6 +109,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                         type="submit"
                         fullWidth
                         disabled={open}
+                        className="bg-[#FF6633]"
                     >
                         {open ? "Logging in..." : "Login"}
                     </Button>

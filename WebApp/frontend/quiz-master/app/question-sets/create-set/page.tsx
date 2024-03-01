@@ -166,7 +166,7 @@ export default function Page() {
                 <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
-                        href="#"
+                        href="/question-sets"
                     >
                         Cancel
                     </Link>

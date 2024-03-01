@@ -230,6 +230,7 @@ function DragAndDrop({ question, connectionId }, ref) {
                 color={"yellow"}
                 onClick={handleSubmit}
                 disabled={isSubmitted}
+                className="bg-[#FF6633]"
               >
                 Submit
               </Button>

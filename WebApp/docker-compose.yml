@@ -85,8 +85,9 @@ services:
       - GrpcServerConfiguration:Session_Service=https://backend_api_quizsession:6006
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:443
-      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
-      - Kestrel:Certificates:Default:Password=123456
+      # - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      # - Kestrel:Certificates:Default:Password=123456
+      - AppSettings:CORS_ORIGINS=http://localhost:3000;http://localhost:3001;http://localhost:5173;
     networks:
       - gateway
 
@@ -182,6 +183,33 @@ services:
       - Kestrel:Certificates:Default:Password=123456
     networks:
       - rabbitmq_go_net
+      - gateway
+
+  # FRONTEND SIDE
+  frontend_quizmaster_session:
+    container_name: frontend_quizmaster_session
+    build: 
+      context: frontend/quiz_session/
+      dockerfile: Dockerfile
+    ports:
+      - 3001:3001
+    networks:
+      - gateway
+
+  frontend_quizmaster_admin:
+    container_name: frontend_quizmaster_admin
+    build: 
+      context: frontend/quiz-master/
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - QUIZMASTER_SESSION=http://localhost:3001
+      - QUIZMASTER_GATEWAY=https://localhost:7081
+      - NEXTAUTH_URL=http://localhost:3000/auth/login
+      - NEXTAUTH_SECRET=298180d2-63ce-4012-98d9-5baa64a3ea99
+      - QUIZMASTER_MONITORING=https://backend_api_monitoring:6004
+    networks:
       - gateway
 
   # RABBIT MQ
