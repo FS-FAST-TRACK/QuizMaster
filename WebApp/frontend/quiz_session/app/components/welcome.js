@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import logo1 from "@/public/logo/Logo1.svg";
-import { useEffect } from "react";
-import { ConnectToHub } from "../util/Connections";
+import { useEffect, useState } from "react";
 import {
   useConnection,
   useParticipants,
@@ -13,10 +10,18 @@ import {
   useStart,
   useQuestion,
   useLeaderboard,
+  useMetaData,
+  useAnswer
 } from "../util/store";
 import { notifications } from "@mantine/notifications";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { Progress } from "@mantine/core";
+import CryptoJS from "crypto-js";
 
 export default function Welcome() {
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
   const { connection, setConnection } = useConnection();
   const { setParticipants } = useParticipants();
   const { setConnectionId } = useConnectionId();
@@ -24,6 +29,10 @@ export default function Welcome() {
   const { setChat } = useChat();
   const { setQuestion } = useQuestion();
   const { setLeaderboard } = useLeaderboard();
+  const { setMetadata } = useMetaData();
+  const { setAnswer } = useAnswer();
+  const { push } = useRouter();
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     setConnection();
@@ -35,6 +44,9 @@ export default function Welcome() {
         .then(() => {
           //notif
           connection.on("notif", (message) => {
+            if (message === "Failed to authenticate") {
+              push("/auth");
+            }
             notifications.show({
               title: message,
             });
@@ -63,6 +75,7 @@ export default function Welcome() {
           //question
           connection.on("question", (question) => {
             setQuestion(question);
+            setStart(true);
           });
 
           //leaderboard
@@ -72,8 +85,55 @@ export default function Welcome() {
 
           //metadata
           connection.on("metadata", (metadata) => {
-            console.log(metadata);
+            setMetadata(metadata);
           });
+
+          // answer
+          connection.on("answer", (answer) => {
+            setAnswer(answer)
+          })
+
+          const token = params.get("token");
+          const username = params.get("name");
+
+          let loggedIn = false;
+
+          if (token && username && connection.state === "Connected") {
+            //TODO: SECRET KEY SHOULD BE REPLACED
+            const decrypToken = CryptoJS.AES.decrypt(
+              token.toString(),
+              "secret_key"
+            );
+            const decryptedToken = decrypToken.toString(CryptoJS.enc.Utf8);
+
+            connection.invoke("Login", decryptedToken);
+            localStorage.setItem("username", username.toLowerCase());
+
+            localStorage.setItem("token", decryptedToken);
+            loggedIn = true;
+          } else {
+            loggedIn = false;
+          }
+
+          const id = setInterval(() => {
+            setProgress((prevProgress) => {
+              if (prevProgress >= 100) {
+                clearInterval(id);
+                if (loggedIn) {
+                  push("/auth/code");
+                } else {
+                  push("/auth");
+                }
+
+                return 100;
+              }
+              return prevProgress + 1; // Increase the progress by 1 unit
+            });
+          }, 20); // Update the progress every 20 milliseconds
+
+          return () => {
+            clearInterval(id); // Cleanup when component unmounts
+          };
         })
         .catch((err) => {
           console.error("Error starting connection:", err);
@@ -82,14 +142,19 @@ export default function Welcome() {
   }, [connection]);
 
   return (
+    // <div>
+    //   {/* <div className="bg-white w-1/4 h-1/4 rounded-lg">
+    //     <Image
+    //       src={logo1}
+    //       alt="Quis Master Logo"
+    //       className="w-full h-full p-5"
+    //     />
+    //   </div> */}
+    //   <div>{params.get("name")}</div>
+    //   <div>{params.get("token")}</div>
+    // </div>
     <>
-      {/* <div className="bg-white w-1/4 h-1/4 rounded-lg">
-        <Image
-          src={logo1}
-          alt="Quis Master Logo"
-          className="w-full h-full p-5"
-        />
-      </div> */}
+      <Progress value={progress}></Progress>
     </>
   );
 }

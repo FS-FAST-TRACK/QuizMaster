@@ -3,11 +3,12 @@
 import React from "react";
 import RoomPin from "../../components/roomPin";
 import { useEffect, useState } from "react";
-import { useQuestion } from "@/app/util/store";
+import { useQuestion, useMetaData } from "@/app/util/store";
 import { timeFormater } from "@/app/auth/util/handlers";
 
 export default function Header() {
   const { question } = useQuestion();
+  const { metadata } = useMetaData();
   const [time, setTime] = useState();
   useEffect(() => {
     setTime(question?.remainingTime);
@@ -22,8 +23,10 @@ export default function Header() {
 
         <div className="flex justify-center w-full">
           <div className="flex-row flex bg-white items-center px-5 py-2 rounded-lg text-green_text ">
-            <div className="text-xl font-bold">Question 1</div>
-            <div> out of 10</div>
+            <div className="text-xl font-bold">
+              Question {metadata?.currentQuestionIndex}{" "}
+            </div>
+            <div>&nbsp; out of {metadata?.totalNumberOfQuestions}</div>
           </div>
         </div>
         <div className="flex items-end flex-col w-full">

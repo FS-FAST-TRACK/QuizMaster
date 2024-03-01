@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using QuizMaster.API.Account.Proto;
 using QuizMaster.API.Monitoring.Proto;
 using QuizMaster.Library.Common.Entities.Accounts;
+using QuizMaster.Library.Common.Entities.Details;
 using QuizMaster.Library.Common.Helpers;
 
 namespace QuizMaster.API.Account.Service
@@ -41,6 +42,7 @@ namespace QuizMaster.API.Account.Service
             else
             {
                 success.Account = JsonConvert.SerializeObject(user);
+                success.Roles = JsonConvert.SerializeObject(await _userManager.GetRolesAsync(user));
                 response.GetAccountByIdReply = success;
             }
 
@@ -68,6 +70,7 @@ namespace QuizMaster.API.Account.Service
                 reply.DateCreated = user.DateCreated.ToString();
                 reply.DateUpdated = user.DateUpdated != null ? user.DateUpdated.ToString() : "";
                 reply.UpdatedByUser = user.UpdatedByUser != null ? user.UpdatedByUser.ToString() : "";
+                reply.Roles = JsonConvert.SerializeObject(await _userManager.GetRolesAsync(user));
 
                 await responseStream.WriteAsync(reply);
             }
@@ -562,14 +565,54 @@ namespace QuizMaster.API.Account.Service
 
             if(!updatePasswordResult.Succeeded)
             {
-                reply.Code = 400;
-                reply.Message = "Failed to update password";
+                // try reset password
+                IdentityResult passwordChangeResult =  await _userManager.ResetPasswordAsync(existingUser, currentPassword, newPassword);
+
+
+                if(!passwordChangeResult.Succeeded)
+                {
+                    reply.Code = 400;
+                    reply.Message = "Failed to update password";
+                }
+                else
+                {
+                    reply.Code = 200;
+                    reply.Message = "Password was resetted successfully";
+                }
             }
             else
             {
                 reply.Code = 200;
                 reply.Message = "Password was updated successfully";
             }
+
+
+
+            return await Task.FromResult(reply);
+        }
+
+        public override async Task<SetAccountAdminResponse> ResetPassword(UpdatePasswordRequest request, ServerCallContext context)
+        {
+            var reply = new SetAccountAdminResponse();
+
+            // Find the existing user to capture old values
+            var existingUser = await _userManager.FindByIdAsync(request.Id.ToString());
+
+            if (existingUser == null)
+            {
+                reply.Code = 404;
+                reply.Message = "Account not found";
+                return await Task.FromResult(reply);
+            }
+
+            string resetToken = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
+            
+            string generatedPassword = "P@ss" + new Random().Next(100000,999999).ToString();
+            string token = _passwordHandler.GenerateToken(request.Id.ToString(), resetToken, generatedPassword);
+            Task.Run(() => { _emailSenderService.SendEmailResetPassword(existingUser.Email, existingUser.FirstName, token, generatedPassword); });
+
+            reply.Code = 200;
+            reply.Message = "A confirmation email was sent to your account. ";
 
 
             return await Task.FromResult(reply);

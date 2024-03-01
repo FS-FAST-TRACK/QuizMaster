@@ -12,7 +12,7 @@ namespace QuizMaster.API.Gateway.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "Emai",
+                name: "Email",
                 table: "SystemReachingContacts",
                 newName: "Email");
 

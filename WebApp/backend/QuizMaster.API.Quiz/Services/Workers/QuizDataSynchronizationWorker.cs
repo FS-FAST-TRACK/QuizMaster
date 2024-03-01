@@ -46,9 +46,8 @@ namespace QuizMaster.API.Quiz.Services.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            bool sent = false;
-            while(!stoppingToken.IsCancellationRequested && !sent)
-            {
+            while(!stoppingToken.IsCancellationRequested)
+            {   
                 try
                 {
                     await Task.Delay(1000, stoppingToken);
@@ -79,10 +78,10 @@ namespace QuizMaster.API.Quiz.Services.Workers
                         channel.BasicPublish(_applicationSettings.RabbitMq_Quiz_ExchangeName, "", null, payloadBody);
                         LogInformation("Data was sent");
 
-                        sent = true;
                     }
                 }
                 catch { }
+                await Task.Delay(5000, stoppingToken);
             }
         }
 

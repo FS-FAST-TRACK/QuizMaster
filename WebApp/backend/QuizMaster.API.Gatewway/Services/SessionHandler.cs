@@ -7,6 +7,7 @@ using QuizMaster.API.Authentication.Proto;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Models.Report;
 using QuizMaster.API.Gateway.Services.ReportService;
+using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
@@ -29,6 +30,7 @@ namespace QuizMaster.API.Gateway.Services
         private Dictionary<int, IEnumerable<QuizParticipant>> RoomEliminatedParticipants;
         private Dictionary<string, string> SessionId;
         private readonly ReportServiceHandler ReportHandler;
+        private Dictionary<int, bool> RoomNextSetPaused;
 
         public SessionHandler(ReportServiceHandler reportServiceHandler)
         {
@@ -42,6 +44,7 @@ namespace QuizMaster.API.Gateway.Services
             ActiveRooms = new();
             RoomEliminatedParticipants = new();
             SessionId = new();
+            RoomNextSetPaused = new();
             ReportHandler = reportServiceHandler;
         }
 
@@ -55,6 +58,19 @@ namespace QuizMaster.API.Gateway.Services
         public string GetSessionId(string roomPin)
         {
             return SessionId[roomPin];
+        }
+
+        public void SetPauseRoom(int roomId, bool Pause)
+        {
+            if(RoomNextSetPaused.ContainsKey(roomId))
+                RoomNextSetPaused[roomId] = Pause;
+            else RoomNextSetPaused.Add(roomId, Pause);
+        }
+
+        public bool GetPausedRoom(int roomId)
+        {
+            RoomNextSetPaused.TryGetValue(roomId, out bool result);
+            return result;
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
@@ -81,13 +97,14 @@ namespace QuizMaster.API.Gateway.Services
                 connectionGroupPair.Remove(connectionId);
             }
         }
-        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, string channel = "chat", bool sendParticipantData = true)
+        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, bool sendParticipantData = true)
         {
             if (connectionGroupPair.ContainsKey(connectionId))
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
                 var roomPin = connectionGroupPair[connectionId];
-                await hub.Clients.Group(roomPin).SendAsync(channel, disconnectMessage);
+                await hub.Clients.Group(roomPin).SendAsync("notif", disconnectMessage); // removed chat, set to notif
+                await hub.Clients.Group(roomPin).SendAsync("chat", new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
                 
                 if (sendParticipantData)
                 {
@@ -282,12 +299,13 @@ namespace QuizMaster.API.Gateway.Services
                 // try checking if puzzle type is correct
                 correct = true;
                 List<string> _answers = JsonConvert.DeserializeObject<List<string>>(answer) ?? new List<string>();
+                List<string> _correct = JsonConvert.DeserializeObject<List<string>>(answers[0]) ?? new List<string>();
                 
                 for(int index = 0; index < _answers.Count(); index++)
                 {
                     if(index < answers.Count)
                     {
-                        if (answers[index] != _answers[index])
+                        if (_correct[index] != _answers[index])
                         {
                             correct = false;
                             break;
@@ -299,7 +317,7 @@ namespace QuizMaster.API.Gateway.Services
             {
                 foreach (string Qanswer in answers)
                 {
-                    if (Qanswer.ToLower() == answer.ToLower())
+                    if (Qanswer.ToLower().Trim() == answer.ToLower().Trim())
                     {
                         correct = true;
                         break;

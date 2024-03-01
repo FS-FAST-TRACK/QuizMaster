@@ -12,8 +12,8 @@ using QuizMaster.API.Monitoring.DataAccess;
 namespace QuizMaster.API.Monitoring.Migrations
 {
     [DbContext(typeof(MonitoringDbContext))]
-    [Migration("20231206114456_QuestionTypeAuditTrailTable")]
-    partial class QuestionTypeAuditTrailTable
+    [Migration("20240118100133_InitialMigrationOnRestart")]
+    partial class InitialMigrationOnRestart
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,50 @@ namespace QuizMaster.API.Monitoring.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.MediaAuditTrail", b =>
+                {
+                    b.Property<int>("MediaAuditTrailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MediaAuditTrailId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MediaAuditTrailId");
+
+                    b.ToTable("MediaAuditTrails");
+                });
 
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.QuestionAuditTrail", b =>
                 {
@@ -201,6 +245,94 @@ namespace QuizMaster.API.Monitoring.Migrations
                     b.ToTable("QuizDifficultyAuditTrails");
                 });
 
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.QuizSetAuditTrail", b =>
+                {
+                    b.Property<int>("QuizSetAuditTrailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuizSetAuditTrailId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("QuizSetAuditTrailId");
+
+                    b.ToTable("QuizSetAuditTrails");
+                });
+
+            modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.RoomAuditTrail", b =>
+                {
+                    b.Property<int>("RoomAuditTrailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoomAuditTrailId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RoomAuditTrailId");
+
+                    b.ToTable("RoomAuditTrails");
+                });
+
             modelBuilder.Entity("QuizMaster.Library.Common.Entities.Audits.UserAuditTrail", b =>
                 {
                     b.Property<int>("UserAuditTrailId")
@@ -231,6 +363,10 @@ namespace QuizMaster.API.Monitoring.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserRole")
                         .IsRequired()

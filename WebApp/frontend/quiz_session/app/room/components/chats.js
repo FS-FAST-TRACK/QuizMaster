@@ -24,7 +24,7 @@ export default function Chats() {
             >
               <div className="text-gray_text text-sm">{message?.name}</div>
               <div
-                className="bg-wall w-fit  p-1 rounded-lg text-white"
+                className="bg-wall w-fit  p-1 rounded-lg text-white px-4 py-2"
                 style={{ maxWidth: "80%" }}
               >
                 {message?.message}
@@ -39,10 +39,10 @@ export default function Chats() {
           );
         } else {
           return (
-            <div key={index} className="flex flex-col justify-end w-full ">
+            <div key={index} className="flex flex-col justify-end w-full">
               <div className="text-gray_text text-sm">{message?.name}</div>
               <div
-                className="bg-white w-fit  p-1 rounded-lg "
+                className="bg-white w-fit  p-1 rounded-lg px-4 py-2"
                 style={{ maxWidth: "80%" }}
               >
                 {message?.message}

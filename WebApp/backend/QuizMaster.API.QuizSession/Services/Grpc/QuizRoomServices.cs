@@ -32,7 +32,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if (invalidId != -1)
+                if (invalidId == -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
@@ -109,6 +109,30 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
         }
 
+        public override async Task<RoomResponse> GetSetQuizRoom(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var roomId = request.Id;
+                var setQuizRoom = await _context.SetQuizRooms.Where(qR => qR.QRoomId == roomId).ToListAsync();
+                
+               
+
+                reply.Code = 200;
+                reply.Data = JsonConvert.SerializeObject(setQuizRoom);
+
+                return await Task.FromResult(reply);
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Message = ex.Message;
+
+                return await Task.FromResult(reply);
+            }
+        }
+
 
         public override async Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
         {
@@ -119,7 +143,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if (invalidId != -1)
+                if (invalidId == -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
@@ -207,7 +231,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             try
             {
-                var allRooms = _context.QuizRooms.Where(a=>a.ActiveData).ToArray();
+                var allRooms = _context.QuizRooms.ToArray();
 
                 reply.Code = 200;
                 reply.Data = JsonConvert.SerializeObject(allRooms);
@@ -287,6 +311,33 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);
         }
 
+        public override async Task<RoomResponse> DeactivateRoomRequest(DeactivateRoom request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var room = await _context.QuizRooms.Where(r => r.Id == request.Id).FirstOrDefaultAsync();
+                if (room == null)
+                {
+                    reply.Code = 404;
+                    reply.Message = $"Room with room pin {request.Id} does not exists";
+                }
+                else
+                {
+                    room.ActiveData = false;
+                    _context.SaveChanges();
+
+                    reply.Code = 200;
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code=500;
+                reply.Message=ex.Message;
+            }
+            return await Task.FromResult(reply);
+        }
+
 
         // In room, get all the Sets
         public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)
@@ -325,12 +376,15 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
             var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
+            int foundId = -1;
             foreach(var id in QuestionSetIds)
             {
-                if (!sets.Contains(id))
-                    return id;
+                if(sets.Contains(id))
+                {
+                    foundId = id; break;
+                };
             }
-            return -1;
+            return foundId ;
         }
 
         // Get Question from a set Id in a list

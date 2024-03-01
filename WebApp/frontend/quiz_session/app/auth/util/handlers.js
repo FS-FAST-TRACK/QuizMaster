@@ -1,9 +1,13 @@
+import { ADMIN_URL, BASE_URL } from "@/app/util/api";
+import { notifications } from "@mantine/notifications";
+import CryptoJS from "crypto-js";
+
 export const submitPin = (connection, code, params, push) => {
   try {
     connection.invoke("JoinRoom", Number.parseInt(code));
     connection.on("JoinFailed", (isFailed) => {
       if (isFailed) {
-        alert("Incorrect pin");
+        notifications.show({ title: "Room does not exist" });
       } else {
         params.set("roomPin", Number.parseInt(code));
         push(`/room?${params.toString()}`);
@@ -31,16 +35,37 @@ export const timeFormater = (seconds) => {
 export const goBackToLoby = (
   params,
   connection,
-  back,
+  push,
   setResetLeader,
-  setStart
+  setStart,
+  isAdmin
 ) => {
   try {
+    const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
+
+    function encodeUTF8(input) {
+      return encodeURIComponent(input);
+    }
+
+    const utf8EncodedToken = encodeUTF8(token);
+
+    const encryptedToken = CryptoJS.AES.encrypt(
+      utf8EncodedToken,
+      "secret_key"
+    ).toString();
+
+    localStorage.clear(); //CLEAR
     const code = params.get("roomPin");
     connection.invoke("GetRoomParticipants", code);
     setResetLeader();
     setStart(false);
-    back();
+    
+    if(isAdmin){
+      push(`${ADMIN_URL}/dashboard`)
+    }else{
+      push(`/?name=${username}&token=${encodeURIComponent(encryptedToken)}`);
+    }
   } catch (ex) {
     console.log(ex);
   }

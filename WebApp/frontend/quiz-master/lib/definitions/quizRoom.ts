@@ -26,4 +26,5 @@ export interface QuizRoom extends CreateQuizRoom {
     dateUpdated?: Date;
     createdByUserId: number;
     updatedByUserId?: number;
+    activeData?: Boolean;
 }

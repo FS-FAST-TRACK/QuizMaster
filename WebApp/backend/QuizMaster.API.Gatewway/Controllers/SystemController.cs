@@ -201,6 +201,24 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Status = "Success", Message = "Retrieved System Reports", Data = data});
         }
 
+        [QuizMasterAdminAuthorization]
+        [HttpGet("quiz_reports/{roomId}")]
+        public IActionResult GetAllReportsAsync(int roomId)
+        {
+            var data = reportRepository.GetQuizReports();
+            object? result = null;
+            foreach (var report in data)
+            {
+                if(report.RoomId != roomId)
+                    continue;
+                report.ParticipantAnswerReports = JsonConvert.DeserializeObject<IEnumerable<ParticipantAnswerReport>>(report.ParticipantAnswerReportsJSON);
+                report.LeaderboardReports = JsonConvert.DeserializeObject<IEnumerable<LeaderboardReport>>(report.LeaderboardReportsJSON);
+                result = report;
+                break;
+            }
+            return Ok(new { Status = "Success", Message = result!=null?"Retrieved System Reports": $"No Report found based on roomId: {roomId}", Data = result });
+        }
+
 
 
         private async Task<AuthStore> GetAuthStoreInfo(string token)

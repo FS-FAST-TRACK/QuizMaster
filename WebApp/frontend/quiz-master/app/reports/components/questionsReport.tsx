@@ -132,7 +132,7 @@ export default function QuestionReport() {
     }, [difficulties]);
 
     return (
-        <div className="flex flex-col p-8 gap-4 bg-white rounded-lg border shadow-2xl">
+        <div className="flex flex-col p-8 gap-4 bg-white rounded-lg border shadow-lg">
             <div className="flex flex-row justify-between items-center">
                 <p className="text-xl font-bold">Questions</p>
                 <div>

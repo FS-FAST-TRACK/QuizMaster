@@ -261,12 +261,15 @@ namespace QuizMaster.API.Gateway.Hubs
                 await Clients.Client(connId).SendAsync("chat", new { Message = "You are kicked from the room", Name = "bot", IsAdmin = false });
                 await SessionHandler.RemoveClientFromGroups(this, connId, $"{quizParticipant.QParticipantDesc} was kicked by admin");
                 SessionHandler.UnbindConnectionId(connId);
+                IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(roomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
+                await Clients.Group($"{roomPin}").SendAsync("participants", participants);
+                await Clients.Client(connId).SendAsync("kicked", "/* Triggered, you are kicked boyo */");
             }
 
         }
 
 
-        public async Task Chat(string chat, string roomId)
+        public async Task Chat(string chat, int roomId)
         {
             string connectionId = Context.ConnectionId;
 
@@ -279,8 +282,8 @@ namespace QuizMaster.API.Gateway.Hubs
             if (participantData == null) { return; }
             // send chat only to group
             if (SessionHandler.IsAdmin(connectionId))
-                await Clients.Group(roomId).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = true });
-            else await Clients.Group(roomId).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = false });
+                await Clients.Group(roomId.ToString()).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = true });
+            else await Clients.Group(roomId.ToString()).SendAsync("chat", new { Message = chat, Name = participantData.QParticipantDesc, IsAdmin = false });
         }
 
         public async Task JoinRoom(int RoomPin)
@@ -356,7 +359,7 @@ namespace QuizMaster.API.Gateway.Hubs
                                     }
                                 }
 
-                                if (!activeRoom.AllowJoinOnQuizStarted())
+                                if (!activeRoom.AllowJoinOnQuizStarted() && joineeData == null)
                                 {
                                     await Clients.Caller.SendAsync("notif", $"Sorry but the quiz has already been started.");
                                     return;
@@ -412,7 +415,7 @@ namespace QuizMaster.API.Gateway.Hubs
             var participantData = SessionHandler.GetLinkedParticipantInConnectionId(Context.ConnectionId);
             if (participantData == null) { return; }
             var group = SessionHandler.GetConnectionGroup(Context.ConnectionId);
-            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false, channel:"notif");
+            await SessionHandler.RemoveClientFromGroups(this, Context.ConnectionId, $"{participantData.QParticipantDesc} has left the room", sendParticipantData: false);
             SessionHandler.UnbindConnectionId(Context.ConnectionId);
 
             if (group != null)

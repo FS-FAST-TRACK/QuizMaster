@@ -11,7 +11,7 @@ interface DataToken {
     exp: ISODateString;
     iat: ISODateString;
 }
-export const authOptions = {
+const authOptions = {
     providers: [
         CredentialsProvider({
             // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -26,6 +26,8 @@ export const authOptions = {
             async authorize(credentials, req) {
                 try {
                     // Guard of null jwt token
+                    console.log("Method invoked ");
+                    console.log(credentials);
                     if (!credentials?.jwt) {
                         return null;
                     }
@@ -42,7 +44,7 @@ export const authOptions = {
                         username: parsed.UserName,
                         role: parse.Roles[0].Name,
                     };
-
+                    console.log("Returning user");
                     return user as any;
                 } catch (error) {
                     console.log(error);
@@ -55,7 +57,10 @@ export const authOptions = {
         signOut: "/",
     },
 
-    secret: process.env.NEXTAUTH_SECRET,
+    secret:
+        process.env.NEXTAUTH_SECRET ??
+        process.env.SECRET ??
+        "04e9d3fbe3c8fbfb7e5f89892751f8c5",
     callbacks: {
         jwt: async ({ token, user }: { token: JWT; user: User }) => {
             user && (token.user = user);

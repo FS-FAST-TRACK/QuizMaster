@@ -4,7 +4,8 @@ import Link from "next/link";
 import { DifficultyCardBody } from "../cards/DifficultyCard";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
-import { UpdateContactDetails, postContactUs } from "@/lib/hooks/contact-us";
+import { UpdateContactDetails } from "@/lib/hooks/contact-us";
+import { notification } from "@/lib/notifications";
 
 export default function UpdateContactInfoModal({
     contactInfo,
@@ -18,20 +19,44 @@ export default function UpdateContactInfoModal({
     const contactDetails = useForm<ContactDetails>({
         initialValues: {
             email: `${contactInfo?.email}`,
-            phoneNumber: `${contactInfo?.phoneNumber}`,
+            contact: `${contactInfo?.contact}`,
         },
         clearInputErrorOnChange: true,
-        validateInputOnChange: true,
+        validateInputOnBlur: true,
         validate: {
-            email: (value) =>
-                value.length < 1 ? "Email must not be empty." : null,
-            phoneNumber: (value) =>
-                value.length < 1 ? "Phone number must not be empty." : null,
+            email: (value) => {
+                if (!value) {
+                    return "Email must not be empty.";
+                }
+                return /^\S+@\S+$/.test(value) ? null : "Invalid email.";
+            },
+            contact: (value) => {
+                if (!value) {
+                    return "Phone Number must not be empty.";
+                }
+
+                const phoneNumberRegex = /^09\d{9}$/;
+
+                return phoneNumberRegex.test(value)
+                    ? null
+                    : "Invalid phone number (Must start with 09 and a total of 11 digits).";
+            },
         },
     });
 
     const handelSubmit = useCallback(async () => {
-        UpdateContactDetails({ contactForm: contactDetails.values });
+        UpdateContactDetails({ contactForm: contactDetails.values })
+            .then((res) => {
+                if (res.status === "Success") {
+                    notification({ type: "success", title: res.message });
+                    onClose();
+                } else {
+                    notification({ type: "error", title: res.message });
+                }
+            })
+            .catch(() => {
+                notification({ type: "error", title: "Something went wrong" });
+            });
     }, [contactDetails.values]);
 
     return (
@@ -60,7 +85,7 @@ export default function UpdateContactInfoModal({
                     required
                     variant="filled"
                     placeholder="Phone Number"
-                    {...contactDetails.getInputProps("phoneNumber")}
+                    {...contactDetails.getInputProps("contact")}
                 />
                 <div className="flex gap-2">
                     <Button

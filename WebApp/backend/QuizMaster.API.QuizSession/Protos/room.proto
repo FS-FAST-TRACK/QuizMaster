@@ -5,6 +5,7 @@ option csharp_namespace = "QuizMaster.API.QuizSession.Protos";
 service QuizRoomService{
 	rpc CreateRoom (CreateRoomRequest) returns (RoomResponse);
 	rpc GetAllRoom (RoomsEmptyRequest) returns (RoomResponse);
+	rpc GetSetQuizRoom(SetRequest) returns (RoomResponse);
 	rpc DeleteRoom (ModifyRoomRequest) returns (RoomResponse);
 	rpc UpdateRoom (CreateRoomRequest) returns (RoomResponse);
 	rpc GetQuizSet (SetRequest) returns (RoomResponse);
@@ -14,6 +15,7 @@ service QuizRoomService{
 	rpc GetRoomData(Data) returns (RoomResponse);
 	rpc GetAllRoomData(Data) returns (RoomResponse);
 	rpc SaveParticipants(Data) returns (RoomResponse);
+	rpc DeactivateRoomRequest(DeactivateRoom) returns (RoomResponse);
 }
 
 message Data{
@@ -38,4 +40,8 @@ message RoomsEmptyRequest{}
 
 message SetRequest{
 	int32 id=1;
+}
+
+message DeactivateRoom{
+	int32 id =1;
 }

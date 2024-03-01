@@ -36,6 +36,9 @@ export default function CustomPagination({
                 total={metadata?.totalPages || totalPages || 1}
                 siblings={1}
                 {...form.getInputProps("pageNumber")}
+                onChange={(value) => {
+                    form.setFieldValue("pageNumber", value);
+                }}
             />
         </div>
     );

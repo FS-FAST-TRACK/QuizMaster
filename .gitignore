@@ -67,3 +67,11 @@ packages/
 /WebApp/backend/QuizMaster.API.QuizSession/QuizSession.db
 /WebApp/backend/QuizMaster.API.QuizSession/quizSession
 /WebApp/backend/QuizMaster.API.Gatewway/wwwroot/Images
+/WebApp/backend/QuizMaster.API.Gatewway/SystemData/System.db-shm
+/WebApp/backend/QuizMaster.API.Gatewway/SystemData/System.db-wal
+/WebApp/backend/QuizMaster.API.QuizSession/sessionDb/QuizSession.db-shm
+/WebApp/backend/QuizMaster.API.QuizSession/sessionDb/QuizSession.db-wal
+WebApp/backend/QuizMaster.API.QuizSession/sessionDb/QuizSession.db
+WebApp/backend/QuizMaster.API.Gatewway/SystemData/System.db
+WebApp/backend/QuizMaster.API.Media/MediaDatabase.sqlite
+WebApp/backend/QuizMaster.API.QuizSession/sessionDb/QuizSession.db

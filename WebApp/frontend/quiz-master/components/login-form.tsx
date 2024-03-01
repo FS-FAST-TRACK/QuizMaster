@@ -39,6 +39,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
             if (response.type === "success") {
                 localStorage.setItem("token", response.data.token); //this is just temporary.
                 notification({ type: "success", title: response.message });
+
                 await signIn("credentials", {
                     jwt: response.data.token,
                 });
@@ -47,6 +48,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                 notification({ type: "error", title: response.message });
             }
         } catch (e) {
+            console.log("Error occured on logging in");
             notification({ type: "error", title: "Something went wrong" });
             redirectToError();
         }
@@ -111,7 +113,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                         {open ? "Logging in..." : "Login"}
                     </Button>
                     <p className="text-sm">
-                        Don't have an account yet?{" "}
+                        Don&apos;t have an account yet?{" "}
                         <Link
                             href={"/auth/signup"}
                             className="font-medium hover:underline cursor-pointer"

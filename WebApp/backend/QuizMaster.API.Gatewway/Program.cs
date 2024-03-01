@@ -29,9 +29,13 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 builder.Services.AddLogging();
 builder.Services.AddSignalR();
-builder.Services.AddCors(o => 
-    o.AddDefaultPolicy(builder => 
-    builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddCors(o =>
+{
+    var conf = builder.Configuration.GetSection("AppSettings:CORS_ORIGINS").Get<string[]>();
+    o.AddDefaultPolicy(builder =>
+    builder.WithOrigins(conf).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+}
+    );
 builder.Services.AddDbContext<SystemDbContext>(option => option.UseSqlite("Data Source=SystemData\\System.db"));
 builder.Services.AddSingleton<ReportServiceHandler>();
 builder.Services.AddScoped<ReportRepository>();
@@ -81,6 +85,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<GrpcServerConfiguration>(builder.Configuration.GetSection("GrpcServerConfiguration"));
+builder.Services.Configure<QuizSettings>(builder.Configuration.GetSection("QuizSettings"));
 
 // register the services
 builder.Services.AddScoped<IRepository, Repository>();
@@ -90,6 +95,9 @@ builder.Services.AddSingleton<RabbitMqRepository>();
 builder.Services.AddScoped<AccountGatewayController>();
 builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
 builder.Services.AddScoped<EmailService>();
+
+// Use razor pages
+builder.Services.AddRazorPages();
 
 
 // configure cookie authentication
@@ -106,6 +114,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
         option.ExpireTimeSpan = TimeSpan.FromHours(Convert.ToInt16(builder.Configuration["AppSettings:IntExpireHour"]));
         option.SlidingExpiration = true; // renew cookie when it's about to expire,
+        option.Cookie.SameSite = SameSiteMode.None; // frontend is using different port
     });
 
 var app = builder.Build();
@@ -125,17 +134,6 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
     });
 }
-app.UseSwagger(c =>
-{
-    c.PreSerializeFilters.Add((swagger, httpReq) =>
-    {
-        swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" } };
-    });
-});
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
-});
 
 
 //app.UseHttpsRedirection();
@@ -154,6 +152,7 @@ using(var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var systemDbContext = services.GetRequiredService<SystemDbContext>();
+    systemDbContext.Database.Migrate();
     systemDbContext.Database.EnsureCreated();
 }
 

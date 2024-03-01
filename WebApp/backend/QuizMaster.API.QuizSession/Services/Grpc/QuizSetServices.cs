@@ -121,8 +121,26 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             {
                 var data = await _quizSetManager.Sets.Where(x => x.ActiveData == true).ToArrayAsync();
 
+                var listOfData = new List<object>();
+                foreach (var dataItem in data)
+                {
+                    object updatedObject = new
+                    {
+                        id = dataItem.Id,
+                        qSetName = dataItem.QSetName,
+                        qSetDesc =  dataItem.QSetDesc,
+                        activeData = dataItem.ActiveData,
+                        dateCreated = dataItem.DateCreated,
+                        dateUpdated = dataItem.DateUpdated,
+                        createdByUserId = dataItem.CreatedByUserId,
+                        updatedByUserId = dataItem.UpdatedByUserId,
+                        numberOfQuestions = _quizSetManager.QuestionSets.Where(x => x.SetId == dataItem.Id).ToList().Count,
+                };
+                    listOfData.Add(updatedObject);
+                }
+
                 reply.Code = 200;
-                reply.Data = JsonConvert.SerializeObject(data);
+                reply.Data = JsonConvert.SerializeObject(listOfData);
 
                 return await Task.FromResult(reply);
             }
@@ -141,7 +159,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new QuizSetMessage();
             try
             {
-                var data = await _quizSetManager.Sets.FirstOrDefaultAsync(x => x.Id == request.Id);
+                Set? data = null;
+                for(int i = 0; i < 10; i++)
+                {
+                    data = await _quizSetManager.Sets.FirstOrDefaultAsync(x => x.Id == request.Id);
+                    if (data != null) break;
+                    await Task.Delay(1000);
+                }
                 if(data == null)
                 {
                     reply.Code = 404;
