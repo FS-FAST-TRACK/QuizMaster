@@ -125,7 +125,7 @@ export default   function HeadNav() {
        
        </div>
       
-       <div style={{ marginTop: 10, marginBottom: -60 }} />
+     
        {/* Hamburger Icon */}
        </div>
        {isOpen && (
@@ -139,6 +139,7 @@ export default   function HeadNav() {
            
           </div>
         )}
+  <div style={{ marginTop: 10,marginBottom:20}} />
      </div>
        
         

@@ -45,12 +45,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 d="M0,64L48,64C96,64,192,64,288,74.7C384,85,480,107,576,138.7C672,171,768,213,864,208C960,203,1056,149,1152,138.7C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
               ></path>
             </svg>
-            <div style={{ height: !isScreenLarge ? 60 : 70, backgroundColor: 'white' }} className="hidden xl:block"></div>
+            <div style={{ height: !isScreenLarge ? 60 : 100, backgroundColor: 'white' }} className="hidden xl:block"></div>
           </div>
           {/* Div with white background and 400px height */}
         </section>
       
-        <div className="pl-8 md:pl-20 -mt-15 bg-white">
+        <div className="pl-8 md:pl-20 -mt-15 bg-white hidden sm:block ">
           <p className="text-sm text-black text-center">
             Copyright 2023 Ⓒ QuizMaster
           </p>

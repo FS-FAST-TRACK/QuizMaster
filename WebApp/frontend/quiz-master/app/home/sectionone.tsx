@@ -9,6 +9,16 @@ import CryptoJS from "crypto-js";
 import { QUIZMASTER_SESSION_WEBSITE } from "@/api/api-routes";
 
 const HeroSection = () => {
+  const [width, setWidth]   = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+  const updateDimensions = () => {
+      setWidth(window.innerWidth);
+      setHeight(window.innerHeight);
+  }
+useEffect(() => {
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+}, []);
     const { data: session } = useSession();
     const user = session?.user;
 
@@ -89,8 +99,8 @@ const HeroSection = () => {
       // Calculate image width based on window width
       const calculateImageWidth = () => {
         // Adjust the value as needed based on your design
-        const maxWidth = 1500;
-        const minWidth = 1500;
+        const maxWidth = 2000;
+        const minWidth = 2000;
         const scaleFactor = 1;
   
         const calculatedWidth = windowWidth * scaleFactor;
@@ -114,10 +124,10 @@ const HeroSection = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 pl-4 lg:pl-20">
   {/* 1st column row text */}
   <div className="bottom-0 flex flex-col flex-grow" >
-    <h1 className={`text-4xl  md:text-3xl xl:text-7xl lg:-ml-10 lg:mr-10 lg:-mt-10 lg:text-6xl md:ml-10 md:-mt-10  font-bold text-white`} >
+    <h1 style={{marginTop:width < 1024 ? -70:width < 768 ? -220:width < 640 ? -200 : width < 480 ? -250:!isScreenLarge?-200:0}} className={`text-4xl m-auto md:text-5xl    xl:text-6xl lg:-ml-10 lg:mr-10 lg:-mt-10 lg:text-6xl md:ml-10  font-bold text-white`} >
       Unlocking Your Inner QuizMaster.
     </h1>
-    <p className="text-white mt-2  lg:mr-10  lg:-ml-8 lg:text-md md:ml-10 xl:-ml-8 xl:text-lg xl:mr-5 md:mr-10 ">
+    <p className="text-white mt-2  lg:mr-10  lg:-ml-8 lg:text-sm md:ml-10 xl:-ml-8 xl:text-lg xl:mr-5 md:mr-10 ">
       Ignites friendly competition and knowledge exploration, fostering
       a community of champions and lifelong learners through an engaging
       platform for intellectual development and inclusive learning.
@@ -125,7 +135,7 @@ const HeroSection = () => {
     <Link
       style={{zIndex:999,maxWidth:160}}
       href={`${QUIZMASTER_SESSION_WEBSITE}?name=${user?.username}&token=${encodedEncryptedToken}`}
-      className="mt-5 text-white lg:-ml-8 xl:-ml-8 md:ml-10  rounded bg-[#FFAD33] hover:bg-[#FFAD3390] text-bold px-6 pb-2 pt-2.5 text-md font-medium uppercase "
+      className="mt-5 text-white lg:-ml-8 xl:-ml-8 md:ml-10   rounded bg-[#FFAD33] hover:bg-[#FFAD3390] text-bold px-6 pb-2 pt-2.5 text-md font-medium uppercase "
     >
       JOIN A ROOM
     </Link>
@@ -133,10 +143,11 @@ const HeroSection = () => {
 </div>
 
           {/* 2nd column Image */}
-          <div className={!isScreenLarge || isScreenSmall ? "hidden" : "block lg:block"}>
+          <div className='hidden xl:block lg:block md:block sm:block'>
           <Image 
+            
             src={personSvg} 
-            style={{ marginTop: -160, backgroundColor: 'transparent' }} 
+            style={{ marginTop: -120, backgroundColor: 'transparent', display:width < 1024 ? "none" :width < 480 ? "none": width < 640? "none": width < 768 ? "none":!isScreenLarge|| isScreenSmall?"none": "flex"}} 
              width={imageWidth}
              height={imageWidth}
             alt="Person"  
