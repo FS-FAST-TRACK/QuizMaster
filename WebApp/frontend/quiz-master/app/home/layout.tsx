@@ -25,7 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, []);
     return (
-      <div className="flex flex-col w-full h-full text-white bg-gradient-to-r from-[#17A14B] to-[#1AC159] gap-16 " style={{overflow:'scroll',overflowY:'auto'}}>
+      <div className="flex flex-col w-full h-full text-white bg-gradient-to-r from-[#17A14B] to-[#1AC159] gap-16 overflow-scroll overflow-y-auto">
       <div className="pt-8 pl-5 pr-8 md:px-20 lg:px-15">
         <HeadNav />
       </div>
