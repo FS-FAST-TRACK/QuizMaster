@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
-import Game from "./game";
-
+import PageHeader from "@/components/Commons/headers/PageHeader";
+import SideNav from "@/components/Commons/navbars/sidenav";
 export function generateMetadata() {
     return {
         title: "Dashboard",
@@ -9,9 +9,8 @@ export function generateMetadata() {
 
 export default function Page() {
     return (
-        <div>
-            <div>Dashboard page</div>
-            <Game />
+        <div >
+            Hello
         </div>
     );
 }

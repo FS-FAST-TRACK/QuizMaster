@@ -1,5 +1,4 @@
 import {
-    ArrowRightCircleIcon,
     ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@mantine/core";
