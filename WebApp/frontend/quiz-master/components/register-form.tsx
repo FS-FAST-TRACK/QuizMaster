@@ -195,6 +195,7 @@ const RegisterForm = () => {
                             fullWidth
                             radius={6}
                             disabled={open}
+                            className="bg-[#FF6633]"
                         >
                             {open ? "Creating Account..." : "Create account"}
                         </Button>
