@@ -87,16 +87,16 @@ export default   function HeadNav() {
          </div>
         
          <div className="flex grow flex-row justify-between space-x-0"></div>
-         <div style={{ display: loading ? "flex" : "none" }}>
+         <div className={`${loading ? "flex" : "hidden"}`} >
            {userInfo ? (
              <div className="flex justify-between items-center">
-               <Link className="flex flex-row justify-center items-center h-5 p-5 mr-2 w-auto p-5 bg-[#FF7F2A] hover:bg-[#FF7F2A80] gap-2 rounded-md hover:cursor-pointer" style={{ display: !userInfo?.info.roles.includes("Administrator") ? "none" : "flex" }} href="/dashboard">  
-               <text style={{fontSize:24,paddingBottom:3}}>+</text><b className="hidden lg:block" >Create Quiz</b>
+               <Link className={`flex flex-row justify-center items-center h-5 p-5 mr-2 w-auto p-5 bg-[#FF7F2A] hover:bg-[#FF7F2A80] gap-2 rounded-md hover:cursor-pointer ${ !userInfo?.info.roles.includes("Administrator") ? "hidden" : "flex" }`}  href="/dashboard">  
+               <text className="text-2xl pb-1">+</text><b className="hidden lg:block" >Create Quiz</b>
                </Link>
                <Popover position="bottom" withArrow shadow="md">
                  <Popover.Target>
-                   <Button style={{ backgroundColor: "transparent" }} className="flex flex-row justify-center items-center h-5 p-5 mr-2 w-40 p-5 gap-2 rounded-md hover:cursor-pointer">
-                     <div style={{ flexDirection: 'row' }}>
+                   <Button style={{ background: "#1AC15930" }} className="bg-[#1AC15930]  flex flex-row justify-center items-center h-5 p-5 mr-2 w-40 p-5 gap-2 rounded-md hover:cursor-pointer">
+                     <div className="flex-row">
                        <text className="ml-2" style={{ fontSize: 18, fontWeight: 'bold' }}>{firstName ? firstName : userInfo?.info?.userData?.userName}</text>
                      </div>
                      <Image
