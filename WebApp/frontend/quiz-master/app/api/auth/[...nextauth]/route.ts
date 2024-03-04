@@ -50,8 +50,8 @@ const authOptions = {
         }),
     ],
     pages: {
-        signIn: "/auth/login",
-        signOut: "/",
+        signIn: `${process.env.BASE_URL ?? 'localhost:3000'}/auth/login`,
+        signOut: `${process.env.BASE_URL ?? 'localhost:3000'}/auth/signout`,
     },
 
     secret:

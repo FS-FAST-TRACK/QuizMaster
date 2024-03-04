@@ -43,7 +43,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                 await signIn("credentials", {
                     jwt: response.data.token,
                 });
-                router.push(callbackUrl);
+                router.push("/home");
             } else {
                 notification({ type: "error", title: response.message });
             }

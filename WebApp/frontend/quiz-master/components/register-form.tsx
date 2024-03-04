@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notification } from "@/lib/notifications";
 import { useDisclosure } from "@mantine/hooks";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { validatorFactory } from "@/lib/validation/creators";
 import {
@@ -32,6 +32,7 @@ const RegisterForm = () => {
     const [visible, handlePasswordVissibility] = useDisclosure(false);
     const [tooltipLabel, setTooltipLabel] = useState<ReactNode | undefined>();
     const { redirectToError } = useErrorRedirection();
+    const router = useRouter();
 
     const form = useForm({
         initialValues: {
@@ -94,7 +95,8 @@ const RegisterForm = () => {
 
             if (response.statusCode < 300) {
                 notification({ type: "success", title: response.message });
-                redirect("/auth/login");
+                //redirect("/auth/login");
+                router.push("/auth/login")
             } else {
                 notification({ type: "error", title: response.message });
             }
@@ -202,7 +204,7 @@ const RegisterForm = () => {
                     <p className="text-sm">
                         Already have an account?{" "}
                         <Link
-                            href={"/"}
+                            href={"/auth/login"}
                             className="font-medium hover:underline cursor-pointer"
                         >
                             Login
