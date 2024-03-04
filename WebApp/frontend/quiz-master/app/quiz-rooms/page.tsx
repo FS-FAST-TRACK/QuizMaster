@@ -59,11 +59,9 @@ export default function Page() {
             const token = localStorage.getItem("token");
             connection.invoke("Login", token);
             connection.on("notif", (data) => {
-                console.log("notif", data);
                 notification({ type: "success", title: data });
             });
             connection.on("auth_data", (data) => {
-                console.log("auth_data", data);
 
                 notification({ type: "success", title: data });
             });

@@ -126,6 +126,7 @@ function TypeAnswer({ question, connectionId }, ref) {
                   size="xl"
                   onClick={handleSubmit}
                   disabled={isSubmitted || ANSWER}
+                  className="bg-[#FF6633]"
                 >
                   Submit
                 </Button>

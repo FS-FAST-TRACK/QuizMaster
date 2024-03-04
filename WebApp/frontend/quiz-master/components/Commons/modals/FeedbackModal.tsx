@@ -38,7 +38,6 @@ export default function FeedbackModal({
     const handelSubmit = useCallback(async () => {
         postReachOut({ feedbackForm: feedbackDetails.values })
             .then((res) => {
-                console.log(res);
                 if (res.status === "Success") {
                     notification({ type: "success", title: res.message });
                     onClose();

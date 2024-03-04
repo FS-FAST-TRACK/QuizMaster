@@ -14,7 +14,7 @@ export async function GetAllUsers()
             },
         });
         const data = await res.json();
-        console.log("DATAAA:",data);
+        
         if (res.status === 200) {
             return data;
         }

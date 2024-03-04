@@ -24,6 +24,7 @@ const nextConfig = {
       I have ignored linting and errors for now 
     */
     experimental: { serverActions: true },
+    output: "standalone"
 };
 
 module.exports = nextConfig;

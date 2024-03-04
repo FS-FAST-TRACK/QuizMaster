@@ -190,6 +190,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               size="xl"
               disabled={isSubmitted || ANSWER}
               onClick={handleSubmit}
+              className="bg-[#FF6633]"
             >
               Submit
             </Button>

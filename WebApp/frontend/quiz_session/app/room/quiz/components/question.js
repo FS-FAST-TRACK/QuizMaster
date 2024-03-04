@@ -75,7 +75,7 @@ export default function Question() {
             onClick={() =>
               goBackToLoby(params, connection, push, setResetLeader, setStart, isAdmin)
             }
-            className={"w-10"}
+            className={"w-auto bg-[#FF6633] p-2"}
             color="yellow"
           >
             { isAdmin ? "Go Back to Dashboard":"Leave Room"}

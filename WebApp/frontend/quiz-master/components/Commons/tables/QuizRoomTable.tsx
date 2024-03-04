@@ -122,7 +122,6 @@ export default function QuizRoomTable() {
                 }
             );
             const dJson = await response.json();
-            console.log("Set " + setId + " has " + dJson.length + " questions");
             if (dJson) {
                 totalNum += dJson.length;
             }
@@ -149,7 +148,7 @@ export default function QuizRoomTable() {
                 if (totalNum === 0) {
                     // populate
                     totalNum = await apiCallQuestionCount(foundDataForId.sets);
-                    console.log("api call");
+                    
                     let newList: Array<any> = [];
                     for (let d of data) {
                         if (d.id === id) {
@@ -208,7 +207,7 @@ export default function QuizRoomTable() {
             return element.id != id;
         };
         setQuizRooms(paginatedRooms.filter(filter));
-        console.log("done");
+        
         const res = await fetch(QUIZMASTER_QUIZROOM_DELETE_BY_ID(id), {
             method: "DELETE",
             credentials: "include",

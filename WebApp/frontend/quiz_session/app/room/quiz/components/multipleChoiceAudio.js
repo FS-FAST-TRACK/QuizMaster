@@ -17,7 +17,6 @@ export default React.forwardRef(MultipleChoiceAudio);
 function MultipleChoiceAudio({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
 
-  console.log(question);
   const [data, setData] = useState([]);
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -68,9 +67,9 @@ function MultipleChoiceAudio({ question, connectionId }, ref) {
 
   useEffect(() => {
     if (question?.question.qStatement !== previousStatement) {
-      console.log(question);
+      
       const options = question?.details;
-      console.log(options);
+      
 
       // Copy all elements except the last 2
       const copiedData = [...options?.slice(0, options?.length - 2)];
@@ -132,7 +131,7 @@ function MultipleChoiceAudio({ question, connectionId }, ref) {
           <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
             <Button
               fullWidth
-              className="shadow-lg"
+              className="shadow-lg bg-[#FF6633]"
               color={"yellow"}
               onClick={handleSubmit}
               disabled={isSubmitted}

@@ -15,7 +15,7 @@ export const submitPin = (connection, code, params, push) => {
       }
     });
   } catch (ex) {
-    console.log(ex);
+    console.error(ex);
   }
 };
 
@@ -67,6 +67,6 @@ export const goBackToLoby = (
       push(`/?name=${username}&token=${encodeURIComponent(encryptedToken)}`);
     }
   } catch (ex) {
-    console.log(ex);
+    console.error(ex);
   }
 };

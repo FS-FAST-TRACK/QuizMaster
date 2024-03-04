@@ -315,13 +315,26 @@ namespace QuizMaster.API.Gateway.Services
             }
             else
             {
+                bool answer_found = false;
                 foreach (string Qanswer in answers)
                 {
-                    if (Qanswer.ToLower().Trim() == answer.ToLower().Trim())
+                    // See if type answer has multiple answers
+                    string[] correctAnswers = Qanswer.Split("|", StringSplitOptions.TrimEntries);
+
+                    foreach(string correctAnswer in correctAnswers)
                     {
-                        correct = true;
-                        break;
+                        // No need to trim the correct answer since it's already trimmed during the split operation
+                        if (correctAnswer.ToLower() == answer.ToLower().Trim())
+                        {
+                            correct = true;
+                            answer_found = true;
+                            break;
+                        }
                     }
+
+                    // let's break out the loop if answer has already specified
+                    if (answer_found) break;
+                    
                 }
             }
 

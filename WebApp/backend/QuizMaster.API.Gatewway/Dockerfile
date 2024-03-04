@@ -25,6 +25,13 @@ RUN dotnet publish "QuizMaster.API.Gateway.csproj" -c Release -o /app/publish /p
 
 FROM base AS final
 WORKDIR /app
-COPY QuizMaster.API.Gatewway/localhost_cert.pfx ./localhost_cert.pfx
+
+# GENERATE A CERTIFICATE
+# RUN dotnet dev-certs https -ep QuizMaster.API.Gatewway/aspnetapp.pfx -p P@ssw0rd
+# RUN dotnet dev-certs https --trust
+# COPY QuizMaster.API.Gatewway/localhost_cert.pfx ./localhost_cert.pfx
+COPY QuizMaster.API.Gatewway/aspnetapp.pfx aspnetapp.pfx
+ENV ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=aspnetapp.pfx
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "QuizMaster.API.Gateway.dll", "https://*:443;http://*:80;"]
