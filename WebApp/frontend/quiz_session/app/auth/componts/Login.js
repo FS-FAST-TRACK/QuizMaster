@@ -21,26 +21,26 @@ export default function Login() {
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       <div>
-        <label>Email</label>
+        <label className=" text-secondary_text text-sm">Email</label>
         <input
           placeholder="example@example.com"
-          className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
+          className="w-full p-2 border-gray-300 border-[1px] rounded-md"
           onChange={(e) => setEmail(e.target.value)}
           autoFocus={true}
         />
       </div>
 
       <div>
-        <label>Username</label>
+        <label className=" text-secondary_text text-sm">Username</label>
         <input
           placeholder="username"
-          className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
+          className="w-full p-2 border-gray-300 border-[1px] rounded-md"
           onChange={(e) => setUserName(e.target.value)}
         />
       </div>
-
+      <div className="h-4"></div>
       <button
-        className="w-full bg-button py-2 text-white text-lg font-bold rounded-lg"
+        className="w-full bg-button py-2 text-white text-base font-semibold rounded-md"
         type="submit"
       >
         Sign Up
