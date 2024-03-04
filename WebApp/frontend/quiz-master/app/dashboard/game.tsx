@@ -1,6 +1,4 @@
 "use client";
-import React from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import CryptoJS from "crypto-js";
 import { QUIZMASTER_SESSION_WEBSITE } from "@/api/api-routes";
@@ -27,11 +25,6 @@ export default function Game() {
     ).toString();
 
     const encodedEncryptedToken = encodeURIComponent(encryptedToken);
-    return (
-        <Link
-            href={`${QUIZMASTER_SESSION_WEBSITE}?name=${user?.username}&token=${encodedEncryptedToken}`}
-        >
-            room
-        </Link>
-    );
+    const linkVar = `${QUIZMASTER_SESSION_WEBSITE}?name=${user?.username}&token=${encodedEncryptedToken}`;
+    return linkVar;
 }

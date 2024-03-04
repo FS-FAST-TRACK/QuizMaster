@@ -7,7 +7,8 @@ import { getServerSession } from "next-auth";
 export default async function ContactUs() {
     const session = await getServerSession();
     return (
-        <div className="flex md:flex-row flex-col w-full gap-5 bg-white p-8 rounded-xl shadow-2xl">
+        <div className="py-5 px-15 -mt-10">
+        <div className="flex md:flex-row flex-col w-full gap-5 bg-white p-10 rounded-xl shadow-2xl ">
             <div className="flex flex-col gap-2 flex-1">
                 <p className=" font-bold text-3xl">Contact Us</p>
                 <p className="text-sm pt-3">
@@ -28,6 +29,7 @@ export default async function ContactUs() {
                 </div>
             </div>
             <ContactUsForm />
+        </div>
         </div>
     );
 }

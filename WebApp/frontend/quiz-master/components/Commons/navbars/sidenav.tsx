@@ -12,7 +12,7 @@ export default function SideNav() {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="flex-none w-12 md:w-64 h-full transition-all duration-500">
+        <div className="flex-none w-12 md:w-64 h-full transition-all duration-500" style={{overflow:'scroll',overflowY:'auto'}}>
             <div
                 className="h-full border border-r-2"
                 style={{
