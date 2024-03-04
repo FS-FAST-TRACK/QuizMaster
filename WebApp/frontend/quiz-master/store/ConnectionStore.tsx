@@ -19,7 +19,7 @@ export const useConnectionStore = create<IConnectionStore>((set, get) => ({
     setConnection: () => {},
     init: () => {
         if (!get().connection) {
-            console.log("Creating connection to gateway session hub.");
+            console.info("Creating connection to gateway session hub.");
             set({
                 connection: new HubConnectionBuilder()
                     .withUrl(QUIZMASTER_GATEWAY_SESSION_HUB)
@@ -30,9 +30,9 @@ export const useConnectionStore = create<IConnectionStore>((set, get) => ({
     },
     startConnection: () => {
         if (get().connection !== undefined) {
-            console.log("Staring connection...");
+            console.info("Staring connection...");
             get().connection?.start();
-            console.log("Connection started");
+            console.info("Connection started");
         }
     },
     loginConnection: (token: string) => {

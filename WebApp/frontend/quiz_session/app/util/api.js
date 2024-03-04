@@ -70,10 +70,6 @@ export const partialLogin = ({
           if (r.status === 200) {
             const data = await r.json();
             await connection.invoke("Login", data.token);
-            console.log(
-              "This is the partial user data: ===================",
-              data.token
-            );
             localStorage.setItem("username", userName.toLowerCase());
             localStorage.setItem("token", data.token);
             push("/auth/code");
@@ -158,7 +154,7 @@ export const uploadScreenshot = (
     redirect: "follow",
     credentials: "include",
   };
-  console.log("uploading screenshot");
+  console.info("uploading screenshot");
 
   fetch("https://localhost:7081/gateway/api/Media/upload", requestOptions)
     .then((response) => response.json())
@@ -178,7 +174,7 @@ export const uploadScreenshot = (
         })
           .then((response) => response.json())
           .then((r) => {
-            console.log(r);
+            console.info(r.message);
           })
           .catch((e) => {
             console.error("Failed to submit screenshot: ", e);

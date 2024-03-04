@@ -64,7 +64,6 @@ export async function postReachOut({
 }: {
     feedbackForm:Feedback
 }) {
-    console.log(feedbackForm);
     try {
         // Post Question
         const res = await fetch(`${QUIZMASTER_SYSTEM_POST_REVIEW}`, {

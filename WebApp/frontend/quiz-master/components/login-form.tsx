@@ -48,7 +48,7 @@ const LoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
                 notification({ type: "error", title: response.message });
             }
         } catch (e) {
-            console.log("Error occured on logging in");
+            console.error("Error occured on logging in");
             notification({ type: "error", title: "Something went wrong" });
             redirectToError();
         }

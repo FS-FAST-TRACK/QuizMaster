@@ -65,7 +65,7 @@ function DragAndDrop({ question, connectionId }, ref) {
 
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
-    console.log(answer.length);
+    
     if (result.source.droppableId === result.destination.droppableId) {
       // Dragged within the same droppable
 
@@ -108,13 +108,10 @@ function DragAndDrop({ question, connectionId }, ref) {
   const submitScreenshot = (id, connectionId) => takeScreenShot(ref.current).then((image) => uploadScreenshot(image, id, connectionId));
 
   const handleSubmit = () => {
-    console.log("On Submit");
-    console.log(answer);
+    
     const arrayOfIds = answer?.map((opt) => opt.id);
-    console.log(arrayOfIds);
     const idsString = JSON.stringify(arrayOfIds);
 
-    console.log(idsString);
     let id = question.question.id;
     setIsSubmitted(true);
     submitScreenshot(id, connectionId);

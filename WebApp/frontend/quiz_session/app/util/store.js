@@ -10,7 +10,7 @@ export const useConnection = create((set, get) => ({
   connection: undefined,
 
   setConnection: () => {
-    if (get().connection !== undefined) console.log("initializing");
+    if (get().connection !== undefined) console.info("initializing");
     set({
       connection: new HubConnectionBuilder()
         .withUrl(`${BASE_URL}/gateway/hub/session`)

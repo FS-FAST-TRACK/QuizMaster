@@ -74,7 +74,7 @@ export default function Card() {
             setUsersLength(users.length);
 
           } catch (error) {
-            console.log(error);
+            console.error(error);
           }
         };
     
@@ -87,7 +87,7 @@ export default function Card() {
             const set = await fetchSets();
             setSetsLength(set.length);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
        
         }
@@ -109,7 +109,7 @@ export default function Card() {
             setQuestionsLength(length as number);
             
           } catch (error) {
-           console.log(error);
+           console.error(error);
           }
         };
     

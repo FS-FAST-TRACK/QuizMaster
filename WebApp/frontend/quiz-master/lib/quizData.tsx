@@ -49,7 +49,7 @@ export async function fetchLoginUser() {
             data = resJson;
             return data;
         }).catch(e => {
-            console.log("unauthorized");
+            console.error("unauthorized", e);
         });
         return data;
     } catch (error) {
@@ -164,7 +164,6 @@ export async function fetchAllSetQuestions() {
     try {
         const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
-        console.log(token);
 
         const data = await fetch(apiUrl, {
             credentials: "include",

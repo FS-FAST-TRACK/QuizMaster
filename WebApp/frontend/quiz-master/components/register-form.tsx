@@ -128,7 +128,6 @@ const RegisterForm = () => {
             <form
                 className="space-y-5 w-full flex-col flex gap-[40px]"
                 onSubmit={form.onSubmit((e) => {
-                    console.log("HEELo");
                     signUp(form.values);
                 })}
             >

@@ -35,10 +35,7 @@ export default function MultipleChoiceQuestionDetail({
             }
         }
 
-        console.log("OPT - - - - OLD - - - - NEW - - - - FOCUS ")
         OutDatedForm.values.options.map((option, index) => {
-            
-            //console.log(option.value, option.isAnswer, UpdatedForm.values.options[index].isAnswer)
             
             // Only update the selected answers if there is an update in the new form
             if(hasTrue){
