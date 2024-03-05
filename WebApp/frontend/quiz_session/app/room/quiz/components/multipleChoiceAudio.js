@@ -56,8 +56,9 @@ function MultipleChoiceAudio({ question, connectionId }, ref) {
 
   useEffect(() => {
     if (question?.question.qImage) {
+      if (question.question.qImage === "nothing") return;
       downloadImage({
-        url: question.question.qImage,
+        id: question.question.qImage,
         setImageUrl: setImageUrl,
         setHasImage: setHasImage,
       });

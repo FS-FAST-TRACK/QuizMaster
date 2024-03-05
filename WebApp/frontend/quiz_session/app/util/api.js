@@ -156,19 +156,21 @@ export const uploadScreenshot = (
   };
   console.info("uploading screenshot");
 
-  fetch("https://localhost:7081/gateway/api/Media/upload", requestOptions)
+  const token = localStorage.getItem('token');
+
+  fetch(`${BASE_URL}/gateway/api/Media/upload`, requestOptions)
     .then((response) => response.json())
     .then((result) => {
       let imageId = result.fileInformation.id;
       if (imageId) {
         // Submit Screenshot Link
-        fetch("https://localhost:7081/gateway/api/room/submitScreenshot", {
+        fetch(`${BASE_URL}/gateway/api/room/submitScreenshot`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({
             questionId: id,
             connectionId,
-            screenshotLink: `https://localhost:7081/gateway/api/media/download_media/${imageId}`,
+            screenshotLink: `${BASE_URL}/gateway/api/media/download_media/${imageId}`,
           }),
           credentials: "include",
         })

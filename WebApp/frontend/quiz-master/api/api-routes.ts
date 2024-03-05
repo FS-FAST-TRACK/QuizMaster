@@ -108,7 +108,7 @@ const QUIZMASTER_SYSTEM_POST_REVIEW = `${QUIZMASTER_SYSTEM}/review`;
 //Monitoring
 
 const QUIZMASTER_MONITORING_AUDIT_GET =
-    process.env.QUIZMASTER_MONITORING && `https://localhost:7065`;
+    process.env.QUIZMASTER_MONITORING ?? process.env.NEXT_PUBLIC_QUIZMASTER_MONITORING ?? `https://localhost:6004`;
 
 const QUIZMASTER_MONITORING_USER_GET = `${QUIZMASTER_MONITORING_AUDIT_GET}/api/audit/user/all`;
 const QUIZMASTER_MONITORING_MEDIA_GET = `${QUIZMASTER_MONITORING_AUDIT_GET}/api/mediaaudit/all`;
@@ -125,7 +125,7 @@ const QUIZMASTER_GATEWAY_SESSION_HUB = `${process.env.QUIZMASTER_GATEWAY}/gatewa
 //#endregion
 
 const QUIZMASTER_SESSION_WEBSITE =
-    process.env.QUIZMASTER_SESSION_WEBSITE ?? "http://localhost:3001";
+    process.env.QUIZMASTER_SESSION_WEBSITE ?? process.env.QUIZMASTER_SESSION ?? "http://localhost:3001";
 export {
     QUIZMASTER_ACCOUNT_GET,
     QUIZMASTER_ACCOUNT_POST,

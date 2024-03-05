@@ -240,7 +240,7 @@ namespace QuizMaster.API.QuizSession.Services.Workers
             #endregion
             var questions = context.Questions.ToList();
             LogInformation("Data Synchronized");
-            LogInformation(JsonConvert.SerializeObject(questions));
+            //LogInformation(JsonConvert.SerializeObject(questions));
 
         }
 

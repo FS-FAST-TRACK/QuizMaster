@@ -54,7 +54,7 @@ export async function fetchLoginUser() {
         return data;
     } catch (error) {
         console.error("Database Error:", error);
-        throw new Error("Failed to fetch question data.");
+        throw new Error("Failed to fetch user data");
     }
 }
 
