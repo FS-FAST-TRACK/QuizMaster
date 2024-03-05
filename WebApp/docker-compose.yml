@@ -22,7 +22,7 @@ services:
       - ApplicationSettings:RabbitMq_Account_RequestQueueName=QuizMasterRequestQueue
       - ApplicationSettings:RabbitMq_Account_ResponseQueueName=QuizMasterResponseQueue
       - ApplicationSettings:RabbitMq_Hostname=rabbitmq
-      - ApplicationSettings:Service_MonitoringGRPC=https://backend_api_monitoring:6004
+      - ApplicationSettings:Service_MonitoringGRPC=https://${HOST_IP}:6004
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:6001
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
@@ -162,7 +162,7 @@ services:
       - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
       - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
       - AppSettings:RabbitMq_Hostname=rabbitmq
-      - AppSettings:Service_MonitoringGRPC=https://backend_api_monitoring:6004
+      - AppSettings:Service_MonitoringGRPC=https://${HOST_IP}:6004
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:6005
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
@@ -190,7 +190,7 @@ services:
       - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
       - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
       - AppSettings:RabbitMq_Hostname=rabbitmq
-      - AppSettings:Monitoring_Service=https://backend_api_monitoring:6004
+      - AppSettings:Monitoring_Service=https://${HOST_IP}:6004
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:6006
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
@@ -229,7 +229,7 @@ services:
       - QUIZMASTER_GATEWAY=http://${HOST_IP}:7081
       - NEXTAUTH_URL=${HOST_PROTOCOL}://${HOST_IP}:3000/${NEXTAUTH_URL}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - QUIZMASTER_MONITORING=https://backend_api_monitoring:6004
+      - QUIZMASTER_MONITORING=https://${HOST_IP}:6004
     networks:
       - gateway
 
