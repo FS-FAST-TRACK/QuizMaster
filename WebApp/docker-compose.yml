@@ -183,6 +183,7 @@ services:
       - 6006:443
     depends_on:
       - rabbitmq
+      - mssql
     env_file:
       - .env
     environment:
@@ -198,6 +199,7 @@ services:
     networks:
       - rabbitmq_go_net
       - gateway
+      - mssql_net
 
   # FRONTEND SIDE
   frontend_quizmaster_session:
