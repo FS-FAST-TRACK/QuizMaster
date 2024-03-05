@@ -19,6 +19,7 @@ const nextConfig = {
         QUIZMASTER_MONITORING:
             process.env.QUIZMASTER_MONITORING &&
             process.env.NEXT_PUBLIC_QUIZMASTER_MONITORING,
+        BASE_URL: process.env.BASE_URL && process.env.NEXT_PUBLIC_BASE_URL
     },
     /*
       I have ignored linting and errors for now 

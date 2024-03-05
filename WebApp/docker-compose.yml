@@ -135,7 +135,7 @@ services:
     environment:
       - ConnectionStrings:AuditTrailDBConnection=${BACKEND_MONITORING_CONN_STR}
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
-      - Kestrel:Endpoints:Https:Url=https://*:6004
+      - Kestrel:Endpoints:Https:Url=https://*:443
       - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
       - Kestrel:Certificates:Default:Password=123456
     networks:
