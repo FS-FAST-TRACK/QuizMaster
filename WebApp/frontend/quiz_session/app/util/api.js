@@ -156,6 +156,8 @@ export const uploadScreenshot = (
   };
   console.info("uploading screenshot");
 
+  const token = localStorage.getItem('token');
+
   fetch(`${BASE_URL}/gateway/api/Media/upload`, requestOptions)
     .then((response) => response.json())
     .then((result) => {
@@ -164,7 +166,7 @@ export const uploadScreenshot = (
         // Submit Screenshot Link
         fetch(`${BASE_URL}/gateway/api/room/submitScreenshot`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({
             questionId: id,
             connectionId,

@@ -125,7 +125,7 @@ const QUIZMASTER_GATEWAY_SESSION_HUB = `${process.env.QUIZMASTER_GATEWAY}/gatewa
 //#endregion
 
 const QUIZMASTER_SESSION_WEBSITE =
-    process.env.QUIZMASTER_SESSION_WEBSITE ?? "http://localhost:3001";
+    process.env.QUIZMASTER_SESSION_WEBSITE ?? process.env.QUIZMASTER_SESSION ?? "http://localhost:3001";
 export {
     QUIZMASTER_ACCOUNT_GET,
     QUIZMASTER_ACCOUNT_POST,

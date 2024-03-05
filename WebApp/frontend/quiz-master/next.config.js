@@ -14,8 +14,8 @@ const nextConfig = {
             process.env.NEXTAUTH_SECRET ??
             process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
         QUIZMASTER_SESSION_WEBSITE:
-            process.env.QUIZMASTER_SESSION ??
-            process.env.NEXT_PUBLIC_QUIZMASTER_SESSION,
+            process.env.QUIZMASTER_SESSION_WEBSITE ??
+            process.env.NEXT_PUBLIC_QUIZMASTER_SESSION_WEBSITE ?? process.env.QUIZMASTER_SESSION,
         QUIZMASTER_MONITORING:
             process.env.QUIZMASTER_MONITORING ??
             process.env.NEXT_PUBLIC_QUIZMASTER_MONITORING,
