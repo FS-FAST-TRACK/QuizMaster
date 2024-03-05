@@ -10,7 +10,7 @@ export function ConnectToHub() {
     const { connection } = useConnection();
     connection.start();
   } catch (ex) {
-    console.log(ex);
+    console.error(ex);
   }
 }
 

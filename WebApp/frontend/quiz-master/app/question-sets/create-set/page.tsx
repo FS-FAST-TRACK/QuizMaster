@@ -79,12 +79,10 @@ export default function Page() {
             questions: formValues.values.questions,
         };
 
-        console.log(questionSetCreateDto);
         open();
 
         postQuestionSet({ questionSet: questionSetCreateDto })
             .then((res) => {
-                console.log(res, "hello");
                 // Notify for successful post
                 notification({
                     type: "success",
@@ -94,7 +92,7 @@ export default function Page() {
                 router.push("/question-sets");
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
                 // notify for error
                 notification({
                     type: "error",
@@ -116,7 +114,6 @@ export default function Page() {
             <form
                 className="flex flex-col gap-8 relative"
                 onSubmit={form.onSubmit((values) => {
-                    console.log(values);
                     //handelSubmit();
                 })}
                 onReset={() => form.reset()}
@@ -166,7 +163,7 @@ export default function Page() {
                 <div className="flex justify-end">
                     <Link
                         className="flex ml-3 h-[40px] items-center gap-3 rounded-md py-3 text-black text-sm font-medium justify-start px-3"
-                        href="#"
+                        href="/question-sets"
                     >
                         Cancel
                     </Link>

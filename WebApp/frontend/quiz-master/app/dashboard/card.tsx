@@ -58,7 +58,7 @@ export default function Card() {
             setUsersLength(users.length);
 
           } catch (error) {
-            console.log(error);
+            console.error(error);
           }
         };
     
@@ -71,7 +71,7 @@ export default function Card() {
             const set = await fetchSets();
             setSetsLength(set.length);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
        
         }
@@ -79,6 +79,7 @@ export default function Card() {
     }, []);
     //FOR QUESTIONS
     useEffect(() => {
+
       const fetchData = async () => {
         try {
           const response = await GetAllQuestion(); // Wait for the promise to resolve
@@ -89,7 +90,6 @@ export default function Card() {
           console.log(error);
         } 
       };
-    
       fetchData(); // Call the async function
     }, []);
   

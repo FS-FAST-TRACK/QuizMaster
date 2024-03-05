@@ -48,7 +48,6 @@ export default function ReviewsCard() {
 
     useEffect(() => {
         const stars = reviews.map((r) => r.starRating);
-        console.log(stars);
         const averageRating =
             stars.length > 0
                 ? +(

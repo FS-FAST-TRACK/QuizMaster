@@ -26,8 +26,6 @@ const authOptions = {
             async authorize(credentials, req) {
                 try {
                     // Guard of null jwt token
-                    console.log("Method invoked ");
-                    console.log(credentials);
                     if (!credentials?.jwt) {
                         return null;
                     }
@@ -44,17 +42,16 @@ const authOptions = {
                         username: parsed.UserName,
                         role: parse.Roles[0].Name,
                     };
-                    console.log("Returning user");
                     return user as any;
                 } catch (error) {
-                    console.log(error);
+                    console.error(error);
                 }
             },
         }),
     ],
     pages: {
-        signIn: "/auth/login",
-        signOut: "/",
+        signIn: `${process.env.BASE_URL ?? 'localhost:3000'}/auth/login`,
+        signOut: `${process.env.BASE_URL ?? 'localhost:3000'}/auth/signout`,
     },
 
     secret:

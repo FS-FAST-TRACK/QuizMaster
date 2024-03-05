@@ -66,7 +66,6 @@ export default function Page() {
     }, [searchQuery, form]);
 
     const handleDelete = useCallback(async () => {
-        console.log("DELETE DIFFICULTY");
         if (deleteDifficulty) {
             try {
                 const response = await removeDifficulty({

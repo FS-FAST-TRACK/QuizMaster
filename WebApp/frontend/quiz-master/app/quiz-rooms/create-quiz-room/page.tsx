@@ -375,7 +375,7 @@ export default function Page() {
                     >
                         Cancel
                     </Button>
-                    <Button variant="filled" color="green" type="submit">
+                    <Button variant="filled" color="green" type="submit" className="bg-[#FF6633]">
                         Create Quiz Room
                     </Button>
                 </div>
