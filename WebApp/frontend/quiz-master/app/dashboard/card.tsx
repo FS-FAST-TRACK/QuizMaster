@@ -4,12 +4,12 @@ import { GetAllUsers } from '@/lib/hooks/dashboard-api-call'
 import { fetchSets } from '@/lib/quizData';
 import { useForm } from "@mantine/form";
 import { fetchCategories } from '@/lib/quizData';
-import { fetchQuestions } from '@/lib/hooks/question';
+import { GetAllQuestion } from '@/lib/hooks/question';
 import { fetchDifficulties } from '@/lib/hooks/difficulty';
 import {
-    ResourceParameter,QuestionFilterProps, Question,
     CategoryResourceParameter
 } from "@/lib/definitions";
+import { json } from 'stream/consumers';
 export default function Card() {
     const [usersLength, setUsersLength] = useState<number>(0);
     const [setsLength, setSetsLength] = useState<number>(0);
@@ -17,22 +17,6 @@ export default function Card() {
     const [categoriesLength, setCategoriesLength] = useState<number>(0);
     const [difficultiesLength,setDifficultiesLength] = useState<number>(0);
 
-
-     const [questionFilters, setQuestionFilters] = useState<QuestionFilterProps>(
-        {
-            filterByCategories: [],
-            filterByDifficulties: [],
-            filterByTypes: [],
-        }
-    );
-    const Questionform = useForm<ResourceParameter>({
-        initialValues: {
-            pageSize: "100",
-            searchQuery: "",
-            pageNumber: 1,
-        },
-    });
-    
     const CategoriesForm = useForm<CategoryResourceParameter>({
         initialValues: {
             pageSize: "100",
@@ -95,27 +79,20 @@ export default function Card() {
     }, []);
     //FOR QUESTIONS
     useEffect(() => {
-        const fetchQuestionsLength = async () => {
-          try {
-            const questionsResponse = await fetchQuestions({ 
-              questionResourceParameter: {
-                ...Questionform.values,
-                ...questionFilters,
-                exludeQuestionsIds: undefined,
-              },
-            });
-           
-            const length = questionsResponse?.data?.questions.length !== undefined ? questionsResponse?.data?.questions.length : 0;
-            setQuestionsLength(length as number);
-            
-          } catch (error) {
-           console.error(error);
-          }
-        };
-    
-        fetchQuestionsLength();
-      }, []); // Empty dependency array to run only on mount
-    
+
+      const fetchData = async () => {
+        try {
+          const response = await GetAllQuestion(); // Wait for the promise to resolve
+          console.log("RESPONSE1121:", response );
+          setQuestionsLength(response?.length);
+          // Now you can work with the response data here
+        } catch (error) {
+          console.log(error);
+        } 
+      };
+      fetchData(); // Call the async function
+    }, []);
+  
   return (
 <div className="flex flex-wrap flex-col">
   <div className="mr-3 ml-3 mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-center">

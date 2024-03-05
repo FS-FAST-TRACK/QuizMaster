@@ -1,6 +1,9 @@
+
 import LoginForm from "@/components/login-form";
 import { getServerSession } from "next-auth";
 import HeadNav from "@/components/Commons/navbars/head-nav";
+
+import React from "react";
 export default async function Home() {
     const session = await getServerSession();
     return (
@@ -8,7 +11,7 @@ export default async function Home() {
            {session ? (
                <HeadNav  />
             ) : (
-                <LoginForm callbackUrl="/home" />
+                <LoginForm callbackUrl="/" />
             )}
         </main>
     );
