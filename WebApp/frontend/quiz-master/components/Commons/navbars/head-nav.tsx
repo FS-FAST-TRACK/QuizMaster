@@ -35,7 +35,6 @@ export default   function HeadNav() {
       setIsOpen(!isOpen);
     };
  
- 
   
    
     return (
@@ -93,19 +92,20 @@ export default   function HeadNav() {
                <Link className={`flex flex-row justify-center items-center h-5 p-5 mr-2 w-auto p-5 bg-[#FF7F2A] hover:bg-[#FF7F2A80] gap-2 rounded-md hover:cursor-pointer ${ !userInfo?.info.roles.includes("Administrator") ? "hidden" : "flex" }`}  href="/dashboard">  
                <text className="text-2xl pb-1">+</text><b className="hidden lg:block" >Create Quiz</b>
                </Link>
-               <Popover position="bottom" withArrow shadow="md">
+             
+               <Popover  position="bottom" withArrow shadow="md">
                  <Popover.Target>
-                   <Button style={{ background: "#1AC15930" }} className="bg-[#1AC15930]  flex flex-row justify-center items-center h-5 p-5 mr-2 w-40 p-5 gap-2 rounded-md hover:cursor-pointer">
-                     <div className="flex-row">
-                       <text className="ml-2" style={{ fontSize: 18, fontWeight: 'bold' }}>{firstName ? firstName : userInfo?.info?.userData?.userName}</text>
-                     </div>
-                     <Image
+                   <button style={{ backgroundColor: "#1AC15930", background: "#1AC15930" }} className=" bg-[#1AC15930] text-white  flex flex-row justify-center items-center h-5 p-5 mr-2 w-40 p-5 gap-2 rounded-md hover:cursor-pointer">
+                     <div className="flex flex-row w-auto align-center">
+                       <span className="ml-2" style={{ fontSize: 18, fontWeight: 'bold' }}>{firstName ? firstName : userInfo?.info?.userData?.userName}</span>
+                       <Image
                        src={chevronDown}
                        alt="chevron"
                        height={20}
-                       style={{ color: 'white', height: '100%', marginTop: 2, marginLeft: 8 }}
+                       style={{ height: '100%', marginTop: 4, marginLeft: 8 }}
                      />
-                   </Button>
+                     </div>
+                   </button>
                  </Popover.Target>
                  <Popover.Dropdown style={{ paddingTop: 7, paddingBottom: 5 }}>
                    <Link href="/profile" className="hover:bg-[#5a5a5a30] flex rounded-md hover:cursor-pointer p-3 text-center">Profile Settings</Link>
@@ -113,6 +113,7 @@ export default   function HeadNav() {
                  </Popover.Dropdown>
                </Popover>
              </div>
+            
            ) : (
              <div className="flex flex-row rounded-3xl items-center gap-10">
                <Link href="/auth/login">Login</Link>
