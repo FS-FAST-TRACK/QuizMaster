@@ -52,6 +52,15 @@ function TypeAnswer({ question, connectionId }, ref) {
     }
   }, [question?.question.qImage, previousStatement]);
 
+  useEffect(()=>{
+    // clear input field if answer is shown
+    if(ANSWER){
+      setTimeout(()=>{
+        setAnswer('');
+      }, 10_000);
+    }
+  }, [ANSWER])
+
   useEffect(() => {
     if (question?.question.qStatement !== previousStatement) {
       setAnswer();
@@ -117,8 +126,8 @@ function TypeAnswer({ question, connectionId }, ref) {
                   onChange={(e) => {
                     setAnswer(e.target.value);
                   }}
-                  value={answer}
                   disabled={isSubmitted || ANSWER}
+                  value={answer}
                 />
               </div>
               <div className="w-1/4">
