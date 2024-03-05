@@ -19,7 +19,6 @@ export default function PageHeaderDashboard({
                         <p className="block pl-3">Go to Home</p>
                         <ArrowLongRightIcon className="w-5" />
                     </Link>
-   
         </div>
     );
 }
