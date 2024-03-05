@@ -9,7 +9,7 @@ import { fetchDifficulties } from '@/lib/hooks/difficulty';
 import {
     CategoryResourceParameter
 } from "@/lib/definitions";
-import { json } from 'stream/consumers';
+
 export default function Card() {
     const [usersLength, setUsersLength] = useState<number>(0);
     const [setsLength, setSetsLength] = useState<number>(0);
@@ -83,7 +83,6 @@ export default function Card() {
       const fetchData = async () => {
         try {
           const response = await GetAllQuestion(); // Wait for the promise to resolve
-          console.log("RESPONSE1121:", response );
           setQuestionsLength(response?.length);
           // Now you can work with the response data here
         } catch (error) {
