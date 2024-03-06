@@ -351,7 +351,7 @@ namespace QuizMaster.API.Gateway.Hubs
                                 {
                                     if (participantData.Where(p => p.UserId == joineeData.UserId).Any())
                                     {
-                                        if (!activeRoom.AllowReconnect())
+                                        if (!activeRoom.AllowReconnect() && !SessionHandler.IsAdmin(connectionId))
                                         {
                                             await Clients.Caller.SendAsync("notif", $"Sorry but disconnected participant is not allowed to join again.");
                                             return;

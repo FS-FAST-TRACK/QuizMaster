@@ -94,7 +94,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center  w-full ">
         <div className="text-white">Slider</div>
-        <div className="text-white text-2xl font-bold flex flex-wrap text-center  ">
+        <div className="text-white text-2xl font-bold flex flex-wrap text-center select-none">
           {question?.question.qStatement}
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
@@ -150,7 +150,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
               color={"yellow"}
               onClick={handleSubmit}
               disabled={isSubmitted || ANSWER}
-              className="bg-[#FF6633]"
+              className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
             >
               Submit
             </Button>

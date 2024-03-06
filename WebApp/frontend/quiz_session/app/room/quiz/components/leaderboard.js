@@ -12,7 +12,7 @@ export default function Leaderboard({ leaderBoard }) {
       case 2:
         return "bg-bronze";
       default:
-        return "bg-red-500";
+        return "bg-green-200";
     }
   };
   return (
@@ -27,7 +27,7 @@ export default function Leaderboard({ leaderBoard }) {
         </div>
         <div className="space-y-3">
           <div className="flex flex-row p-2 rounded-lg">
-            <div className=" flex-grow font-bold">PARTICIPANT</div>
+            <div className=" flex-grow font-bold text-slate-500">PARTICIPANTS</div>
             <div className="text-score_result">SCORE</div>
           </div>
         </div>
