@@ -19,7 +19,7 @@ export default function Card() {
 
     const CategoriesForm = useForm<CategoryResourceParameter>({
         initialValues: {
-            pageSize: "100",
+            pageSize: "1000000",
             searchQuery: "",
             pageNumber: 1,
         },
@@ -27,7 +27,7 @@ export default function Card() {
 
     const DifficultiesForm = useForm<CategoryResourceParameter>({
         initialValues: {
-            pageSize: "100",
+            pageSize: "1000000",
             searchQuery: "",
             pageNumber: 1,
         },
