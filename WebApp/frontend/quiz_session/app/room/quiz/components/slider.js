@@ -107,7 +107,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
               <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon width={20} height={20} /></div>
             </div>
           }
-          <Participants includeLoaderModal={false} />
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <div className="flex-grow w-full text-white text-xl font-bold space-x-2 flex-col flex justify-center">

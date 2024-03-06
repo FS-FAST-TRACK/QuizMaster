@@ -114,6 +114,7 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
               </div>
             </div>
           )}
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <>

@@ -83,3 +83,10 @@ export const useAnswer = create((set) => ({
     set({ answer: data });
   }
 }))
+
+export const useAnsweredParticipants = create((set) => ({
+  answeredParticipants: [],
+  setAnsweredParticipants: (data = []) => {
+    set({answeredParticipants: data})
+  }
+}))
