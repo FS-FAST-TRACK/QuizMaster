@@ -102,9 +102,10 @@ export default function ViewParticipantAnswersModal({
                             (report) =>
                                 report.participantName === participantName
                         )
-                        .map((answer) => {
+                        .map((answer, index) => {
                             return (
                                 <ParticipantAnswerItem
+                                    key={index}
                                     participantAnswer={answer}
                                     onChangeQuestionInfos={(questionInfo) =>
                                         setQuestionInfo((prev) => [

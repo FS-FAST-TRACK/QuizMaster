@@ -52,7 +52,7 @@ export default function ViewQuestionScreenShotModal({
                 URL.revokeObjectURL(imageBlobUrl);
             }
         };
-    }, [opened, screenshotLink]); // Re-run effect when modal opens or screenshot link changes
+    }, [opened, screenshotLink, imageBlobUrl]); // Re-run effect when modal opens or screenshot link changes
 
     return (
         <Modal
@@ -64,7 +64,7 @@ export default function ViewQuestionScreenShotModal({
                 <div className="flex justify-between gap-4 pl-4 pt-4">
                     <div>
                         <p className="text-xl mb-2">
-                            Screenshot on <b>{participantName}'s</b> answer
+                            Screenshot on <b>{`${participantName}'s`}</b> answer
                         </p>
                     </div>
                 </div>
