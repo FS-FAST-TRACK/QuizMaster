@@ -54,7 +54,7 @@ namespace QuizMaster.API.QuizSession.Services.Workers
             {
                 try
                 {
-                    await Task.Delay(5000, stoppingToken);
+                    await Task.Delay(1000, stoppingToken);
                     LogInformation("Initializing...");
 
                     using IConnection connection = _RabbitMqConnectionFactory.CreateConnection();

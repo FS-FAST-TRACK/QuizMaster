@@ -81,7 +81,7 @@ namespace QuizMaster.API.Quiz.Services.Workers
                     }
                 }
                 catch { }
-                await Task.Delay(15_000, stoppingToken);
+                await Task.Delay(25_000, stoppingToken);
             }
         }
 
