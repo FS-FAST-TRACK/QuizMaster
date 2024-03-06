@@ -45,6 +45,7 @@ export default function LeaderBoard({
                                 index={index}
                                 sessionReport={sessionReport}
                                 sessionName={sessionName}
+                                key={index}
                             />
                         ))}
                     </Table.Tbody>
@@ -73,6 +74,7 @@ export default function LeaderBoard({
                                         index={index + 3}
                                         sessionReport={sessionReport}
                                         sessionName={sessionName}
+                                        key={index}
                                     />
                                 ))}
                             </Table.Tbody>

@@ -27,8 +27,8 @@ export function UsersTablePDF({ users }: { users: User[] }) {
                         Roles
                     </Text>
                 </View>
-                {users.map((user) => {
-                    return <UserTableRow user={user} />;
+                {users.map((user, index) => {
+                    return <UserTableRow user={user} key={index} />;
                 })}
             </View>
         </View>

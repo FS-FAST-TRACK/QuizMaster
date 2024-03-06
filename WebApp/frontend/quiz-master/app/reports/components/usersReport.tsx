@@ -58,10 +58,6 @@ export default function UserReports() {
         fetchUsers();
     }, []);
 
-    useEffect(() => {
-        console.log(users);
-    }, []);
-
     const errorOverLay = () => {
         return (
             <div className="absolute bg-gray-300/60 top-0 bottom-0 left-0 right-0 flex flex-col items-center gap-4 pt-16">

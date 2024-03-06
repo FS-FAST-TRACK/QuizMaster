@@ -31,14 +31,14 @@ export function UsersTable({
             <Table>
                 <Table.Thead>
                     <Table.Tr>
-                        {TABLE_COLUMNS.map((column) => {
-                            return <Table.Td>{column}</Table.Td>;
+                        {TABLE_COLUMNS.map((column, index) => {
+                            return <Table.Td key={index}>{column}</Table.Td>;
                         })}
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                    {users.map((user) => {
-                        return <UserTableRow user={user} />;
+                    {users.map((user, index) => {
+                        return <UserTableRow user={user} key={index} />;
                     })}
                 </Table.Tbody>
             </Table>

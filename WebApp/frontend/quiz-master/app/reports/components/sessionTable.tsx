@@ -31,8 +31,8 @@ export default function SessionTable({
     isLoading: boolean;
     error: any;
 }) {
-    const rows = quizReports.map((report) => (
-        <SessionTableRow session={report} />
+    const rows = quizReports.map((report, index) => (
+        <SessionTableRow session={report} key={index} />
     ));
 
     if (isLoading) {

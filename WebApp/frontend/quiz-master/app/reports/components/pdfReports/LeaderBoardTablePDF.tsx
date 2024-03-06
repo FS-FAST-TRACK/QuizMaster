@@ -31,6 +31,7 @@ export function LeaderBoardTablePDF({
                     <LeaderBoardPdfRow
                         participant={participant}
                         index={index + 1}
+                        key={index}
                     />
                 ))}
             </View>
@@ -52,6 +53,7 @@ export function LeaderBoardTablePDF({
                     <LeaderBoardPdfRow
                         participant={participant}
                         index={index + 4}
+                        key={index}
                     />
                 ))}
             </View>

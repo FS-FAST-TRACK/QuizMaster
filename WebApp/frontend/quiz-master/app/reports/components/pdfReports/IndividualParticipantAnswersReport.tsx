@@ -48,11 +48,12 @@ export function IndividualParticipantAnswersReport({
                                 Answer
                             </Text>
                         </View>
-                        {participantAnswers.map((answer) => {
+                        {participantAnswers.map((answer, index) => {
                             return (
                                 <ParticipantAnswersTableRow
                                     participantAnswer={answer}
                                     questionInfos={questionInfos}
+                                    key={index}
                                 />
                             );
                         })}

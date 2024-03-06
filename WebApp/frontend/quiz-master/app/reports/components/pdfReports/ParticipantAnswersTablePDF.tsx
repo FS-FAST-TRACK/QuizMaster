@@ -20,10 +20,11 @@ export function ParticipantAnswersTablePDF({
                         Answer
                     </Text>
                 </View>
-                {participantAnswers.map((answer) => {
+                {participantAnswers.map((answer, index) => {
                     return (
                         <ParticipantAnswersTableRow
                             participantAnswer={answer}
+                            key={index}
                         />
                     );
                 })}
