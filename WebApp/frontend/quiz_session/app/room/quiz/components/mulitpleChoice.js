@@ -9,6 +9,7 @@ import Participants from "../../components/participants";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer } from "@/app/util/store";
+import { notifications } from "@mantine/notifications";
 
 export default React.forwardRef(MulitpleChoice);
 
@@ -45,6 +46,17 @@ function MulitpleChoice({ question, connectionId }, ref) {
       setPick(answer);
     }
   };
+
+  
+  useEffect(()=>{
+    // handleSubmit if answer is shown
+    if(answer && !isSubmitted){
+      if(!pick){
+        notifications.show({title: "You have not selected any choices"})
+      }
+      handleSubmit();
+    }
+  }, [answer])
 
   useEffect(() => {
     if (question?.question.qImage) {

@@ -59,6 +59,14 @@ function SliderPuzzle({ question, connectionId }, ref) {
     submitAnswer({ id, answer, connectionId });
   };
 
+  
+  useEffect(()=>{
+    // handleSubmit if answer is shown
+    if(ANSWER && !isSubmitted){
+      handleSubmit();
+    }
+  }, [ANSWER])
+
   useEffect(() => {
     if (question?.question.qImage) {
       if (question.question.qImage === "nothing") return;

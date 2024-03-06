@@ -45,6 +45,16 @@ function TrueOrFalse({ question, connectionId }, ref) {
     }
   };
 
+  useEffect(()=>{
+    // handleSubmit if answer is shown
+    if(ANSWER && !isSubmitted){
+      if(!pick){
+        notifications.show({title: "You have not selected any choices"})
+      }
+      handleSubmit();
+    }
+  }, [ANSWER])
+
   useEffect(() => {
     if (question?.question.qImage) {
       if (question.question.qImage === "nothing") return;

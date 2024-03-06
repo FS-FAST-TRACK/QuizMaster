@@ -10,6 +10,7 @@ import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer } from "@/app/util/store";
+import { notifications } from "@mantine/notifications";
 
 export default React.forwardRef(TypeAnswer);
 
@@ -35,6 +36,10 @@ function TypeAnswer({ question, connectionId }, ref) {
 
   const handleSubmit = () => {
     let id = question.question.id;
+    if(!ANSWER && !answer){
+      notifications.show({title: "Please type your answer in the input field"});
+      return;
+    }
     setIsSubmitted(true);
     submitScreenshot(id, connectionId);
     submitAnswer({ id, answer, connectionId });
@@ -54,10 +59,14 @@ function TypeAnswer({ question, connectionId }, ref) {
 
   useEffect(()=>{
     // clear input field if answer is shown
-    if(ANSWER){
+    if(ANSWER && !isSubmitted){
+      if(!answer){
+        notifications.show({title: "No answer inputted"});
+      }
       setTimeout(()=>{
         setAnswer('');
       }, 10_000);
+      handleSubmit();
     }
   }, [ANSWER])
 
