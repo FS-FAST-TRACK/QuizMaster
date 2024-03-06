@@ -36,7 +36,6 @@ export default function CustomPagination({
             <Pagination
                 style={{backgroundColor:'white'}}
                 total={metadata?.totalPages || totalPages || 1}
-                getItemProps={(item)=> <text className="text-black">{item}</text>}
                 siblings={1}
                 {...form.getInputProps("pageNumber")}
                 onChange={(value) => {
