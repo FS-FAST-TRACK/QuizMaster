@@ -54,10 +54,11 @@ function TypeAnswer({ question, connectionId }, ref) {
 
   useEffect(()=>{
     // clear input field if answer is shown
-    if(ANSWER){
+    if(ANSWER && !isSubmitted){
       setTimeout(()=>{
         setAnswer('');
       }, 10_000);
+      handleSubmit();
     }
   }, [ANSWER])
 

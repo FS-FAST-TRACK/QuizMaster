@@ -46,6 +46,14 @@ function MulitpleChoice({ question, connectionId }, ref) {
     }
   };
 
+  
+  useEffect(()=>{
+    // handleSubmit if answer is shown
+    if(answer && !isSubmitted){
+      handleSubmit();
+    }
+  }, [answer])
+
   useEffect(() => {
     if (question?.question.qImage) {
       if (question.question.qImage === "nothing") return;
