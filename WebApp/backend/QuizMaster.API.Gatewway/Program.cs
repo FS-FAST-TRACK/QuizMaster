@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Helper;
@@ -154,6 +155,11 @@ using(var scope = app.Services.CreateScope())
     var systemDbContext = services.GetRequiredService<SystemDbContext>();
     systemDbContext.Database.Migrate();
     systemDbContext.Database.EnsureCreated();
+
+    QuizSettings QuizSettings = services.GetRequiredService<IOptions<QuizSettings>>().Value;
+    Console.WriteLine("Multiple Choice: "+QuizSettings.OverrideQuestionTimer.MultipleChoice);
+    Console.WriteLine("Type Answer: " + QuizSettings.OverrideQuestionTimer.TypeAnswer);
+    Console.WriteLine("True or False: " + QuizSettings.OverrideQuestionTimer.TrueOrFalse);
 }
 
 app.Run();
