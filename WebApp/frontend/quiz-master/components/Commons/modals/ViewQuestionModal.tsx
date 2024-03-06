@@ -49,7 +49,7 @@ export default function ViewQuestionModal({
                 <QuesitonCard question={question} />
                 {imageBlobUrl && (
                     <div>
-                        <p>Image</p>
+                        <p className="text-gray-400">Image</p>
                         <Image
                             alt="Image"
                             src={imageBlobUrl}

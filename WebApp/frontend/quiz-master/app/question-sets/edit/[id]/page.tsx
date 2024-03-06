@@ -91,13 +91,13 @@ export default function Page({ params }: { params: { id: number } }) {
         });
     }, [params.id]);
 
-    useEffect(() => {
-        removeQuestion.map((id) => {
-            setQuestionSet((prev) =>
-                prev.filter((question) => question.id !== id)
-            );
-        });
-    }, [removeQuestion]);
+    // useEffect(() => {
+    //     removeQuestion.map((id) => {
+    //         setQuestionSet((prev) =>
+    //             prev.filter((question) => question.id !== id)
+    //         );
+    //     });
+    // }, [removeQuestion]);
 
     //check if there are changes in list of questions
     useEffect(() => {

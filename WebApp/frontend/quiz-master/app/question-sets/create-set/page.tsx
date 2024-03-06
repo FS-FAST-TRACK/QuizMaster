@@ -60,13 +60,13 @@ export default function Page() {
         },
     });
 
-    useEffect(() => {
-        removeQuestion.map((id) => {
-            setQuestionSet((prev) =>
-                prev.filter((question) => question.id !== id)
-            );
-        });
-    }, [removeQuestion]);
+    // useEffect(() => {
+    //     removeQuestion.map((id) => {
+    //         setQuestionSet((prev) =>
+    //             prev.filter((question) => question.id !== id)
+    //         );
+    //     });
+    // }, [removeQuestion]);
 
     const handleSubmit = useCallback(async () => {
         formValues.values.questions = questionSet.map(
@@ -78,7 +78,6 @@ export default function Page() {
             qSetName: formValues.values.qSetName,
             questions: formValues.values.questions,
         };
-
         open();
 
         postQuestionSet({ questionSet: questionSetCreateDto })
