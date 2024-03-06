@@ -26,16 +26,21 @@ export default function Leaderboard({ leaderBoard }) {
           </div>
         </div>
         <div className="space-y-3">
-          {leaderBoard.map((score, index) => (
+          <div className="flex flex-row p-2 rounded-lg">
+            <div className=" flex-grow font-bold">PARTICIPANT</div>
+            <div className="text-score_result">SCORE</div>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {leaderBoard.map((participant, index) => (
             <div
               className={` ${getRankColorClass(
                 index
               )} flex flex-row p-2 rounded-lg`}
               key={index}
             >
-              <div className=" w-10 font-bold ">{index + 1}</div>
-              <div className=" flex-grow font-bold">{score.name}</div>
-              <div className="text-score_result">{score.score}</div>
+              <div className=" flex-grow font-bold">{participant.name}</div>
+              <div className="text-score_result">{participant.score}</div>
             </div>
           ))}
         </div>
