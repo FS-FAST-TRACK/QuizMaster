@@ -51,7 +51,8 @@ namespace QuizMaster.API.QuizSession.Migrations
                 name: "QuizParticipants",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     QParticipantDesc = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     QRoomId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -155,7 +156,8 @@ namespace QuizMaster.API.QuizSession.Migrations
                 name: "SetQuizRooms",
                 columns: table => new
                 {
-                    QSetId = table.Column<int>(type: "int", nullable: false),
+                    QSetId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     QRoomId = table.Column<int>(type: "int", nullable: false),
                     ActiveData = table.Column<bool>(type: "bit", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
