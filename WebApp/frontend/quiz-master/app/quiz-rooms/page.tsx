@@ -136,7 +136,7 @@ export default function Page() {
                 </div>
             </div>
             <QuizRoomTable />
-            <Pagination form={form} totalPages={totalPages} />
+          {/* <Pagination form={form} totalPages={totalPages} /> */}
         </div>
     );
 }
