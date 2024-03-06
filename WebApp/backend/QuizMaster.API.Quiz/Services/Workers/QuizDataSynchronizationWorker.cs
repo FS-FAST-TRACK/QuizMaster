@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NuGet.Packaging;
 using QuizMaster.API.Quiz.Configuration;
+using QuizMaster.API.Quiz.SeedData;
 using QuizMaster.API.Quiz.Services.Repositories;
 using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Models;
@@ -46,6 +47,7 @@ namespace QuizMaster.API.Quiz.Services.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            bool firstRun = false;
             while(!stoppingToken.IsCancellationRequested)
             {   
                 try
@@ -65,8 +67,8 @@ namespace QuizMaster.API.Quiz.Services.Workers
 
                         // process the payload to be sent
                         LogInformation("Processing Data");
-                        // no joke, this is heavy HAHAHAHA
-                        var processedPayload = await ProcessGetPayloadAsync();
+                        // no joke, this is heavy HAHAHAHA | Jay: I have updated to only process latest, commented: 3/6/2024
+                        var processedPayload = firstRun ? await ProcessGetPayloadAsync() : await ProcessGetPayloadLatestAsync(2);
 
                         LogInformation("Serializing Data");
                         // serialize the payload to JSON
@@ -81,7 +83,7 @@ namespace QuizMaster.API.Quiz.Services.Workers
                     }
                 }
                 catch { }
-                await Task.Delay(25_000, stoppingToken);
+                await Task.Delay(2_000, stoppingToken);
             }
         }
 
@@ -102,8 +104,8 @@ namespace QuizMaster.API.Quiz.Services.Workers
 
                 // process the payload to be sent
                 LogInformation("Processing Data");
-                // no joke, this is heavy HAHAHAHA
-                var processedPayload = await ProcessGetPayloadAsync();
+                // no joke, this is heavy HAHAHAHA | Jay: I have updated to only process latest, commented: 3/6/2024
+                var processedPayload = await ProcessGetPayloadLatestAsync(2);
 
                 LogInformation("Serializing Data");
                 // serialize the payload to JSON
@@ -118,6 +120,7 @@ namespace QuizMaster.API.Quiz.Services.Workers
             }
         }
 
+        // This should be called upon instantiation only, don't call this overtime, it might kill server
         public async Task<RabbitMQ_QuestionPayload> ProcessGetPayloadAsync()
         {
             RabbitMQ_QuestionPayload payload = new();
@@ -133,6 +136,46 @@ namespace QuizMaster.API.Quiz.Services.Workers
                 payload.QuestionDetailTypes = await quizRepository.GetAllQuestionDetailTypesAsync();
                 payload.QuestionDifficulties = await quizRepository.GetAllDifficultiesAsync();
                 payload.QuestionTypes = await quizRepository.GetAllTypesAsync();
+            }
+            return payload;
+        }
+
+        // This method will only retrieve items that are updated recently [2mins before]
+        public async Task<RabbitMQ_QuestionPayload> ProcessGetPayloadLatestAsync(int minutes_recent = 2)
+        {
+            RabbitMQ_QuestionPayload payload = new();
+            using var scope = _serviceProvider.CreateScope();
+
+            IQuizRepository? quizRepository = scope.ServiceProvider.GetService<IQuizRepository>();
+            if (quizRepository != null)
+            {
+                // Process DetailTypes
+                IEnumerable<DetailType> detailTypes = await quizRepository.GetDetailTypesAsync();
+                payload.DetailTypes = detailTypes.Where(d => d.DateUpdated > (DateTime.UtcNow - TimeSpan.FromMinutes(minutes_recent))).ToList();
+
+                // Process QuestionCategories
+                IEnumerable<QuestionCategory> questionCategories = await quizRepository.GetAllCategoriesAsync();
+                payload.QuestionCategories = questionCategories.Where(c => c.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+
+                // Process Questions
+                IEnumerable<Question> questions = await quizRepository.GetAllQuestionsAsync();
+                payload.Questions = questions.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+
+                // Process QuestionDetails
+                IEnumerable<QuestionDetail> questionDetails = await quizRepository.GetAllQuestionDetailsAsync();
+                payload.QuestionDetails = questionDetails.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+
+                // Process QuestionDetailTypes
+                IEnumerable<QuestionDetailType> questionDetailTypes = await quizRepository.GetAllQuestionDetailTypesAsync();
+                payload.QuestionDetailTypes = questionDetailTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+
+                // Process QuestionDifficulties
+                IEnumerable<QuestionDifficulty> questionDifficulties = await quizRepository.GetAllDifficultiesAsync();
+                payload.QuestionDifficulties = questionDifficulties.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+
+                // Process QuestionTypes
+                IEnumerable<QuestionType> questionTypes = await quizRepository.GetAllTypesAsync();
+                payload.QuestionTypes = questionTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
             }
             return payload;
         }
