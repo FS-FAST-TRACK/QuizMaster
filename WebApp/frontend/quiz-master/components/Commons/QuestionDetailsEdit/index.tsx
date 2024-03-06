@@ -401,6 +401,7 @@ export default function QuestionDetails({
                     color="green"
                     disabled={!form.isDirty() || !form.isValid()}
                     type="submit"
+                    className="bg-[#FF6633]"
                 >
                     Update
                 </Button>

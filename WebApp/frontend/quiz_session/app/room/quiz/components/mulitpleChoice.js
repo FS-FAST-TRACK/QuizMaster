@@ -147,6 +147,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
               onClick={handleSubmit}
               size="lg"
               disabled={isSubmitted || answer}
+              className="bg-[#FF6633]"
             >
               Submit
             </Button>

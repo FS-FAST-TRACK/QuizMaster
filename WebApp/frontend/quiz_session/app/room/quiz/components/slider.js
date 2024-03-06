@@ -61,8 +61,9 @@ function SliderPuzzle({ question, connectionId }, ref) {
 
   useEffect(() => {
     if (question?.question.qImage) {
+      if (question.question.qImage === "nothing") return;
       downloadImage({
-        url: question.question.qImage,
+        id: question.question.qImage,
         setImageUrl: setImageUrl,
         setHasImage: setHasImage,
       });
@@ -95,7 +96,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
           { ANSWER && 
              <div className="py-8 px-[20%]">
               <p className="text-white">Correct answer is: </p>
-              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon className="px-4" width={20} height={20} /></div>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon width={20} height={20} /></div>
             </div>
           }
           <Participants includeLoaderModal={false} />
@@ -105,7 +106,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
           { ANSWER && 
             <div className="py-8 px-[20%] w-full">
               <p className="text-white">Correct answer is: </p>
-              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon className="px-4" width={20} height={20} /></div>
+              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon width={20} height={20} /></div>
             </div>
           }
           <div className="w-full flex justify-center items-center  flex-col ">
@@ -141,6 +142,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
               color={"yellow"}
               onClick={handleSubmit}
               disabled={isSubmitted || ANSWER}
+              className="bg-[#FF6633]"
             >
               Submit
             </Button>

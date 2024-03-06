@@ -355,6 +355,7 @@ export default function Page({ params }: { params: { id: number } }) {
                             )
                         }
                         type="submit"
+                        className="bg-[#FF6633]"
                     >
                         Update
                     </Button>

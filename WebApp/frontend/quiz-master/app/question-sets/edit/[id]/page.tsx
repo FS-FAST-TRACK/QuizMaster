@@ -123,12 +123,11 @@ export default function Page({ params }: { params: { id: number } }) {
             questions: formValues.values.questions,
         };
 
-        console.log(questionSetCreateDto);
         open();
 
         updateQuestionSet({ id: params.id, questionSet: questionSetCreateDto })
             .then((res) => {
-                console.log(res, "hello");
+                console.error(res, "hello");
                 // Notify for successful post
                 notification({
                     type: "success",
@@ -138,7 +137,7 @@ export default function Page({ params }: { params: { id: number } }) {
                 router.push("/question-sets");
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
                 // notify for error
                 notification({
                     type: "error",
@@ -160,7 +159,6 @@ export default function Page({ params }: { params: { id: number } }) {
             <form
                 className="flex flex-col gap-8 relative"
                 onSubmit={form.onSubmit((values) => {
-                    console.log(values);
                 })}
                 onReset={() => form.reset()}
             >

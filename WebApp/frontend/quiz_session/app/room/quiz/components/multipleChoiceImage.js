@@ -44,7 +44,7 @@ export default function MultipleChoiceAudio() {
       </div>
       <div className=" w-full justify-center flex">
         <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-          <Button fullWidth color={"yellow"}>
+          <Button fullWidth color={"yellow"}  className="bg-[#FF6633]">
             Submit
           </Button>
         </div>

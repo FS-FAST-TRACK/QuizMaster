@@ -5,12 +5,25 @@ import SideNav from "@/components/Commons/navbars/sidenav";
 import { getAllCategories } from "@/lib/hooks/category";
 import { getAllDifficulties } from "@/lib/hooks/difficulty";
 import { getAllTypes } from "@/lib/hooks/type";
+import { fetchLoginUser } from "@/lib/quizData";
 import { useQuestionCategoriesStore } from "@/store/CategoryStore";
 import { useQuestionDifficultiesStore } from "@/store/DifficultyStore";
 import { useQuestionTypesStore } from "@/store/TypeStore";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
+
+    useEffect(()=>{
+        fetchLoginUser().then((res) => {
+            if (res !== null && res !== undefined) {
+                if(!(res?.info.roles.includes("Administrator"))){
+                    router.push("/home");
+                }
+            }
+        });
+    }, [])
     const { setQuestionCategories } = useQuestionCategoriesStore();
     const { setQuestionDifficulties } = useQuestionDifficultiesStore();
     const { setQuestionTypes } = useQuestionTypesStore();

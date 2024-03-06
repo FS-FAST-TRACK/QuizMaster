@@ -10,7 +10,7 @@ using QuizMaster.API.QuizSession.Services.Repositories;
 using QuizMaster.API.QuizSession.Services.Workers;
 
 /*
- * You have any issues? Contact Jayharron: jabejar@fullscale.io for more info :D
+ * You have any issues? Contact Jayharron: jabejar@fullscale.ph for more info :D
  * Date: 1/11/2024
  */
 namespace QuizMaster.API.QuizSession
@@ -63,7 +63,7 @@ namespace QuizMaster.API.QuizSession
 
             // Add DBcontext
 			builder.Services.AddDbContext<QuizSessionDbContext>(
-				dbContextOptions => dbContextOptions.UseSqlite(
+				dbContextOptions => dbContextOptions.UseSqlServer(
 					builder.Configuration["ConnectionStrings:QuizMasterQuizSessionDBConnectionString"]));
 
             // Register worker services

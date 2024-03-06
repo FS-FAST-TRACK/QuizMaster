@@ -17,6 +17,7 @@
 * docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
 */
 #endregion
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.QuizSession.Configuration;
@@ -53,7 +54,7 @@ namespace QuizMaster.API.QuizSession.Services.Workers
             {
                 try
                 {
-                    await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(5000, stoppingToken);
                     LogInformation("Initializing...");
 
                     using IConnection connection = _RabbitMqConnectionFactory.CreateConnection();
@@ -240,7 +241,7 @@ namespace QuizMaster.API.QuizSession.Services.Workers
             #endregion
             var questions = context.Questions.ToList();
             LogInformation("Data Synchronized");
-            LogInformation(JsonConvert.SerializeObject(questions));
+            //LogInformation(JsonConvert.SerializeObject(questions));
 
         }
 

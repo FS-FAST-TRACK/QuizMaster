@@ -15,7 +15,7 @@ export async function getUserInfo(){
 
     const userData = data.info.userData as IAccount;
     return {userData:new UserAccount().parse(userData), roles:data.info.roles as Array<string>};
-  }catch(e){console.log("Error ",e)}
+  }catch(e){console.error("Error ",e)}
   return {userData:new UserAccount(), roles:[""]};;
 }
 
@@ -29,7 +29,7 @@ export async function getAccountInfo(id: Number){
 
     const userData = data as IAccount;
     return userData;
-  }catch(e){console.log("Error ",e)}
+  }catch(e){console.error("Error ",e)}
   return new UserAccount();
 }
 
@@ -54,7 +54,7 @@ export async function updateEmail(id: Number, newEmail: string, ErrorCallback: (
 
 export async function saveUserDetails(account: IAccount, setEditToggle: Dispatch<SetStateAction<boolean>>, ErrorCallback: (message: string) => void){
   // apply patch
-  console.log("called")
+  
   if(!account.firstName || !account.lastName || !account.userName){
     ErrorCallback("Make sure that the fields are not empty");
     return

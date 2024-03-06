@@ -42,14 +42,24 @@ function TypeAnswer({ question, connectionId }, ref) {
 
   useEffect(() => {
     if (question?.question.qImage) {
+      if (question.question.qImage === "nothing") return;
       downloadImage({
-        url: question.question.qImage,
+        id: question.question.qImage,
         setImageUrl: setImageUrl,
         setHasImage: setHasImage,
       });
       setHasImage(true);
     }
   }, [question?.question.qImage, previousStatement]);
+
+  useEffect(()=>{
+    // clear input field if answer is shown
+    if(ANSWER){
+      setTimeout(()=>{
+        setAnswer('');
+      }, 10_000);
+    }
+  }, [ANSWER])
 
   useEffect(() => {
     if (question?.question.qStatement !== previousStatement) {
@@ -117,6 +127,7 @@ function TypeAnswer({ question, connectionId }, ref) {
                     setAnswer(e.target.value);
                   }}
                   disabled={isSubmitted || ANSWER}
+                  value={answer}
                 />
               </div>
               <div className="w-1/4">
@@ -126,6 +137,7 @@ function TypeAnswer({ question, connectionId }, ref) {
                   size="xl"
                   onClick={handleSubmit}
                   disabled={isSubmitted || ANSWER}
+                  className="bg-[#FF6633]"
                 >
                   Submit
                 </Button>

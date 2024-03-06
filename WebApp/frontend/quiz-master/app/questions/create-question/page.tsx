@@ -327,10 +327,10 @@ export default function Page() {
                 <QuestionDetails form={form} />
 
                 <div className="flex justify-end">
-                    <Button variant="transparent" color="gray" type="reset">
+                    <Button variant="transparent" color="gray" type="reset" onClick={()=>{router.push("/questions")}}>
                         Cancel
                     </Button>
-                    <Button variant="filled" color="green" type="submit">
+                    <Button variant="filled" color="green" type="submit" className="bg-[#FF6633]">
                         Create
                     </Button>
                 </div>

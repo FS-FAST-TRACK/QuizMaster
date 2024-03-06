@@ -47,8 +47,9 @@ function TrueOrFalse({ question, connectionId }, ref) {
 
   useEffect(() => {
     if (question?.question.qImage) {
+      if (question.question.qImage === "nothing") return;
       downloadImage({
-        url: question.question.qImage,
+        id: question.question.qImage,
         setImageUrl: setImageUrl,
         setHasImage: setHasImage,
       });
@@ -190,6 +191,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               size="xl"
               disabled={isSubmitted || ANSWER}
               onClick={handleSubmit}
+              className="bg-[#FF6633]"
             >
               Submit
             </Button>

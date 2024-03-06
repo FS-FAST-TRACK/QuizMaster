@@ -29,7 +29,7 @@ export default function PromptModal({
                 <Button variant="transparent" color="gray" onClick={onClose}>
                     Cancel
                 </Button>
-                <Button variant="filled" color="red" onClick={onConfirm}>
+                <Button variant="filled" color="red" className="bg-red-600" onClick={onConfirm}>
                     {action}
                 </Button>
             </div>

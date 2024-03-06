@@ -7,6 +7,7 @@ import { QuizRoomPageData } from "@/lib/pagesData";
 import { useConnectionStore } from "@/store/ConnectionStore";
 import { useQuizRoomsStore } from "@/store/QuizRoomStore";
 import { PlusIcon } from "@heroicons/react/24/outline";
+
 import { Anchor, Breadcrumbs } from "@mantine/core";
 import Pagination from "@/components/Commons/Pagination";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
@@ -15,6 +16,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
 import { ResourceParameter } from "@/lib/definitions";
 import SearchField from "@/components/Commons/SearchField";
+
 
 const items = [
     { label: "All", href: "#" },
@@ -57,11 +59,9 @@ export default function Page() {
             const token = localStorage.getItem("token");
             connection.invoke("Login", token);
             connection.on("notif", (data) => {
-                console.log("notif", data);
                 notification({ type: "success", title: data });
             });
             connection.on("auth_data", (data) => {
-                console.log("auth_data", data);
 
                 notification({ type: "success", title: data });
             });
@@ -112,7 +112,7 @@ export default function Page() {
     }, [form.values, debouncedSearchQuery]);
 
     return (
-        <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
+        <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow" >
             <Breadcrumbs>{items}</Breadcrumbs>
             <div className="flex flex-col md:flex-row gap-3">
                 <Link
@@ -122,6 +122,7 @@ export default function Page() {
                     <PlusIcon className="w-6" />
                     <p className="block">Create Quiz Room</p>
                 </Link>
+               
                 <div className="grow"></div>
 
                 <div className="flex">

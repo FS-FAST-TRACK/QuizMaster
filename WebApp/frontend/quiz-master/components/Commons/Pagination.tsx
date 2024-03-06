@@ -32,14 +32,19 @@ export default function CustomPagination({
                     }}
                 />
             </div>
+            <div className="bg-white flex">
             <Pagination
+                style={{backgroundColor:'white'}}
                 total={metadata?.totalPages || totalPages || 1}
+                getItemProps={(item)=> <text className="text-black">{item}</text>}
                 siblings={1}
                 {...form.getInputProps("pageNumber")}
                 onChange={(value) => {
                     form.setFieldValue("pageNumber", value);
                 }}
+                color="green"
             />
+             </div>
         </div>
     );
 }

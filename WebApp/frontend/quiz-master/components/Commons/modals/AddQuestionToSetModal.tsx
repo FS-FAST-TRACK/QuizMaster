@@ -134,6 +134,7 @@ export default function AddQuestionToSetModal({
                         color="green"
                         disabled={selectedRows.length === 0}
                         onClick={handelSubmit}
+                        className="bg-[#FF6633]"
                     >
                         Add to set
                     </Button>
