@@ -156,8 +156,7 @@ namespace QuizMaster.API.QuizSession.Migrations
                 name: "SetQuizRooms",
                 columns: table => new
                 {
-                    QSetId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    QSetId = table.Column<int>(type: "int", nullable: false),
                     QRoomId = table.Column<int>(type: "int", nullable: false),
                     ActiveData = table.Column<bool>(type: "bit", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
