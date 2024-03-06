@@ -115,6 +115,8 @@ namespace QuizMaster.API.QuizSession
                         var scopeProvider = scope.ServiceProvider;
                         var dbContext = scopeProvider.GetRequiredService<QuizSessionDbContext>();
 
+                        dbContext.Database.EnsureDeleted();
+                        Task.Delay(1000).Wait();
                         dbContext.Database.Migrate();
                         dbContext.Database.EnsureCreated();
                         run = true;
