@@ -40,7 +40,7 @@ interface QuestionGetResponse extends CustomResponse {
 export async function GetAllQuestion()
     {
         try {
-            var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}`;
+            var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?maxPageSize=10000`;
             const res = await fetch(apiUrl);
 
             const isSuccess = res.status === 201 || res.status === 200;
