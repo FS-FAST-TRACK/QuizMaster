@@ -151,31 +151,31 @@ namespace QuizMaster.API.Quiz.Services.Workers
             {
                 // Process DetailTypes
                 IEnumerable<DetailType> detailTypes = await quizRepository.GetDetailTypesAsync();
-                payload.DetailTypes = detailTypes.Where(d => d.DateUpdated > (DateTime.UtcNow - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.DetailTypes = detailTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
 
                 // Process QuestionCategories
                 IEnumerable<QuestionCategory> questionCategories = await quizRepository.GetAllCategoriesAsync();
-                payload.QuestionCategories = questionCategories.Where(c => c.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.QuestionCategories = questionCategories.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
 
                 // Process Questions
                 IEnumerable<Question> questions = await quizRepository.GetAllQuestionsAsync();
-                payload.Questions = questions.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.Questions = questions.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
 
                 // Process QuestionDetails
                 IEnumerable<QuestionDetail> questionDetails = await quizRepository.GetAllQuestionDetailsAsync();
-                payload.QuestionDetails = questionDetails.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.QuestionDetails = questionDetails.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
 
                 // Process QuestionDetailTypes
                 IEnumerable<QuestionDetailType> questionDetailTypes = await quizRepository.GetAllQuestionDetailTypesAsync();
-                payload.QuestionDetailTypes = questionDetailTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.QuestionDetailTypes = questionDetailTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
 
                 // Process QuestionDifficulties
                 IEnumerable<QuestionDifficulty> questionDifficulties = await quizRepository.GetAllDifficultiesAsync();
-                payload.QuestionDifficulties = questionDifficulties.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.QuestionDifficulties = questionDifficulties.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
 
                 // Process QuestionTypes
                 IEnumerable<QuestionType> questionTypes = await quizRepository.GetAllTypesAsync();
-                payload.QuestionTypes = questionTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
+                payload.QuestionTypes = questionTypes.Where(q => q.DateUpdated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent)) || q.DateCreated > (DateTime.Now - TimeSpan.FromMinutes(minutes_recent))).ToList();
             }
             return payload;
         }

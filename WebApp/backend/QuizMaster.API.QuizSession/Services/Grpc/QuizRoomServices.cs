@@ -17,11 +17,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
     {
         private readonly QuizSessionDbContext _context;
         private readonly RoomAuditServiceClient _roomAuditServiceClient;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public QuizRoomServices(QuizSessionDbContext context, RoomAuditServiceClient roomAuditServiceClient)
+        public QuizRoomServices(QuizSessionDbContext context, RoomAuditServiceClient roomAuditServiceClient, IServiceScopeFactory serviceScopeFactory)
         {
             _context = context;
             _roomAuditServiceClient = roomAuditServiceClient;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
         public override async Task<RoomResponse> CreateRoom(CreateRoomRequest request, ServerCallContext context)
         {
@@ -39,6 +41,10 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return await Task.FromResult(reply);
                 }
 
+                // create a scoped service
+                using IServiceScope scope = serviceScopeFactory.CreateScope();
+                QuizSessionDbContext quizSessionDbContext = scope.ServiceProvider.GetRequiredService<QuizSessionDbContext>();
+
                 // Capture the details of the user creating the room
                 var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
                 var userNameClaim = context.RequestHeaders.FirstOrDefault(h => h.Key == "username")?.Value;
@@ -46,23 +52,23 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 var quizRoom = new QuizRoom { QRoomDesc = room.RoomName, QRoomPin = new Random().Next(10000000, 99999999) };
 
-                QuizRoom? existingRoom = _context.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
+                QuizRoom? existingRoom = quizSessionDbContext.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
                 while (existingRoom != null)
                 {
                     quizRoom.QRoomPin = new Random().Next(10000000, 99999999);
-                    existingRoom = _context.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
+                    existingRoom = quizSessionDbContext.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
                 }
 
                 quizRoom.RoomOptions = JsonConvert.SerializeObject(room.RoomOptions);
 
-                var createdRoomObject = await _context.QuizRooms.AddAsync(quizRoom);
-                await _context.SaveChangesAsync();
+                var createdRoomObject = await quizSessionDbContext.QuizRooms.AddAsync(quizRoom);
+                await quizSessionDbContext.SaveChangesAsync();
 
                 // Todo: Check quiz set ID
                 foreach (var id in room.QuestionSets)
                 {
-                    await _context.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = createdRoomObject.Entity.Id });
-                    await _context.SaveChangesAsync();
+                    await quizSessionDbContext.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = createdRoomObject.Entity.Id });
+                    await quizSessionDbContext.SaveChangesAsync();
                 }
 
                 // Construct the create room event
@@ -375,7 +381,10 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
-            var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
+            using IServiceScope scope = serviceScopeFactory.CreateScope();
+            QuizSessionDbContext quizSessionDbContext = scope.ServiceProvider.GetRequiredService<QuizSessionDbContext>();
+            
+            var sets = quizSessionDbContext.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
             int foundId = -1;
             foreach(var id in QuestionSetIds)
             {

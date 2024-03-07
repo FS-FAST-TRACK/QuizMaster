@@ -18,11 +18,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
     {
         private readonly QuizSessionDbContext _quizSetManager;
         private readonly QuizAuditService.QuizAuditServiceClient _quizAuditServiceClient;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public QuizSetServices(QuizSessionDbContext quizSetManager, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient)
+        public QuizSetServices(QuizSessionDbContext quizSetManager, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient, IServiceScopeFactory serviceScopeFactory)
         {
             _quizSetManager = quizSetManager;
             _quizAuditServiceClient = quizAuditServiceClient;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         public override async Task<QuizSetMessage> AddQuizSet(QuizSetRequest request, ServerCallContext context)
@@ -32,6 +34,10 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var quizSet = JsonConvert.DeserializeObject<SetDTO>(request.QuizSet)!;
 
             var checkQuestion = CheckForQuistionId(quizSet.questions);
+
+            // Create a scoped service
+            using IServiceScope scope = serviceScopeFactory.CreateScope();
+            QuizSessionDbContext quizSessionDbContext = scope.ServiceProvider.GetRequiredService<QuizSessionDbContext>();
 
             try
             {
@@ -43,7 +49,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return await Task.FromResult(reply);
                 }
 
-                var setWithNameExists = _quizSetManager.Sets.Where(s => s.QSetName.ToLower() == quizSet.QSetName.ToLower()).FirstOrDefault();
+                var setWithNameExists = quizSessionDbContext.Sets.Where(s => s.QSetName.ToLower() == quizSet.QSetName.ToLower()).FirstOrDefault();
 
                 if (setWithNameExists != null)
                 {
@@ -54,16 +60,16 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
 
                 var set = new Set { QSetName = quizSet.QSetName, QSetDesc = quizSet.QSetDesc, ActiveData = true, DateCreated = DateTime.Now };
-                await _quizSetManager.Sets.AddAsync(set);
-                await _quizSetManager.SaveChangesAsync();
+                await quizSessionDbContext.Sets.AddAsync(set);
+                await quizSessionDbContext.SaveChangesAsync();
 
                 foreach (var questionID in quizSet.questions)
                 {
                     var questionSet = new QuestionSet { QuestionId = questionID, SetId = set.Id, ActiveData = true };
-                    await _quizSetManager.QuestionSets.AddAsync(questionSet);
+                    await quizSessionDbContext.QuestionSets.AddAsync(questionSet);
                 }
 
-                await _quizSetManager.SaveChangesAsync();
+                await quizSessionDbContext.SaveChangesAsync();
 
                 // Capture the details of the user adding the quiz set
                 var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
