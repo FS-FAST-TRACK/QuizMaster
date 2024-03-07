@@ -36,9 +36,9 @@ export default function Participants({ includeLoaderModal = true, className = ''
         {names?.map((name, index) => (
           <div
             key={index}
-            className={`py-2 px-5 rounded-md font-bold m-2 shadow-sm ${answeredParticipants.includes(name.qParticipantDesc) ? 'bg-yellow-700 text-white' : 'bg-white text-green_text'}`}
+            className={`py-2 px-5 rounded-md font-bold m-2 shadow-sm ${answeredParticipants.includes(name.qParticipantDesc) ? 'bg-yellow-500 text-white' : 'bg-white text-green_text'}`}
           >
-            {name.qParticipantDesc}
+            {name.qParticipantDesc.toUpperCase()}
           </div>
         ))}
       </div>

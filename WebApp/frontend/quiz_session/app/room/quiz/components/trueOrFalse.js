@@ -91,7 +91,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
           True or False
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
-          {question?.question.qStatement}.
+          {question?.question.qStatement}
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
