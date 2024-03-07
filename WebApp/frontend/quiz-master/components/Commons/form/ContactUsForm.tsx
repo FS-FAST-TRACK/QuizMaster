@@ -166,7 +166,7 @@ export default function ContactUsForm() {
                     />
                 </div>
                 <div>
-                    <Button variant="filled" color="orange" type="submit">
+                    <Button variant="filled" color="orange" className="bg-orange-500" type="submit">
                         Submit
                     </Button>
                 </div>
