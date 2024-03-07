@@ -9,6 +9,8 @@ import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer } from "@/app/util/store";
+import { notifications } from "@mantine/notifications";
+import Participants from "../../components/participants";
 
 export default React.forwardRef(TrueOrFalse);
 
@@ -34,6 +36,10 @@ function TrueOrFalse({ question, connectionId }, ref) {
 
   const handleSubmit = () => {
     let id = question.question.id;
+    if(!pick && !isAdmin && !ANSWER){
+      notifications.show({title: "Please select an option"})
+      return;
+    }
     setIsSubmitted(true);
     submitScreenshot(id, connectionId);
     submitAnswer({ id, answer: pick, connectionId });
@@ -44,6 +50,16 @@ function TrueOrFalse({ question, connectionId }, ref) {
       setPick(answer);
     }
   };
+
+  useEffect(()=>{
+    // handleSubmit if answer is shown
+    if(ANSWER && !isSubmitted){
+      if(!pick && !isAdmin){
+        notifications.show({title: "You have not selected any choices"})
+      }
+      handleSubmit();
+    }
+  }, [ANSWER])
 
   useEffect(() => {
     if (question?.question.qImage) {
@@ -74,7 +90,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
         <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
           True or False
         </div>
-        <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center">
+        <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}.
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
@@ -126,6 +142,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               False
             </div>
           </div>
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <div className="w-full place-content-center">
@@ -186,12 +203,11 @@ function TrueOrFalse({ question, connectionId }, ref) {
           <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
             <Button
               fullWidth
-              className="shadow-lg"
               color={"yellow"}
               size="xl"
               disabled={isSubmitted || ANSWER}
               onClick={handleSubmit}
-              className="bg-[#FF6633]"
+              className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
             >
               Submit
             </Button>

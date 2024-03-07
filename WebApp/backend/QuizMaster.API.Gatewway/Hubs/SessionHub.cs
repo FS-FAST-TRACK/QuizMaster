@@ -261,8 +261,7 @@ namespace QuizMaster.API.Gateway.Hubs
                 await Clients.Client(connId).SendAsync("chat", new { Message = "You are kicked from the room", Name = "bot", IsAdmin = false });
                 await SessionHandler.RemoveClientFromGroups(this, connId, $"{quizParticipant.QParticipantDesc} was kicked by admin");
                 SessionHandler.UnbindConnectionId(connId);
-                IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(roomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
-                await Clients.Group($"{roomPin}").SendAsync("participants", participants);
+                await UpdateParticipants($"{roomPin}");
                 await Clients.Client(connId).SendAsync("kicked", "/* Triggered, you are kicked boyo */");
             }
 
@@ -351,7 +350,7 @@ namespace QuizMaster.API.Gateway.Hubs
                                 {
                                     if (participantData.Where(p => p.UserId == joineeData.UserId).Any())
                                     {
-                                        if (!activeRoom.AllowReconnect())
+                                        if (!activeRoom.AllowReconnect() && !SessionHandler.IsAdmin(connectionId))
                                         {
                                             await Clients.Caller.SendAsync("notif", $"Sorry but disconnected participant is not allowed to join again.");
                                             return;
@@ -371,8 +370,7 @@ namespace QuizMaster.API.Gateway.Hubs
                         
                         await SessionHandler.AddToGroup(this, $"{RoomPin}", connectionId);
                         await Clients.Group($"{RoomPin}").SendAsync("chat", new { Message = $"{Name} has joined the room", Name = "bot", IsAdmin = false });
-                        IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString()).Select(p => new { p.UserId, p.QParticipantDesc });
-                        await Clients.Group($"{RoomPin}").SendAsync("participants", participants);
+                        await UpdateParticipants($"{RoomPin}");
                     }
                     else {
                         await Clients.Caller.SendAsync("JoinFailed", true);
@@ -420,8 +418,7 @@ namespace QuizMaster.API.Gateway.Hubs
 
             if (group != null)
             {
-                IEnumerable<object> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(group).Select(p => new { p.UserId, p.QParticipantDesc });
-                await Clients.Group(group).SendAsync("participants", participants);
+                await UpdateParticipants(group);
             }
         }
 
@@ -476,6 +473,37 @@ namespace QuizMaster.API.Gateway.Hubs
             await Task.Delay(1000);
             var participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(roomPin);
             await Clients.Group(roomPin).SendAsync("participants", participants);
+        }
+
+
+        public async Task UpdateParticipants(string RoomPin)
+        {
+            IEnumerable<QuizParticipant> participants = SessionHandler.GetParticipantLinkedConnectionsInAGroup(RoomPin.ToString());
+            List<string> admins = new();
+            foreach (var connId in SessionHandler.GetConnectionIdsInAGroup($"{RoomPin}"))
+            {
+                var p = SessionHandler.GetLinkedParticipantInConnectionId(connId);
+                if (p != null)
+                {
+                    if (SessionHandler.IsAdmin(connId))
+                    {
+                        admins.Add(p.QParticipantDesc);
+                    }
+                }
+            }
+            List<object> participantsWithAdmin = new();
+            
+
+            foreach (var p in participants)
+            {
+                participantsWithAdmin.Add(new
+                {
+                    p.UserId,
+                    p.QParticipantDesc,
+                    IsAdmin = admins.Contains(p.QParticipantDesc)
+                });
+            }
+            await Clients.Group($"{RoomPin}").SendAsync("participants", participantsWithAdmin);
         }
 
       

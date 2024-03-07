@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Helper;
@@ -134,6 +135,17 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
     });
 }
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swagger, httpReq) =>
+    {
+        swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" } };
+    });
+});
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway - Documentation");
+});
 
 
 //app.UseHttpsRedirection();
@@ -154,6 +166,11 @@ using(var scope = app.Services.CreateScope())
     var systemDbContext = services.GetRequiredService<SystemDbContext>();
     systemDbContext.Database.Migrate();
     systemDbContext.Database.EnsureCreated();
+
+    QuizSettings QuizSettings = services.GetRequiredService<IOptions<QuizSettings>>().Value;
+    Console.WriteLine("Multiple Choice: "+QuizSettings.OverrideQuestionTimer.MultipleChoice);
+    Console.WriteLine("Type Answer: " + QuizSettings.OverrideQuestionTimer.TypeAnswer);
+    Console.WriteLine("True or False: " + QuizSettings.OverrideQuestionTimer.TrueOrFalse);
 }
 
 app.Run();

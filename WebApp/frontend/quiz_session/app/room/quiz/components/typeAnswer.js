@@ -3,19 +3,20 @@ import React, { useState, useEffect } from "react";
 import { Button, CheckIcon, Input } from "@mantine/core";
 import { submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { downloadImage } from "@/app/util/api";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useForceUpdate } from "@mantine/hooks";
 import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer } from "@/app/util/store";
+import { notifications } from "@mantine/notifications";
 
 export default React.forwardRef(TypeAnswer);
 
-function TypeAnswer({ question, connectionId }, ref) {
+function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
   const { isAdmin } = useUserTokenData();
-  const { answer: ANSWER } = useAnswer();
+  //const { answer: ANSWER } = useAnswer();
 
   const [answer, setAnswer] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -35,6 +36,10 @@ function TypeAnswer({ question, connectionId }, ref) {
 
   const handleSubmit = () => {
     let id = question.question.id;
+    if(!ANSWER && !answer && !isAdmin){
+      notifications.show({title: "Please type your answer in the input field"});
+      return;
+    }
     setIsSubmitted(true);
     submitScreenshot(id, connectionId);
     submitAnswer({ id, answer, connectionId });
@@ -54,10 +59,14 @@ function TypeAnswer({ question, connectionId }, ref) {
 
   useEffect(()=>{
     // clear input field if answer is shown
-    if(ANSWER){
+    if(ANSWER && !isSubmitted){
+      if(!answer && !isAdmin){
+        notifications.show({title: "No answer inputted"});
+      }
       setTimeout(()=>{
-        setAnswer('');
+        setAnswer();
       }, 10_000);
+      handleSubmit();
     }
   }, [ANSWER])
 
@@ -78,7 +87,7 @@ function TypeAnswer({ question, connectionId }, ref) {
         <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
           Type Answer
         </div>
-        <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center">
+        <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}.
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
@@ -105,6 +114,7 @@ function TypeAnswer({ question, connectionId }, ref) {
               </div>
             </div>
           )}
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <>
@@ -121,13 +131,14 @@ function TypeAnswer({ question, connectionId }, ref) {
             <div className="flex flex-row w-1/2 space-x-2">
               <div className="w-3/4">
                 <Input
+                  id="input-typeAnswer"
                   placeholder="Type your Answer"
                   size="xl"
                   onChange={(e) => {
                     setAnswer(e.target.value);
                   }}
                   disabled={isSubmitted || ANSWER}
-                  value={answer}
+                  value={answer ?? (ANSWER?'':'')}
                 />
               </div>
               <div className="w-1/4">
@@ -137,7 +148,7 @@ function TypeAnswer({ question, connectionId }, ref) {
                   size="xl"
                   onClick={handleSubmit}
                   disabled={isSubmitted || ANSWER}
-                  className="bg-[#FF6633]"
+                  className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
                 >
                   Submit
                 </Button>

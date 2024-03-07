@@ -2,8 +2,8 @@
 {
 	public class CategoryResourceParameter : IResourceParameter
 	{
-		public int maxPageSize => 50;
-		public bool IsOnlyActiveData { get; set; } = true;
+        public int maxPageSize { get; set; } = 50;
+        public bool IsOnlyActiveData { get; set; } = true;
 		public string? SearchQuery { get; set; }
 		public int PageNumber { get; set; } = 1;
 		public bool IsGetAll { get; set; } = false;

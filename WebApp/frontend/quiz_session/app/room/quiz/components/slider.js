@@ -59,6 +59,14 @@ function SliderPuzzle({ question, connectionId }, ref) {
     submitAnswer({ id, answer, connectionId });
   };
 
+  
+  useEffect(()=>{
+    // handleSubmit if answer is shown
+    if(ANSWER && !isSubmitted){
+      handleSubmit();
+    }
+  }, [ANSWER])
+
   useEffect(() => {
     if (question?.question.qImage) {
       if (question.question.qImage === "nothing") return;
@@ -86,7 +94,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center  w-full ">
         <div className="text-white">Slider</div>
-        <div className="text-white text-2xl font-bold flex flex-wrap text-center  ">
+        <div className="text-white text-2xl font-bold flex flex-wrap text-center select-none">
           {question?.question.qStatement}
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
@@ -99,7 +107,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
               <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg"><p className="px-4">{ANSWER}</p> <CheckIcon width={20} height={20} /></div>
             </div>
           }
-          <Participants includeLoaderModal={false} />
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <div className="flex-grow w-full text-white text-xl font-bold space-x-2 flex-col flex justify-center">
@@ -142,7 +150,7 @@ function SliderPuzzle({ question, connectionId }, ref) {
               color={"yellow"}
               onClick={handleSubmit}
               disabled={isSubmitted || ANSWER}
-              className="bg-[#FF6633]"
+              className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
             >
               Submit
             </Button>

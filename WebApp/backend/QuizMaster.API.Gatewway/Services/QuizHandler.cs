@@ -96,7 +96,10 @@ namespace QuizMaster.API.Gateway.Services
                     if (details == null) continue;
 
                     handler.SetCurrentQuestionDisplayed(roomPin, details.question.Id);// Save the current displayed Question
-                    var timout = details.question.QTime;
+                    var timeout = details.question.QTime;
+
+                    // Override timeout based on the QType
+                    timeout = OverrideTimeout(timeout, details.question.QTypeId);
 
                     // setting the current set info
                     details.CurrentSetName = questionSet.Set.QSetName;
@@ -130,12 +133,13 @@ namespace QuizMaster.API.Gateway.Services
                     });
 
                     // Sending Question with updated remaining time
-                    for (int time = timout; time >= 0; time--)
+                    for (int time = timeout; time >= 0; time--)
                     {
                         details.RemainingTime = time;
                         await hub.Clients.Group(roomPin).SendAsync("question", details);
                         //string connectionId = hub.Context.ConnectionId;
-                        
+                        await hub.Clients.Group(roomPin).SendAsync("participant_answered", handler.ParticipantsAnswered());
+
                         //await hub.Clients.Group(roomPin).SendAsync("connId", connectionId);
 
                         await Task.Delay(1000);
@@ -144,6 +148,7 @@ namespace QuizMaster.API.Gateway.Services
                     // TODO: Display answer for (n) seconds
                     await hub.Clients.Group(roomPin).SendAsync("answer", answers);
                     await Task.Delay(1000 * quizSettings.ShowAnswerAfterQuestionDelay);
+                    await hub.Clients.Group(roomPin).SendAsync("participant_answered", null);
                     await hub.Clients.Group(roomPin).SendAsync("answer", null);
                 }
 
@@ -192,6 +197,30 @@ namespace QuizMaster.API.Gateway.Services
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
             //await hub.Clients.Group(roomPin).SendAsync("notif", "Quiz Data: "+JsonConvert.SerializeObject(await GetQuizRoomDatasAsync()));
             //await hub.Clients.Group(roomPin).SendAsync("stop",true);
+        }
+
+        private int OverrideTimeout(int timeout, int qTypeId)
+        {
+            // Override Multiple choice
+            if(qTypeId == 1)
+            {
+                if (quizSettings.OverrideQuestionTimer.MultipleChoice > 0)
+                    return quizSettings.OverrideQuestionTimer.MultipleChoice;
+            }   
+            // Override True or False
+            if(qTypeId == 3)
+            {
+                if (quizSettings.OverrideQuestionTimer.TrueOrFalse > 0)
+                    return quizSettings.OverrideQuestionTimer.TrueOrFalse;
+            }
+            // Override TypeAnswer
+            if(qTypeId == 4)
+            {
+                if (quizSettings.OverrideQuestionTimer.TypeAnswer > 0)
+                    return quizSettings.OverrideQuestionTimer.TypeAnswer;
+            }
+
+            return timeout;
         }
 
         public void AcceptParticipantsAnswerSubmission(SessionHandler handler, string roomPin, QuizRoom room)

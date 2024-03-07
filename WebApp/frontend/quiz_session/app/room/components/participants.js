@@ -3,20 +3,23 @@
 import React from "react";
 import { Loader } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { useParticipants } from "@/app/util/store";
+import { useAnsweredParticipants, useParticipants } from "@/app/util/store";
 
-export default function Participants({ includeLoaderModal = true }) {
+export default function Participants({ includeLoaderModal = true, className = '', excludeAdmins = false}) {
   const [names, setNames] = useState([]);
   const { participants } = useParticipants();
+  const { answeredParticipants } = useAnsweredParticipants();
 
   useEffect(() => {
-    setNames(participants);
-  }, [participants]);
+    if(excludeAdmins)
+      setNames(participants.filter(p => !p.isAdmin));
+    else setNames(participants);
+  }, [participants, excludeAdmins]);
 
   return (
     <>
       {includeLoaderModal && (
-        <div className=" flex  flex-col items-center space-y-2 mt-8 mb-8">
+        <div className={`flex  flex-col items-center space-y-2 mt-8 mb-8 ${className}`}>
           <Loader color="rgba(255, 255, 255, 1)" size="md" />
           <div className="text-white font-regular">
             Waiting for other players...
@@ -24,11 +27,16 @@ export default function Participants({ includeLoaderModal = true }) {
         </div>
       )}
 
-      <div className="flex flex-wrap justify-center w-full  overflow-auto ">
+      {!includeLoaderModal && (
+        <div className="text-white font-regular py-8 mt-4 text-center">
+              Participants
+        </div>
+      )}
+      <div className={`flex flex-wrap justify-center w-full  overflow-auto ${className}`}>
         {names?.map((name, index) => (
           <div
             key={index}
-            className="bg-white py-2 px-5 rounded-md text-green_text font-bold m-2 shadow-sm"
+            className={`py-2 px-5 rounded-md font-bold m-2 shadow-sm ${answeredParticipants.includes(name.qParticipantDesc) ? 'bg-yellow-700 text-white' : 'bg-white text-green_text'}`}
           >
             {name.qParticipantDesc}
           </div>

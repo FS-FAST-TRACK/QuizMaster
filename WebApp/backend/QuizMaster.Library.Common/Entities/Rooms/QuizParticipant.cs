@@ -11,7 +11,7 @@ namespace QuizMaster.Library.Common.Entities.Rooms
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public int Id { get; set; } = new Random().Next(1000000,9999999);
 
 		[Required]
 		[MaxLength(50)]

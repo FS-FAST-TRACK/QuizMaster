@@ -33,7 +33,7 @@ import AudioInput from "@/components/Commons/inputs/AudioInput";
 import { notification } from "@/lib/notifications";
 import { postQuestion } from "@/lib/hooks/question";
 
-const timeLimits = [10, 30, 60, 120];
+const timeLimits = [10, 15, 30, 60, 120];
 
 const items = [
     { label: "All", href: "/questions" },
