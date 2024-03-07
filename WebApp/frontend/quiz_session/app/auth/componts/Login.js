@@ -23,7 +23,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     if(userName === "" || email === "" || userName.length < 8){
-      if(userName.length < 8){
+      if(userName.length < 8 && userName !== ""){
         notifications.show({title: "Username must be at least 8 characters"})
       }else{
         notifications.show({title: "Please fill up all the fields"})
