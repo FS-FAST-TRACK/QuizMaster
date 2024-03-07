@@ -71,10 +71,13 @@ export default function ViewQuizSessionModal({
                     >
                         <Popover.Target>
                             <Button
+                                variant="filled"
+                                color="green"
+                                type="submit"
+                                className="bg-[#17a14b]"
                                 rightSection={
                                     <ChevronDownIcon width={16} height={16} />
                                 }
-                                color="var(--primary)"
                             >
                                 Export Session
                             </Button>
