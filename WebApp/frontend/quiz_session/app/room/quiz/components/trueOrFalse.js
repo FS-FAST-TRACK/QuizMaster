@@ -142,7 +142,6 @@ function TrueOrFalse({ question, connectionId }, ref) {
               False
             </div>
           </div>
-          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <div className="w-full place-content-center">
@@ -212,6 +211,12 @@ function TrueOrFalse({ question, connectionId }, ref) {
               Submit
             </Button>
           </div>
+        </div>
+      )}
+      
+      {isAdmin && (
+        <div className="py-8 px-[20%] w-full">
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       )}
     </div>

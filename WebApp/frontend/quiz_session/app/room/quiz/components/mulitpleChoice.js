@@ -109,7 +109,6 @@ function MulitpleChoice({ question, connectionId }, ref) {
               </div>
             )}
           </div>
-          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <div className="w-full grid grid-cols-2 place-content-center">
@@ -168,6 +167,11 @@ function MulitpleChoice({ question, connectionId }, ref) {
               Submit
             </Button>
           </div>
+        </div>
+      )}
+      {isAdmin && (
+        <div className="py-8 px-[20%] w-full">
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       )}
     </div>
