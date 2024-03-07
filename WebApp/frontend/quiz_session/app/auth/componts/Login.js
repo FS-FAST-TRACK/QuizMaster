@@ -14,8 +14,26 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
 
+  const validateEmail = (email) => {
+    return email.match(
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    if(userName === "" || email === "" || userName.length < 8){
+      if(userName.length < 8){
+        notifications.show({title: "Username must be at least 8 characters"})
+      }else{
+        notifications.show({title: "Please fill up all the fields"})
+      }
+      return;
+    }
+    if(!validateEmail(email)){
+      notifications.show({title: "Email is invalid"})
+      return;
+    }
     partialLogin({ email, userName, connection, push, notifications });
   };
   return (
