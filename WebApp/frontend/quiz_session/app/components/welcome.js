@@ -11,7 +11,8 @@ import {
   useQuestion,
   useLeaderboard,
   useMetaData,
-  useAnswer
+  useAnswer,
+  useAnsweredParticipants
 } from "../util/store";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
@@ -31,6 +32,7 @@ export default function Welcome() {
   const { setLeaderboard } = useLeaderboard();
   const { setMetadata } = useMetaData();
   const { setAnswer } = useAnswer();
+  const { setAnsweredParticipants } = useAnsweredParticipants();
   const { push } = useRouter();
   const [progress, setProgress] = useState(0);
 
@@ -91,6 +93,11 @@ export default function Welcome() {
           // answer
           connection.on("answer", (answer) => {
             setAnswer(answer)
+          })
+
+          // answered  Participants
+          connection.on("participant_answered", (participant_answered) => {
+            setAnsweredParticipants(participant_answered ?? []);
           })
 
           const token = params.get("token");

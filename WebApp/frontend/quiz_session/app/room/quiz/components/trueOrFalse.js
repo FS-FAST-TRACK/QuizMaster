@@ -10,6 +10,7 @@ import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
+import Participants from "../../components/participants";
 
 export default React.forwardRef(TrueOrFalse);
 
@@ -141,6 +142,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               False
             </div>
           </div>
+          <Participants excludeAdmins={true} includeLoaderModal={false}/>
         </div>
       ) : (
         <div className="w-full place-content-center">

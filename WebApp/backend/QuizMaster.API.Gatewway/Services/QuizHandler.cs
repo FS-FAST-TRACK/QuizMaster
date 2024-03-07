@@ -138,7 +138,8 @@ namespace QuizMaster.API.Gateway.Services
                         details.RemainingTime = time;
                         await hub.Clients.Group(roomPin).SendAsync("question", details);
                         //string connectionId = hub.Context.ConnectionId;
-                        
+                        await hub.Clients.Group(roomPin).SendAsync("participant_answered", handler.ParticipantsAnswered());
+
                         //await hub.Clients.Group(roomPin).SendAsync("connId", connectionId);
 
                         await Task.Delay(1000);
@@ -147,6 +148,7 @@ namespace QuizMaster.API.Gateway.Services
                     // TODO: Display answer for (n) seconds
                     await hub.Clients.Group(roomPin).SendAsync("answer", answers);
                     await Task.Delay(1000 * quizSettings.ShowAnswerAfterQuestionDelay);
+                    await hub.Clients.Group(roomPin).SendAsync("participant_answered", null);
                     await hub.Clients.Group(roomPin).SendAsync("answer", null);
                 }
 

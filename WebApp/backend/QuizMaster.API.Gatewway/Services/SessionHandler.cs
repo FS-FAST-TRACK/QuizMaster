@@ -137,6 +137,20 @@ namespace QuizMaster.API.Gateway.Services
             return ClientsSubmittedAnswers.Remove(connectionId);
         }
 
+        public IReadOnlyList<string> ParticipantsAnswered()
+        {
+            List<string> names = new();
+
+            foreach (var userConnectionId in ClientsSubmittedAnswers)
+            {
+                participantLinkedConnectionId.TryGetValue(userConnectionId, out QuizParticipant? quizParticipant);
+                if(quizParticipant != null && !IsAdmin(userConnectionId))
+                    names.Add(quizParticipant.QParticipantDesc);
+            }
+
+            return names;
+        }
+
         public void AddActiveRoom(int roomPin, QuizRoom room)
         {
             ActiveRooms.Add(roomPin, room);
