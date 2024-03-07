@@ -126,10 +126,13 @@ export default function ViewParticipantAnswersModal({
                 <Popover width={200} position="bottom" withArrow shadow="md">
                     <Popover.Target>
                         <Button
+                            variant="filled"
+                            color="green"
+                            type="submit"
+                            className="bg-[#17a14b]"
                             rightSection={
                                 <ChevronDownIcon width={16} height={16} />
                             }
-                            color="var(--primary)"
                         >
                             Export Answers
                         </Button>
