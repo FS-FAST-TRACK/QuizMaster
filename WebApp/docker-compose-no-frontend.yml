@@ -1,0 +1,244 @@
+version: "3"
+
+services:
+  # BACKEND SYSTEM
+  # ACCOUNT
+  backend_api_account:
+    container_name: backend_api_account
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.Account/Dockerfile
+    ports:
+      - 5001:80
+      - 6001:443
+    depends_on:
+      - mssql
+      - backend_api_monitoring
+    env_file:
+      - .env
+    environment:
+      - ConnectionStrings:QuizMasterAccountDBConnectionString=${BACKEND_ACCOUNT_CONN_STR}
+      - ApplicationSettings:RabbitMq_Account_ExchangeName=QuizMasterExchange
+      - ApplicationSettings:RabbitMq_Account_RequestQueueName=QuizMasterRequestQueue
+      - ApplicationSettings:RabbitMq_Account_ResponseQueueName=QuizMasterResponseQueue
+      - ApplicationSettings:RabbitMq_Hostname=rabbitmq
+      - ApplicationSettings:Service_MonitoringGRPC=https://${HOST_IP}:6004
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:6001
+      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      - Kestrel:Certificates:Default:Password=123456
+    networks:
+      - rabbitmq_go_net
+      - mssql_net
+      - gateway
+
+  # AUTHENTICATION
+  backend_api_authentication:
+    container_name: backend_api_authentication
+    hostname: backend_api_authentication
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.Authentication/Dockerfile
+    ports:
+      - 5002:80
+      - 6002:443
+    depends_on:
+      - backend_api_account
+      - rabbitmq
+    environment:
+      - AppSettings:RabbitMq_Account_ExchangeName=QuizMasterExchange
+      - AppSettings:RabbitMq_Account_RequestQueueName=QuizMasterRequestQueue
+      - AppSettings:RabbitMq_Account_ResponseQueueName=QuizMasterResponseQueue
+      - AppSettings:RabbitMq_Hostname=rabbitmq
+      - AppSettings:JWTSecret=__SECRET_JWT_TESTING_PURPOSE__-2c0a94bf-9ab0-4432-993f-3c0f8234e180
+      - AppSettings:IntExpireHour=12
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:6002
+      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      - Kestrel:Certificates:Default:Password=123456
+    networks:
+      - rabbitmq_go_net
+      - mssql_net
+      - gateway
+
+  # GATEWAY
+  backend_api_gateway:
+    container_name: backend_api_gateway
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.Gatewway/Dockerfile
+    ports:
+      - 5000:80
+      - 7081:443
+    depends_on:
+      - backend_api_account
+      - backend_api_authentication
+      - backend_api_monitoring
+      - backend_api_media
+      - backend_api_quiz
+      - backend_api_quizsession
+    env_file:
+      - .env
+    environment:
+      - AppSettings:JWTSecret=__SECRET_JWT_TESTING_PURPOSE__-2c0a94bf-9ab0-4432-993f-3c0f8234e180
+      - AppSettings:IntExpireHour=12
+      - GrpcServerConfiguration:Account_Service=https://backend_api_account:6001
+      - GrpcServerConfiguration:Authentication_Service=https://backend_api_authentication:6002
+      - GrpcServerConfiguration:Media_Service=https://backend_api_media:6003
+      - GrpcServerConfiguration:Quiz_Category_Service=https://backend_api_quiz:6005
+      - GrpcServerConfiguration:Session_Service=https://backend_api_quizsession:6006
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:443
+      # - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      # - Kestrel:Certificates:Default:Password=123456
+      - AppSettings:CORS_ORIGINS=${GATEWAY_CORS}
+      - QuizSettings:ShowAnswerAfterQuestionDelay=${SHOW_ANSWER_AFTER_QUESTION_DELAY}
+      - QuizSettings:ForceNextRoundTimeout=${FORCE_NEXT_ROUND_TIMEOUT}
+      - QuizSettings:OverrideQuestionTimer:TypeAnswer=${OVERRIDE_QUESTION_TIMER_TYPEANSWER}
+      - QuizSettings:OverrideQuestionTimer:MultipleChoice=${OVERRIDE_QUESTION_TIMER_MULTIPLECHOICE}
+      - QuizSettings:OverrideQuestionTimer:TrueOrFalse=${OVERRIDE_QUESTION_TIMER_TRUEORFALSE}
+    networks:
+      - gateway
+
+  # MEDIA
+  backend_api_media:
+    container_name: backend_api_media
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.Media/Dockerfile
+    ports:
+      - 5003:80
+      - 6003:443
+    depends_on:
+      - backend_api_monitoring
+    env_file:
+      - .env
+    environment:
+      - ConnectionStrings:SqliteConnStr=${BACKEND_MEDIA_CONN_STR}
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:6003
+      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      - Kestrel:Certificates:Default:Password=123456
+    networks:
+      - gateway
+
+  # MONITORING
+  backend_api_monitoring:
+    container_name: backend_api_monitoring
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.Monitoring/Dockerfile
+    ports:
+      - 5004:80
+      - 6004:443
+    depends_on:
+      - mssql
+    env_file:
+      - .env
+    environment:
+      - ConnectionStrings:AuditTrailDBConnection=${BACKEND_MONITORING_CONN_STR}
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:443
+      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      - Kestrel:Certificates:Default:Password=123456
+    networks:
+      - mssql_net
+      - gateway
+
+  # QUIZ
+  backend_api_quiz:
+    container_name: backend_api_quiz
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.Quiz/Dockerfile
+    ports:
+      - 5005:80
+      - 6005:443
+    depends_on:
+      - mssql
+      - rabbitmq
+      - backend_api_monitoring
+    env_file:
+      - .env
+    environment:
+      - ConnectionStrings:QuizMasterQuestionDBConnectionString=${BACKEND_QUIZ_CONN_STR}
+      - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
+      - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
+      - AppSettings:RabbitMq_Hostname=rabbitmq
+      - AppSettings:Service_MonitoringGRPC=https://${HOST_IP}:6004
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:6005
+      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      - Kestrel:Certificates:Default:Password=123456
+    networks:
+      - rabbitmq_go_net
+      - mssql_net
+      - gateway
+
+  # QUIZ SESSION
+  backend_api_quizsession:
+    container_name: backend_api_quizsession
+    build:
+      context: backend/
+      dockerfile: QuizMaster.API.QuizSession/Dockerfile
+    ports:
+      - 5006:80
+      - 6006:443
+    depends_on:
+      - rabbitmq
+      - mssql
+    env_file:
+      - .env
+    environment:
+      - ConnectionStrings:QuizMasterQuizSessionDBConnectionString=${BACKEND_SESSION_CONN_STR}
+      - AppSettings:RabbitMq_Quiz_ExchangeName=QuizMasterExchange_Quiz
+      - AppSettings:RabbitMq_Quiz_QuizInitQueue=QuizMasterInitQueue_Quiz
+      - AppSettings:RabbitMq_Hostname=rabbitmq
+      - AppSettings:Monitoring_Service=https://${HOST_IP}:6004
+      - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
+      - Kestrel:Endpoints:Https:Url=https://*:6006
+      - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
+      - Kestrel:Certificates:Default:Password=123456
+    networks:
+      - rabbitmq_go_net
+      - gateway
+      - mssql_net
+
+  # RABBIT MQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - rabbitmq_go_net
+
+  # DATABASE
+  mssql:
+    container_name: mssql
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - 1433:1433
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: MsSql123
+    restart: always
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - mssql_net
+
+volumes:
+  mssql_data:
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
+  mssql_net:
+    driver: bridge
+  gateway:
+    driver: bridge

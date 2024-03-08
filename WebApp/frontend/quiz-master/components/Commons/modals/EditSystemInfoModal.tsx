@@ -124,10 +124,10 @@ export default function EditSystemInfoModal({
                     {...systemDetails.getInputProps("ios_link")}
                 />
                 <div className="flex gap-2">
-                    <Button variant="filled" color="orange" type="submit">
+                    <Button variant="filled" color="orange" className="bg-orange-500" type="submit">
                         Submit
                     </Button>
-                    <Button variant="outline" color="gray" onClick={onClose}>
+                    <Button variant="outline" color="gray" className="text-gray" onClick={onClose}>
                         Close
                     </Button>
                 </div>

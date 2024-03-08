@@ -126,6 +126,7 @@ export default function FeedbackModal({
                     }}
                 >
                     <Button
+                        className="bg-orange-500"
                         variant="filled"
                         color="orange"
                         fullWidth
