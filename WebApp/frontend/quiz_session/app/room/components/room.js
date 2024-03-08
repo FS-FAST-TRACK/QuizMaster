@@ -12,7 +12,7 @@ export default function Room() {
     <div className=" w-full h-full p-5 flex flex-col">
       <RoomPin />
       <div className=" grow flex items-center flex-col flex-1   overflow-hidden">
-        <Participants />
+        <Participants excludeAdmins={true} />
       </div>
       <Start />
       {!isAdmin && (

@@ -164,16 +164,21 @@ export const uploadScreenshot = (
       let imageId = result.fileInformation.id;
       if (imageId) {
         // Submit Screenshot Link
-        fetch(`${BASE_URL}/gateway/api/room/submitScreenshot`, {
+        const payload = {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({
             questionId: id,
             connectionId,
             screenshotLink: `${BASE_URL}/gateway/api/media/download_media/${imageId}`,
-          }),
-          credentials: "include",
-        })
+          })
+        }
+
+        if(!token){
+          payload.credentials="include"
+        }
+        
+        fetch(`${BASE_URL}/gateway/api/room/submitScreenshot`, payload)
           .then((response) => response.json())
           .then((r) => {
             console.info(r.message);

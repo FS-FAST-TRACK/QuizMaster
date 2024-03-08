@@ -108,7 +108,6 @@ function MulitpleChoice({ question, connectionId }, ref) {
               </div>
             )}
           </div>
-          <Participants excludeAdmins={true} includeLoaderModal={false} />
         </div>
       ) : (
         <div className="w-full grid grid-cols-2 place-content-center">
