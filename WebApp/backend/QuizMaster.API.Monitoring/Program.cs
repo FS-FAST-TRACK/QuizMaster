@@ -87,7 +87,7 @@ namespace QuizMaster.API.Monitoring
 
             app.UseHttpsRedirection();
 
-            app.UseCors(options => options.SetIsOriginAllowed(x => true).AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+            app.UseCors(options => options.SetIsOriginAllowed(x => true).AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthorization();
             app.MapGrpcService<MonitoringInfoService>().RequireCors("AllowAll"); ;
