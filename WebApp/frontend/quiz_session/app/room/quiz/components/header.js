@@ -15,7 +15,7 @@ export default function Header() {
   }, [question]);
 
   return (
-    <div className="px-5 pt-2 w-full">
+    <div className="px-5 pt-2 w-full bg-green-600">
       <div className="flex flex-row  w-full">
         <div className="flex justify-start w-full">
           <RoomPin />

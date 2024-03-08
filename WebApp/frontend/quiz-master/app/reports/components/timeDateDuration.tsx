@@ -1,5 +1,6 @@
 import React from "react";
-import moment from "moment";
+import moment from "moment-timezone";
+import { convertToBrowserTimezone } from "@/lib/dateTimeUtils";
 
 interface TimeDateProps {
     startTime: Date;
@@ -11,11 +12,11 @@ export default function TimeDateDuration({
     endTime,
 }: TimeDateProps) {
     const formatTime = (date: Date): string => {
-        return moment(date).format("h:mm A");
+        return moment(convertToBrowserTimezone(date)).format("hh:mm A"); // Use UTC time zone
     };
 
     const formatDate = (date: Date): string => {
-        return moment(date).format("MMM DD, YYYY");
+        return moment(date).tz("Asia/Manila").format("MMM DD, YYYY"); // Use UTC time zone
     };
 
     const calculateDuration = (start: Date, end: Date): string => {
@@ -23,7 +24,7 @@ export default function TimeDateDuration({
         const duration = moment.duration(durationMs);
         const hours = duration.hours();
         const minutes = duration.minutes();
-        return `${hours}hr ${minutes}min`;
+        return `${hours ? hours + "hr " : ""}${minutes}min`;
     };
 
     return (

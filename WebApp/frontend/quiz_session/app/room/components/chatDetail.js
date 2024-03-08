@@ -8,7 +8,7 @@ export default function ChatDetail() {
   const { participants } = useParticipants();
   return (
     <div className="flex flex-row h-full items-center space-x-2">
-      <Image src={person} width={30} height={30} />
+      <Image src={person} width={24} height={24} />
       <div className="font-bold">{participants.length}</div>
     </div>
   );

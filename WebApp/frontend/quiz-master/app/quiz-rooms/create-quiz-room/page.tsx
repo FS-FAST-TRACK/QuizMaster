@@ -144,51 +144,34 @@ export default function Page() {
     });
 
     // COPIED
-    const rows =  questionSets?.map((questionSet) => (
+    const rows = questionSets?.map((questionSet) => (
         <Table.Tr key={questionSet.id}>
             <Table.Td>
                 <Checkbox
                     color="green"
                     aria-label="Select row"
-                    checked={selectedQuestionSets.includes(
-                        questionSet.id
-                    )}
+                    checked={selectedQuestionSets.includes(questionSet.id)}
                     onChange={(event) =>
                         setSelectedQuestionSets(
-                            event.currentTarget
-                                .checked
-                                ? [
-                                      ...selectedQuestionSets,
-                                      questionSet.id,
-                                  ]
+                            event.currentTarget.checked
+                                ? [...selectedQuestionSets, questionSet.id]
                                 : selectedQuestionSets.filter(
-                                      (id) =>
-                                          id !==
-                                          questionSet.id
+                                      (id) => id !== questionSet.id
                                   )
                         )
                     }
                 />
             </Table.Td>
+            <Table.Td>{questionSet.qSetName}</Table.Td>
             <Table.Td>
-                {questionSet.qSetName}
+                {new Date(questionSet.dateCreated).toLocaleDateString()}
             </Table.Td>
             <Table.Td>
-                {new Date(
-                    questionSet.dateCreated
-                ).toLocaleDateString()}
+                {new Date(questionSet.dateUpdated).toLocaleDateString()}
             </Table.Td>
-            <Table.Td>
-                {new Date(
-                    questionSet.dateUpdated
-                ).toLocaleDateString()}
-            </Table.Td>
-            <Table.Td>
-                {questionSet.numberOfQuestions}
-            </Table.Td>
+            <Table.Td>{questionSet.numberOfQuestions}</Table.Td>
         </Table.Tr>
     ));
-
 
     return (
         <div className="flex flex-col px-6 md:px-16 md:pb-20 py-5 space-y-5 grow">
@@ -219,66 +202,66 @@ export default function Page() {
 
                 {isLoading ? (
                     <div className="mb-5">
-                        <InputLabel >Question Sets</InputLabel>
-                        <div className="mb-5"/>
+                        <InputLabel>Question Sets</InputLabel>
+                        <div className="mb-5" />
                     </div>
                 ) : questionSets === undefined ? null : (
                     <div>
                         <InputLabel>Question Sets</InputLabel>
-                        <div className="mb-5"/>
-                        
-      {/* COPIED */}
-         <div className="w-full border-2 rounded-xl overflow-x-auto grow bg-white">
-            <Table striped>
-                <Table.Thead>
-                    <Table.Tr>
-                    <Table.Th>
-                                        <Checkbox
-                                            color="green"
-                                            aria-label="Select row"
-                                            checked={
-                                                selectedQuestionSets.length ===
-                                                questionSets?.length
-                                            }
-                                            onChange={(event) =>
-                                                setSelectedQuestionSets(
-                                                    event.currentTarget.checked
-                                                        ? questionSets.map(
-                                                              (questionSet) =>
-                                                                  questionSet.id
-                                                          )
-                                                        : []
-                                                )
-                                            }
-                                        />
-                                    </Table.Th>
-                        <Table.Th>Question Set</Table.Th>
-                        <Table.Th>Created on</Table.Th>
-                        <Table.Th>Updated on</Table.Th>
-                        <Table.Th>No. of questions</Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                    {questionSets.length === 0 ? (
-                        // <Table.Tr>
-                        //     <Table.Td colSpan={99} rowSpan={10}>
-                        //         <div className="flex grow justify-center">
-                        //             {message ? (
-                        //                 message
-                        //             ) : (
-                        //                 <Loader size={50} color="green" />
-                        //             )}
-                        //         </div>
-                        //     </Table.Td>
-                        // </Table.Tr>
-                        ""
-                    ) : (
-                        rows
-                    )}
-                </Table.Tbody>
-            </Table>
-          </div>
+                        <div className="mb-5" />
 
+                        {/* COPIED */}
+                        <div className="w-full border-2 rounded-xl overflow-x-auto grow bg-white">
+                            <Table striped>
+                                <Table.Thead>
+                                    <Table.Tr>
+                                        <Table.Th>
+                                            <Checkbox
+                                                color="green"
+                                                aria-label="Select row"
+                                                checked={
+                                                    selectedQuestionSets.length ===
+                                                    questionSets?.length
+                                                }
+                                                onChange={(event) =>
+                                                    setSelectedQuestionSets(
+                                                        event.currentTarget
+                                                            .checked
+                                                            ? questionSets.map(
+                                                                  (
+                                                                      questionSet
+                                                                  ) =>
+                                                                      questionSet.id
+                                                              )
+                                                            : []
+                                                    )
+                                                }
+                                            />
+                                        </Table.Th>
+                                        <Table.Th>Question Set</Table.Th>
+                                        <Table.Th>Created on</Table.Th>
+                                        <Table.Th>Updated on</Table.Th>
+                                        <Table.Th>No. of questions</Table.Th>
+                                    </Table.Tr>
+                                </Table.Thead>
+                                <Table.Tbody>
+                                    {questionSets.length === 0
+                                        ? // <Table.Tr>
+                                          //     <Table.Td colSpan={99} rowSpan={10}>
+                                          //         <div className="flex grow justify-center">
+                                          //             {message ? (
+                                          //                 message
+                                          //             ) : (
+                                          //                 <Loader size={50} color="green" />
+                                          //             )}
+                                          //         </div>
+                                          //     </Table.Td>
+                                          // </Table.Tr>
+                                          ""
+                                        : rows}
+                                </Table.Tbody>
+                            </Table>
+                        </div>
                     </div>
                 )}
 
@@ -307,7 +290,7 @@ export default function Page() {
                                 }}
                             />
                             <Tooltip
-                                label="Only top 50% of the participants willproceed to the next round"
+                                label="Only top 50% of the participants will proceed to the next round"
                                 multiline
                                 w={220}
                                 offset={{ mainAxis: 0, crossAxis: 100 }}
@@ -375,7 +358,12 @@ export default function Page() {
                     >
                         Cancel
                     </Button>
-                    <Button variant="filled" color="green" type="submit" className="bg-[#FF6633]">
+                    <Button
+                        variant="filled"
+                        color="green"
+                        type="submit"
+                        className="bg-[#FF6633]"
+                    >
                         Create Quiz Room
                     </Button>
                 </div>

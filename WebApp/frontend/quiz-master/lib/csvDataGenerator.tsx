@@ -33,29 +33,28 @@ export function participantAnswersToCsvData(
         );
     const csvData = [
         [
-            "Session Id",
             "Participant Name",
-            "Question ID",
             "Statement",
             "Answer",
+            "Correct Answer",
         ],
     ];
 
     answers.forEach((report) => {
-        const sessionId = report.sessionId;
         const participantName = report.participantName;
-        const questionId = report.questionId.toString();
         const questionStatement = questionInfos.find(
             (q) => q.id === report.questionId
         )?.qStatement;
         const answer = report.answer;
+        const correctAnswer = questionInfos.find(
+            (q) => q.id === report.questionId)?.details.find((d) => d.detailTypes.includes("answer"))?.qDetailDesc
+        
 
         csvData.push([
-            sessionId,
             participantName,
-            questionId,
             questionStatement || "",
             answer,
+            correctAnswer || ""
         ]);
     });
 
@@ -106,7 +105,8 @@ export function answersAllParticipantsToCsvData(
 }
 
 export function usersToCsvData(users: User[]) {
-    const userCsvData = users;
+    //Exclued the id property
+    const userCsvData = users.map(({id, ...others}) => others);
 
     return userCsvData;
 }
