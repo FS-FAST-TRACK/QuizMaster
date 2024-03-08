@@ -80,7 +80,7 @@ export function SessionTableRow({ session }: { session: QuizSessionReport }) {
             setIsLoading(true);
             try {
                 const response = await fetch(
-                    QUIZMASTER_QUIZROOM_GET_BY_ID(session.id) +
+                    QUIZMASTER_QUIZROOM_GET_BY_ID(session.roomId) +
                         "?isActive=false",
                     {
                         method: "GET",
@@ -153,7 +153,7 @@ export function SessionTableRow({ session }: { session: QuizSessionReport }) {
                                     separator=","
                                     filename={`[${qRoomDesc}] Quiz Answers.csv`}
                                 >
-                                    Export as CSV
+                                    Export
                                 </CSVLink>
                                 <div className="py-2 px-4 hover:font-medium">
                                     <PDFDownloadLink

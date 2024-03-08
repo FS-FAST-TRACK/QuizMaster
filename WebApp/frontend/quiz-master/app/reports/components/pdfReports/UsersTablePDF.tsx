@@ -38,8 +38,20 @@ export function UsersTablePDF({ users }: { users: User[] }) {
 function UserTableRow({ user }: { user: User }) {
     return (
         <View style={styles.row}>
-            <Text style={styles.column1}>{user.lastName}</Text>
-            <Text style={styles.column2}>{user.firstName}</Text>
+            {user.lastName ? (
+                <Text style={styles.column1}>{user.lastName}</Text>
+            ) : (
+                <Text style={[styles.column1, { color: "grey" }]}>
+                    -- No provided --
+                </Text>
+            )}
+            {user.firstName ? (
+                <Text style={styles.column1}>{user.firstName}</Text>
+            ) : (
+                <Text style={[styles.column1, { color: "grey" }]}>
+                    -- No provided --
+                </Text>
+            )}
             <Text style={styles.column3}>{user.userName}</Text>
             <Text style={styles.column4}>{user.email}</Text>
             <Text style={[styles.column5]}>
@@ -84,6 +96,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 8,
         borderTopWidth: 1,
+        borderRight: 1,
         borderColor: "#D1D5DB",
     },
     column2: {

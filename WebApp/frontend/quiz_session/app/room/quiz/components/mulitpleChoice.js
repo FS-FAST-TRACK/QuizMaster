@@ -36,8 +36,8 @@ function MulitpleChoice({ question, connectionId }, ref) {
 
   const handleSubmit = () => {
     let id = question.question.id;
-    if(!pick && !isAdmin && !answer){
-      notifications.show({title: "Please select an option"})
+    if (!pick && !isAdmin && !answer) {
+      notifications.show({ title: "Please select an option" });
       return;
     }
     setIsSubmitted(true);
@@ -51,16 +51,15 @@ function MulitpleChoice({ question, connectionId }, ref) {
     }
   };
 
-  
-  useEffect(()=>{
+  useEffect(() => {
     // handleSubmit if answer is shown
-    if(answer && !isSubmitted){
-      if(!pick && !isAdmin){
-        notifications.show({title: "You have not selected any choices"})
+    if (answer && !isSubmitted) {
+      if (!pick && !isAdmin) {
+        notifications.show({ title: "You have not selected any choices" });
       }
       handleSubmit();
     }
-  }, [answer])
+  }, [answer]);
 
   useEffect(() => {
     if (question?.question.qImage) {
@@ -85,7 +84,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
   }, [question?.question.qStatement]);
 
   return (
-    <div className="w-full flex flex-col p-5 flex-grow mt-8">
+    <div className="w-full flex flex-col p-5 flex-grow mt-8 bg-green-600">
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center flex-grow justify-center">
         <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
@@ -109,6 +108,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
               </div>
             )}
           </div>
+          <Participants excludeAdmins={true} includeLoaderModal={false} />
         </div>
       ) : (
         <div className="w-full grid grid-cols-2 place-content-center">
@@ -158,7 +158,9 @@ function MulitpleChoice({ question, connectionId }, ref) {
           <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
             <Button
               fullWidth
-              className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
+              className={`shadow-lg ${
+                isSubmitted ? "bg-[#FFAB3E] text-[##FFF9DF]" : "bg-[#FF6633]"
+              }`}
               color={"yellow"}
               onClick={handleSubmit}
               size="lg"
@@ -171,7 +173,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
       )}
       {isAdmin && (
         <div className="py-8 px-[20%] w-full">
-          <Participants excludeAdmins={true} includeLoaderModal={false}/>
+          <Participants excludeAdmins={true} includeLoaderModal={false} />
         </div>
       )}
     </div>

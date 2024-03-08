@@ -49,10 +49,26 @@ export function UsersTable({
 function UserTableRow({ user }: { user: User }) {
     return (
         <Table.Tr>
-            <Table.Td>{user.lastName}</Table.Td>
-            <Table.Td>{user.firstName}</Table.Td>
-            <Table.Td>{user.userName}</Table.Td>
-            <Table.Td>{user.email}</Table.Td>
+            <Table.Td>
+                {user.lastName || (
+                    <p className="text-gray-400 text-xs">None provided</p>
+                )}
+            </Table.Td>
+            <Table.Td>
+                {user.firstName || (
+                    <p className="text-gray-400 text-xs">None provided</p>
+                )}
+            </Table.Td>
+            <Table.Td>
+                {user.userName || (
+                    <p className="text-gray-400 text-xs">None provided</p>
+                )}
+            </Table.Td>
+            <Table.Td>
+                {user.email || (
+                    <p className="text-gray-400 text-xs">None provided</p>
+                )}
+            </Table.Td>
             <Table.Td>
                 {user.activeData ? (
                     <Badge color="green">Active</Badge>

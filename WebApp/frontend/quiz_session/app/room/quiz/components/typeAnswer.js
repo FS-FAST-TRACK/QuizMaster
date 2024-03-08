@@ -36,8 +36,10 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
 
   const handleSubmit = () => {
     let id = question.question.id;
-    if(!ANSWER && !answer && !isAdmin){
-      notifications.show({title: "Please type your answer in the input field"});
+    if (!ANSWER && !answer && !isAdmin) {
+      notifications.show({
+        title: "Please type your answer in the input field",
+      });
       return;
     }
     setIsSubmitted(true);
@@ -57,18 +59,18 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
     }
   }, [question?.question.qImage, previousStatement]);
 
-  useEffect(()=>{
+  useEffect(() => {
     // clear input field if answer is shown
-    if(ANSWER && !isSubmitted){
-      if(!answer && !isAdmin){
-        notifications.show({title: "No answer inputted"});
+    if (ANSWER && !isSubmitted) {
+      if (!answer && !isAdmin) {
+        notifications.show({ title: "No answer inputted" });
       }
-      setTimeout(()=>{
+      setTimeout(() => {
         setAnswer();
       }, 10_000);
       handleSubmit();
     }
-  }, [ANSWER])
+  }, [ANSWER]);
 
   useEffect(() => {
     if (question?.question.qStatement !== previousStatement) {
@@ -81,7 +83,7 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
   }, [question?.question.qStatement]);
 
   return (
-    <div className="w-full flex flex-col h-full  items-center flex-grow p-5">
+    <div className="w-full flex flex-col h-full  items-center flex-grow p-5  bg-green-600">
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center h-96 justify-center ">
         <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
@@ -114,7 +116,7 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
               </div>
             </div>
           )}
-          <Participants excludeAdmins={true} includeLoaderModal={false}/>
+          <Participants excludeAdmins={true} includeLoaderModal={false} />
         </div>
       ) : (
         <>
@@ -138,7 +140,7 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
                     setAnswer(e.target.value);
                   }}
                   disabled={isSubmitted || ANSWER}
-                  value={answer ?? (ANSWER?'':'')}
+                  value={answer ?? (ANSWER ? "" : "")}
                 />
               </div>
               <div className="w-1/4">
@@ -148,7 +150,11 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
                   size="xl"
                   onClick={handleSubmit}
                   disabled={isSubmitted || ANSWER}
-                  className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
+                  className={`shadow-lg ${
+                    isSubmitted
+                      ? "bg-[#FFAB3E] text-[##FFF9DF]"
+                      : "bg-[#FF6633]"
+                  }`}
                 >
                   Submit
                 </Button>

@@ -17,9 +17,10 @@ import {
     CheckCircleIcon,
     ChevronDownIcon,
     EyeIcon,
+    InformationCircleIcon,
     XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Button, Modal, Popover } from "@mantine/core";
+import { Button, Modal, Popover, Tooltip } from "@mantine/core";
 import { useEffect, useState } from "react";
 import ViewQuestionScreenShotModal from "./ViewQuestionScreenShotModal";
 import { participantAnswersToCsvData } from "@/lib/csvDataGenerator";
@@ -64,7 +65,6 @@ export default function ViewParticipantAnswersModal({
                             <span className="text-gray-400">•</span>
                             <p className="text-sm text-gray-400">
                                 {participantScore} points{" "}
-                                {`(Ranking place: ${participantPlace})`}
                             </p>
                         </div>
                     </div>
@@ -126,10 +126,13 @@ export default function ViewParticipantAnswersModal({
                 <Popover width={200} position="bottom" withArrow shadow="md">
                     <Popover.Target>
                         <Button
+                            variant="filled"
+                            color="green"
+                            type="submit"
+                            className="bg-[#17a14b]"
                             rightSection={
                                 <ChevronDownIcon width={16} height={16} />
                             }
-                            color="var(--primary)"
                         >
                             Export Answers
                         </Button>
@@ -169,6 +172,7 @@ export default function ViewParticipantAnswersModal({
                                                 sessionReport.startTime,
                                                 sessionReport.endTime
                                             )}
+                                            participantScore={participantScore}
                                         />
                                     }
                                 >
@@ -246,9 +250,38 @@ function ParticipantAnswerItem({
         ) {
             setIsParticipantAnswerCorrect(true);
         } else {
-            setIsParticipantAnswerCorrect(false);
+            const hasMultipleAnswers = correctAnswer.split("|").length !== 0;
+            if (hasMultipleAnswers) {
+                console.log(
+                    "Multiple Answers? ",
+                    correctAnswer.split("|").length
+                );
+            }
+            if (hasMultipleAnswers) {
+                const possibleAnswers = correctAnswer
+                    .split("|")
+                    .map((a) => a.trim().toLocaleLowerCase());
+                if (
+                    possibleAnswers.includes(
+                        participantAnswer.answer.toLowerCase()
+                    )
+                ) {
+                    setIsParticipantAnswerCorrect(true);
+                } else {
+                    setIsParticipantAnswerCorrect(false);
+                }
+            } else {
+                setIsParticipantAnswerCorrect(false);
+            }
         }
     }, [questionDetail, correctAnswer]);
+
+    useEffect(() => {
+        if (correctAnswer) {
+            if (correctAnswer.split("|").length !== 0) {
+            }
+        }
+    }, [correctAnswer]);
 
     useEffect(() => {
         const fetchQuestionInfo = () => {
@@ -310,22 +343,28 @@ function ParticipantAnswerItem({
                 <div className="flex gap-4 item">
                     <div className="flex gap-1">
                         <p
-                            className={`text-sm ${
+                            className={`text-sm flex gap-1 ${
                                 isParticipantAnswerCorrect
                                     ? "text-green-600"
                                     : "text-red-500"
                             }`}
                         >
                             Answered:{" "}
-                            <b
-                                className={`text-gray-900 ${
-                                    isParticipantAnswerCorrect
-                                        ? "text-green-600"
-                                        : "text-red-500"
-                                }`}
-                            >
-                                {participantAnswer.answer}
-                            </b>
+                            {participantAnswer.answer ? (
+                                <b
+                                    className={`text-gray-900 ${
+                                        isParticipantAnswerCorrect
+                                            ? "text-green-600"
+                                            : "text-red-500"
+                                    }`}
+                                >
+                                    {participantAnswer.answer}
+                                </b>
+                            ) : (
+                                <p className="text-red-500 italic">
+                                    {"-- No answer --"}
+                                </p>
+                            )}
                         </p>
                         <span>
                             {isParticipantAnswerCorrect ? (
@@ -335,11 +374,13 @@ function ParticipantAnswerItem({
                                     color="var(--primary)"
                                 />
                             ) : (
-                                <XCircleIcon
-                                    height={20}
-                                    width={20}
-                                    color="var(--error)"
-                                />
+                                participantAnswer.answer && (
+                                    <XCircleIcon
+                                        height={20}
+                                        width={20}
+                                        color="var(--error)"
+                                    />
+                                )
                             )}
                         </span>
                     </div>
@@ -356,6 +397,23 @@ function ParticipantAnswerItem({
                             </b>
                         </p>
                     )}
+                    {correctAnswer.split("|").length > 1 &&
+                        isParticipantAnswerCorrect && (
+                            <Tooltip
+                                label={`Possible answers: ${correctAnswer
+                                    .split("|")
+                                    .join(",")}`}
+                                multiline
+                                w={220}
+                                offset={{ mainAxis: 0, crossAxis: 100 }}
+                            >
+                                <InformationCircleIcon
+                                    className="w-6"
+                                    width={22}
+                                    height={22}
+                                />
+                            </Tooltip>
+                        )}
                 </div>
                 {participantAnswer.screenshotLink.length !== 0 ? (
                     <p

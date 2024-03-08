@@ -2,10 +2,10 @@ import moment from "moment";
 
 export const formatDateTimeRange = (startTime: Date, endTime: Date): string => {
     // Format start time
-    const formattedStartTime = moment(startTime).format("MMMM DD, YYYY HH:mm");
+    const formattedStartTime = moment(convertToBrowserTimezone(startTime)).format("MMMM DD, YYYY HH:mm A");
 
     // Format end time
-    const formattedEndTime = moment(endTime).format("HH:mm");
+    const formattedEndTime = moment(convertToBrowserTimezone(endTime)).format("HH:mm A");
 
     // Calculate duration in hours and minutes
     const durationHours = moment
@@ -16,7 +16,7 @@ export const formatDateTimeRange = (startTime: Date, endTime: Date): string => {
         .minutes();
 
     // Construct the formatted string
-    const formattedString = `${formattedStartTime} - ${formattedEndTime} • ${durationHours}h ${durationMinutes}m`;
+    const formattedString = `${formattedStartTime} - ${formattedEndTime} • ${durationHours? durationHours+"h":""} ${durationMinutes}m`;
 
     return formattedString;
 };
@@ -42,4 +42,15 @@ export function parseDateStringToDate(dateString: string) {
 
     // Create and return the Date object
     return new Date(year, month, day, hour, minute, second);
+}
+
+export function convertToBrowserTimezone(utcDateTime: Date): Date {
+    const dateTime = new Date(utcDateTime);
+    // Get the browser's timezone offset in milliseconds
+    const browserTimezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
+
+    // Calculate the local time by adding the browser's timezone offset to the UTC time
+    const localTime = new Date(dateTime.getTime() - browserTimezoneOffset);
+
+    return localTime;
 }

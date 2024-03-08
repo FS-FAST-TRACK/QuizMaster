@@ -38,17 +38,17 @@ export default function UserReports() {
             });
             const data = await response.json();
 
-            const usersWithDateParsed = data.map((user: User) => {
-                return {
-                    ...user,
-                    dateCreated: parseDateStringToDate(user.dateCreated + ""),
-                };
-            });
+            const sortedUsers = data.sort(
+                (a: User, b: User) =>
+                    new Date(b.dateCreated).getTime() -
+                    new Date(a.dateCreated).getTime()
+            );
 
-            setUsers(usersWithDateParsed as User[]);
+            setUsers(sortedUsers as User[]);
             setIsLoading(false);
         } catch (e) {
             setError(e);
+            console.log(e);
         } finally {
             setIsLoading(false);
         }

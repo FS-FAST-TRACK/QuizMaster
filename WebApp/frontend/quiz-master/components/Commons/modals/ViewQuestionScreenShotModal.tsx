@@ -52,7 +52,7 @@ export default function ViewQuestionScreenShotModal({
                 URL.revokeObjectURL(imageBlobUrl);
             }
         };
-    }, [opened, screenshotLink, imageBlobUrl]); // Re-run effect when modal opens or screenshot link changes
+    }, [opened, screenshotLink]); // Re-run effect when modal opens or screenshot link changes
 
     return (
         <Modal

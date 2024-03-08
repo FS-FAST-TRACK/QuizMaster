@@ -2,17 +2,20 @@ import React from "react";
 import { Page, Text, Document, StyleSheet, View } from "@react-pdf/renderer";
 import { ParticipantAnswer } from "@/components/Commons/modals/ViewParticipantAnswersModal";
 import { Question } from "@/lib/definitions";
+import { truncateString } from "@/lib/stringUtils";
 
 export function IndividualParticipantAnswersReport({
     participantAnswers,
     questionInfos,
     sessionName,
     sessionDuration,
+    participantScore,
 }: {
     participantAnswers: ParticipantAnswer[];
     questionInfos: Question[];
     sessionName: string;
     sessionDuration: string;
+    participantScore: number;
 }) {
     return (
         <Document>
@@ -20,12 +23,25 @@ export function IndividualParticipantAnswersReport({
                 <View style={styles.header}>
                     <View>
                         <Text style={styles.sessionDuration}>Participant</Text>
-                        <Text style={styles.sessionTitle}>
-                            {participantAnswers[0]?.participantName}
-                        </Text>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "flex-end",
+                                gap: 12,
+                            }}
+                        >
+                            <Text style={styles.participantName}>
+                                {participantAnswers[0]?.participantName.toUpperCase()}
+                            </Text>
+                            <Text style={{ color: "grey", fontSize: 12 }}>
+                                {participantScore} points
+                            </Text>
+                        </View>
                     </View>
                     <View>
-                        <Text style={styles.sessionTitle}>{sessionName}</Text>
+                        <Text style={styles.sectionTitle}>
+                            {truncateString(sessionName, 30)}
+                        </Text>
                         <Text style={styles.sessionDuration}>
                             {sessionDuration}
                         </Text>
@@ -35,17 +51,29 @@ export function IndividualParticipantAnswersReport({
                 <View>
                     <View style={styles.table}>
                         <View style={styles.row}>
-                            <Text style={[styles.column1, styles.tableHeader]}>
-                                Question ID
-                            </Text>
-                            <Text style={[styles.column2, styles.tableHeader]}>
+                            <Text
+                                style={[
+                                    styles.questionStatementColumn,
+                                    styles.tableHeader,
+                                ]}
+                            >
                                 Question Statement
                             </Text>
-                            <Text style={[styles.column3, styles.tableHeader]}>
-                                Participant Name
-                            </Text>
-                            <Text style={[styles.column4, styles.tableHeader]}>
+                            <Text
+                                style={[
+                                    styles.answerColumn,
+                                    styles.tableHeader,
+                                ]}
+                            >
                                 Answer
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.correctAnswer,
+                                    styles.tableHeader,
+                                ]}
+                            >
+                                Correct Answer
                             </Text>
                         </View>
                         {participantAnswers.map((answer, index) => {
@@ -74,14 +102,29 @@ function ParticipantAnswersTableRow({
     const questionStatement = questionInfos.find(
         (q) => q.id === participantAnswer.questionId
     )?.qStatement;
+
+    const correctAnswer =
+        questionInfos
+            .find((q) => q.id === participantAnswer.questionId)
+            ?.details.find((detail) => detail.detailTypes.includes("answer"))
+            ?.qDetailDesc || "";
+
     return (
         <View style={styles.row}>
-            <Text style={styles.column1}>{participantAnswer.questionId}</Text>
-            <Text style={styles.column2}>{questionStatement}</Text>
-            <Text style={styles.column3}>
-                {participantAnswer.participantName}
+            <Text style={styles.questionStatementColumn}>
+                {questionStatement}
             </Text>
-            <Text style={styles.column4}>{participantAnswer.answer}</Text>
+            {participantAnswer.answer ? (
+                <Text style={styles.answerColumn}>
+                    {participantAnswer.answer}
+                </Text>
+            ) : (
+                <Text style={[styles.answerColumn, { color: "grey" }]}>
+                    {"<No answer submitted>"}
+                </Text>
+            )}
+
+            <Text style={styles.correctAnswer}>{correctAnswer}</Text>
         </View>
     );
 }
@@ -96,6 +139,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         marginBottom: 32,
+    },
+    participantName: {
+        fontSize: 20,
+        textAlign: "left",
+        color: "black",
+        fontWeight: 600,
     },
     sessionTitle: {
         fontSize: 20,
@@ -134,8 +183,8 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         marginBottom: 32,
     },
-    column1: {
-        width: "10%",
+    questionStatementColumn: {
+        width: "50%",
         height: "100%",
         textAlign: "center",
         fontSize: 8,
@@ -144,8 +193,8 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderColor: "#D1D5DB",
     },
-    column2: {
-        width: "40%",
+    answerColumn: {
+        width: "25%",
         height: "100%",
         fontSize: 8,
         paddingVertical: 8,
@@ -155,18 +204,8 @@ const styles = StyleSheet.create({
         borderColor: "#D1D5DB",
     },
 
-    column3: {
-        width: "20%",
-        height: "100%",
-        fontSize: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderTopWidth: 1,
-        borderLeftWidth: 1,
-        borderColor: "#D1D5DB",
-    },
-    column4: {
-        width: "30%",
+    correctAnswer: {
+        width: "25%",
         height: "100%",
         fontSize: 8,
         paddingVertical: 8,
