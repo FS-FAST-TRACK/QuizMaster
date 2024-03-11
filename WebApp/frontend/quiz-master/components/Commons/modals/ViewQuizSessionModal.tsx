@@ -1,11 +1,14 @@
+import { QUIZMASTER_QUESTION_GET_QUESTION } from "@/api/api-routes";
 import LeaderBoard from "@/app/reports/components/leaderboard";
 import { QuizSessionReportPDF } from "@/app/reports/components/pdfReports/QuizSessionReportPDF";
 import { QuizSessionReport } from "@/app/reports/components/sessionsReport";
 import { answersAllParticipantsToCsvData } from "@/lib/csvDataGenerator";
 import { formatDateTimeRange } from "@/lib/dateTimeUtils";
+import { Question } from "@/lib/definitions";
 import { UserIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Button, Modal, ModalHeader, Popover } from "@mantine/core";
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 
 export default function ViewQuizSessionModal({
@@ -19,6 +22,33 @@ export default function ViewQuizSessionModal({
     sessionReport: QuizSessionReport;
     sessionName: string;
 }) {
+    const questionIds = [
+        ...new Set(
+            sessionReport.participantAnswerReports.map(
+                (participantAnswer) => participantAnswer.questionId
+            )
+        ),
+    ];
+    const [questionInfos, setQuestionInfos] = useState<Question[]>([]);
+
+    useEffect(() => {
+        const fetchQuestionInfos = () => {
+            questionIds.forEach((id) => {
+                fetch(QUIZMASTER_QUESTION_GET_QUESTION + `${id}`)
+                    .then((response) => response.json())
+                    .then((data: Question) =>
+                        setQuestionInfos((prev) => [...prev, data])
+                    )
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            });
+        };
+        if (questionIds.length !== 0) {
+            fetchQuestionInfos();
+        }
+    }, []);
+
     return (
         <Modal
             opened={opened}
@@ -101,6 +131,7 @@ export default function ViewQuizSessionModal({
                                             <QuizSessionReportPDF
                                                 sessionName={sessionName}
                                                 sessionReport={sessionReport}
+                                                questionInfos={questionInfos}
                                             />
                                         }
                                     >

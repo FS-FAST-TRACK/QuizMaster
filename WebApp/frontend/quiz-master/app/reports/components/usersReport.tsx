@@ -36,13 +36,19 @@ export default function UserReports() {
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
             });
-            const data = await response.json();
+            const data: User[] = await response.json();
 
-            const sortedUsers = data.sort(
-                (a: User, b: User) =>
-                    new Date(b.dateCreated).getTime() -
-                    new Date(a.dateCreated).getTime()
-            );
+            const sortedUsers: User[] = data
+                .filter(
+                    (user) =>
+                        (user.lastName && user.firstName) ||
+                        user.roles.includes("Administrator")
+                )
+                .sort(
+                    (a: User, b: User) =>
+                        new Date(b.dateCreated).getTime() -
+                        new Date(a.dateCreated).getTime()
+                );
 
             setUsers(sortedUsers as User[]);
             setIsLoading(false);

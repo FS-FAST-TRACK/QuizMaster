@@ -246,7 +246,7 @@ function ParticipantAnswerItem({
     useEffect(() => {
         if (
             participantAnswer.answer.trim().toLowerCase() ===
-            correctAnswer.toLowerCase()
+            correctAnswer.trim().toLowerCase()
         ) {
             setIsParticipantAnswerCorrect(true);
         } else {
