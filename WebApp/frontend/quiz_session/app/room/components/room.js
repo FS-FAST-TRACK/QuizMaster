@@ -5,13 +5,22 @@ import RoomPin from "./roomPin";
 import Participants from "./participants";
 import Start from "./start";
 import useUserTokenData from "@/app/util/useUserTokenData";
+import { IconMessage } from "@tabler/icons-react";
 
-export default function Room() {
+export default function Room({ onToggleCollapseChat }) {
   const { isAdmin } = useUserTokenData();
   return (
     <div className=" w-full h-full p-5 flex flex-col">
-      <RoomPin />
-      <div className=" grow flex items-center flex-col flex-1   overflow-hidden">
+      <div className="flex justify-between">
+        <RoomPin />
+        <div
+          className="sm:visible md:hidden p-4 hover:bg-green-700 rounded-full cursor-pointer"
+          onClick={onToggleCollapseChat}
+        >
+          <IconMessage size={24} color="white" />
+        </div>
+      </div>
+      <div className=" grow flex items-center flex-col flex-1 overflow-hidden">
         <Participants />
       </div>
       <Start />

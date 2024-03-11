@@ -40,7 +40,7 @@ export default function Chats() {
         } else {
           return (
             <div key={index} className="flex flex-col justify-end w-full">
-              <div className="text-gray_text text-sm">{message?.name}</div>
+              <div className="text-gray_text text-xs">{message?.name}</div>
               <div
                 className="bg-white w-fit  p-1 rounded-lg px-4 py-2"
                 style={{ maxWidth: "80%" }}
