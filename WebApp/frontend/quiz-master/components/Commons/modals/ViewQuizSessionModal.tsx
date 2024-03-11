@@ -44,10 +44,14 @@ export default function ViewQuizSessionModal({
                     });
             });
         };
-        if (questionIds.length !== 0) {
+        if (questionIds.length !== 0 || opened) {
             fetchQuestionInfos();
         }
     }, []);
+
+    if (!opened) {
+        return null;
+    }
 
     return (
         <Modal

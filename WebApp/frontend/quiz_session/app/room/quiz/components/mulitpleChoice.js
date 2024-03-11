@@ -56,8 +56,8 @@ function MulitpleChoice({ question, connectionId }, ref) {
     if (answer && !isSubmitted) {
       if (!pick && !isAdmin) {
         notifications.show({ title: "You have not selected any choices" });
+        handleSubmit();
       }
-      handleSubmit();
     }
   }, [answer]);
 
