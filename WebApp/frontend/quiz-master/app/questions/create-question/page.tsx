@@ -162,6 +162,14 @@ export default function Page() {
                         return "Provide option";
                     }
 
+                    // Check if more than one option is selected
+                    if (
+                        values.options.filter((option) => option.isAnswer)
+                            .length > 1
+                    ) {
+                        return "Only one answer must be selected";
+                    }
+
                     return values.options.findIndex((op, i) => {
                         return (
                             op.value === value && path !== `options.${i}.value`
@@ -327,10 +335,22 @@ export default function Page() {
                 <QuestionDetails form={form} />
 
                 <div className="flex justify-end">
-                    <Button variant="transparent" color="gray" type="reset" onClick={()=>{router.push("/questions")}}>
+                    <Button
+                        variant="transparent"
+                        color="gray"
+                        type="reset"
+                        onClick={() => {
+                            router.push("/questions");
+                        }}
+                    >
                         Cancel
                     </Button>
-                    <Button variant="filled" color="green" type="submit" className="bg-[#FF6633]">
+                    <Button
+                        variant="filled"
+                        color="green"
+                        type="submit"
+                        className="bg-[#FF6633]"
+                    >
                         Create
                     </Button>
                 </div>
