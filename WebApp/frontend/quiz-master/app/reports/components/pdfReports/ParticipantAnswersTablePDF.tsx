@@ -1,30 +1,40 @@
-import { View, StyleSheet, Text } from "@react-pdf/renderer";
+import { View, StyleSheet, Text, Font } from "@react-pdf/renderer";
 import { ParticipantAnswerReport } from "../sessionsReport";
+import { Question } from "@/lib/definitions";
+
+Font.register({
+    family: "Open Sans",
+    fonts: [
+        {
+            src: "https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf",
+        },
+        {
+            src: "https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-600.ttf",
+            fontWeight: 600,
+        },
+        {
+            src: "https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-700.ttf",
+            fontWeight: 700,
+        },
+    ],
+});
 
 export function ParticipantAnswersTablePDF({
     participantAnswers,
+    questionInfos,
 }: {
     participantAnswers: ParticipantAnswerReport[];
+    questionInfos: Question[];
 }) {
     return (
         <View>
-            <View style={styles.table}>
-                <View style={styles.row}>
-                    <Text style={[styles.column1, styles.tableHeader]}>
-                        Question ID
-                    </Text>
-                    <Text style={[styles.column2, styles.tableHeader]}>
-                        Participant Name
-                    </Text>
-                    <Text style={[styles.column3, styles.tableHeader]}>
-                        Answer
-                    </Text>
-                </View>
-                {participantAnswers.map((answer, index) => {
+            <View>
+                {questionInfos.map((info, index) => {
                     return (
-                        <ParticipantAnswersTableRow
-                            participantAnswer={answer}
+                        <QuestionCorrectResponses
                             key={index}
+                            qInfo={info}
+                            participantAnswers={participantAnswers}
                         />
                     );
                 })}
@@ -33,18 +43,78 @@ export function ParticipantAnswersTablePDF({
     );
 }
 
-function ParticipantAnswersTableRow({
-    participantAnswer,
+function QuestionCorrectResponses({
+    qInfo,
+    participantAnswers,
 }: {
-    participantAnswer: ParticipantAnswerReport;
+    qInfo: Question;
+    participantAnswers: ParticipantAnswerReport[];
 }) {
     return (
-        <View style={styles.row}>
-            <Text style={styles.column1}>{participantAnswer.questionId}</Text>
-            <Text style={styles.column2}>
-                {participantAnswer.participantName}
-            </Text>
-            <Text style={styles.column3}>{participantAnswer.answer}</Text>
+        <View style={styles.questionContainer}>
+            <Text
+                style={styles.qStatement}
+            >{`Question: ${qInfo.qStatement}`}</Text>
+            <View
+                style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 24,
+                }}
+            >
+                <Text style={styles.text}>Answer: </Text>
+                <Text style={styles.qAnswer}>
+                    {
+                        qInfo.details.find((d) =>
+                            d.detailTypes.includes("answer")
+                        )?.qDetailDesc
+                    }
+                </Text>
+            </View>
+            <View style={{ gap: 12 }}>
+                {participantAnswers
+                    .filter(
+                        (answer: ParticipantAnswerReport) =>
+                            answer.questionId === qInfo.id
+                    )
+                    .map((answer: ParticipantAnswerReport, index) => {
+                        return (
+                            <View
+                                key={index}
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        gap: 4,
+                                    }}
+                                >
+                                    <Text
+                                        style={styles.qUserName}
+                                    >{`${answer.participantName}`}</Text>
+                                    <Text style={styles.text}>
+                                        {" answered:  "}
+                                    </Text>
+                                    {answer.answer ? (
+                                        <Text style={styles.qParticipantAnswer}>
+                                            {answer.answer}
+                                        </Text>
+                                    ) : (
+                                        <Text style={styles.qNoAnswer}>
+                                            {"-- No answer submitted --"}
+                                        </Text>
+                                    )}
+                                </View>
+                            </View>
+                        );
+                    })}
+            </View>
         </View>
     );
 }
@@ -61,13 +131,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#17a14b",
         color: "white",
     },
-    table: {
-        borderWidth: 1,
-        borderTopWidth: 1,
-        borderTopColor: "#17a14b",
+    questionContainer: {
+        padding: 16,
         borderColor: "#D1D5DB",
+        borderWidth: 1,
         borderRadius: 6,
-        overflow: "hidden",
         marginBottom: 32,
     },
     sectionTitle: {
@@ -75,32 +143,39 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         fontWeight: 600,
     },
-    column1: {
-        width: "25%",
-        textAlign: "center",
-        fontSize: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderTopWidth: 1,
-        borderColor: "#D1D5DB",
+    text: {
+        fontFamily: "Open Sans",
+        fontSize: 8,
     },
-    column2: {
-        width: "50%",
-        fontSize: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderTopWidth: 1,
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
-        borderColor: "#D1D5DB",
+    qStatement: {
+        fontFamily: "Open Sans",
+        fontSize: 12,
+        fontWeight: 700,
+        marginBottom: 16,
     },
-    column3: {
-        width: "25%",
-        textAlign: "center",
+    qAnswer: {
+        fontFamily: "Open Sans",
         fontSize: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderTopWidth: 1,
-        borderColor: "#D1D5DB",
+        color: "#17A14B",
+        fontWeight: 700,
+    },
+    qUserName: {
+        fontFamily: "Open Sans",
+        fontSize: 8,
+        fontWeight: 600,
+        color: "white",
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        backgroundColor: "#3C3C3C",
+        borderRadius: 2,
+    },
+    qParticipantAnswer: {
+        fontFamily: "Open Sans",
+        fontSize: 12,
+        fontWeight: 600,
+    },
+    qNoAnswer: {
+        color: "grey",
+        fontSize: 8,
     },
 });

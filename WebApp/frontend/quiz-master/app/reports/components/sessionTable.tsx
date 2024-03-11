@@ -131,52 +131,6 @@ export function SessionTableRow({ session }: { session: QuizSessionReport }) {
                     />
                 }
             </Table.Td>
-            <Table.Td>
-                {
-                    <Popover withArrow arrowPosition="side" shadow="md">
-                        <Popover.Target>
-                            <ArrowDownCircleIcon
-                                width={24}
-                                height={24}
-                                color="rgb(31 41 55)"
-                                onClick={() => alert("Downloading reports...")}
-                                className="opacity-50 hover:opacity-100 cursor-pointer"
-                            />
-                        </Popover.Target>
-                        <Popover.Dropdown style={{ padding: 0 }}>
-                            <div className="overflow-clip bg-white h-fit cursor-pointer text-gray-800 py-2 px-4 flex-col">
-                                <CSVLink
-                                    className="py-2 px-4 hover:font-medium"
-                                    data={answersAllParticipantsToCsvData(
-                                        session
-                                    )}
-                                    separator=","
-                                    filename={`[${qRoomDesc}] Quiz Answers.csv`}
-                                >
-                                    Export
-                                </CSVLink>
-                                <div className="py-2 px-4 hover:font-medium">
-                                    <PDFDownloadLink
-                                        fileName={`[${qRoomDesc}] - Reports (Host by ${session.hostName})`}
-                                        document={
-                                            <QuizSessionReportPDF
-                                                sessionName={qRoomDesc}
-                                                sessionReport={session}
-                                            />
-                                        }
-                                    >
-                                        {({ loading }) =>
-                                            loading
-                                                ? "Downloading document..."
-                                                : "Export as PDF"
-                                        }
-                                    </PDFDownloadLink>
-                                </div>
-                            </div>
-                        </Popover.Dropdown>
-                    </Popover>
-                }
-            </Table.Td>
             <ViewQuizSessionModal
                 sessionReport={session}
                 opened={openModal}

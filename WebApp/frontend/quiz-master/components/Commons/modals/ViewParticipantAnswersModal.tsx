@@ -246,17 +246,11 @@ function ParticipantAnswerItem({
     useEffect(() => {
         if (
             participantAnswer.answer.trim().toLowerCase() ===
-            correctAnswer.toLowerCase()
+            correctAnswer.trim().toLowerCase()
         ) {
             setIsParticipantAnswerCorrect(true);
         } else {
-            const hasMultipleAnswers = correctAnswer.split("|").length !== 0;
-            if (hasMultipleAnswers) {
-                console.log(
-                    "Multiple Answers? ",
-                    correctAnswer.split("|").length
-                );
-            }
+            const hasMultipleAnswers = correctAnswer.split("|").length > 1;
             if (hasMultipleAnswers) {
                 const possibleAnswers = correctAnswer
                     .split("|")
@@ -275,13 +269,6 @@ function ParticipantAnswerItem({
             }
         }
     }, [questionDetail, correctAnswer]);
-
-    useEffect(() => {
-        if (correctAnswer) {
-            if (correctAnswer.split("|").length !== 0) {
-            }
-        }
-    }, [correctAnswer]);
 
     useEffect(() => {
         const fetchQuestionInfo = () => {

@@ -9,8 +9,6 @@ export function LeaderBoardTablePDF({
     const sortedParticipants = [...participants].sort(
         (a, b) => b.score - a.score
     );
-    const topThree = sortedParticipants.slice(0, 3);
-    const restParticipants = sortedParticipants.slice(3);
 
     return (
         <View>
@@ -18,41 +16,16 @@ export function LeaderBoardTablePDF({
             <View style={styles.table}>
                 <View style={styles.row}>
                     <Text style={[styles.column1, styles.tableHeader]}>
-                        Place
-                    </Text>
-                    <Text style={[styles.column2, styles.tableHeader]}>
                         Participant Name
                     </Text>
-                    <Text style={[styles.column3, styles.tableHeader]}>
+                    <Text style={[styles.column2, styles.tableHeader]}>
                         Score
                     </Text>
                 </View>
-                {topThree.map((participant, index) => (
+                {sortedParticipants.map((participant, index) => (
                     <LeaderBoardPdfRow
                         participant={participant}
                         index={index + 1}
-                        key={index}
-                    />
-                ))}
-            </View>
-
-            <Text style={styles.sectionTitle}>Participants</Text>
-            <View style={styles.table}>
-                <View style={styles.row}>
-                    <Text style={[styles.column1, styles.tableHeader]}>
-                        Place
-                    </Text>
-                    <Text style={[styles.column2, styles.tableHeader]}>
-                        Participant Name
-                    </Text>
-                    <Text style={[styles.column3, styles.tableHeader]}>
-                        Score
-                    </Text>
-                </View>
-                {restParticipants.map((participant, index) => (
-                    <LeaderBoardPdfRow
-                        participant={participant}
-                        index={index + 4}
                         key={index}
                     />
                 ))}
@@ -70,9 +43,8 @@ function LeaderBoardPdfRow({
 }) {
     return (
         <View style={styles.row}>
-            <Text style={styles.column1}>{index.toString()}</Text>
-            <Text style={styles.column2}>{participant.participantName}</Text>
-            <Text style={styles.column3}>{participant.score} points</Text>
+            <Text style={styles.column1}>{participant.participantName}</Text>
+            <Text style={styles.column2}>{participant.score} points</Text>
         </View>
     );
 }
@@ -104,7 +76,7 @@ const styles = StyleSheet.create({
         fontWeight: 600,
     },
     column1: {
-        width: "25%",
+        width: "50%",
         textAlign: "center",
         fontSize: 8,
         paddingVertical: 8,
@@ -120,15 +92,6 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderLeftWidth: 1,
         borderRightWidth: 1,
-        borderColor: "#D1D5DB",
-    },
-    column3: {
-        width: "25%",
-        textAlign: "center",
-        fontSize: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderTopWidth: 1,
         borderColor: "#D1D5DB",
     },
 });

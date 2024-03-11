@@ -4,13 +4,16 @@ import { QuizSessionReport } from "../sessionsReport";
 import { formatDateTimeRange } from "@/lib/dateTimeUtils";
 import { LeaderBoardTablePDF } from "./LeaderBoardTablePDF";
 import { ParticipantAnswersTablePDF } from "./ParticipantAnswersTablePDF";
+import { Question } from "@/lib/definitions";
 
 export function QuizSessionReportPDF({
     sessionName,
     sessionReport,
+    questionInfos,
 }: {
     sessionName: string;
     sessionReport: QuizSessionReport;
+    questionInfos: Question[];
 }) {
     return (
         <Document>
@@ -47,9 +50,9 @@ export function QuizSessionReportPDF({
                 </View>
             </Page>
             <Page style={styles.body}>
-                <Text style={styles.sectionTitle}>Participants Answers</Text>
                 <ParticipantAnswersTablePDF
                     participantAnswers={sessionReport.participantAnswerReports}
+                    questionInfos={questionInfos}
                 />
             </Page>
         </Document>
@@ -76,7 +79,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 14,
-        marginBottom: 8,
+        marginBottom: 16,
         fontWeight: 600,
     },
     sessionDuration: {
