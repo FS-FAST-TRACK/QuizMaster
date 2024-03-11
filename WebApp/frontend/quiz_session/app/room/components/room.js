@@ -14,7 +14,7 @@ export default function Room({ onToggleCollapseChat }) {
       <div className="flex justify-between">
         <RoomPin />
         <div
-          className="sm:visible md:hidden p-4 hover:bg-green-700 rounded-full cursor-pointer"
+          className="sm:visible md:hidden p-4 bg-green-700/50 hover:bg-green-700 rounded-full cursor-pointer"
           onClick={onToggleCollapseChat}
         >
           <IconMessage size={24} color="white" />
