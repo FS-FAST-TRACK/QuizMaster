@@ -29,9 +29,10 @@ export function ParticipantAnswersTablePDF({
     return (
         <View>
             <View>
-                {questionInfos.map((info) => {
+                {questionInfos.map((info, index) => {
                     return (
                         <QuestionCorrectResponses
+                            key={index}
                             qInfo={info}
                             participantAnswers={participantAnswers}
                         />
@@ -77,9 +78,10 @@ function QuestionCorrectResponses({
                         (answer: ParticipantAnswerReport) =>
                             answer.questionId === qInfo.id
                     )
-                    .map((answer: ParticipantAnswerReport) => {
+                    .map((answer: ParticipantAnswerReport, index) => {
                         return (
                             <View
+                                key={index}
                                 style={{
                                     flexDirection: "row",
                                     alignItems: "center",
