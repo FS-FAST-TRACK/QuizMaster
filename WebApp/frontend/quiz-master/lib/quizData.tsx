@@ -7,12 +7,10 @@ import {
     QuestionDetail,
     QuestionSet,
     Set,
-
     SystemInfoDto,
     UserInfo,
     ContactDetails,
     Review,
-
 } from "./definitions";
 import {
     QUIZMASTER_AUTH_GET_COOKIE_INFO,
@@ -28,6 +26,7 @@ import {
     QUIZMASTER_SYSTEM_GET_SYSTEM_INFO,
     QUIZMASTER_SYSTEM_USER_GET_REVIEW,
 } from "@/api/api-routes";
+import { signOut } from "next-auth/react";
 
 export async function fetchLoginUser() {
     try {
@@ -40,17 +39,23 @@ export async function fetchLoginUser() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-        }).then(async (res) => {
-            var data: UserInfo;
-            const resJson = await res.json();
-            if(resJson?.status === 401) {
-                return null;
-            }
-            data = resJson;
-            return data;
-        }).catch(e => {
-            console.error("unauthorized", e);
-        });
+        })
+            .then(async (res) => {
+                var data: UserInfo;
+                const resJson = await res.json();
+                if (resJson?.status === 401) {
+                    return null;
+                }
+                data = resJson;
+                return data;
+            })
+            .catch((e) => {
+                console.error("unauthorized", e);
+            });
+        if (!data) {
+            localStorage.clear();
+            signOut();
+        }
         return data;
     } catch (error) {
         console.error("Database Error:", error);
@@ -241,7 +246,6 @@ export async function fetchMedia(id: string) {
     }
 }
 export async function fetchSystemInfo() {
-
     try {
         var apiUrl = `${QUIZMASTER_SYSTEM_GET_SYSTEM_INFO}`;
 
@@ -254,7 +258,7 @@ export async function fetchSystemInfo() {
             var data: SystemInfoDto;
             const resJson = await res.json();
             data = resJson.data;
-            
+
             return data;
         });
         return data;
@@ -265,7 +269,6 @@ export async function fetchSystemInfo() {
 }
 
 export async function fetchContactInfo() {
-
     try {
         var apiUrl = `${QUIZMASTER_SYSTEM_GET_CONTACT_INFO}`;
 
@@ -278,7 +281,7 @@ export async function fetchContactInfo() {
             var data: ContactDetails;
             const resJson = await res.json();
             data = resJson.data;
-            
+
             return data;
         });
         return data;
@@ -303,7 +306,7 @@ export async function fetchReviewsForAdmin() {
             var data: Review[];
             const resJson = await res.json();
             data = resJson.data;
-            
+
             return data;
         });
         return data;
@@ -326,7 +329,7 @@ export async function fetchReviewsForClient() {
             var data: Review[];
             const resJson = await res.json();
             data = resJson.data;
-            
+
             return data;
         });
         return data;
