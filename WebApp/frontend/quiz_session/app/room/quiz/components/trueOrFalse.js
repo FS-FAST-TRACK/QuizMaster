@@ -36,8 +36,8 @@ function TrueOrFalse({ question, connectionId }, ref) {
 
   const handleSubmit = () => {
     let id = question.question.id;
-    if(!pick && !isAdmin && !ANSWER){
-      notifications.show({title: "Please select an option"})
+    if (!pick && !isAdmin && !ANSWER) {
+      notifications.show({ title: "Please select an option" });
       return;
     }
     setIsSubmitted(true);
@@ -51,15 +51,15 @@ function TrueOrFalse({ question, connectionId }, ref) {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     // handleSubmit if answer is shown
-    if(ANSWER && !isSubmitted){
-      if(!pick && !isAdmin){
-        notifications.show({title: "You have not selected any choices"})
+    if (ANSWER && !isSubmitted) {
+      if (!pick && !isAdmin) {
+        notifications.show({ title: "You have not selected any choices" });
+        handleSubmit();
       }
-      handleSubmit();
     }
-  }, [ANSWER])
+  }, [ANSWER]);
 
   useEffect(() => {
     if (question?.question.qImage) {
@@ -206,17 +206,19 @@ function TrueOrFalse({ question, connectionId }, ref) {
               size="xl"
               disabled={isSubmitted || ANSWER}
               onClick={handleSubmit}
-              className={`shadow-lg ${isSubmitted ? 'bg-[#FFAB3E] text-[##FFF9DF]' : 'bg-[#FF6633]'}`}
+              className={`shadow-lg ${
+                isSubmitted ? "bg-[#FFAB3E] text-[##FFF9DF]" : "bg-[#FF6633]"
+              }`}
             >
               Submit
             </Button>
           </div>
         </div>
       )}
-      
+
       {isAdmin && (
         <div className="py-8 px-[20%] w-full">
-          <Participants excludeAdmins={true} includeLoaderModal={false}/>
+          <Participants excludeAdmins={true} includeLoaderModal={false} />
         </div>
       )}
     </div>

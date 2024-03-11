@@ -50,6 +50,9 @@ function QuestionCorrectResponses({
     qInfo: Question;
     participantAnswers: ParticipantAnswerReport[];
 }) {
+    const correctAnswer =
+        qInfo.details.find((d) => d.detailTypes.includes("answer"))
+            ?.qDetailDesc || "";
     return (
         <View style={styles.questionContainer}>
             <Text
@@ -64,13 +67,7 @@ function QuestionCorrectResponses({
                 }}
             >
                 <Text style={styles.text}>Answer: </Text>
-                <Text style={styles.qAnswer}>
-                    {
-                        qInfo.details.find((d) =>
-                            d.detailTypes.includes("answer")
-                        )?.qDetailDesc
-                    }
-                </Text>
+                <Text style={styles.qAnswer}>{correctAnswer}</Text>
             </View>
             <View style={{ gap: 12 }}>
                 {participantAnswers
@@ -102,8 +99,27 @@ function QuestionCorrectResponses({
                                         {" answered:  "}
                                     </Text>
                                     {answer.answer ? (
-                                        <Text style={styles.qParticipantAnswer}>
-                                            {answer.answer}
+                                        <Text
+                                            style={[
+                                                styles.qParticipantAnswer,
+                                                {
+                                                    color: isCorrectAnswer(
+                                                        answer.answer,
+                                                        correctAnswer
+                                                    )
+                                                        ? "#17A14B"
+                                                        : "red",
+                                                },
+                                            ]}
+                                        >
+                                            {`${answer.answer} - ${
+                                                isCorrectAnswer(
+                                                    answer.answer,
+                                                    correctAnswer
+                                                )
+                                                    ? "- (Correct)"
+                                                    : "- (Incorrect)"
+                                            }`}
                                         </Text>
                                     ) : (
                                         <Text style={styles.qNoAnswer}>
@@ -117,6 +133,36 @@ function QuestionCorrectResponses({
             </View>
         </View>
     );
+}
+
+function isCorrectAnswer(
+    participantAnswer: string,
+    correctAnswer: string
+): boolean {
+    const hasMultipleAnswers = correctAnswer.split("|").length > 1;
+
+    if (hasMultipleAnswers) {
+        // Trim spaces and lowered casings
+        const trimmedAnswers = correctAnswer
+            .split("|")
+            .map((answer) => answer.trim().toLowerCase());
+        if (trimmedAnswers.includes(participantAnswer.trim().toLowerCase())) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        if (
+            correctAnswer.trim().toLowerCase() ===
+            participantAnswer.trim().toLowerCase()
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 const styles = StyleSheet.create({
