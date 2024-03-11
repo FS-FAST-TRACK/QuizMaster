@@ -113,7 +113,13 @@ export default function QuestionTable({
                 className="cursor-pointer"
                 onClick={() => setViewQuestion(question)}
             >
-                {question.qStatement}
+                {question.qStatement ? (
+                    question.qStatement
+                ) : (
+                    <p className="text-red-500">
+                        DELETED QUESTION - REMOVE THIS QUESTION -
+                    </p>
+                )}
             </Table.Td>
             <Table.Td>{getQuestionTypeDescription(question.qTypeId)}</Table.Td>
             <Table.Td>
