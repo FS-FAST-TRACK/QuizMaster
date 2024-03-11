@@ -24,14 +24,15 @@ import {
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "@/styles/input.module.css";
 import { notifications } from "@mantine/notifications";
 import notificationStyles from "@/styles/notification.module.css";
 import ImageInput from "@/components/Commons/inputs/ImageInput";
 import AudioInput from "@/components/Commons/inputs/AudioInput";
 import { notification } from "@/lib/notifications";
-import { postQuestion } from "@/lib/hooks/question";
+import { GetAllQuestion, postQuestion } from "@/lib/hooks/question";
+import { useQuestionnaire } from "@/store/QuestionStore";
 
 const timeLimits = [10, 15, 30, 60, 120];
 
@@ -49,6 +50,7 @@ export default function Page() {
     const { questionCategories } = useQuestionCategoriesStore();
     const { questionDifficulties } = useQuestionDifficultiesStore();
     const { questionTypes } = useQuestionTypesStore();
+    const { questionnaire, setQuestionnaire } = useQuestionnaire();
     const router = useRouter();
     const [visible, { close, open }] = useDisclosure(false);
     const [fileImage, setFileImage] = useState<File | null>(null);
@@ -59,10 +61,10 @@ export default function Page() {
             qStatement: "",
             qAudio: "",
             qImage: "",
-            qCategoryId: "1",
-            qDifficultyId: "1",
-            qTypeId: "1",
-            qTime: "30",
+            qCategoryId: questionnaire.qCategoryId + "",
+            qDifficultyId: questionnaire.qDifficultyId + "",
+            qTypeId: questionnaire.qTypeId + "",
+            qTime: questionnaire.qTime + "",
             questionDetailCreateDtos: [],
             options: [],
             trueOrFalseAnswer: true,
@@ -213,6 +215,8 @@ export default function Page() {
                     type: "success",
                     title: response.message,
                 });
+                const questionsRes = await GetAllQuestion();
+                if (questionsRes) setQuestionnaire(questionsRes.pop());
                 // redirect to qeustions page
                 router.push("/questions");
             } else {
