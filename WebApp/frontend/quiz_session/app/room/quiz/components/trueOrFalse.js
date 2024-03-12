@@ -121,6 +121,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("true");
               }}
             >
@@ -136,6 +137,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("false");
               }}
             >
@@ -169,6 +171,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("true");
               }}
             >
@@ -184,6 +187,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("false");
               }}
             >

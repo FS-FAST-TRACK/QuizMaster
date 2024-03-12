@@ -141,6 +141,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
             key={index}
             onClick={() => {
               if (isAdmin) return;
+              if  (isSubmitted) return;
               handlePick(choices.qDetailDesc);
             }}
           >
