@@ -53,11 +53,11 @@ function MulitpleChoice({ question, connectionId }, ref) {
 
   useEffect(() => {
     // handleSubmit if answer is shown
-    if (answer && !isSubmitted) {
-      if (!pick && !isAdmin) {
+    if (answer && !isSubmitted && !isAdmin) {
+      if (!pick) {
         notifications.show({ title: "You have not selected any choices" });
-        handleSubmit();
       }
+      handleSubmit();
     }
   }, [answer]);
 

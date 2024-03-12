@@ -21,7 +21,7 @@ export default function Room({ onToggleCollapseChat }) {
         </div>
       </div>
       <div className=" grow flex items-center flex-col flex-1 overflow-hidden">
-        <Participants />
+        <Participants excludeAdmins={true}/>
       </div>
       <Start />
       {!isAdmin && (
