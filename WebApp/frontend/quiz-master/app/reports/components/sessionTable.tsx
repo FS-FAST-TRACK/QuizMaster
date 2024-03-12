@@ -59,7 +59,6 @@ export default function SessionTable({
                         <Table.Th>Sets</Table.Th>
                         <Table.Th>Participants</Table.Th>
                         <Table.Th></Table.Th>
-                        <Table.Th></Table.Th>
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>{rows}</Table.Tbody>

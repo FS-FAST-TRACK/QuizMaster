@@ -161,8 +161,6 @@ function isCorrectAnswer(
             return false;
         }
     }
-
-    return true;
 }
 
 const styles = StyleSheet.create({
@@ -217,7 +215,7 @@ const styles = StyleSheet.create({
     },
     qParticipantAnswer: {
         fontFamily: "Open Sans",
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 600,
     },
     qNoAnswer: {

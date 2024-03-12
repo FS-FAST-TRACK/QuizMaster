@@ -10,6 +10,7 @@ import { Button, Modal, ModalHeader, Popover } from "@mantine/core";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
+import { ViewSessionQuestionsModal } from "./ViewSessionQuestionsModal";
 
 export default function ViewQuizSessionModal({
     opened,
@@ -30,6 +31,7 @@ export default function ViewQuizSessionModal({
         ),
     ];
     const [questionInfos, setQuestionInfos] = useState<Question[]>([]);
+    const [openQuestionsModal, setOpenQuestionsModal] = useState(false);
 
     useEffect(() => {
         const fetchQuestionInfos = () => {
@@ -84,9 +86,22 @@ export default function ViewQuizSessionModal({
                         </p>
                     </div>
                 </div>
-                <p className="text-base text-gray-900 mb-2 font-semibold mt-8">
-                    Leader Board
-                </p>
+                <div className="flex mb-2 mt-8 justify-between items-end">
+                    <p className="text-base text-gray-900  font-semibold">
+                        Leader Board
+                    </p>
+                    <div
+                        className="px-4 py-2 cursor-pointer rounded-md hover:bg-slate-50 border border-gray-200"
+                        onClick={() => {
+                            setOpenQuestionsModal(true);
+                        }}
+                    >
+                        <p className="text-sm font-medium text-gray-950">
+                            {`View questions (${questionIds.length})`}
+                        </p>
+                    </div>
+                </div>
+
                 <LeaderBoard
                     participants={sessionReport.leaderboardReports}
                     sessionReport={sessionReport}
@@ -150,6 +165,13 @@ export default function ViewQuizSessionModal({
                         </Popover.Dropdown>
                     </Popover>
                 </div>
+                <ViewSessionQuestionsModal
+                    opened={openQuestionsModal}
+                    onClose={() => setOpenQuestionsModal(false)}
+                    sessionName={sessionName}
+                    sessionReport={sessionReport}
+                    questionInfos={questionInfos}
+                />
             </div>
         </Modal>
     );
