@@ -2,6 +2,7 @@ import { QuizRoom } from "@/lib/definitions/quizRoom";
 import {
     Button,
     Checkbox,
+    CopyButton,
     LoadingOverlay,
     Popover,
     Table,
@@ -18,12 +19,15 @@ import {
     QUIZMASTER_QUIZROOM_GET_BY_ID,
     QUIZMASTER_SET_GET_SETQUESTION,
 } from "@/api/api-routes";
-import{
+import {
+    ClipboardIcon,
     EllipsisVerticalIcon,
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { duration } from "moment";
 
 export default function QuizRoomTable() {
     const pageNumber = useQuizRoomsStore((state) => state.pageNumber);
@@ -148,7 +152,7 @@ export default function QuizRoomTable() {
                 if (totalNum === 0) {
                     // populate
                     totalNum = await apiCallQuestionCount(foundDataForId.sets);
-                    
+
                     let newList: Array<any> = [];
                     for (let d of data) {
                         if (d.id === id) {
@@ -207,7 +211,7 @@ export default function QuizRoomTable() {
             return element.id != id;
         };
         setQuizRooms(paginatedRooms.filter(filter));
-        
+
         const res = await fetch(QUIZMASTER_QUIZROOM_DELETE_BY_ID(id), {
             method: "DELETE",
             credentials: "include",
@@ -267,9 +271,40 @@ export default function QuizRoomTable() {
                     className="cursor-pointer"
                     onClick={() => setViewQuizRoom(quizRoom)}
                 >
-                    {quizRoom.qRoomDesc}
+                    <p className="font-semibold">{quizRoom.qRoomDesc}</p>
                 </Table.Td>
-                <Table.Td>{quizRoom.qRoomPin}</Table.Td>
+                <Table.Td>
+                    <CopyButton value={quizRoom.qRoomPin.toString()}>
+                        {({ copied, copy }) => (
+                            <div
+                                className="flex hover:scale-105 cursor-pointer ease-in-out duration-150 gap-2"
+                                onClick={() => {
+                                    copy();
+                                    toast.success("Copied room pin");
+                                }}
+                            >
+                                <p
+                                    className="font-medium"
+                                    style={{
+                                        color: copied
+                                            ? "var(--primary)"
+                                            : "rgb(75 85 99)",
+                                    }}
+                                >
+                                    {quizRoom.qRoomPin}
+                                </p>
+                                <ClipboardIcon
+                                    width={20}
+                                    color={
+                                        copied
+                                            ? "var(--primary)"
+                                            : "rgb(75 85 99)"
+                                    }
+                                />
+                            </div>
+                        )}
+                    </CopyButton>
+                </Table.Td>
                 <Table.Td>{quizRoom.dateCreated.toDateString()}</Table.Td>
                 <Table.Td>
                     {quizRoom.dateUpdated?.toDateString() ||

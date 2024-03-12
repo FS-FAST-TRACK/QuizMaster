@@ -10,10 +10,8 @@ import { Popover, Button } from "@mantine/core";
 import chevronDown from "/public/chevronDown.svg";
 import PlusIcon from "@heroicons/react/24/outline";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 export default function HeadNav() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [userInfo, setUserInfo] = useState<UserInfo>();
     useEffect(() => {
