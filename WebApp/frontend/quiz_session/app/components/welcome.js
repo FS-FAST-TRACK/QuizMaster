@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Progress } from "@mantine/core";
 import CryptoJS from "crypto-js";
+import { BASE_URL } from "../util/api";
 
 export default function Welcome() {
   const searchParams = useSearchParams();
@@ -104,7 +105,6 @@ export default function Welcome() {
           const username = params.get("name");
 
           let loggedIn = false;
-
           if (token && username && connection.state === "Connected") {
             //TODO: SECRET KEY SHOULD BE REPLACED
             const decrypToken = CryptoJS.AES.decrypt(
@@ -127,7 +127,18 @@ export default function Welcome() {
               if (prevProgress >= 100) {
                 clearInterval(id);
                 if (loggedIn) {
-                  push("/auth/code");
+                  // Verify Auth Token
+                  const token = localStorage.getItem("token");
+                  fetch(BASE_URL+"/gateway/api/auth/info", {method:'GET', headers: {"Authorization": `Bearer ${token}`}})
+                  .then(r => r.json().then(d => ({status: r.status, body: d})))
+                  .then(d =>{
+                    if(d.status === 200){
+                      push("/auth/code");
+                    }else{
+                      push("/auth");
+                    }
+                  })
+                  
                 } else {
                   push("/auth");
                 }
