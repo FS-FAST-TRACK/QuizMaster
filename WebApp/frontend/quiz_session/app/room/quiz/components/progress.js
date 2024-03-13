@@ -18,6 +18,11 @@ export default function TimeProgress() {
     }
   }, [question]);
   return (
-    <Progress value={time} color="white" bg="green" transitionDuration={1000} />
+    <Progress
+      value={time}
+      color={question?.remainingTime > 10 ? "white" : "red"}
+      bg={"green"}
+      transitionDuration={1000}
+    />
   );
 }
