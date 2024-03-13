@@ -63,7 +63,7 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
     // clear input field if answer is shown
     if (isAdmin) return; // Prevent the admin side from auto-submitting an answer
     if (ANSWER && !isSubmitted) {
-      if (!answer && !isAdmin) {
+      if (!answer) {
         notifications.show({ title: "No answer inputted" });
       }
       setTimeout(() => {

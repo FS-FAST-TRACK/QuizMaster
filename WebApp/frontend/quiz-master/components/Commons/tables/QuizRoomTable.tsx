@@ -210,7 +210,6 @@ export default function QuizRoomTable() {
         const filter = (element: QuizRoom) => {
             return element.id != id;
         };
-        setQuizRooms(paginatedRooms.filter(filter));
 
         const res = await fetch(QUIZMASTER_QUIZROOM_DELETE_BY_ID(id), {
             method: "DELETE",
@@ -221,6 +220,7 @@ export default function QuizRoomTable() {
                 type: "success",
                 title: "Successfully removed room",
             });
+            setQuizRooms(paginatedRooms.filter(filter));
         } else {
             notification({ type: "error", title: "Failed to removed room" });
         }
@@ -305,10 +305,16 @@ export default function QuizRoomTable() {
                         )}
                     </CopyButton>
                 </Table.Td>
-                <Table.Td>{quizRoom.dateCreated.toDateString()}</Table.Td>
                 <Table.Td>
-                    {quizRoom.dateUpdated?.toDateString() ||
-                        new Date().toDateString()}
+                    <p className="text-gray-400 font-light">
+                        {quizRoom.dateCreated.toDateString()}
+                    </p>
+                </Table.Td>
+                <Table.Td>
+                    <p className="text-gray-400 font-light">
+                        {quizRoom.dateUpdated?.toDateString() ||
+                            quizRoom.dateCreated.toDateString()}
+                    </p>
                 </Table.Td>
                 <Table.Td>{getSetCount(quizRoom.id)}</Table.Td>
 
@@ -321,24 +327,15 @@ export default function QuizRoomTable() {
                             </div>
                         </Popover.Target>
                         <Popover.Dropdown p={10} className="space-y-3">
-                            <button className="flex w-full p-2 gap-2 text-[var(--error)] rounded-lg hover:text-white hover:bg-[var(--error)]">
-                                <TrashIcon className="w-6" />
-                                <div
-                                    onClick={() => {
-                                        handleRemoveRoom(quizRoom.id);
-                                    }}
-                                >
-                                    Remove
-                                </div>
-                            </button>
-                            <Link
-                                // TODO add link to edit quiz room
-                                href={`#`}
-                                className="flex gap-2 p-2 text-[var(--success)] rounded-lg hover:text-white hover:bg-[var(--success)] "
+                            <button
+                                className="flex w-full p-2 gap-2 text-[var(--error)] rounded-lg hover:text-white hover:bg-[var(--error)]"
+                                onClick={() => {
+                                    setDeleteQuizRoom(quizRoom);
+                                }}
                             >
-                                <PencilIcon className="w-6 " />
-                                <div>Edit</div>
-                            </Link>
+                                <TrashIcon className="w-6" />
+                                <div>Remove</div>
+                            </button>
                         </Popover.Dropdown>
                     </Popover>
                 </Table.Td>
@@ -403,17 +400,30 @@ export default function QuizRoomTable() {
             <PromptModal
                 body={
                     <div>
-                        <Text>Are you sure want to delete.</Text>
-                        {deleteQuizRoom?.qRoomDesc}
+                        <p className="text-base">
+                            Are you sure want to delete this quiz room? This
+                            action cannot be undone.
+                        </p>
+                        <p className="text-base mt-8 mb-16 font-semibold text-gray-700">
+                            •{" "}
+                            {`${deleteQuizRoom?.qRoomDesc} - ${deleteQuizRoom?.qRoomPin}`}
+                        </p>
                     </div>
                 }
                 action="Delete"
-                onConfirm={handelDelete}
+                onConfirm={() => {
+                    if (deleteQuizRoom) {
+                        handleRemoveRoom(deleteQuizRoom.id);
+                        setDeleteQuizRoom(undefined);
+                    }
+                }}
                 opened={deleteQuizRoom ? true : false}
                 onClose={() => {
                     setDeleteQuizRoom(undefined);
                 }}
-                title="Delete QuizRoom"
+                title={
+                    <p className="text-lg font-semibold">Delete Quiz Room</p>
+                }
             />
         </div>
     );

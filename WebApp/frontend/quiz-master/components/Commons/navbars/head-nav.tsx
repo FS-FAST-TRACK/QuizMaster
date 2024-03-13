@@ -10,6 +10,7 @@ import { Popover, Button } from "@mantine/core";
 import chevronDown from "/public/chevronDown.svg";
 import PlusIcon from "@heroicons/react/24/outline";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { signOut } from "next-auth/react";
 export default function HeadNav() {
     const [loading, setLoading] = useState(false);
     const [userInfo, setUserInfo] = useState<UserInfo>();
@@ -23,6 +24,12 @@ export default function HeadNav() {
                 setLoading(true);
             }, 100);
         });
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.log("Token not found, signing out");
+            signOut();
+        }
     }, []);
     const firstName = userInfo?.info?.userData?.firstName;
 
@@ -116,7 +123,7 @@ export default function HeadNav() {
                         {userInfo ? (
                             <div className="flex justify-between items-center">
                                 <Link
-                                    className={`flex flex-row justify-center items-center h-5 mr-2 w-auto p-5 bg-[#FF7F2A] hover:bg-[#FF7F2A80] gap-2 rounded-md hover:cursor-pointer ${
+                                    className={`flex flex-row justify-center items-center h-5 p-5 mr-2 w-auto p-5 bg-[#FF7F2A] hover:bg-[#FF7F2A80] gap-2 rounded-md hover:cursor-pointer ${
                                         !userInfo?.info.roles.includes(
                                             "Administrator"
                                         )
@@ -142,7 +149,7 @@ export default function HeadNav() {
                                                 backgroundColor: "#1AC15930",
                                                 background: "#1AC15930",
                                             }}
-                                            className=" bg-[#1AC15930] text-white  flex flex-row justify-center items-center h-5 p-5 mr-2 w-40 gap-2 rounded-md hover:cursor-pointer"
+                                            className=" bg-[#1AC15930] text-white  flex flex-row justify-center items-center h-5 p-5 mr-2 w-40 p-5 gap-2 rounded-md hover:cursor-pointer"
                                         >
                                             <div className="flex flex-row w-auto align-center">
                                                 <span
@@ -206,7 +213,7 @@ export default function HeadNav() {
                 {/* Hamburger Icon */}
             </div>
             {isOpen && (
-                <div className="flex flex-row item-center lg:hidden">
+                <div className="flex flex-row flex-col item-center lg:hidden">
                     <div id="mobile-menu" className="ml-10 mt-3 pt-2 pb-3  ">
                         <Link
                             href={"/home"}

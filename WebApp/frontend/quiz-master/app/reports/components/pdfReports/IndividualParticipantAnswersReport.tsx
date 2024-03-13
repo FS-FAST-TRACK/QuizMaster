@@ -1,8 +1,21 @@
 import React from "react";
-import { Page, Text, Document, StyleSheet, View } from "@react-pdf/renderer";
+import {
+    Page,
+    Text,
+    Document,
+    StyleSheet,
+    View,
+    Font,
+} from "@react-pdf/renderer";
 import { ParticipantAnswer } from "@/components/Commons/modals/ViewParticipantAnswersModal";
 import { Question } from "@/lib/definitions";
 import { truncateString } from "@/lib/stringUtils";
+import { isCorrectAnswer } from "@/lib/correctAnswerUtils";
+
+Font.registerEmojiSource({
+    format: "png",
+    url: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/",
+});
 
 export function IndividualParticipantAnswersReport({
     participantAnswers,
@@ -108,6 +121,10 @@ function ParticipantAnswersTableRow({
             .find((q) => q.id === participantAnswer.questionId)
             ?.details.find((detail) => detail.detailTypes.includes("answer"))
             ?.qDetailDesc || "";
+    const isParticipantCorrect = isCorrectAnswer(
+        participantAnswer.answer,
+        correctAnswer
+    );
 
     return (
         <View style={styles.row}>
@@ -115,8 +132,15 @@ function ParticipantAnswersTableRow({
                 {questionStatement}
             </Text>
             {participantAnswer.answer ? (
-                <Text style={styles.answerColumn}>
-                    {participantAnswer.answer}
+                <Text
+                    style={[
+                        styles.answerColumn,
+                        { color: isParticipantCorrect ? "#17A14B" : "red" },
+                    ]}
+                >
+                    {`${participantAnswer.answer} ${
+                        isParticipantCorrect ? "  ✅" : "  ❌"
+                    }`}
                 </Text>
             ) : (
                 <Text style={[styles.answerColumn, { color: "grey" }]}>

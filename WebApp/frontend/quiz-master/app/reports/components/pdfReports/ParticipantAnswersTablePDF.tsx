@@ -1,6 +1,7 @@
 import { View, StyleSheet, Text, Font } from "@react-pdf/renderer";
 import { ParticipantAnswerReport } from "../sessionsReport";
 import { Question } from "@/lib/definitions";
+import { isCorrectAnswer } from "@/lib/correctAnswerUtils";
 
 Font.register({
     family: "Open Sans",
@@ -26,6 +27,10 @@ export function ParticipantAnswersTablePDF({
     participantAnswers: ParticipantAnswerReport[];
     questionInfos: Question[];
 }) {
+    console.log(
+        "QUESTION INFOS FROM THE PARTICIPANTANSWERS TABLE COMPONENT",
+        questionInfos
+    );
     return (
         <View>
             <View>
@@ -133,34 +138,6 @@ function QuestionCorrectResponses({
             </View>
         </View>
     );
-}
-
-function isCorrectAnswer(
-    participantAnswer: string,
-    correctAnswer: string
-): boolean {
-    const hasMultipleAnswers = correctAnswer.split("|").length > 1;
-
-    if (hasMultipleAnswers) {
-        // Trim spaces and lowered casings
-        const trimmedAnswers = correctAnswer
-            .split("|")
-            .map((answer) => answer.trim().toLowerCase());
-        if (trimmedAnswers.includes(participantAnswer.trim().toLowerCase())) {
-            return true;
-        } else {
-            return false;
-        }
-    } else {
-        if (
-            correctAnswer.trim().toLowerCase() ===
-            participantAnswer.trim().toLowerCase()
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }
 
 const styles = StyleSheet.create({
