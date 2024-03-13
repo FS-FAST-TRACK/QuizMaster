@@ -168,6 +168,7 @@ namespace QuizMaster.API.Gateway.Services
                         await Task.Delay(1000);
                         // Notify the admin while the game is paused
                         await hub.Clients.Client(hostConnectionId).SendAsync("paused", $"Game is paused, click proceed to start or the game will resume automatically on '{limit--} second/s'");
+                        await hub.Clients.GroupExcept(roomPin, hostConnectionId).SendAsync("paused", $"Game is Paused");
                     }
 
                     // Reset to true
