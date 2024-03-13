@@ -6,16 +6,22 @@ import { useEffect, useState } from "react";
 import { useQuestion, useMetaData } from "@/app/util/store";
 import { timeFormater } from "@/app/auth/util/handlers";
 import useSound from "use-sound";
+import { IconVolume, IconVolumeOff } from "@tabler/icons-react";
 
 export default function Header() {
   const { question } = useQuestion();
   const { metadata } = useMetaData();
   const [time, setTime] = useState();
+  const [isMute, setIsMute] = useState();
 
   const [play, { stop }] = useSound(
     "/audio/quiz_master-ten-seconds-count-down.mp3",
-    { volume: 0.5 }
+    { volume: isMute ? 0 : 0.5 }
   );
+
+  const toggleMute = () => {
+    setIsMute((prev) => !prev);
+  };
 
   useEffect(() => {
     setTime(question?.remainingTime);
@@ -65,6 +71,16 @@ export default function Header() {
             </div>
           </div>
         </div>
+      </div>
+      <div
+        className="p-4 bg-green-700/50 hover:bg-green-700 rounded-full cursor-pointer absolute mt-3 right-5"
+        onClick={toggleMute}
+      >
+        {isMute ? (
+          <IconVolumeOff size={24} color="white" />
+        ) : (
+          <IconVolume size={24} color="white" />
+        )}
       </div>
     </div>
   );
