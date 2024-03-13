@@ -20,17 +20,7 @@ export const QUESTION_DEFAULT = {
 } as Question;
 
 export const useQuestionnaire = create<IQuestionStore>((set, get) => ({
-    questionnaire: {
-        id: -1,
-        qAudio: "",
-        qCategoryId: 1,
-        qDifficultyId: 1,
-        qTypeId: 1,
-        qImage: "",
-        qStatement: "",
-        qTime: 30,
-        details: [],
-    } as Question,
+    questionnaire: QUESTION_DEFAULT,
     setQuestionnaire(fetchedQuestionnaire) {
         set({ questionnaire: fetchedQuestionnaire });
     },
