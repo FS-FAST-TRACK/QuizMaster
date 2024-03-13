@@ -50,7 +50,7 @@ export default function Leaderboard({ leaderBoard }) {
 
   return (
     <div className="h-full w-full flex justify-center items-center ">
-      <AnimateSlideInFromBottom className="w-[90%] sm:w-[75%] md:w-[45%] lg:w-[50%] xl:w-1/3 h-3/4 max-w-[460px] bg-white  rounded-lg shadow-2xl shadow-green-600">
+      <AnimateSlideInFromBottom className="w-[90%] sm:w-[75%] md:w-[45%] lg:w-[50%] xl:w-1/3 h-3/4 max-w-[460px] bg-white  rounded-lg shadow-2xl shadow-green-600 overflow-y-scroll">
         <div className="p-5 overflow-auto space-y-5">
           <div className="flex flex-row justify-between">
             <div className="font-bold">Leaderboard</div>
