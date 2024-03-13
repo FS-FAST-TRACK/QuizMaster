@@ -53,8 +53,8 @@ function TrueOrFalse({ question, connectionId }, ref) {
 
   useEffect(() => {
     // handleSubmit if answer is shown
-    if (ANSWER && !isSubmitted) {
-      if (!pick && !isAdmin) {
+    if (ANSWER && !isSubmitted && !isAdmin) {
+      if (!pick) {
         notifications.show({ title: "You have not selected any choices" });
         handleSubmit();
       }
@@ -121,6 +121,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("true");
               }}
             >
@@ -136,6 +137,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("false");
               }}
             >
@@ -169,6 +171,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("true");
               }}
             >
@@ -184,6 +187,7 @@ function TrueOrFalse({ question, connectionId }, ref) {
               }`}
               onClick={() => {
                 if (isAdmin) return;
+                if  (isSubmitted) return;
                 handlePick("false");
               }}
             >

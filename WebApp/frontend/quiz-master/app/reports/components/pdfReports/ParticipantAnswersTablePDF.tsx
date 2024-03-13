@@ -26,6 +26,10 @@ export function ParticipantAnswersTablePDF({
     participantAnswers: ParticipantAnswerReport[];
     questionInfos: Question[];
 }) {
+    console.log(
+        "QUESTION INFOS FROM THE PARTICIPANTANSWERS TABLE COMPONENT",
+        questionInfos
+    );
     return (
         <View>
             <View>

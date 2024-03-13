@@ -35,12 +35,16 @@ export default function ViewQuizSessionModal({
 
     useEffect(() => {
         const fetchQuestionInfos = () => {
+            const infos: Question[] = [];
             questionIds.forEach((id) => {
                 fetch(QUIZMASTER_QUESTION_GET_QUESTION + `${id}`)
                     .then((response) => response.json())
-                    .then((data: Question) =>
-                        setQuestionInfos((prev) => [...prev, data])
-                    )
+                    .then((data: Question) => {
+                        infos.push(data);
+                    })
+                    .then(() => {
+                        setQuestionInfos(infos);
+                    })
                     .catch((err) => {
                         console.log(err);
                     });
@@ -156,7 +160,7 @@ export default function ViewQuizSessionModal({
                                     >
                                         {({ loading }) =>
                                             loading
-                                                ? "Downloading document..."
+                                                ? "Preparing report"
                                                 : "Export as PDF"
                                         }
                                     </PDFDownloadLink>

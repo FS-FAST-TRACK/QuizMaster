@@ -53,11 +53,11 @@ function MulitpleChoice({ question, connectionId }, ref) {
 
   useEffect(() => {
     // handleSubmit if answer is shown
-    if (answer && !isSubmitted) {
-      if (!pick && !isAdmin) {
+    if (answer && !isSubmitted && !isAdmin) {
+      if (!pick) {
         notifications.show({ title: "You have not selected any choices" });
-        handleSubmit();
       }
+      handleSubmit();
     }
   }, [answer]);
 
@@ -108,7 +108,6 @@ function MulitpleChoice({ question, connectionId }, ref) {
               </div>
             )}
           </div>
-          <Participants excludeAdmins={true} includeLoaderModal={false} />
         </div>
       ) : (
         <div className="w-full grid grid-cols-2 place-content-center">
@@ -142,6 +141,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
             key={index}
             onClick={() => {
               if (isAdmin) return;
+              if  (isSubmitted) return;
               handlePick(choices.qDetailDesc);
             }}
           >

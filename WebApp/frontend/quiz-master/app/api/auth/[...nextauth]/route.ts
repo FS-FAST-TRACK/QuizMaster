@@ -72,6 +72,8 @@ const authOptions = {
             return session;
         },
     },
+
+    site: process.env.BASE_URL
 };
 
 const handler = NextAuth(authOptions as any);
