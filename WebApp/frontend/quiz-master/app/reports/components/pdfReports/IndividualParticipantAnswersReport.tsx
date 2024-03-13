@@ -138,13 +138,13 @@ function ParticipantAnswersTableRow({
                         { color: isParticipantCorrect ? "#17A14B" : "red" },
                     ]}
                 >
-                    {`${participantAnswer.answer} ${
-                        isParticipantCorrect ? "  ✅" : "  ❌"
+                    {`${isParticipantCorrect ? "✅  " : "❌  "} ${
+                        participantAnswer.answer
                     }`}
                 </Text>
             ) : (
                 <Text style={[styles.answerColumn, { color: "grey" }]}>
-                    {"<No answer submitted>"}
+                    {"❌  <No answer submitted>"}
                 </Text>
             )}
 
