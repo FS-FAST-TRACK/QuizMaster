@@ -7,6 +7,18 @@ interface IQuestionStore {
     getLatestQuestionnaire: () => Question | undefined;
 }
 
+export const QUESTION_DEFAULT = {
+    id: -1,
+    qAudio: "",
+    qCategoryId: 1,
+    qDifficultyId: 1,
+    qTypeId: 1,
+    qImage: "",
+    qStatement: "",
+    qTime: 30,
+    details: [],
+} as Question;
+
 export const useQuestionnaire = create<IQuestionStore>((set, get) => ({
     questionnaire: {
         id: -1,

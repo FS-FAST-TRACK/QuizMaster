@@ -14,7 +14,7 @@ import ErrorContainer from "@/components/pages/ErrorContainer";
 import { useErrorRedirection } from "@/utils/errorRedirection";
 import { fetchLoginUser } from "@/lib/quizData";
 import { useRouter } from "next/navigation";
-import { useQuestionnaire } from "@/store/QuestionStore";
+import { QUESTION_DEFAULT, useQuestionnaire } from "@/store/QuestionStore";
 import { GetAllQuestion } from "@/lib/hooks/question";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -48,7 +48,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             setQuestionTypes(typesRes.data);
 
             const questionsRes = await GetAllQuestion();
-            if (questionsRes) setQuestionnaire(questionsRes.pop());
+            if (questionsRes)
+                setQuestionnaire(questionsRes.pop() ?? QUESTION_DEFAULT);
         } catch (error) {
             redirectToError();
         }
