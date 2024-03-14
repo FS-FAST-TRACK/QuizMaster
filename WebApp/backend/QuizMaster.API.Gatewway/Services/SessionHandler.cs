@@ -202,6 +202,11 @@ namespace QuizMaster.API.Gateway.Services
             return RoomEliminatedParticipants.GetValueOrDefault(roomPin) ?? new List<QuizParticipant>();
         }
 
+        public QuizParticipant? GetQuizParticipantByUsername(string username)
+        {
+            return participantLinkedConnectionId.Values.Where(qp => qp.QParticipantDesc == username).FirstOrDefault();
+        }
+
         public void LinkParticipantConnectionId(string connectionId, QuizParticipant quizParticipant)
         {
             var hasAbandonedParticipant = participantLinkedConnectionId.Where(kv => kv.Value.UserId == quizParticipant.UserId && kv.Value.QEndDate != null).Select(kv=>kv.Value).FirstOrDefault();

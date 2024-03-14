@@ -325,7 +325,8 @@ namespace QuizMaster.API.Gateway.Hubs
                     {
                         //string Name = NAMES[new Random().Next(0, NAMES.Count - 1)];
                         string Name = userData.UserData.UserName;
-                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id, QRoomId = room.Id });
+                        var hasUserData = SessionHandler.GetQuizParticipantByUsername(Name);
+                        SessionHandler.LinkParticipantConnectionId(connectionId, new QuizParticipant { QParticipantDesc = Name, UserId = userData.UserData.Id, QRoomId = room.Id, Score = hasUserData != null ? hasUserData.Score : 0 });
 
                         // get the linked participant and check if eliminated
                         var ParticipantData = SessionHandler.GetLinkedParticipantInConnectionId(connectionId);
