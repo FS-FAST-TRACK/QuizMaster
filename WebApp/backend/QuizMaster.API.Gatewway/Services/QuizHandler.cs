@@ -96,10 +96,15 @@ namespace QuizMaster.API.Gateway.Services
                     if (details == null) continue;
 
                     handler.SetCurrentQuestionDisplayed(roomPin, details.question.Id);// Save the current displayed Question
-                    var timeout = details.question.QTime;
 
                     // Override timeout based on the QType
-                    timeout = OverrideTimeout(timeout, details.question.QTypeId);
+                    details.question.QTime = OverrideTimeout(details.question.QTime, details.question.QTypeId);
+
+                    var timeout = details.question.QTime;
+
+                    // Add BufferTime
+                    timeout += quizSettings.BufferTime;
+
 
                     // setting the current set info
                     details.CurrentSetName = questionSet.Set.QSetName;
@@ -120,6 +125,7 @@ namespace QuizMaster.API.Gateway.Services
                      * - CurrentQuestionIndex
                      * - CurrentQuestionName
                      * - TotalNumberOfQuestions
+                     * - bufferTime
                      * - ParticipantsInRoom
                      */
                     await hub.Clients.Group(roomPin).SendAsync("metadata", new {
@@ -129,6 +135,7 @@ namespace QuizMaster.API.Gateway.Services
                         currentQuestionIndex = currentQuestion++,
                         currentQuestionName = details.question.QStatement,
                         totalNumberOfQuestions = Setquestions.Count,
+                        bufferTime = quizSettings.BufferTime,
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
 

@@ -4,6 +4,7 @@
     {
         public int ShowAnswerAfterQuestionDelay { get; set; } = 10;
         public int ForceNextRoundTimeout { get; set; } = 300;
+        public int BufferTime { get; set; } = 0;
 
         public OverrideQuestionTimer OverrideQuestionTimer { get; set;} = new();
     }
