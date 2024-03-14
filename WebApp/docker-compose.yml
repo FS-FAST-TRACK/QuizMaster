@@ -94,6 +94,7 @@ services:
       - AppSettings:CORS_ORIGINS=${GATEWAY_CORS}
       - QuizSettings:ShowAnswerAfterQuestionDelay=${SHOW_ANSWER_AFTER_QUESTION_DELAY}
       - QuizSettings:ForceNextRoundTimeout=${FORCE_NEXT_ROUND_TIMEOUT}
+      - QuizSettings:BufferTime=${BUFFER_TIME}
       - QuizSettings:OverrideQuestionTimer:TypeAnswer=${OVERRIDE_QUESTION_TIMER_TYPEANSWER}
       - QuizSettings:OverrideQuestionTimer:MultipleChoice=${OVERRIDE_QUESTION_TIMER_MULTIPLECHOICE}
       - QuizSettings:OverrideQuestionTimer:TrueOrFalse=${OVERRIDE_QUESTION_TIMER_TRUEORFALSE}

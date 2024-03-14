@@ -6,15 +6,20 @@ import { useEffect, useState } from "react";
 import { useQuestion, useMetaData } from "@/app/util/store";
 import { timeFormater } from "@/app/auth/util/handlers";
 import useSound from "use-sound";
+import { IconVolume, IconVolumeOff } from "@tabler/icons-react";
+import { Slider } from "@mantine/core";
 
 export default function Header() {
   const { question } = useQuestion();
   const { metadata } = useMetaData();
   const [time, setTime] = useState();
+  const [isMute, setIsMute] = useState();
+  const [collapsedVolume, setCollapsedVolumne] = useState(true);
+  const [volume, setVolume] = useState(100);
 
   const [play, { stop }] = useSound(
     "/audio/quiz_master-ten-seconds-count-down.mp3",
-    { volume: 0.5 }
+    { volume: isMute ? 0 : volume / 100 }
   );
 
   useEffect(() => {
@@ -29,6 +34,14 @@ export default function Header() {
       stop();
     }
   }, [time]);
+
+  useEffect(() => {
+    if (volume === 0) {
+      setIsMute(true);
+    } else {
+      setIsMute(false);
+    }
+  }, [volume]);
 
   return (
     <div className="px-5 pt-2 w-full bg-green-600 ">
@@ -65,6 +78,33 @@ export default function Header() {
             </div>
           </div>
         </div>
+      </div>
+      <div
+        className={`p-4 opacity-50 hover:opacity-100 bg-green-700/50 hover:bg-green-700 flex justify-center items-center rounded-full cursor-pointer absolute mt-3 right-5 gap-4`}
+      >
+        <div className={`${collapsedVolume ? "hidden" : ""}`}>
+          <Slider
+            max={100}
+            value={volume}
+            onChange={setVolume}
+            size={"sm"}
+            color={"green"}
+            className="w-36"
+          />
+        </div>
+        {isMute ? (
+          <IconVolumeOff
+            size={24}
+            color="white"
+            onClick={() => setCollapsedVolumne((prev) => !prev)}
+          />
+        ) : (
+          <IconVolume
+            size={24}
+            color="white"
+            onClick={() => setCollapsedVolumne((prev) => !prev)}
+          />
+        )}
       </div>
     </div>
   );
