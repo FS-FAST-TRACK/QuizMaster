@@ -127,7 +127,7 @@ function ParticipantAnswersTableRow({
     );
 
     return (
-        <View style={styles.row}>
+        <View style={styles.row} wrap={false}>
             <Text style={styles.questionStatementColumn}>
                 {questionStatement}
             </Text>

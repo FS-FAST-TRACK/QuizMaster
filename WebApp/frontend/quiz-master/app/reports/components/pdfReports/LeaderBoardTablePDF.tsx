@@ -42,7 +42,7 @@ function LeaderBoardPdfRow({
     index: Number;
 }) {
     return (
-        <View style={styles.row}>
+        <View style={styles.row} wrap={false}>
             <Text style={styles.column1}>{participant.participantName}</Text>
             <Text style={styles.column2}>{participant.score} points</Text>
         </View>
