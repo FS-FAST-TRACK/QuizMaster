@@ -22,8 +22,6 @@ export default function Header() {
     { volume: isMute ? 0 : volume / 100 }
   );
 
-  console.log(metadata);
-
   useEffect(() => {
     setTime(question?.remainingTime);
   }, [question]);
