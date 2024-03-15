@@ -332,6 +332,14 @@ namespace QuizMaster.API.Gateway.Controllers
             return Ok(new { Message = "Proceed Success"});
         }
 
+        [QuizMasterAdminAuthorization]
+        [HttpGet("room/forceExit/{id}")]
+        public IActionResult RoomForceExit(int id)
+        {
+            SessionHandler.ForceExitRoom(id);
+            return Ok(new { Message = "Proceed Success" });
+        }
+
         [QuizMasterAuthorization]
         [HttpGet("room/getAllRooms")]
         public async Task<IActionResult> GetAllRoomsAsync()

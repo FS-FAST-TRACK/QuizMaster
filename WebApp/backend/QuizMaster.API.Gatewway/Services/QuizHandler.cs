@@ -69,8 +69,10 @@ namespace QuizMaster.API.Gateway.Services
             handler.SetPauseRoom(roomId, true); // <- Pause the room when before proceeding to next round
             handler.AddActiveRoom(room.QRoomPin, room); // register the room to be started | set to active
             int setIndex = 0;
+            bool ForcedToExit = false;
             foreach (var Qset in quizSets)
             {
+                if (ForcedToExit) break;
                 // Get the Sets
                 var setRequest = new SetRequest() { Id = Qset.QSetId };
                 var setReply = await grpcClient.GetQuizAsync(setRequest);
@@ -82,6 +84,10 @@ namespace QuizMaster.API.Gateway.Services
                 int currentQuestion = 1;
                 foreach (var questionSet in Setquestions)
                 {
+                    // Exit Set
+                    ForcedToExit = handler.IsRoomForcedToExit(roomId);
+                    if(ForcedToExit) break;
+
                     roomPin = Qset.QRoom.QRoomPin + "";
                     // update the participant start-time if haven't, for late joiners
                     UpdateParticipantsStartTime(handler, roomPin);
@@ -166,6 +172,7 @@ namespace QuizMaster.API.Gateway.Services
                     await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores
                 }
 
+                // Handling the Pause
                 if(setIndex < quizSets.Count)
                 {
                     int limit = quizSettings.ForceNextRoundTimeout; // DEFAULT (300s) of 5mins, if not clicked `proceed` then continue
@@ -203,6 +210,7 @@ namespace QuizMaster.API.Gateway.Services
             // Clear
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
+            handler.ClearForcedExitRoom();
             //await hub.Clients.Group(roomPin).SendAsync("notif", "Quiz Data: "+JsonConvert.SerializeObject(await GetQuizRoomDatasAsync()));
             //await hub.Clients.Group(roomPin).SendAsync("stop",true);
         }
