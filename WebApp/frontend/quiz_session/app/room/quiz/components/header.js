@@ -51,10 +51,10 @@ export default function Header() {
         </div>
         <div className="flex justify-center">
           <div className="justify-center items-center">
-            <p className="text-white text-sm mb-2">
-              {metadata?.currentSetName}
+            <p className="text-white text-sm mb-2 text-center">
+              {`(${metadata?.currentSetIndex}/${metadata?.totalNumberOfSets}) ${metadata?.currentSetName}`}
             </p>
-            <div className="flex-row flex bg-white py-2 rounded-md text-green_text flex-2 justify-center items-center">
+            <div className="flex-row flex bg-white py-2 px-4 rounded-md text-green_text flex-2 justify-center items-center">
               <div className="text-base font-bold">
                 Question {metadata?.currentQuestionIndex}{" "}
               </div>
