@@ -8,7 +8,7 @@ import QuestionImage from "./questionImage";
 import Participants from "../../components/participants";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
-import { useAnswer } from "@/app/util/store";
+import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
 
 export default React.forwardRef(MulitpleChoice);
@@ -23,6 +23,9 @@ function MulitpleChoice({ question, connectionId }, ref) {
   const [hasImage, setHasImage] = useState(false);
   const [previousStatement, setPreviousStatement] = useState(null);
   const { answer } = useAnswer();
+
+  /* Shows/hides question details during buffer time */
+  const showDetails = question?.remainingTime <= question?.question?.qTime;
 
   const [image, takeScreenShot] = useScreenshot({
     type: "image/jpeg",
@@ -124,31 +127,34 @@ function MulitpleChoice({ question, connectionId }, ref) {
           </div>
         </div>
       )}
-      <div
-        className={`w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
-          answer ? "opacity-50" : ""
-        }`}
-      >
-        {question?.details.map((choices, index) => (
-          <div
-            className={`${
-              pick === choices.qDetailDesc
-                ? "bg-dark_green text-white"
-                : "bg-white text-dark_green"
-            } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-              isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-            }`}
-            key={index}
-            onClick={() => {
-              if (isAdmin) return;
-              if  (isSubmitted) return;
-              handlePick(choices.qDetailDesc);
-            }}
-          >
-            {choices.qDetailDesc}
-          </div>
-        ))}
-      </div>
+
+      {showDetails && (
+        <div
+          className={`w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
+            answer ? "opacity-50" : ""
+          }`}
+        >
+          {question?.details.map((choices, index) => (
+            <div
+              className={`${
+                pick === choices.qDetailDesc
+                  ? "bg-dark_green text-white"
+                  : "bg-white text-dark_green"
+              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
+              key={index}
+              onClick={() => {
+                if (isAdmin) return;
+                if (isSubmitted) return;
+                handlePick(choices.qDetailDesc);
+              }}
+            >
+              {choices.qDetailDesc}
+            </div>
+          ))}
+        </div>
+      )}
       {!isAdmin && (
         <div
           className={`w-full justify-center flex mt-8 ${
