@@ -31,6 +31,7 @@ namespace QuizMaster.API.Gateway.Services
         private Dictionary<string, string> SessionId;
         private readonly ReportServiceHandler ReportHandler;
         private Dictionary<int, bool> RoomNextSetPaused;
+        private List<int> RoomForceExitIds;
 
         public SessionHandler(ReportServiceHandler reportServiceHandler)
         {
@@ -46,6 +47,7 @@ namespace QuizMaster.API.Gateway.Services
             SessionId = new();
             RoomNextSetPaused = new();
             ReportHandler = reportServiceHandler;
+            RoomForceExitIds = new();
         }
 
         public string GenerateSessionId(string roomPin)
@@ -71,6 +73,21 @@ namespace QuizMaster.API.Gateway.Services
         {
             RoomNextSetPaused.TryGetValue(roomId, out bool result);
             return result;
+        }
+
+        public void ForceExitRoom(int roomId)
+        {
+            RoomForceExitIds.Add(roomId);
+        }
+
+        public bool IsRoomForcedToExit(int roomId)
+        {
+            return RoomForceExitIds.Contains(roomId);
+        }
+
+        public void ClearForcedExitRoom()
+        {
+            RoomForceExitIds.Clear();
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
