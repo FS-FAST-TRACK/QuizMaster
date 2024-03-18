@@ -13,7 +13,7 @@ export default function Chat({ onToggleCollapseChat }) {
   return (
     <div className="flex flex-col w-full h-full shadow-lg">
       <div className="h-14 items-center flex justify-between px-4 border-b-2 border-gray-200">
-        <div className="flex gap-2">
+        <div className="flex gap-2 py-4">
           <IconChevronRight
             className="sm:visible md:hidden cursor-pointer hover:bg-slate-100 rounded-full"
             size={24}
