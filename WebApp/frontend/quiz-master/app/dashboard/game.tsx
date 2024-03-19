@@ -2,10 +2,12 @@
 import { useSession } from "next-auth/react";
 import CryptoJS from "crypto-js";
 import { QUIZMASTER_SESSION_WEBSITE } from "@/api/api-routes";
+import jwtDecode from "jwt-decode";
 
 export default function Game() {
     const { data: session } = useSession();
-    const user = session?.user;
+    let user = session?.user;
+    let username;
 
     function encodeUTF8(input: string) {
         return encodeURIComponent(input);
@@ -13,6 +15,14 @@ export default function Game() {
 
     // Get the data to be encrypted (e.g., from localStorage)
     const token = localStorage.getItem("token") || "";
+
+    // Get username from token
+    if (token) {
+        const data: any = jwtDecode(token);
+        const userData = JSON.parse(data.token);
+        console.log(userData);
+        username = userData["UserData"]["UserName"];
+    }
 
     // Encode the data as UTF-8
     const utf8EncodedToken = encodeUTF8(token);
@@ -25,6 +35,6 @@ export default function Game() {
     ).toString();
 
     const encodedEncryptedToken = encodeURIComponent(encryptedToken);
-    const linkVar = `${QUIZMASTER_SESSION_WEBSITE}?name=${user?.username}&token=${encodedEncryptedToken}`;
+    const linkVar = `${QUIZMASTER_SESSION_WEBSITE}?name=${username}&token=${encodedEncryptedToken}`;
     return linkVar;
 }

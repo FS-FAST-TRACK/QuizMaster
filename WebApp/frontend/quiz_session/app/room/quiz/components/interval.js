@@ -6,11 +6,14 @@ import { useEffect, useState } from "react";
 import { BASE_URL } from "@/app/util/api";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import { useMetaData, useQuestion } from "@/app/util/store";
+import { AnimateSlideInFromBottom } from "./AnimateSlideInFromBottom";
+import ConfirmEndGameModal from "../modals/ConfirmEndGameModal";
 
 export default function Interval({ leaderBoard, handleCloseLeaderboard }) {
   const { isAdmin } = useUserTokenData();
   const { question } = useQuestion();
   const { metadata } = useMetaData();
+  const [endGameModal, setEndGameModal] = useState(false);
 
   const handleNextRound = () => {
     if (handleCloseLeaderboard) {
@@ -87,21 +90,26 @@ export default function Interval({ leaderBoard, handleCloseLeaderboard }) {
         >
           {seconds}
         </div> */}
+        <ConfirmEndGameModal
+          opened={endGameModal}
+          onClose={() => setEndGameModal(false)}
+          onConfirm={handleForceExit}
+        />
       </div>
       <Leaderboard leaderBoard={leaderBoard} />
       {isAdmin && (
-        <div className="w-full flex items-center b-[50px] h-[30%]">
-          <button
-            onClick={handleNextRound}
-            className="text-white bg-orange-600 m-auto px-4 py-2 rounded-md"
-          >
-            Next Round
-          </button>
+        <div className="w-full bg-gradient-to-t from-green-800 to-green-600/50 h-32 flex gap-4 justify-center items-center ">
           <button
             onClick={handleForceExit}
-            className="text-white bg-red-600 m-auto px-4 py-2 rounded-md"
+            className="border-2 border-white text-white px-4 py-2 rounded-md hover:bg-red-600 hover:border-red-600 hover:-translate-y-1 hover:scale-110 transition ease-in-out"
           >
             End Game
+          </button>
+          <button
+            onClick={handleNextRound}
+            className="text-white bg-orange-500 px-4 py-2 rounded-md hover:-translate-y-1 hover:scale-110 transition ease-in-out"
+          >
+            Next Round
           </button>
         </div>
       )}

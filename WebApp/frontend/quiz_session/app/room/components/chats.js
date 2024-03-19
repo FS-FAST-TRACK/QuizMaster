@@ -19,6 +19,7 @@ export default function Chats() {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
+    console.log("Conversations", conversation);
   }, [conversation]);
 
   return (
@@ -31,7 +32,9 @@ export default function Chats() {
               className="flex flex-col justify-end w-full items-end "
               ref={index === conversation.length - 1 ? lastMessageRef : null}
             >
-              <div className="text-gray-400 text-xs mb-1">{message?.name}</div>
+              <div className="text-gray-400 text-xs mb-1">
+                {`${message?.name} ${message?.isAdmin ? "(Host)" : ""}`}
+              </div>
               <div
                 className="bg-wall w-fit  p-1 rounded-lg text-white px-4 py-2"
                 style={{ maxWidth: "80%" }}
@@ -57,7 +60,11 @@ export default function Chats() {
               className="flex flex-col justify-end w-full"
               ref={index === conversation.length - 1 ? lastMessageRef : null}
             >
-              <div className="text-gray-300 text-xs mb-1">{message?.name}</div>
+              <div>
+                <div className="text-gray-300 text-xs mb-1">
+                  {`${message?.name} ${message?.isAdmin ? "(Host)" : ""}`}
+                </div>
+              </div>
               <div
                 className="bg-white w-fit  p-1 rounded-md px-4 py-2  shadow-sm"
                 style={{ maxWidth: "80%" }}

@@ -12,7 +12,7 @@ import {
   useLeaderboard,
   useMetaData,
   useAnswer,
-  useAnsweredParticipants
+  useAnsweredParticipants,
 } from "../util/store";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
@@ -93,13 +93,13 @@ export default function Welcome() {
 
           // answer
           connection.on("answer", (answer) => {
-            setAnswer(answer)
-          })
+            setAnswer(answer);
+          });
 
           // answered  Participants
           connection.on("participant_answered", (participant_answered) => {
             setAnsweredParticipants(participant_answered ?? []);
-          })
+          });
 
           const token = params.get("token");
           const username = params.get("name");
@@ -114,6 +114,8 @@ export default function Welcome() {
             const decryptedToken = decrypToken.toString(CryptoJS.enc.Utf8);
 
             connection.invoke("Login", decryptedToken);
+
+            localStorage.clear();
             localStorage.setItem("username", username.toLowerCase());
 
             localStorage.setItem("token", decryptedToken);
@@ -129,16 +131,20 @@ export default function Welcome() {
                 if (loggedIn) {
                   // Verify Auth Token
                   const token = localStorage.getItem("token");
-                  fetch(BASE_URL+"/gateway/api/auth/info", {method:'GET', headers: {"Authorization": `Bearer ${token}`}})
-                  .then(r => r.json().then(d => ({status: r.status, body: d})))
-                  .then(d =>{
-                    if(d.status === 200){
-                      push("/auth/code");
-                    }else{
-                      push("/auth");
-                    }
+                  fetch(BASE_URL + "/gateway/api/auth/info", {
+                    method: "GET",
+                    headers: { Authorization: `Bearer ${token}` },
                   })
-                  
+                    .then((r) =>
+                      r.json().then((d) => ({ status: r.status, body: d }))
+                    )
+                    .then((d) => {
+                      if (d.status === 200) {
+                        push("/auth/code");
+                      } else {
+                        push("/auth");
+                      }
+                    });
                 } else {
                   push("/auth");
                 }

@@ -144,6 +144,8 @@ export const uploadScreenshot = (
   // a.href = image;
   // a.download = createFileName(extension, name);
   // a.click();
+
+  const token = localStorage.getItem("token");
   const blob = dataURLtoBlob(image);
   const formData = new FormData();
   formData.append("File", blob, createFileName(extension, name));
@@ -153,10 +155,11 @@ export const uploadScreenshot = (
     body: formData,
     redirect: "follow",
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
   console.info("uploading screenshot");
-
-  const token = localStorage.getItem('token');
 
   fetch(`${BASE_URL}/gateway/api/Media/upload`, requestOptions)
     .then((response) => response.json())
@@ -166,18 +169,21 @@ export const uploadScreenshot = (
         // Submit Screenshot Link
         const payload = {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({
             questionId: id,
             connectionId,
             screenshotLink: `${BASE_URL}/gateway/api/media/download_media/${imageId}`,
-          })
+          }),
+        };
+
+        if (!token) {
+          payload.credentials = "include";
         }
 
-        if(!token){
-          payload.credentials="include"
-        }
-        
         fetch(`${BASE_URL}/gateway/api/room/submitScreenshot`, payload)
           .then((response) => response.json())
           .then((r) => {
