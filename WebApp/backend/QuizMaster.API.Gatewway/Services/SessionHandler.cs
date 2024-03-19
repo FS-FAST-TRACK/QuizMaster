@@ -413,7 +413,8 @@ namespace QuizMaster.API.Gateway.Services
                 ParticipantName = participantData.QParticipantDesc,
                 Answer = answer,
                 QuestionId = questionData.question.Id,
-                ScreenshotLink = ""
+                ScreenshotLink = "",
+                Points = Point
             });
             #endregion
             return "Answer submitted";
