@@ -144,7 +144,6 @@ namespace QuizMaster.API.Gateway.Services
                         totalNumberOfQuestions = Setquestions.Count,
                         bufferTime = quizSettings.BufferTime,
                         points = quizSettings.OverridePointSystem,
-                        currentDifficulty = details.question.QDifficulty.QDifficultyDesc.ToLower(),
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
 
