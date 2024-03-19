@@ -132,6 +132,7 @@ namespace QuizMaster.API.Gateway.Services
                      * - CurrentQuestionName
                      * - TotalNumberOfQuestions
                      * - bufferTime
+                     * - points
                      * - ParticipantsInRoom
                      */
                     await hub.Clients.Group(roomPin).SendAsync("metadata", new {
@@ -142,6 +143,8 @@ namespace QuizMaster.API.Gateway.Services
                         currentQuestionName = details.question.QStatement,
                         totalNumberOfQuestions = Setquestions.Count,
                         bufferTime = quizSettings.BufferTime,
+                        points = quizSettings.OverridePointSystem,
+                        currentDifficulty = details.question.QDifficulty.QDifficultyDesc.ToLower(),
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
 

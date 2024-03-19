@@ -89,8 +89,6 @@ services:
       - GrpcServerConfiguration:Session_Service=https://backend_api_quizsession:6006
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:443
-      # - Kestrel:Certificates:Default:Path=/app/localhost_cert.pfx
-      # - Kestrel:Certificates:Default:Password=123456
       - AppSettings:CORS_ORIGINS=${GATEWAY_CORS}
       - QuizSettings:ShowAnswerAfterQuestionDelay=${SHOW_ANSWER_AFTER_QUESTION_DELAY}
       - QuizSettings:ForceNextRoundTimeout=${FORCE_NEXT_ROUND_TIMEOUT}
@@ -98,6 +96,11 @@ services:
       - QuizSettings:OverrideQuestionTimer:TypeAnswer=${OVERRIDE_QUESTION_TIMER_TYPEANSWER}
       - QuizSettings:OverrideQuestionTimer:MultipleChoice=${OVERRIDE_QUESTION_TIMER_MULTIPLECHOICE}
       - QuizSettings:OverrideQuestionTimer:TrueOrFalse=${OVERRIDE_QUESTION_TIMER_TRUEORFALSE}
+      - QuizSettings:OverridePointSystem:Easy=${OVERRIDE_POINT_EASY_ROUND}
+      - QuizSettings:OverridePointSystem:Average=${OVERRIDE_POINT_AVERAGE_ROUND}
+      - QuizSettings:OverridePointSystem:Difficult=${OVERRIDE_POINT_DIFFICULT_ROUND}
+      - QuizSettings:OverridePointSystem:Clincher=${OVERRIDE_POINT_CLINCHER_ROUND}
+      - QuizSettings:OverridePointSystem:GeneralPoints=${OVERRIDE_POINT_GENERAL}
     networks:
       - gateway
 
