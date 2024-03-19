@@ -16,6 +16,7 @@ using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Runtime.Intrinsics.X86;
 
 namespace QuizMaster.API.Gateway.Services
 {
@@ -414,7 +415,8 @@ namespace QuizMaster.API.Gateway.Services
                 Answer = answer,
                 QuestionId = questionData.question.Id,
                 ScreenshotLink = "",
-                Points = Point
+                Points = Point,
+                Score = correct ? Point:0
             });
             #endregion
             return "Answer submitted";

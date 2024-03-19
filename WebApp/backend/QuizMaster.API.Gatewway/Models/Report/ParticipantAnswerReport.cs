@@ -12,6 +12,7 @@ namespace QuizMaster.API.Gateway.Models.Report
         public string Answer { get; set; } = string.Empty;
         public int QuestionId { get; set; }
         public int Points { get; set; } = 0;
+        public int Score { get; set; } = 0;
         public string ScreenshotLink { get; set; } = string.Empty;
     }
 }
