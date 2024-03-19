@@ -72,6 +72,7 @@ namespace QuizMaster.API.Gateway.Services
             bool ForcedToExit = false;
             foreach (var Qset in quizSets)
             {
+                ForcedToExit = handler.IsRoomForcedToExit(roomId);
                 if (ForcedToExit) break;
                 // Get the Sets
                 var setRequest = new SetRequest() { Id = Qset.QSetId };
@@ -144,6 +145,7 @@ namespace QuizMaster.API.Gateway.Services
                         totalNumberOfQuestions = Setquestions.Count,
                         bufferTime = quizSettings.BufferTime,
                         points = quizSettings.OverridePointSystem,
+                        currentDifficulty = details.question.QDifficulty.QDifficultyDesc.ToLower(),
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
 
@@ -180,6 +182,9 @@ namespace QuizMaster.API.Gateway.Services
                     int limit = quizSettings.ForceNextRoundTimeout; // DEFAULT (300s) of 5mins, if not clicked `proceed` then continue
                     while (handler.GetPausedRoom(roomId) && limit > 0)
                     {
+                        ForcedToExit = handler.IsRoomForcedToExit(roomId);
+                        // force break loop if triggered 'end game'
+                        if (ForcedToExit) break;
                         // Adding delay so it doesn't kill the backend when looping infinitely
                         await Task.Delay(1000);
                         // Notify the admin while the game is paused

@@ -402,7 +402,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             var id = request.Id;
 
-            var question = _context.Questions.FirstOrDefault(x => x.Id == id);
+            var question = _context.Questions.Include(q => q.QDifficulty).FirstOrDefault(x => x.Id == id);
             //_ = _context.DetailTypes.ToList();
             //var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).Include(qD => qD.DetailTypes).ToList();
             var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).Include(qD => qD.DetailTypes).ToList();
@@ -417,6 +417,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 return await Task.FromResult(reply);
             }
+
+            // include the qDifficulty
+            question.QDifficulty = _context.Difficulties.Where(d => d.Id == question.QDifficultyId).First();
 
             reply.Code = 200;
             reply.Data = JsonConvert.SerializeObject(new QuestionsDTO { question=question, details=details});
