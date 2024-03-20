@@ -32,7 +32,7 @@ export default function Question() {
   const [isFinished, setIsFinished] = useState(false);
   const [leaderBoard, setLeaderBoard] = useState([]);
   const { connectionId } = useConnectionId();
-  const {answer} = useAnswer();
+  const { answer } = useAnswer();
   const { isAdmin } = useUserTokenData();
 
   const { push } = useRouter();
@@ -44,7 +44,7 @@ export default function Question() {
   const handleCloseLeaderboard = () => {
     setResetLeader();
     setIsShowLeader(false);
-  }
+  };
 
   useEffect(() => {
     if (leader.length > 0) {
@@ -63,7 +63,12 @@ export default function Question() {
   }, [question, leader, isStop]);
 
   if (isShowLeader && !isFinished) {
-    return <Interval leaderBoard={leaderBoard} handleCloseLeaderboard={handleCloseLeaderboard} />;
+    return (
+      <Interval
+        leaderBoard={leaderBoard}
+        handleCloseLeaderboard={handleCloseLeaderboard}
+      />
+    );
   } else if (isFinished) {
     return (
       <>
@@ -73,12 +78,19 @@ export default function Question() {
           <div></div> {/* Add an empty div to push the button to the right */}
           <Button
             onClick={() =>
-              goBackToLoby(params, connection, push, setResetLeader, setStart, isAdmin)
+              goBackToLoby(
+                params,
+                connection,
+                push,
+                setResetLeader,
+                setStart,
+                isAdmin
+              )
             }
             className={"w-auto bg-[#FF6633] p-2"}
             color="yellow"
           >
-            { isAdmin ? "Go Back to Dashboard":"Leave Room"}
+            {isAdmin ? "Go Back to Dashboard" : "Leave Room"}
           </Button>
         </div>
       </>

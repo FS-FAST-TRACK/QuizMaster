@@ -8,7 +8,7 @@ import ImageModal from "./modal";
 import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
-import { useAnswer } from "@/app/util/store";
+import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
 import Participants from "../../components/participants";
 
@@ -17,6 +17,7 @@ export default React.forwardRef(TrueOrFalse);
 function TrueOrFalse({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
   const { answer: ANSWER } = useAnswer();
+  const { metadata } = useMetaData();
 
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -28,6 +29,8 @@ function TrueOrFalse({ question, connectionId }, ref) {
     type: "image/jpeg",
     quality: 1.0,
   });
+  /* Shows/hides question details during buffer time */
+  const showDetails = question?.remainingTime <= question?.question?.qTime;
 
   const submitScreenshot = (id, connectionId) =>
     takeScreenShot(ref.current).then((image) =>
@@ -87,117 +90,125 @@ function TrueOrFalse({ question, connectionId }, ref) {
     <div className="w-full flex flex-col  h-full bg-green-600 p-5 ">
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center flex-grow justify-center ">
-        <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
+        <div className="mb-2 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
           True or False
+        </div>
+        <div className="mb-4">
+          <p className="text-sm text-white">{`${
+            metadata?.currentDifficulty
+          } • ${metadata?.points[metadata?.currentDifficulty] || 0} points`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
-      {isAdmin ? (
-        <div className="w-full place-content-center">
-          {ANSWER && (
-            <div className="py-8 px-[20%]">
-              <p className="text-white">Correct answer is: </p>
-              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
-                <p className="px-4">{ANSWER}</p>
-                <CheckIcon width={20} height={20} />
-              </div>
-            </div>
-          )}
-          <div
-            className={`{w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
-              ANSWER ? "opacity-50" : ""
-            }`}
-          >
-            <div
-              className={` ${
-                pick === "true"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("true");
-              }}
-            >
-              True
-            </div>
-            <div
-              className={` ${
-                pick === "false"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("false");
-              }}
-            >
-              False
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="w-full place-content-center">
-          {ANSWER && (
-            <div className="py-8 px-[20%] col-span-2">
-              <p className="text-white">Correct answer is: </p>
-              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
-                <p className="px-4">{ANSWER}</p>
-                <CheckIcon width={20} height={20} />
-              </div>
-            </div>
-          )}
-          <div
-            className={`{w-screen grid grid-cols-2 place-content-center gap-3 mt-8 ${
-              ANSWER ? "opacity-50" : ""
-            }`}
-          >
-            <div
-              className={` ${
-                pick === "true"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("true");
-              }}
-            >
-              True
-            </div>
-            <div
-              className={` ${
-                pick === "false"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("false");
-              }}
-            >
-              False
-            </div>
-          </div>
-        </div>
-      )}
 
-      {!isAdmin && (
+      {isAdmin
+        ? showDetails && (
+            <div className="w-full place-content-center">
+              {ANSWER && (
+                <div className="py-8 px-[20%]">
+                  <p className="text-white">Correct answer is: </p>
+                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
+                    <p className="px-4">{ANSWER}</p>
+                    <CheckIcon width={20} height={20} />
+                  </div>
+                </div>
+              )}
+              <div
+                className={`{w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
+                  ANSWER ? "opacity-50" : ""
+                }`}
+              >
+                <div
+                  className={` ${
+                    pick === "true"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("true");
+                  }}
+                >
+                  True
+                </div>
+                <div
+                  className={` ${
+                    pick === "false"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("false");
+                  }}
+                >
+                  False
+                </div>
+              </div>
+            </div>
+          )
+        : showDetails && (
+            <div className="w-full place-content-center">
+              {ANSWER && (
+                <div className="py-8 px-[20%] col-span-2">
+                  <p className="text-white">Correct answer is: </p>
+                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
+                    <p className="px-4">{ANSWER}</p>
+                    <CheckIcon width={20} height={20} />
+                  </div>
+                </div>
+              )}
+              <div
+                className={`{w-screen grid grid-cols-2 place-content-center gap-3 mt-8 ${
+                  ANSWER ? "opacity-50" : ""
+                }`}
+              >
+                <div
+                  className={` ${
+                    pick === "true"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("true");
+                  }}
+                >
+                  True
+                </div>
+                <div
+                  className={` ${
+                    pick === "false"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("false");
+                  }}
+                >
+                  False
+                </div>
+              </div>
+            </div>
+          )}
+
+      {!isAdmin && showDetails && (
         <div
           className={`w-full justify-center flex mt-8 ${
             ANSWER ? "opacity-50" : ""

@@ -198,6 +198,8 @@ export interface ParticipantAnswer {
     answer: string;
     screenshotLink: string;
     questionId: number;
+    score: number;
+    points: number;
 }
 
 function ParticipantAnswerItem({
@@ -322,6 +324,12 @@ function ParticipantAnswerItem({
                     <span className="text-gray-400 text-xs font-light">•</span>
                     <p className="text-gray-400 text-xs">
                         {qCategory?.qCategoryDesc || loadingSkeleton("h-4")}
+                    </p>
+                    <span className="text-gray-400 text-xs font-light">•</span>
+                    <p className="text-gray-400 text-xs">
+                        {participantAnswer.score +
+                            ` out of ${participantAnswer.points} point(s)` ||
+                            loadingSkeleton("h-4")}
                     </p>
                 </div>
             </div>

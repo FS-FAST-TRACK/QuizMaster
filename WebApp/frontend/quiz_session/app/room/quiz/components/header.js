@@ -21,6 +21,8 @@ export default function Header() {
   const [isMute, setIsMute] = useState();
   const [collapsedVolume, setCollapsedVolumne] = useState(true);
   const [volume, setVolume] = useState(100);
+  /* Shows/hides question details during buffer time */
+  const showDetails = question?.remainingTime <= question?.question?.qTime;
 
   const [play, { stop }] = useSound(
     "/audio/quiz_master-ten-seconds-count-down.mp3",
@@ -63,13 +65,15 @@ export default function Header() {
               <div className="text-base font-bold">
                 Question {metadata?.currentQuestionIndex}{" "}
               </div>
-              <div>&nbsp; out of {metadata?.totalNumberOfQuestions}</div>
+              <div>&nbsp; out of {metadata?.totalNumberOfQuestions} </div>
             </div>
           </div>
         </div>
         <div className="flex flex-1 justify-end">
           <div
-            className={`flex flex-col rounded-md px-4 py-2 w-28 justify-center items-center ${
+            className={`${
+              showDetails ? `flex` : `hidden`
+            } flex-col rounded-md px-4 py-2 w-28 justify-center items-center ${
               time > SFX_TRIGGER_SECONDS ? " bg-green-700/50" : "bg-red-500"
             }`}
           >

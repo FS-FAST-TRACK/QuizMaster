@@ -28,6 +28,8 @@ export interface ParticipantAnswerReport {
     answer: string;
     questionId: number;
     screenshotLink: string;
+    score: number;
+    points: number;
 }
 
 export default function SessionReports() {
