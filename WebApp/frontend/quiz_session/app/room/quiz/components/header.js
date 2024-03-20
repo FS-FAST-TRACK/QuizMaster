@@ -21,6 +21,8 @@ export default function Header() {
   const [isMute, setIsMute] = useState();
   const [collapsedVolume, setCollapsedVolumne] = useState(true);
   const [volume, setVolume] = useState(100);
+  /* Shows/hides question details during buffer time */
+  const showDetails = question?.remainingTime <= question?.question?.qTime;
 
   const [play, { stop }] = useSound(
     "/audio/quiz_master-ten-seconds-count-down.mp3",

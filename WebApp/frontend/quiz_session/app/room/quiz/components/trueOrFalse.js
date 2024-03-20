@@ -28,6 +28,8 @@ function TrueOrFalse({ question, connectionId }, ref) {
     type: "image/jpeg",
     quality: 1.0,
   });
+  /* Shows/hides question details during buffer time */
+  const showDetails = question?.remainingTime <= question?.question?.qTime;
 
   const submitScreenshot = (id, connectionId) =>
     takeScreenShot(ref.current).then((image) =>
@@ -95,109 +97,112 @@ function TrueOrFalse({ question, connectionId }, ref) {
         </div>
         {hasImage && <QuestionImage imageUrl={imageUrl} open={open} />}
       </div>
-      {isAdmin ? (
-        <div className="w-full place-content-center">
-          {ANSWER && (
-            <div className="py-8 px-[20%]">
-              <p className="text-white">Correct answer is: </p>
-              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
-                <p className="px-4">{ANSWER}</p>
-                <CheckIcon width={20} height={20} />
-              </div>
-            </div>
-          )}
-          <div
-            className={`{w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
-              ANSWER ? "opacity-50" : ""
-            }`}
-          >
-            <div
-              className={` ${
-                pick === "true"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("true");
-              }}
-            >
-              True
-            </div>
-            <div
-              className={` ${
-                pick === "false"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("false");
-              }}
-            >
-              False
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="w-full place-content-center">
-          {ANSWER && (
-            <div className="py-8 px-[20%] col-span-2">
-              <p className="text-white">Correct answer is: </p>
-              <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
-                <p className="px-4">{ANSWER}</p>
-                <CheckIcon width={20} height={20} />
-              </div>
-            </div>
-          )}
-          <div
-            className={`{w-screen grid grid-cols-2 place-content-center gap-3 mt-8 ${
-              ANSWER ? "opacity-50" : ""
-            }`}
-          >
-            <div
-              className={` ${
-                pick === "true"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("true");
-              }}
-            >
-              True
-            </div>
-            <div
-              className={` ${
-                pick === "false"
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (isAdmin) return;
-                if  (isSubmitted) return;
-                handlePick("false");
-              }}
-            >
-              False
-            </div>
-          </div>
-        </div>
-      )}
 
-      {!isAdmin && (
+      {isAdmin
+        ? showDetails && (
+            <div className="w-full place-content-center">
+              {ANSWER && (
+                <div className="py-8 px-[20%]">
+                  <p className="text-white">Correct answer is: </p>
+                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
+                    <p className="px-4">{ANSWER}</p>
+                    <CheckIcon width={20} height={20} />
+                  </div>
+                </div>
+              )}
+              <div
+                className={`{w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
+                  ANSWER ? "opacity-50" : ""
+                }`}
+              >
+                <div
+                  className={` ${
+                    pick === "true"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("true");
+                  }}
+                >
+                  True
+                </div>
+                <div
+                  className={` ${
+                    pick === "false"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("false");
+                  }}
+                >
+                  False
+                </div>
+              </div>
+            </div>
+          )
+        : showDetails && (
+            <div className="w-full place-content-center">
+              {ANSWER && (
+                <div className="py-8 px-[20%] col-span-2">
+                  <p className="text-white">Correct answer is: </p>
+                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
+                    <p className="px-4">{ANSWER}</p>
+                    <CheckIcon width={20} height={20} />
+                  </div>
+                </div>
+              )}
+              <div
+                className={`{w-screen grid grid-cols-2 place-content-center gap-3 mt-8 ${
+                  ANSWER ? "opacity-50" : ""
+                }`}
+              >
+                <div
+                  className={` ${
+                    pick === "true"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("true");
+                  }}
+                >
+                  True
+                </div>
+                <div
+                  className={` ${
+                    pick === "false"
+                      ? "bg-dark_green text-white"
+                      : "bg-white text-dark_green"
+                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isAdmin) return;
+                    if (isSubmitted) return;
+                    handlePick("false");
+                  }}
+                >
+                  False
+                </div>
+              </div>
+            </div>
+          )}
+
+      {!isAdmin && showDetails && (
         <div
           className={`w-full justify-center flex mt-8 ${
             ANSWER ? "opacity-50" : ""
