@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, CheckIcon } from "@mantine/core";
+import { Button, CheckIcon, CloseIcon } from "@mantine/core";
 import { downloadImage, submitAnswer, uploadScreenshot } from "@/app/util/api";
 import { useDisclosure } from "@mantine/hooks";
 import ImageModal from "./modal";
@@ -10,6 +10,7 @@ import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
 
 export default React.forwardRef(MulitpleChoice);
 
@@ -140,7 +141,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
                 pick === choices.qDetailDesc
                   ? "bg-dark_green text-white"
                   : "bg-white text-dark_green"
-              } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+              } flex justify-center items-center space-x-3 text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
                 isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
               }`}
               key={index}
@@ -150,7 +151,17 @@ function MulitpleChoice({ question, connectionId }, ref) {
                 handlePick(choices.qDetailDesc);
               }}
             >
-              {choices.qDetailDesc}
+              <span>{choices.qDetailDesc}</span>
+              {answer && pick == answer && pick == choices.qDetailDesc ? (
+                <CheckIcon width={20} height={20} color="#90EE90" />
+              ) : (
+                answer &&
+                pick == choices.qDetailDesc && (
+                  <span className="w-[20px] h-[20px]">
+                    <IconX width={24} height={24} color="red" stroke={2} />
+                  </span>
+                )
+              )}
             </div>
           ))}
         </div>
