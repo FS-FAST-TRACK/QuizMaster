@@ -101,9 +101,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
                 catch (Exception ex)
                 {
-                    reply.Code = 500;
-                    reply.Message = ex.Message;
-                    return await Task.FromResult(reply);
+                    //reply.Code = 500;
+                    //reply.Message = ex.Message;
+                    //return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
@@ -249,9 +249,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
                 catch (Exception ex)
                 {
-                    reply.Code = 500;
-                    reply.Message = ex.Message;
-                    return await Task.FromResult(reply);
+                    //reply.Code = 500;
+                    //reply.Message = ex.Message;
+                    //return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
@@ -367,9 +367,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
                 catch (Exception ex)
                 {
-                    reply.Code = 500;
-                    reply.Message = ex.Message;
-                    return await Task.FromResult(reply);
+                    //reply.Code = 500;
+                    //reply.Message = ex.Message;
+                    //return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
