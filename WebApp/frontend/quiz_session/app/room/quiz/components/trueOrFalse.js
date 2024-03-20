@@ -29,6 +29,9 @@ function TrueOrFalse({ question, connectionId }, ref) {
     type: "image/jpeg",
     quality: 1.0,
   });
+
+  console.log(metadata);
+
   /* Shows/hides question details during buffer time */
   const showDetails = question?.remainingTime <= question?.question?.qTime;
 
@@ -96,7 +99,9 @@ function TrueOrFalse({ question, connectionId }, ref) {
         <div className="mb-4">
           <p className="text-sm text-white">{`${
             metadata?.currentDifficulty
-          } • ${metadata?.points[metadata?.currentDifficulty] || 0} points`}</p>
+          } • ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 0
+          } points`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}

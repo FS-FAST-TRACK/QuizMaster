@@ -327,9 +327,7 @@ function ParticipantAnswerItem({
                     </p>
                     <span className="text-gray-400 text-xs font-light">•</span>
                     <p className="text-gray-400 text-xs">
-                        {participantAnswer.score +
-                            ` out of ${participantAnswer.points} point(s)` ||
-                            loadingSkeleton("h-4")}
+                        {` ${participantAnswer.score} point(s)`}
                     </p>
                 </div>
             </div>

@@ -94,7 +94,7 @@ export function IndividualParticipantAnswersReport({
                                     styles.tableHeader,
                                 ]}
                             >
-                                Points
+                                Score
                             </Text>
                         </View>
                         {participantAnswers.map((answer, index) => {
@@ -158,7 +158,7 @@ function ParticipantAnswersTableRow({
 
             <Text style={styles.correctAnswer}>{correctAnswer}</Text>
             <Text style={styles.correctAnswer}>
-                {participantAnswer.points} {" point(s)"}
+                {participantAnswer.score} {" point(s)"}
             </Text>
         </View>
     );

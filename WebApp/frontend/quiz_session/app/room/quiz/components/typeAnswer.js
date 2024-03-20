@@ -96,7 +96,9 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
         <div className="mb-4">
           <p className="text-sm text-white">{`${
             metadata?.currentDifficulty
-          } • ${metadata?.points[metadata?.currentDifficulty] || 0} points`}</p>
+          } • ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 0
+          } points`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}
@@ -140,7 +142,7 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
                   </div>
                 </div>
               )}
-              {!isAdmin && (
+              {!isAdmin && showDetails && (
                 <div className="flex flex-row w-1/2 space-x-2">
                   <div className="w-3/4">
                     <Input

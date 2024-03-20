@@ -15,7 +15,8 @@ export default React.forwardRef(MulitpleChoice);
 
 function MulitpleChoice({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
-
+  const { metadata } = useMetaData();
+  console.log(metadata);
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [imageUrl, setImageUrl] = useState();
@@ -90,8 +91,15 @@ function MulitpleChoice({ question, connectionId }, ref) {
     <div className="w-full flex flex-col p-5 flex-grow mt-8 bg-green-600">
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center flex-grow justify-center">
-        <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
+        <div className="mb-2 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
           Multiple Choice
+        </div>
+        <div className="mb-4">
+          <p className="text-sm text-white">{`${
+            metadata?.currentDifficulty
+          } • ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 0
+          } points`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl h-52 items-center select-none">
           {question?.question.qStatement}
@@ -155,7 +163,7 @@ function MulitpleChoice({ question, connectionId }, ref) {
           ))}
         </div>
       )}
-      {!isAdmin && (
+      {!isAdmin && showDetails && (
         <div
           className={`w-full justify-center flex mt-8 ${
             answer ? "opacity-50" : ""
