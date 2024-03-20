@@ -8,6 +8,11 @@ import { timeFormater } from "@/app/auth/util/handlers";
 import useSound from "use-sound";
 import { IconVolume, IconVolumeOff } from "@tabler/icons-react";
 import { Slider } from "@mantine/core";
+import ParticipantName from "./ParticipantName";
+
+const SFX_TRIGGER_SECONDS =
+  process.env.QUIZMASTER_TRIGGER_SFX_SECONDS ??
+  process.env.NEXT_PUBLIC_QUIZMASTER_TRIGGER_SFX_SECONDS;
 
 export default function Header() {
   const { question } = useQuestion();
@@ -29,7 +34,7 @@ export default function Header() {
   }, [question]);
 
   useEffect(() => {
-    if (time === 10) {
+    if (time === parseInt(SFX_TRIGGER_SECONDS)) {
       play();
     }
     if (time === 0) {
@@ -66,16 +71,14 @@ export default function Header() {
         </div>
         <div className="flex flex-1 justify-end">
           <div
-            className={`${
-              showDetails ? `flex` : `hidden`
-            } flex-col rounded-md px-4 py-2 w-28 justify-center items-center ${
-              time > 10 ? " bg-green-700/50" : "bg-red-500"
+            className={`flex flex-col rounded-md px-4 py-2 w-28 justify-center items-center ${
+              time > SFX_TRIGGER_SECONDS ? " bg-green-700/50" : "bg-red-500"
             }`}
           >
             <div className="text-white text-sm">Time left</div>
             <div
               className={`text-2xl font-bold text-white ${
-                time <= 5 && time > 0 ? "animate-ping" : ""
+                time <= SFX_TRIGGER_SECONDS && time > 0 ? "animate-ping" : ""
               }`}
             >
               {timeFormater(time)}
@@ -83,6 +86,7 @@ export default function Header() {
           </div>
         </div>
       </div>
+      <ParticipantName />
       <div
         className={`p-4 opacity-50 hover:opacity-100 bg-green-700/50 hover:bg-green-700 flex justify-center items-center rounded-full cursor-pointer absolute mt-3 right-5 gap-4`}
       >

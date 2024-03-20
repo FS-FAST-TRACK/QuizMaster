@@ -18,7 +18,6 @@ export function AnimateSlideInFromBottom({
   delay = "500",
   className = "",
 }) {
-  console.log("DELAYYYY:===============", delay);
   const [isShowing, setIsShowing] = useState(false);
 
   useEffect(() => {

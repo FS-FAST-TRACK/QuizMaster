@@ -37,7 +37,7 @@ export default function Start() {
       <Button
         variant="filled"
         color="yellow"
-        className="shadow-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-yellow-500 duration-200"
+        className="shadow-lg transition ease-in-out delay-150 bg-yellow-500 hover:-translate-y-1 hover:scale-110 hover:bg-yellow-500 duration-200"
         onClick={() => startQuiz(connection, params)}
         style={{ visibility: isAdmin ? "visible" : "hidden" }}
         size="lg"

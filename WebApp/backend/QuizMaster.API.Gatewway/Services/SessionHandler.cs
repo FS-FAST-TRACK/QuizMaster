@@ -1,18 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Models.Report;
 using QuizMaster.API.Gateway.Services.ReportService;
 using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Runtime.Intrinsics.X86;
 
 namespace QuizMaster.API.Gateway.Services
 {
@@ -32,8 +36,9 @@ namespace QuizMaster.API.Gateway.Services
         private readonly ReportServiceHandler ReportHandler;
         private Dictionary<int, bool> RoomNextSetPaused;
         private List<int> RoomForceExitIds;
+        private QuizSettings QuizSettings;
 
-        public SessionHandler(ReportServiceHandler reportServiceHandler)
+        public SessionHandler(ReportServiceHandler reportServiceHandler, IOptions<QuizSettings> options)
         {
             connectionGroupPair = new();
             participantLinkedConnectionId = new();
@@ -48,6 +53,7 @@ namespace QuizMaster.API.Gateway.Services
             RoomNextSetPaused = new();
             ReportHandler = reportServiceHandler;
             RoomForceExitIds = new();
+            QuizSettings = options.Value;
         }
 
         public string GenerateSessionId(string roomPin)
@@ -374,6 +380,21 @@ namespace QuizMaster.API.Gateway.Services
                 }
             }
 
+            // Get the question difficulty description
+            int Point = QuizSettings.OverridePointSystem.GeneralPoints;
+            QuestionDifficulty diff = questionData.question.QDifficulty;
+            if(diff != null || diff != default)
+            {
+                if (diff.QDifficultyDesc.ToLower().Contains("easy"))
+                    Point = QuizSettings.OverridePointSystem.Easy;
+                else if (diff.QDifficultyDesc.ToLower().Contains("average"))
+                    Point = QuizSettings.OverridePointSystem.Average;
+                else if (diff.QDifficultyDesc.ToLower().Contains("difficult"))
+                    Point = QuizSettings.OverridePointSystem.Difficult;
+                else if (diff.QDifficultyDesc.ToLower().Contains("clincher"))
+                    Point = QuizSettings.OverridePointSystem.Clincher;
+            }
+
             QuizParticipant? participantData;
             // get the participant data
             participantData = GetLinkedParticipantInConnectionId(connectionId);
@@ -382,7 +403,7 @@ namespace QuizMaster.API.Gateway.Services
             if (correct)
             {
                 // increment score by 1
-                participantData.Score += 1;
+                participantData.Score += Point;
             }
             // Hold Submission of Answer
             HoldClientAnswerSubmission(connectionId);
@@ -393,7 +414,9 @@ namespace QuizMaster.API.Gateway.Services
                 ParticipantName = participantData.QParticipantDesc,
                 Answer = answer,
                 QuestionId = questionData.question.Id,
-                ScreenshotLink = ""
+                ScreenshotLink = "",
+                Points = Point,
+                Score = correct ? Point:0
             });
             #endregion
             return "Answer submitted";

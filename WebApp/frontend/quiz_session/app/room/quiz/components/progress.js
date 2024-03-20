@@ -5,6 +5,10 @@ import { Progress } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { useConnection, useQuestion } from "@/app/util/store";
 
+const SFX_TRIGGER_SECONDS =
+  process.env.QUIZMASTER_TRIGGER_SFX_SECONDS ??
+  process.env.NEXT_PUBLIC_QUIZMASTER_TRIGGER_SFX_SECONDS;
+
 export default function TimeProgress() {
   const { connection } = useConnection();
   const { question } = useQuestion();
@@ -20,7 +24,7 @@ export default function TimeProgress() {
   return (
     <Progress
       value={time}
-      color={question?.remainingTime > 10 ? "white" : "red"}
+      color={question?.remainingTime > SFX_TRIGGER_SECONDS ? "white" : "red"}
       bg={"green"}
       transitionDuration={1000}
     />

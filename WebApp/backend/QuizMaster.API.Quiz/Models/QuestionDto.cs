@@ -16,8 +16,9 @@ namespace QuizMaster.API.Quiz.Models
 		public int QTime { get; set; }
 
 		public int QDifficultyId { get; set; }
+		public QuestionDifficulty QDifficulty { get; set; } = default!;
 
-		public int QCategoryId { get; set; }
+        public int QCategoryId { get; set; }
 
 		public int QTypeId { get; set; }
 		public IEnumerable<QuestionDetailDto> Details { get; set; }

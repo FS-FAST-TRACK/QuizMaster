@@ -9,6 +9,9 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY,
     QUIZMASTER_ADMIN:
       process.env.QUIZMASTER_ADMIN ?? process.env.NEXT_PUBLIC_QUIZMASTER_ADMIN,
+    QUIZMASTER_TRIGGER_SFX_SECONDS:
+      process.env.QUIZMASTER_TRIGGER_SFX_SECONDS ??
+      process.env.NEXT_PUBLIC_QUIZMASTER_TRIGGER_SFX_SECONDS,
   },
   eslint: {
     ignoreDuringBuilds: ["/app", "/components", "/.next"],
@@ -19,7 +22,7 @@ const nextConfig = {
   images: {
     domains: ["localhost"],
   },
-  output: "standalone"
+  output: "standalone",
 };
 
 module.exports = nextConfig;
