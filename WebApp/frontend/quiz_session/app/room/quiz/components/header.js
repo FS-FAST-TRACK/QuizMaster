@@ -9,6 +9,8 @@ import useSound from "use-sound";
 import { IconVolume, IconVolumeOff } from "@tabler/icons-react";
 import { Slider } from "@mantine/core";
 import ParticipantName from "./ParticipantName";
+import { useContext } from "react";
+import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
 
 const SFX_TRIGGER_SECONDS =
   process.env.QUIZMASTER_TRIGGER_SFX_SECONDS ??
@@ -18,9 +20,9 @@ export default function Header() {
   const { question } = useQuestion();
   const { metadata } = useMetaData();
   const [time, setTime] = useState();
-  const [isMute, setIsMute] = useState();
   const [collapsedVolume, setCollapsedVolumne] = useState(true);
-  const [volume, setVolume] = useState(100);
+  const { volume, setVolume, isMute } = useContext(SoundEffectsContext);
+
   /* Shows/hides question details during buffer time */
   const showDetails = question?.remainingTime <= question?.question?.qTime;
 
@@ -41,14 +43,6 @@ export default function Header() {
       stop();
     }
   }, [time]);
-
-  useEffect(() => {
-    if (volume === 0) {
-      setIsMute(true);
-    } else {
-      setIsMute(false);
-    }
-  }, [volume]);
 
   return (
     <div className="px-5 pt-2 w-full bg-green-600 ">

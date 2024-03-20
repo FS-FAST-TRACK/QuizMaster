@@ -11,6 +11,10 @@ import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
+import { useAnswerSFX } from "../../hooks/useAnswerSFX";
+import { isCorrectAnswer } from "@/app/util/questionAnswerUtil";
+import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
+import { useContext } from "react";
 
 export default React.forwardRef(TypeAnswer);
 
@@ -29,6 +33,12 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
     type: "image/jpeg",
     quality: 1.0,
   });
+
+  const { volume, isMute } = useContext(SoundEffectsContext);
+  const { playCorrect, playIncorrect } = useAnswerSFX(
+    isMute ? 0 : volume / 100
+  );
+
   /* Shows/hides question details during buffer time */
   const showDetails = question?.remainingTime <= question?.question?.qTime;
 
@@ -73,6 +83,13 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
         setAnswer();
       }, 10_000);
       handleSubmit();
+    }
+    if (ANSWER && !isAdmin) {
+      if (isCorrectAnswer(answer, ANSWER + "")) {
+        playCorrect();
+      } else {
+        playIncorrect();
+      }
     }
   }, [ANSWER]);
 

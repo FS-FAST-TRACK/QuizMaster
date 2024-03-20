@@ -11,6 +11,10 @@ import { useScreenshot } from "use-react-screenshot";
 import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
 import Participants from "../../components/participants";
+import { useContext } from "react";
+import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
+import { useAnswerSFX } from "../../hooks/useAnswerSFX";
+import { isCorrectAnswer } from "@/app/util/questionAnswerUtil";
 
 export default React.forwardRef(TrueOrFalse);
 
@@ -30,7 +34,10 @@ function TrueOrFalse({ question, connectionId }, ref) {
     quality: 1.0,
   });
 
-  console.log(metadata);
+  const { volume, isMute } = useContext(SoundEffectsContext);
+  const { playCorrect, playIncorrect } = useAnswerSFX(
+    isMute ? 0 : volume / 100
+  );
 
   /* Shows/hides question details during buffer time */
   const showDetails = question?.remainingTime <= question?.question?.qTime;
@@ -63,6 +70,13 @@ function TrueOrFalse({ question, connectionId }, ref) {
       if (!pick) {
         notifications.show({ title: "You have not selected any choices" });
         handleSubmit();
+      }
+    }
+    if (ANSWER && !isAdmin) {
+      if (isCorrectAnswer(pick, ANSWER + "")) {
+        playCorrect();
+      } else {
+        playIncorrect();
       }
     }
   }, [ANSWER]);

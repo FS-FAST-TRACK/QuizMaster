@@ -10,13 +10,16 @@ import useUserTokenData from "@/app/util/useUserTokenData";
 import { useScreenshot } from "use-react-screenshot";
 import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
+import { useContext } from "react";
+import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
+import { useAnswerSFX } from "../../hooks/useAnswerSFX";
+import { isCorrectAnswer } from "@/app/util/questionAnswerUtil";
 
 export default React.forwardRef(MulitpleChoice);
 
 function MulitpleChoice({ question, connectionId }, ref) {
   const { isAdmin } = useUserTokenData();
   const { metadata } = useMetaData();
-  console.log(metadata);
   const [pick, setPick] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [imageUrl, setImageUrl] = useState();
@@ -32,6 +35,11 @@ function MulitpleChoice({ question, connectionId }, ref) {
     type: "image/jpeg",
     quality: 1.0,
   });
+
+  const { volume, isMute } = useContext(SoundEffectsContext);
+  const { playCorrect, playIncorrect } = useAnswerSFX(
+    isMute ? 0 : volume / 100
+  );
 
   const submitScreenshot = (id, connectionId) =>
     takeScreenShot(ref.current).then((image) =>
@@ -62,6 +70,13 @@ function MulitpleChoice({ question, connectionId }, ref) {
         notifications.show({ title: "You have not selected any choices" });
       }
       handleSubmit();
+    }
+    if (answer && !isAdmin) {
+      if (isCorrectAnswer(pick, answer + "")) {
+        playCorrect();
+      } else {
+        playIncorrect();
+      }
     }
   }, [answer]);
 
