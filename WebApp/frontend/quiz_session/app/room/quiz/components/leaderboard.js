@@ -37,7 +37,7 @@ export default function Leaderboard({ leaderBoard }) {
       <div
         className={` ${getRankColorClass(
           isFirst ? 1 : isSecond ? 2 : isThird ? 3 : 0
-        )} flex flex-row p-2 rounded-lg`}
+        )} flex flex-row p-2 rounded-md`}
       >
         <div className=" flex-grow font-bold">
           <span>{isFirst ? "🏆" : isSecond ? "🥈" : isThird ? "🥉" : ""}</span>

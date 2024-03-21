@@ -15,6 +15,8 @@ import { useContext } from "react";
 import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
 import { useAnswerSFX } from "../../hooks/useAnswerSFX";
 import { isCorrectAnswer } from "@/app/util/questionAnswerUtil";
+import { AnimateSlideInFromBottom } from "./AnimateSlideInFromBottom";
+import { IconX } from "@tabler/icons-react";
 
 export default React.forwardRef(TrueOrFalse);
 
@@ -114,8 +116,12 @@ function TrueOrFalse({ question, connectionId }, ref) {
           <p className="text-sm text-white">{`${
             metadata?.currentDifficulty
           } • ${
-            metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 0
-          } points`}</p>
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 1
+          } ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] > 1
+              ? "points"
+              : "point"
+          }`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}
@@ -127,52 +133,56 @@ function TrueOrFalse({ question, connectionId }, ref) {
         ? showDetails && (
             <div className="w-full place-content-center">
               {ANSWER && (
-                <div className="py-8 px-[20%]">
-                  <p className="text-white">Correct answer is: </p>
-                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
-                    <p className="px-4">{ANSWER}</p>
-                    <CheckIcon width={20} height={20} />
+                <AnimateSlideInFromBottom>
+                  <div className="py-8 px-[20%]">
+                    <p className="text-white">Correct answer is: </p>
+                    <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg">
+                      <p className="px-4">{ANSWER}</p>
+                      <CheckIcon width={20} height={20} />
+                    </div>
+                  </div>
+                </AnimateSlideInFromBottom>
+              )}
+              <AnimateSlideInFromBottom>
+                <div
+                  className={`{w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
+                    ANSWER && "opacity-50"
+                  }`}
+                >
+                  <div
+                    className={` ${
+                      pick === "true"
+                        ? "bg-dark_green text-white"
+                        : "bg-white text-dark_green"
+                    } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                      isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                    } `}
+                    onClick={() => {
+                      if (isAdmin) return;
+                      if (isSubmitted) return;
+                      handlePick("true");
+                    }}
+                  >
+                    True
+                  </div>
+                  <div
+                    className={` ${
+                      pick === "false"
+                        ? "bg-dark_green text-white"
+                        : "bg-white text-dark_green"
+                    } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                      isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                    }`}
+                    onClick={() => {
+                      if (isAdmin) return;
+                      if (isSubmitted) return;
+                      handlePick("false");
+                    }}
+                  >
+                    False
                   </div>
                 </div>
-              )}
-              <div
-                className={`{w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
-                  ANSWER ? "opacity-50" : ""
-                }`}
-              >
-                <div
-                  className={` ${
-                    pick === "true"
-                      ? "bg-dark_green text-white"
-                      : "bg-white text-dark_green"
-                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-                  }`}
-                  onClick={() => {
-                    if (isAdmin) return;
-                    if (isSubmitted) return;
-                    handlePick("true");
-                  }}
-                >
-                  True
-                </div>
-                <div
-                  className={` ${
-                    pick === "false"
-                      ? "bg-dark_green text-white"
-                      : "bg-white text-dark_green"
-                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-                  }`}
-                  onClick={() => {
-                    if (isAdmin) return;
-                    if (isSubmitted) return;
-                    handlePick("false");
-                  }}
-                >
-                  False
-                </div>
-              </div>
+              </AnimateSlideInFromBottom>
             </div>
           )
         : showDetails && (
@@ -186,68 +196,135 @@ function TrueOrFalse({ question, connectionId }, ref) {
                   </div>
                 </div>
               )}
-              <div
-                className={`{w-screen grid grid-cols-2 place-content-center gap-3 mt-8 ${
-                  ANSWER ? "opacity-50" : ""
-                }`}
-              >
+              <AnimateSlideInFromBottom>
                 <div
-                  className={` ${
-                    pick === "true"
-                      ? "bg-dark_green text-white"
-                      : "bg-white text-dark_green"
-                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-                  }`}
-                  onClick={() => {
-                    if (isAdmin) return;
-                    if (isSubmitted) return;
-                    handlePick("true");
-                  }}
+                  className={`{w-screen grid grid-cols-2 place-content-center gap-3 mt-8`}
                 >
-                  True
+                  <div
+                    className={` ${
+                      pick === "true"
+                        ? "bg-dark_green text-white"
+                        : "bg-white text-dark_green"
+                    } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                      isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                    } ${ANSWER && pick != "true" ? "opacity-50" : ""}  ${
+                      ANSWER &&
+                      pick === "true" &&
+                      isCorrectAnswer(pick, ANSWER + "")
+                        ? "bg-white !border-4 !border-dark_green !text-dark_green !font-semibold"
+                        : ANSWER &&
+                          pick === "true" &&
+                          "bg-white !border-4 !border-red-500 !text-red-500 !font-semibold"
+                    }`}
+                    onClick={() => {
+                      if (isAdmin) return;
+                      if (isSubmitted) return;
+                      handlePick("true");
+                    }}
+                  >
+                    <span>True</span>
+                    {ANSWER &&
+                    pick === "true" &&
+                    isCorrectAnswer(pick, ANSWER + "") ? (
+                      <span className="ml-2">
+                        <CheckIcon
+                          width={20}
+                          height={20}
+                          color="rgb(21 128 61)"
+                        />
+                      </span>
+                    ) : (
+                      ANSWER &&
+                      pick === "true" && (
+                        <span className="ml-2">
+                          <IconX
+                            width={24}
+                            height={24}
+                            color="red"
+                            stroke={3}
+                          />
+                        </span>
+                      )
+                    )}
+                  </div>
+                  <div
+                    className={` ${
+                      pick === "false"
+                        ? "bg-dark_green text-white"
+                        : "bg-white text-dark_green"
+                    } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                      isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                    } ${ANSWER && pick != "false" ? "opacity-50" : ""}
+                     ${
+                       ANSWER &&
+                       pick === "false" &&
+                       isCorrectAnswer(pick, ANSWER + "")
+                         ? "bg-white !border-2 !border-green-700 !text-green-700 !font-semibold"
+                         : ANSWER &&
+                           pick === "false" &&
+                           "bg-white !border-2 !border-red-500 !text-red-500 !font-semibold"
+                     }`}
+                    onClick={() => {
+                      if (isAdmin) return;
+                      if (isSubmitted) return;
+                      handlePick("false");
+                    }}
+                  >
+                    <span>False</span>
+                    {ANSWER &&
+                    pick === "false" &&
+                    isCorrectAnswer(pick, ANSWER + "") ? (
+                      <span className="ml-2">
+                        <CheckIcon
+                          width={20}
+                          height={20}
+                          color="rgb(21 128 61)"
+                        />
+                      </span>
+                    ) : (
+                      ANSWER &&
+                      pick === "false" && (
+                        <span className="ml-2">
+                          <IconX
+                            width={24}
+                            height={24}
+                            color="red"
+                            stroke={3}
+                          />
+                        </span>
+                      )
+                    )}
+                  </div>
                 </div>
-                <div
-                  className={` ${
-                    pick === "false"
-                      ? "bg-dark_green text-white"
-                      : "bg-white text-dark_green"
-                  } flex justify-center items-center text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                    isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-                  }`}
-                  onClick={() => {
-                    if (isAdmin) return;
-                    if (isSubmitted) return;
-                    handlePick("false");
-                  }}
-                >
-                  False
-                </div>
-              </div>
+              </AnimateSlideInFromBottom>
             </div>
           )}
 
       {!isAdmin && showDetails && (
-        <div
-          className={`w-full justify-center flex mt-8 ${
-            ANSWER ? "opacity-50" : ""
-          }`}
-        >
-          <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-            <Button
-              fullWidth
-              color={"yellow"}
-              size="xl"
-              disabled={isSubmitted || ANSWER}
-              onClick={handleSubmit}
-              className={`shadow-lg ${
-                isSubmitted ? "bg-[#FFAB3E] text-[##FFF9DF]" : "bg-[#FF6633]"
-              }`}
-            >
-              Submit
-            </Button>
+        <AnimateSlideInFromBottom delay="2000">
+          <div
+            className={`w-full justify-center flex mt-8 ${
+              ANSWER ? "opacity-50" : ""
+            } ${ANSWER ? "hidden" : ""}`}
+          >
+            <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
+              <Button
+                fullWidth
+                color={"yellow"}
+                size="xl"
+                disabled={isSubmitted || ANSWER}
+                onClick={handleSubmit}
+                className={`shadow-lg ${
+                  isSubmitted
+                    ? "bg-[#FFAB3E] text-[#FFF9DF] opacity-50"
+                    : "bg-[#FF6633]"
+                }`}
+              >
+                Submit
+              </Button>
+            </div>
           </div>
-        </div>
+        </AnimateSlideInFromBottom>
       )}
 
       {isAdmin && (

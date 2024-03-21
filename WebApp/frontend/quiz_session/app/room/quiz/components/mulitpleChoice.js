@@ -15,6 +15,7 @@ import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
 import { useAnswerSFX } from "../../hooks/useAnswerSFX";
 import { isCorrectAnswer } from "@/app/util/questionAnswerUtil";
 import { IconX } from "@tabler/icons-react";
+import { AnimateSlideInFromBottom } from "./AnimateSlideInFromBottom";
 
 export default React.forwardRef(MulitpleChoice);
 
@@ -115,7 +116,11 @@ function MulitpleChoice({ question, connectionId }, ref) {
             metadata?.currentDifficulty
           } • ${
             metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 0
-          } points`}</p>
+          } ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] > 1
+              ? "points"
+              : "point"
+          }`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl h-52 items-center select-none">
           {question?.question.qStatement}
@@ -126,13 +131,15 @@ function MulitpleChoice({ question, connectionId }, ref) {
         <div className="w-full grid grid-cols-2 place-content-center">
           <div className="col-span-2">
             {answer && (
-              <div className="py-8 px-[20%]">
-                <p className="text-white">Correct answer is: </p>
-                <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
-                  <p className="px-4">{answer}</p>
-                  <CheckIcon width={20} height={20} />
+              <AnimateSlideInFromBottom>
+                <div className="py-8 px-[20%]">
+                  <p className="text-white">Correct answer is: </p>
+                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
+                    <p className="px-4">{answer}</p>
+                    <CheckIcon width={20} height={20} />
+                  </div>
                 </div>
-              </div>
+              </AnimateSlideInFromBottom>
             )}
           </div>
         </div>
@@ -140,76 +147,94 @@ function MulitpleChoice({ question, connectionId }, ref) {
         <div className="w-full grid grid-cols-2 place-content-center">
           <div className="col-span-2">
             {answer && (
-              <div className="py-8 px-[20%]">
-                <p className="text-white">Correct answer is: </p>
-                <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
-                  <p className="px-4">{answer}</p>
-                  <CheckIcon width={20} height={20} />
+              <AnimateSlideInFromBottom>
+                <div className="py-8 px-[20%]">
+                  <p className="text-white">Correct answer is: </p>
+                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
+                    <p className="px-4">{answer}</p>
+                    <CheckIcon width={20} height={20} />
+                  </div>
                 </div>
-              </div>
+              </AnimateSlideInFromBottom>
             )}
           </div>
         </div>
       )}
 
       {showDetails && (
-        <div
-          className={`w-full grid grid-cols-2 place-content-center gap-3 mt-8 ${
-            answer ? "opacity-50" : ""
-          }`}
-        >
-          {question?.details.map((choices, index) => (
-            <div
-              className={`${
-                pick === choices.qDetailDesc
-                  ? "bg-dark_green text-white"
-                  : "bg-white text-dark_green"
-              } flex justify-center items-center space-x-3 text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
-                isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              key={index}
-              onClick={() => {
-                if (isAdmin) return;
-                if (isSubmitted) return;
-                handlePick(choices.qDetailDesc);
-              }}
-            >
-              <span>{choices.qDetailDesc}</span>
-              {answer && pick == answer && pick == choices.qDetailDesc ? (
-                <CheckIcon width={20} height={20} color="#90EE90" />
-              ) : (
-                answer &&
-                pick == choices.qDetailDesc && (
-                  <span className="w-[20px] h-[20px]">
-                    <IconX width={24} height={24} color="red" stroke={2} />
-                  </span>
-                )
-              )}
-            </div>
-          ))}
-        </div>
+        <AnimateSlideInFromBottom>
+          <div
+            className={`w-full grid grid-cols-2 place-content-center gap-3 mt-8`}
+          >
+            {question?.details.map((choices, index) => (
+              <div
+                className={`${
+                  pick === choices.qDetailDesc
+                    ? "bg-dark_green text-white"
+                    : "bg-white text-dark_green"
+                } flex justify-center items-center space-x-3 text-xl font-bold px-4 py-4 rounded-md shadow-lg ${
+                  isSubmitted ? "cursor-not-allowed" : "cursor-pointer"
+                } ${answer && pick != choices.qDetailDesc ? "opacity-50" : ""}
+                  ${
+                    answer && pick == answer && pick == choices.qDetailDesc
+                      ? "!bg-white !text-green-700 !border-green-700 !border-4"
+                      : answer && pick == choices.qDetailDesc
+                      ? "!bg-white !text-red-500 !border-4 !border-red-500"
+                      : ""
+                  }`}
+                key={index}
+                onClick={() => {
+                  if (isAdmin) return;
+                  if (isSubmitted) return;
+                  handlePick(choices.qDetailDesc);
+                }}
+              >
+                <span>{choices.qDetailDesc}</span>
+                {answer && pick == answer && pick == choices.qDetailDesc ? (
+                  <CheckIcon width={20} height={20} color="rgb(21 128 61)" />
+                ) : (
+                  answer &&
+                  pick == choices.qDetailDesc && (
+                    <span className="w-[20px] h-[20px]">
+                      <IconX
+                        width={24}
+                        height={24}
+                        color="rgb(239 68 68)"
+                        stroke={3}
+                      />
+                    </span>
+                  )
+                )}
+              </div>
+            ))}
+          </div>
+        </AnimateSlideInFromBottom>
       )}
       {!isAdmin && showDetails && (
-        <div
-          className={`w-full justify-center flex mt-8 ${
-            answer ? "opacity-50" : ""
-          }`}
-        >
-          <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
-            <Button
-              fullWidth
-              className={`shadow-lg ${
-                isSubmitted ? "bg-[#FFAB3E] text-[##FFF9DF]" : "bg-[#FF6633]"
-              }`}
-              color={"yellow"}
-              onClick={handleSubmit}
-              size="lg"
-              disabled={isSubmitted || answer}
-            >
-              Submit
-            </Button>
+        <AnimateSlideInFromBottom delay="2000">
+          <div
+            className={`w-full justify-center flex mt-8 ${
+              answer ? "opacity-50" : ""
+            }`}
+          >
+            <div className=" w-1/2 flex justify-center text-white text-2xl font-bold rounded-lg">
+              <Button
+                fullWidth
+                className={`shadow-lg ${
+                  isSubmitted
+                    ? "bg-[#FFAB3E] text-[#FFF9DF] opacity-50"
+                    : "bg-[#FF6633]"
+                } ${answer ? "hidden" : ""}`}
+                color={"yellow"}
+                onClick={handleSubmit}
+                size="lg"
+                disabled={isSubmitted || answer}
+              >
+                Submit
+              </Button>
+            </div>
           </div>
-        </div>
+        </AnimateSlideInFromBottom>
       )}
       {isAdmin && (
         <div className="py-8 px-[20%] w-full">
