@@ -19,7 +19,6 @@ export default function Chats() {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
-    console.log("Conversations", conversation);
   }, [conversation]);
 
   return (

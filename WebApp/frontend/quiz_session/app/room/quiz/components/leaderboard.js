@@ -8,7 +8,6 @@ export default function Leaderboard({ leaderBoard }) {
     ...new Set(leaderBoard.flatMap((participant) => participant.score)),
   ].slice(0, 3);
 
-  console.log(topScores);
 
   const firstScore = topScores[0];
   const secondScore = topScores[1];

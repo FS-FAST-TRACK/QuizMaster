@@ -1,8 +1,4 @@
 export function isCorrectAnswer(participantAnswer, correctAnswer) {
-  console.log("isCorrectAnswer method is called", {
-    participantAnswer,
-    correctAnswer,
-  });
   const hasMultipleAnswers = correctAnswer.split("|").length > 1;
 
   // If there is participant answer then return false
