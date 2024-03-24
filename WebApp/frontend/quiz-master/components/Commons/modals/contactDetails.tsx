@@ -7,13 +7,34 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import UpdateContactInfoModal from "./UpdateContactInfoModal";
 import { ContactDetails } from "@/lib/definitions";
+import { fetchContactInfo, fetchLoginUser } from "@/lib/quizData";
+import { notification } from "@/lib/notifications";
 
 export default function ContactDetails({ email }: { email?: string }) {
-    const [contactDetails, setContactDetails] = useState<ContactDetails>({
-        email: "alyssa@gmail.com",
-        phoneNumber: "09083547069",
-    });
-    const [openFeedback, setOpenFeedback] = useState<boolean>(false);
+    const [contactDetails, setContactDetails] = useState<ContactDetails>();
+    const [openEditContactInfo, setOpenEditContactInfo] =
+        useState<boolean>(false);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+    useEffect(() => {
+        fetchLoginUser().then((res) => {
+            res?.info?.roles.map((role) => {
+                if (role === "Administrator") {
+                    setIsAdmin(true);
+                }
+            });
+        });
+    }, []);
+
+    useEffect(() => {
+        fetchContactInfo()
+            .then((res) => {
+                setContactDetails(res);
+            })
+            .catch((res) => {
+                notification({ type: "error", title: res.message });
+            });
+    }, [openEditContactInfo]);
 
     return (
         <div className="mt-[-100px]">
@@ -22,13 +43,13 @@ export default function ContactDetails({ email }: { email?: string }) {
                     <p className=" font-thin text-xs items-center">
                         You can also reach us through the following:
                     </p>
-                    {email === "admin@gmail.com" ? (
+                    {isAdmin ? (
                         <Link
                             className="text-xs hover:underline"
                             href="#"
                             onClick={(e) => {
                                 e.preventDefault();
-                                setOpenFeedback(!openFeedback);
+                                setOpenEditContactInfo(!openEditContactInfo);
                             }}
                         >
                             Edit
@@ -43,7 +64,9 @@ export default function ContactDetails({ email }: { email?: string }) {
                         width={40}
                         height={40}
                     />
-                    <p className="text-xs md:text-sm">{contactDetails.email}</p>
+                    <p className="text-xs md:text-sm">
+                        {contactDetails?.email}
+                    </p>
                 </div>
                 <div className="flex flex-row gap-2 items-center">
                     <Image
@@ -54,15 +77,15 @@ export default function ContactDetails({ email }: { email?: string }) {
                         height={40}
                     />
                     <p className="text-xs md:text-sm">
-                        {contactDetails.phoneNumber}
+                        {contactDetails?.contact}
                     </p>
                 </div>
             </div>
-            {openFeedback && (
+            {openEditContactInfo && (
                 <UpdateContactInfoModal
                     contactInfo={contactDetails}
-                    opened={openFeedback}
-                    onClose={() => setOpenFeedback(false)}
+                    opened={openEditContactInfo}
+                    onClose={() => setOpenEditContactInfo(false)}
                 />
             )}
         </div>

@@ -29,11 +29,15 @@ interface IQuizRoomsStore {
     }) => void;
 }
 
+// Make sure that Only quizrooms with active data are shown
+const showActiveQuizRoom = (quizRoom: QuizRoom) => {
+    return quizRoom.activeData;
+};
 export const useQuizRoomsStore = create<IQuizRoomsStore>((set, get) => ({
     quizRooms: undefined,
     setQuizRooms: (fetchedQuizRooms: QuizRoom[]) => {
         set({
-            quizRooms: fetchedQuizRooms,
+            quizRooms: fetchedQuizRooms.filter(showActiveQuizRoom),
         });
     },
     getPaginatedRooms: ({
@@ -52,7 +56,7 @@ export const useQuizRoomsStore = create<IQuizRoomsStore>((set, get) => ({
                           ? qR.qRoomDesc
                                 .trim()
                                 .toLowerCase()
-                                .includes(searchQuery)
+                                .includes(searchQuery.toLowerCase())
                           : true
                   )
                   .slice(
@@ -94,10 +98,7 @@ export const useQuizRoomsStore = create<IQuizRoomsStore>((set, get) => ({
         }
 
         set({
-            pageNumber:
-                searchQuery !== undefined || searchQuery !== ""
-                    ? 1
-                    : pageNumber,
+            pageNumber,
             pageSize: pageSize,
             searchQuery: searchQuery,
         });

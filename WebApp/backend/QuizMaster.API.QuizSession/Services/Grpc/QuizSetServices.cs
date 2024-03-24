@@ -18,11 +18,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
     {
         private readonly QuizSessionDbContext _quizSetManager;
         private readonly QuizAuditService.QuizAuditServiceClient _quizAuditServiceClient;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public QuizSetServices(QuizSessionDbContext quizSetManager, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient)
+        public QuizSetServices(QuizSessionDbContext quizSetManager, QuizAuditService.QuizAuditServiceClient quizAuditServiceClient, IServiceScopeFactory serviceScopeFactory)
         {
             _quizSetManager = quizSetManager;
             _quizAuditServiceClient = quizAuditServiceClient;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         public override async Task<QuizSetMessage> AddQuizSet(QuizSetRequest request, ServerCallContext context)
@@ -32,6 +34,10 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var quizSet = JsonConvert.DeserializeObject<SetDTO>(request.QuizSet)!;
 
             var checkQuestion = CheckForQuistionId(quizSet.questions);
+
+            // Create a scoped service
+            using IServiceScope scope = serviceScopeFactory.CreateScope();
+            QuizSessionDbContext quizSessionDbContext = scope.ServiceProvider.GetRequiredService<QuizSessionDbContext>();
 
             try
             {
@@ -43,7 +49,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                     return await Task.FromResult(reply);
                 }
 
-                var setWithNameExists = _quizSetManager.Sets.Where(s => s.QSetName.ToLower() == quizSet.QSetName.ToLower()).FirstOrDefault();
+                var setWithNameExists = quizSessionDbContext.Sets.Where(s => s.QSetName.ToLower() == quizSet.QSetName.ToLower()).FirstOrDefault();
 
                 if (setWithNameExists != null)
                 {
@@ -54,16 +60,16 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
 
                 var set = new Set { QSetName = quizSet.QSetName, QSetDesc = quizSet.QSetDesc, ActiveData = true, DateCreated = DateTime.Now };
-                await _quizSetManager.Sets.AddAsync(set);
-                await _quizSetManager.SaveChangesAsync();
+                await quizSessionDbContext.Sets.AddAsync(set);
+                await quizSessionDbContext.SaveChangesAsync();
 
                 foreach (var questionID in quizSet.questions)
                 {
                     var questionSet = new QuestionSet { QuestionId = questionID, SetId = set.Id, ActiveData = true };
-                    await _quizSetManager.QuestionSets.AddAsync(questionSet);
+                    await quizSessionDbContext.QuestionSets.AddAsync(questionSet);
                 }
 
-                await _quizSetManager.SaveChangesAsync();
+                await quizSessionDbContext.SaveChangesAsync();
 
                 // Capture the details of the user adding the quiz set
                 var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
@@ -95,9 +101,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
                 catch (Exception ex)
                 {
-                    reply.Code = 500;
-                    reply.Message = ex.Message;
-                    return await Task.FromResult(reply);
+                    //reply.Code = 500;
+                    //reply.Message = ex.Message;
+                    //return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
@@ -121,8 +127,26 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             {
                 var data = await _quizSetManager.Sets.Where(x => x.ActiveData == true).ToArrayAsync();
 
+                var listOfData = new List<object>();
+                foreach (var dataItem in data)
+                {
+                    object updatedObject = new
+                    {
+                        id = dataItem.Id,
+                        qSetName = dataItem.QSetName,
+                        qSetDesc =  dataItem.QSetDesc,
+                        activeData = dataItem.ActiveData,
+                        dateCreated = dataItem.DateCreated,
+                        dateUpdated = dataItem.DateUpdated,
+                        createdByUserId = dataItem.CreatedByUserId,
+                        updatedByUserId = dataItem.UpdatedByUserId,
+                        numberOfQuestions = _quizSetManager.QuestionSets.Where(x => x.SetId == dataItem.Id).ToList().Count,
+                };
+                    listOfData.Add(updatedObject);
+                }
+
                 reply.Code = 200;
-                reply.Data = JsonConvert.SerializeObject(data);
+                reply.Data = JsonConvert.SerializeObject(listOfData);
 
                 return await Task.FromResult(reply);
             }
@@ -141,7 +165,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new QuizSetMessage();
             try
             {
-                var data = await _quizSetManager.Sets.FirstOrDefaultAsync(x => x.Id == request.Id);
+                Set? data = null;
+                for(int i = 0; i < 10; i++)
+                {
+                    data = await _quizSetManager.Sets.FirstOrDefaultAsync(x => x.Id == request.Id);
+                    if (data != null) break;
+                    await Task.Delay(1000);
+                }
                 if(data == null)
                 {
                     reply.Code = 404;
@@ -219,9 +249,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
                 catch (Exception ex)
                 {
-                    reply.Code = 500;
-                    reply.Message = ex.Message;
-                    return await Task.FromResult(reply);
+                    //reply.Code = 500;
+                    //reply.Message = ex.Message;
+                    //return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;
@@ -337,9 +367,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
                 }
                 catch (Exception ex)
                 {
-                    reply.Code = 500;
-                    reply.Message = ex.Message;
-                    return await Task.FromResult(reply);
+                    //reply.Code = 500;
+                    //reply.Message = ex.Message;
+                    //return await Task.FromResult(reply);
                 }
 
                 reply.Code = 200;

@@ -1,9 +1,11 @@
-name: QuizMaster - Quiz Session API
+name: QuizMaster - Gateway API
 
 on:
   push:
     branches:
       - develop
+  pull_request:
+    branches: "*"
 
 jobs:
   build:

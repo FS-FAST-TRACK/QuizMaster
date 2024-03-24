@@ -4,6 +4,9 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Models.Report;
+using QuizMaster.API.Gateway.Services.ReportService;
+using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gateway.Utilities;
 using QuizMaster.API.QuizSession.Protos;
 using QuizMaster.Library.Common.Entities.Questionnaire;
@@ -17,12 +20,21 @@ namespace QuizMaster.API.Gateway.Services
     {
         private GrpcChannel _channel;
         private QuizRoomService.QuizRoomServiceClient _channelClient;
-        public QuizHandler(IOptions<GrpcServerConfiguration> options)
+        private readonly ReportServiceHandler reportServiceHandler;
+        private readonly IServiceProvider serviceProvider;
+        private readonly QuizSettings quizSettings;
+        public QuizHandler(IOptions<GrpcServerConfiguration> options, ReportServiceHandler reportServiceHandler, IServiceProvider serviceProvider, IOptions<QuizSettings> QuizSettingsOption)
         {
-            _channel = GrpcChannel.ForAddress(options.Value.Session_Service);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+            _channel = GrpcChannel.ForAddress(options.Value.Session_Service, new GrpcChannelOptions { HttpHandler = handler});
             _channelClient = new QuizRoomService.QuizRoomServiceClient(_channel);
+            this.reportServiceHandler = reportServiceHandler;
+            this.serviceProvider = serviceProvider;
+            quizSettings = QuizSettingsOption.Value;
         }
-        public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room)
+        public async Task StartQuiz(SessionHub hub, SessionHandler handler, QuizRoomService.QuizRoomServiceClient grpcClient, QuizRoom room, string sessionId)
         {
             int roomId = room.Id;
             string hostConnectionId = hub.Context.ConnectionId;
@@ -54,10 +66,14 @@ namespace QuizMaster.API.Gateway.Services
                 return;
             }
 
+            handler.SetPauseRoom(roomId, true); // <- Pause the room when before proceeding to next round
             handler.AddActiveRoom(room.QRoomPin, room); // register the room to be started | set to active
             int setIndex = 0;
+            bool ForcedToExit = false;
             foreach (var Qset in quizSets)
             {
+                ForcedToExit = handler.IsRoomForcedToExit(roomId);
+                if (ForcedToExit) break;
                 // Get the Sets
                 var setRequest = new SetRequest() { Id = Qset.QSetId };
                 var setReply = await grpcClient.GetQuizAsync(setRequest);
@@ -69,6 +85,10 @@ namespace QuizMaster.API.Gateway.Services
                 int currentQuestion = 1;
                 foreach (var questionSet in Setquestions)
                 {
+                    // Exit Set
+                    ForcedToExit = handler.IsRoomForcedToExit(roomId);
+                    if(ForcedToExit) break;
+
                     roomPin = Qset.QRoom.QRoomPin + "";
                     // update the participant start-time if haven't, for late joiners
                     UpdateParticipantsStartTime(handler, roomPin);
@@ -83,11 +103,25 @@ namespace QuizMaster.API.Gateway.Services
                     if (details == null) continue;
 
                     handler.SetCurrentQuestionDisplayed(roomPin, details.question.Id);// Save the current displayed Question
-                    var timout = details.question.QTime;
+
+                    // Override timeout based on the QType
+                    details.question.QTime = OverrideTimeout(details.question.QTime, details.question.QTypeId);
+
+                    var timeout = details.question.QTime;
+
+                    // Add BufferTime
+                    timeout += quizSettings.BufferTime;
+
 
                     // setting the current set info
                     details.CurrentSetName = questionSet.Set.QSetName;
                     details.CurrentSetDesc = questionSet.Set.QSetDesc;
+                    List<string> answers = new();
+                    foreach(QuestionDetail questionDetail in details.details)
+                    {
+                        if(questionDetail.DetailTypes.Where(qt => qt.DTypeDesc.Equals("answer", StringComparison.OrdinalIgnoreCase)).Any())
+                            answers.Add(questionDetail.QDetailDesc);
+                    }
                     details.details.ForEach(qD => qD.DetailTypes = new List<DetailType>());
 
                     /*
@@ -98,6 +132,8 @@ namespace QuizMaster.API.Gateway.Services
                      * - CurrentQuestionIndex
                      * - CurrentQuestionName
                      * - TotalNumberOfQuestions
+                     * - bufferTime
+                     * - points
                      * - ParticipantsInRoom
                      */
                     await hub.Clients.Group(roomPin).SendAsync("metadata", new {
@@ -107,33 +143,59 @@ namespace QuizMaster.API.Gateway.Services
                         currentQuestionIndex = currentQuestion++,
                         currentQuestionName = details.question.QStatement,
                         totalNumberOfQuestions = Setquestions.Count,
+                        bufferTime = quizSettings.BufferTime,
+                        points = quizSettings.OverridePointSystem,
+                        currentDifficulty = details.question.QDifficulty.QDifficultyDesc,
                         participantsInRoom = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).Count(),
                     });
 
-                    for (int time = timout; time >= 0; time--)
+                    // Sending Question with updated remaining time
+                    for (int time = timeout; time >= 0; time--)
                     {
                         details.RemainingTime = time;
                         await hub.Clients.Group(roomPin).SendAsync("question", details);
                         //string connectionId = hub.Context.ConnectionId;
-                        
+                        await hub.Clients.Group(roomPin).SendAsync("participant_answered", handler.ParticipantsAnswered());
+
                         //await hub.Clients.Group(roomPin).SendAsync("connId", connectionId);
 
                         await Task.Delay(1000);
                     }
-                }
-<<<<<<< HEAD
 
-                if (room.ShowLeaderboardEachRound() && setIndex+1 < quizSets.Count)
-=======
+                    // TODO: Display answer for (n) seconds
+                    await hub.Clients.Group(roomPin).SendAsync("answer", answers);
+                    await Task.Delay(1000 * quizSettings.ShowAnswerAfterQuestionDelay);
+                    await hub.Clients.Group(roomPin).SendAsync("participant_answered", null);
+                    await hub.Clients.Group(roomPin).SendAsync("answer", null);
+                }
+
                 setIndex++;
                 if (room.ShowLeaderboardEachRound() && setIndex < quizSets.Count)
->>>>>>> develop
                 {
                     await hub.Clients.Group(roomPin).SendAsync("notif", "Displaying leaderboards");
                     await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, false); // send scores
-                    await Task.Delay(10000);
                 }
 
+                // Handling the Pause
+                if(setIndex < quizSets.Count)
+                {
+                    int limit = quizSettings.ForceNextRoundTimeout; // DEFAULT (300s) of 5mins, if not clicked `proceed` then continue
+                    while (handler.GetPausedRoom(roomId) && limit > 0)
+                    {
+                        ForcedToExit = handler.IsRoomForcedToExit(roomId);
+                        // force break loop if triggered 'end game'
+                        if (ForcedToExit) break;
+                        // Adding delay so it doesn't kill the backend when looping infinitely
+                        await Task.Delay(1000);
+                        // Notify the admin while the game is paused
+                        await hub.Clients.Client(hostConnectionId).SendAsync("paused", $"Game is paused, click proceed to start or the game will resume automatically on '{limit--} second/s'");
+                        await hub.Clients.GroupExcept(roomPin, hostConnectionId).SendAsync("paused", $"Game is Paused");
+                    }
+
+                    // Reset to true
+                    handler.SetPauseRoom(roomId, true);
+                }
+                    
                 // before going to new set, do some elimination if toggled
                 if (room.IsEliminationRound() && setIndex < quizSets.Count)
                 {
@@ -144,19 +206,44 @@ namespace QuizMaster.API.Gateway.Services
 
             }
             //await hub.Clients.Group(roomPin).SendAsync("stop", "Quiz has ended, scores and sent");
-            
+            _channelClient.DeactivateRoomRequest(new DeactivateRoom { Id = room.Id });
             SetParticipantsEndTime(handler, roomPin); // End participant time
-            await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, true); // send scores
+            var leaderboards = await SendParticipantsScoresAsync(hub, handler, roomPin, room, adminData, true); // send scores
             handler.RemoveRoomDataCurrentDisplayed(roomPin); // clear the last question
             handler.RemoveActiveRoom(room.QRoomPin); // Quiz ended, can restart | Set to inactive
 
             // Save the Participant's Scores and reset their data's
-            await SaveQuizRoomDataAsync(handler, hostConnectionId, roomId, roomPin, startTime, quizSets);
+            await SaveQuizRoomDataAsync(handler, hostConnectionId, roomId, roomPin, startTime, quizSets, leaderboards, sessionId);
             // Clear
             handler.ResetParticipantLinkedConnectionsInAGroup(roomPin);
             handler.ClearEliminatedParticipants(Convert.ToInt32(roomPin));
+            handler.ClearForcedExitRoom();
             //await hub.Clients.Group(roomPin).SendAsync("notif", "Quiz Data: "+JsonConvert.SerializeObject(await GetQuizRoomDatasAsync()));
             //await hub.Clients.Group(roomPin).SendAsync("stop",true);
+        }
+
+        private int OverrideTimeout(int timeout, int qTypeId)
+        {
+            // Override Multiple choice
+            if(qTypeId == 1)
+            {
+                if (quizSettings.OverrideQuestionTimer.MultipleChoice > 0)
+                    return quizSettings.OverrideQuestionTimer.MultipleChoice;
+            }   
+            // Override True or False
+            if(qTypeId == 3)
+            {
+                if (quizSettings.OverrideQuestionTimer.TrueOrFalse > 0)
+                    return quizSettings.OverrideQuestionTimer.TrueOrFalse;
+            }
+            // Override TypeAnswer
+            if(qTypeId == 4)
+            {
+                if (quizSettings.OverrideQuestionTimer.TypeAnswer > 0)
+                    return quizSettings.OverrideQuestionTimer.TypeAnswer;
+            }
+
+            return timeout;
         }
 
         public void AcceptParticipantsAnswerSubmission(SessionHandler handler, string roomPin, QuizRoom room)
@@ -195,16 +282,19 @@ namespace QuizMaster.API.Gateway.Services
             }
         }
 
-        public async Task SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData, bool isStop)
+        public async Task<List<LeaderboardReport>> SendParticipantsScoresAsync(SessionHub hub, SessionHandler handler, string roomPin, QuizRoom room, QuizParticipant adminData, bool isStop)
         {
             List<QuizParticipant> participants = handler.GetParticipantLinkedConnectionsInAGroup(roomPin).ToList();
             participants.AddRange(handler.GetEliminatedParticipants(Convert.ToInt32(roomPin)));
             int limitDisplayed = room.DisplayTop10Only() ? 10 : participants.Count();
 
+            List<LeaderboardReport> leaderboardReports = new();
+
             var leaderboard = participants.OrderByDescending(p => p.Score).Take(limitDisplayed).Select(person => {
                 if (adminData.UserId != person.UserId)
                 {
                     string eliminated = handler.IsParticipantEliminated(Convert.ToInt32(roomPin), person) ? "Eliminated" : string.Empty;
+                    leaderboardReports.Add(new LeaderboardReport() { ParticipantName = person.QParticipantDesc, Score = person.Score, SessionId = handler.GetSessionId(roomPin) });
                     return new ScoreDTO() { Name = person.QParticipantDesc, Score = person.Score, Eleminated = eliminated };
                 }
                 return null;
@@ -222,10 +312,10 @@ namespace QuizMaster.API.Gateway.Services
             //    await hub.Clients.Group(roomPin).SendAsync("leaderboard",  score);
             //}
 
-
+            return leaderboardReports;
         }
 
-        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions)
+        public async Task SaveQuizRoomDataAsync(SessionHandler handler, string hostConnectionId, int roomId, string roomPin, DateTime startTime, IEnumerable<SetQuizRoom> Setquestions, IEnumerable<LeaderboardReport> leaderboardReports, string sessionId)
         {
             var host = handler.GetLinkedParticipantInConnectionId(hostConnectionId);
             if (host == null) return;
@@ -241,8 +331,11 @@ namespace QuizMaster.API.Gateway.Services
 
             if(participantData == null) return;
 
+
+            // Save the Session Data
             QuizRoomData quizRoomData = new QuizRoomData();
             quizRoomData.QRoomId = roomId;
+            quizRoomData.SessionId = sessionId;
             quizRoomData.HostId = host.UserId;
             quizRoomData.SetQuizRoomJSON = JsonConvert.SerializeObject(Setquestions);
             quizRoomData.ParticipantsJSON = JsonConvert.SerializeObject(participants);
@@ -252,6 +345,24 @@ namespace QuizMaster.API.Gateway.Services
 
             var rpcPayloadSaveQuizRoomData = new Data { Value = JsonConvert.SerializeObject(quizRoomData) };
             await _channelClient.SaveRoomDataAsync(rpcPayloadSaveQuizRoomData);
+
+            // Generate the Report Data
+            QuizReport quizReport = new();
+            quizReport.NoOfParticipants = participantData.Count() - 1; // Exclude the host
+            quizReport.HostId = host.UserId;
+            quizReport.HostName = host.QParticipantDesc;
+            quizReport.RoomId = roomId;
+            quizReport.StartTime = startTime;
+            quizReport.EndTime = quizRoomData.EndedDateTime;
+            quizReport.ParticipantAnswerReportsJSON = JsonConvert.SerializeObject(reportServiceHandler.GetParticipantAnswerReports(handler.GetSessionId(roomPin)));
+            quizReport.LeaderboardReportsJSON = JsonConvert.SerializeObject(leaderboardReports);
+
+            // Since we cannot instantiate scoped object in singleton, we will call the service provider and get the service
+            using var scope = serviceProvider.CreateScope();
+            var reportRepository = scope.ServiceProvider.GetService<ReportRepository>();
+
+            // Save the Report Data
+            reportRepository?.SaveReport(quizReport);
         }
 
         public async Task<IEnumerable<QuizRoomData>> GetQuizRoomDatasAsync()
@@ -287,7 +398,7 @@ namespace QuizMaster.API.Gateway.Services
                     {
                         participantLinkedConnectionId.QEndDate = DateTime.Now;
                         // remove the connectionId from the group
-                        await handler.RemoveClientFromGroups(hub, connectionId, $"{participantLinkedConnectionId.QParticipantDesc} was eliminated", channel: "notification");
+                        await handler.RemoveClientFromGroups(hub, connectionId, $"{participantLinkedConnectionId.QParticipantDesc} was eliminated");
                         await hub.Clients.Client(connectionId).SendAsync("notif", "You are eliminated");
                         //await hub.Clients.Group(roomPin).SendAsync("notif", $"{participantLinkedConnectionId.QParticipantDesc} was eliminated");
                         // add to eliminated participant

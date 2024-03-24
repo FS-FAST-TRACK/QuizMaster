@@ -64,10 +64,12 @@ namespace QuizMaster.API.Gatewway.Controllers
             }
 
             var account = JsonConvert.DeserializeObject<UserAccount>(response.GetAccountByIdReply.Account);
+            var roles = JsonConvert.DeserializeObject<IEnumerable<string>>(response.GetAccountByIdReply.Roles);
+            UserAndRolesDTO Account_WithRoles = _mapper.Map<UserAndRolesDTO>(account);
+            Account_WithRoles.Roles = roles;
 
-            return Ok(_mapper.Map<AccountDto>(account));
+            return Ok(Account_WithRoles);
         }
-
         /// <summary>
         /// Get all account API
         /// </summary>
@@ -86,7 +88,26 @@ namespace QuizMaster.API.Gatewway.Controllers
                 users.Add(response.ResponseStream.Current);
             }
 
-            return Ok(users);
+            var usersWithRoles = new List<object>();
+            foreach (var user in users)
+            {
+                object u = new
+                {
+                    id = user.Id,
+                    lastName = user.LastName,
+                    firstName = user.FirstName,
+                    email = user.Email,
+                    userName = user.UserName,
+                    activeData = user.ActiveData,
+                    dateCreated = user.DateCreated,
+                    dateUpdated = user.DateUpdated,
+                    updatedByUser = user.UpdatedByUser,
+                    roles = JsonConvert.DeserializeObject<IEnumerable<string>>(user.Roles)
+                };
+                usersWithRoles.Add(u);
+            }
+
+            return Ok(usersWithRoles);
         }
 
         /// <summary>
@@ -378,6 +399,22 @@ namespace QuizMaster.API.Gatewway.Controllers
             return Ok(new ResponseDto {  Type = "Success", Message = response.Message});
         }
 
+        [QuizMasterAuthorization]
+        [HttpPost]
+        [Route("account/{id}/reset_password")]
+        public async Task<IActionResult> ResetPassword(int id)
+        {
+            var updatePasswordRequest = new UpdatePasswordRequest() { Id = id };
+
+            var response = await _channelClient.ResetPasswordAsync(updatePasswordRequest);
+
+            if (response.Code != 200)
+            {
+                return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+            }
+            return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+        }
+
         [HttpGet]
         [Route("account/update_password/{token}")]
         public async Task<IActionResult> ConfirmUpdatePassword(string token)
@@ -389,9 +426,13 @@ namespace QuizMaster.API.Gatewway.Controllers
 
             if (response.Code != 200)
             {
-                return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+                //return BadRequest(new ResponseDto { Type = "Error", Message = response.Message });
+                TempData["message"] = "Failed to update password, either the token expired or the link was clicked";
+                return View("~/Views/PasswordChange/Index.cshtml");
             }
-            return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+            //return Ok(new ResponseDto { Type = "Success", Message = response.Message });
+            TempData["message"] = "Update password was successful";
+            return View("~/Views/PasswordChange/Index.cshtml");
         }
 
         [QuizMasterAdminAuthorization]
@@ -488,6 +529,11 @@ namespace QuizMaster.API.Gatewway.Controllers
                 Type = "Error",
                 Message = "Email already exist."
             });
+        }
+
+        public sealed class UserAndRolesDTO : AccountDto
+        {
+            public IEnumerable<string> Roles { get; set; }
         }
     }
 }

@@ -1,3 +1,6 @@
+import { useSession } from "next-auth/react";
+import PageHeader from "@/components/Commons/headers/PageHeader";
+import SideNav from "@/components/Commons/navbars/sidenav";
 export function generateMetadata() {
     return {
         title: "Dashboard",
@@ -5,5 +8,9 @@ export function generateMetadata() {
 }
 
 export default function Page() {
-    return <div>Dashboard page</div>;
+    return (
+        <div >
+            Hello
+        </div>
+    );
 }

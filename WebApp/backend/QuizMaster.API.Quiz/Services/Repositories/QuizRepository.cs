@@ -114,7 +114,10 @@ namespace QuizMaster.API.Quiz.Services.Repositories
 					qDetail.DetailTypes = _context.QuestionDetailTypes.Where(qDetailType => qDetailType.QuestionDetailId == qDetail.Id).Select((qDetailType) =>
 					 qDetailType.DetailType).ToList();
 				});
-			}
+
+				var diff = _context.Difficulties.Where(d => d.Id == question.QDifficultyId).FirstOrDefault();
+				if(null != diff) question.QDifficulty = diff;
+            }
 
 			return question;
 

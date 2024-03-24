@@ -1,15 +1,28 @@
-import React from "react";
-import TimeProgress from "./components/progress";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Question from "./components/question";
-import Header from "./components/header";
+import { SoundEffectsContext } from "../contexts/SoundEffectsContext";
 
 export default function page() {
-  return (
-    <div className="h-full  flex flex-col">
-      <TimeProgress />
-      <Header />
+  const [volume, setVolume] = useState(100);
+  const [isMute, setIsMute] = useState(false);
 
-      <Question />
-    </div>
+  useEffect(() => {
+    if (volume === 0) {
+      setIsMute(true);
+    } else {
+      setIsMute(false);
+    }
+  }, [volume]);
+
+  return (
+    <SoundEffectsContext.Provider
+      value={{ volume, setVolume, isMute, setIsMute }}
+    >
+      <div className="h-full  flex flex-col">
+        <Question />
+      </div>
+    </SoundEffectsContext.Provider>
   );
 }

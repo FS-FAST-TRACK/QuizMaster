@@ -6,8 +6,9 @@ import { cookies } from "next/headers";
 
 const LogoutButton = () => {
     const { data: session } = useSession();
-    console.log(session);
+    
     const logout = async () => {
+        localStorage.clear();
         await fetch(`${process.env.QUIZMASTER_GATEWAY}/auth/logout`, {
             method: "POST",
             credentials: "include",

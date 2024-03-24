@@ -10,7 +10,7 @@ using QuizMaster.API.QuizSession.Services.Repositories;
 using QuizMaster.API.QuizSession.Services.Workers;
 
 /*
- * You have any issues? Contact Jayharron: jabejar@fullscale.io for more info :D
+ * You have any issues? Contact Jayharron: jabejar@fullscale.ph for more info :D
  * Date: 1/11/2024
  */
 namespace QuizMaster.API.QuizSession
@@ -34,15 +34,11 @@ namespace QuizMaster.API.QuizSession
             });
             builder.Services.AddScoped(sp =>
             {
-<<<<<<< HEAD
-                var channel = GrpcChannel.ForAddress("https://localhost:7065");
-=======
                 var handler = new HttpClientHandler();
                 handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
                 // Creating Scoped Service Room Audit service
                 var channel = GrpcChannel.ForAddress(builder.Configuration["AppSettings:Monitoring_Service"], new GrpcChannelOptions { HttpHandler = handler });
->>>>>>> develop
                 return new RoomAuditService.RoomAuditServiceClient(channel);
             });
             builder.Services.AddControllers();
@@ -67,7 +63,7 @@ namespace QuizMaster.API.QuizSession
 
             // Add DBcontext
 			builder.Services.AddDbContext<QuizSessionDbContext>(
-				dbContextOptions => dbContextOptions.UseSqlite(
+				dbContextOptions => dbContextOptions.UseSqlServer(
 					builder.Configuration["ConnectionStrings:QuizMasterQuizSessionDBConnectionString"]));
 
             // Register worker services
@@ -87,10 +83,10 @@ namespace QuizMaster.API.QuizSession
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                
+
+                //app.UseSwagger();
+                //app.UseSwaggerUI();
             }
-            app.UseSwagger();
-            app.UseSwaggerUI();
 
             app.UseRouting(); // required when use endpoints is implemented
 

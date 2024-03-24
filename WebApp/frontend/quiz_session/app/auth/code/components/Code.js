@@ -24,13 +24,14 @@ export default function Code() {
       <form onSubmit={handleSubmit}>
         <input
           placeholder="Code"
-          className="w-full p-2 border-gray-300 border-[1px] rounded-lg"
+          className="w-full p-2 border-gray-300 border-[1px] rounded-md"
           onChange={(e) => {
             setCode(e.target.value);
           }}
+          autoFocus={true}
         />
         <button
-          className="w-full bg-button py-2 text-white text-lg font-bold rounded-lg"
+          className="w-full bg-button py-2 text-white text-lg font-bold rounded-md mt-3"
           type="submit"
         >
           Join Room

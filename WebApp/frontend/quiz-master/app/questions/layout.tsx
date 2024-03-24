@@ -12,11 +12,28 @@ import { getAllDifficulties } from "@/lib/hooks/difficulty";
 import { getAllTypes } from "@/lib/hooks/type";
 import ErrorContainer from "@/components/pages/ErrorContainer";
 import { useErrorRedirection } from "@/utils/errorRedirection";
+import { fetchLoginUser } from "@/lib/quizData";
+import { useRouter } from "next/navigation";
+import { QUESTION_DEFAULT, useQuestionnaire } from "@/store/QuestionStore";
+import { GetAllQuestion } from "@/lib/hooks/question";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+    const router = useRouter();
+
+    useEffect(() => {
+        fetchLoginUser().then((res) => {
+            if (res !== null && res !== undefined) {
+                if (!res?.info.roles.includes("Administrator")) {
+                    router.push("/home");
+                }
+            }
+        });
+    }, []);
+
     const { setQuestionCategories } = useQuestionCategoriesStore();
     const { setQuestionDifficulties } = useQuestionDifficultiesStore();
     const { setQuestionTypes } = useQuestionTypesStore();
+    const { setQuestionnaire } = useQuestionnaire();
     const { redirectToError } = useErrorRedirection();
 
     const populateData = useCallback(async () => {
@@ -29,6 +46,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             const typesRes = await getAllTypes();
             setQuestionTypes(typesRes.data);
+
+            const questionsRes = await GetAllQuestion();
+            if (questionsRes)
+                setQuestionnaire(questionsRes.pop() ?? QUESTION_DEFAULT);
         } catch (error) {
             redirectToError();
         }

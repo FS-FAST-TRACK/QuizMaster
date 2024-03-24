@@ -7,8 +7,13 @@ import {
     QuestionDetail,
     QuestionSet,
     Set,
+    SystemInfoDto,
+    UserInfo,
+    ContactDetails,
+    Review,
 } from "./definitions";
 import {
+    QUIZMASTER_AUTH_GET_COOKIE_INFO,
     QUIZMASTER_MEDIA_GET_DOWNLOAD,
     QUIZMASTER_QCATEGORY_GET_CATEGORIES,
     QUIZMASTER_QUESTION_GET_QUESTION,
@@ -16,7 +21,47 @@ import {
     QUIZMASTER_SET_GET_SETQUESTION,
     QUIZMASTER_SET_GET_SETQUESTIONS,
     QUIZMASTER_SET_GET_SETS,
+    QUIZMASTER_SYSTEM_ADMIN_GET_REVIEW,
+    QUIZMASTER_SYSTEM_GET_CONTACT_INFO,
+    QUIZMASTER_SYSTEM_GET_SYSTEM_INFO,
+    QUIZMASTER_SYSTEM_USER_GET_REVIEW,
 } from "@/api/api-routes";
+import { signOut } from "next-auth/react";
+
+export async function fetchLoginUser() {
+    try {
+        const token = localStorage.getItem("token"); //just temporary
+        var apiUrl = `${QUIZMASTER_AUTH_GET_COOKIE_INFO}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(async (res) => {
+                var data: UserInfo;
+                const resJson = await res.json();
+                if (resJson?.status === 401) {
+                    return null;
+                }
+                data = resJson;
+                return data;
+            })
+            .catch((e) => {
+                console.error("unauthorized", e);
+            });
+        if (!data) {
+            localStorage.clear();
+            signOut();
+        }
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch user data");
+    }
+}
 
 export async function fetchCategories(
     questionResourceParameter?: CategoryResourceParameter
@@ -100,7 +145,6 @@ export async function fetchSet({ setId }: { setId: number }) {
     try {
         const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SET}${setId}`;
-        console.log(token);
 
         const data = await fetch(apiUrl, {
             credentials: "include",
@@ -125,7 +169,6 @@ export async function fetchAllSetQuestions() {
     try {
         const token = localStorage.getItem("token"); //just temporary
         var apiUrl = `${QUIZMASTER_SET_GET_SETQUESTIONS}`;
-        console.log(token);
 
         const data = await fetch(apiUrl, {
             credentials: "include",
@@ -202,13 +245,96 @@ export async function fetchMedia(id: string) {
         throw new Error("Failed to fetch media.");
     }
 }
+export async function fetchSystemInfo() {
+    try {
+        var apiUrl = `${QUIZMASTER_SYSTEM_GET_SYSTEM_INFO}`;
 
-export function fetchSystemInfo() {
-    let systemInfo = {
-        version: "1.0.0",
-        systemInfo:
-            "Lorem ipsum dolor sit amet consectetur. Pulvinar porta egestas molestie purus faucibus neque malesuada lectus. Lacus auctor sit felis sed ultrices nullam sapien ornare justo. Proin adipiscing viverra vestibulum arcu sit. Suscipit bibendum ullamcorper ut et dolor quisque nulla et.",
-    };
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(async (res) => {
+            var data: SystemInfoDto;
+            const resJson = await res.json();
+            data = resJson.data;
 
-    return systemInfo;
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch system info.");
+    }
+}
+
+export async function fetchContactInfo() {
+    try {
+        var apiUrl = `${QUIZMASTER_SYSTEM_GET_CONTACT_INFO}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(async (res) => {
+            var data: ContactDetails;
+            const resJson = await res.json();
+            data = resJson.data;
+
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch contact info.");
+    }
+}
+
+export async function fetchReviewsForAdmin() {
+    try {
+        const token = localStorage.getItem("token");
+        var apiUrl = `${QUIZMASTER_SYSTEM_ADMIN_GET_REVIEW}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }).then(async (res) => {
+            var data: Review[];
+            const resJson = await res.json();
+            data = resJson.data;
+
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch reviews.");
+    }
+}
+
+export async function fetchReviewsForClient() {
+    try {
+        var apiUrl = `${QUIZMASTER_SYSTEM_USER_GET_REVIEW}`;
+
+        const data = await fetch(apiUrl, {
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then(async (res) => {
+            var data: Review[];
+            const resJson = await res.json();
+            data = resJson.data;
+
+            return data;
+        });
+        return data;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to fetch reviews.");
+    }
 }

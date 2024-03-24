@@ -29,6 +29,8 @@ import { postQuestionSet, updateQuestionSet } from "@/lib/hooks/set";
 import { notification } from "@/lib/notifications";
 import { useRouter } from "next/navigation";
 import { fetchQuestion, fetchSet, fetchSetQuestions } from "@/lib/quizData";
+import { QUIZMASTER_SET_DELETE } from "@/api/api-routes";
+import { notifications } from "@mantine/notifications";
 
 const items = [
     { label: "All", href: "/question-sets" },
@@ -112,6 +114,25 @@ export default function Page({ params }: { params: { id: number } }) {
         });
     }, [questionSet]);
 
+    const handleDelete = async () => {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${QUIZMASTER_SET_DELETE}${params.id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (res.status === 200) {
+            notifications.show({
+                title: "Set Deleted",
+                message: "Set was deleted successfully",
+            });
+            router.push("/question-sets");
+        }
+    };
+
     const handleSubmit = useCallback(async () => {
         formValues.values.questions = questionSet.map(
             (question) => question.id
@@ -123,12 +144,11 @@ export default function Page({ params }: { params: { id: number } }) {
             questions: formValues.values.questions,
         };
 
-        console.log(questionSetCreateDto);
         open();
 
         updateQuestionSet({ id: params.id, questionSet: questionSetCreateDto })
             .then((res) => {
-                console.log(res, "hello");
+                console.error(res, "hello");
                 // Notify for successful post
                 notification({
                     type: "success",
@@ -138,7 +158,7 @@ export default function Page({ params }: { params: { id: number } }) {
                 router.push("/question-sets");
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
                 // notify for error
                 notification({
                     type: "error",
@@ -159,9 +179,7 @@ export default function Page({ params }: { params: { id: number } }) {
             </div>
             <form
                 className="flex flex-col gap-8 relative"
-                onSubmit={form.onSubmit((values) => {
-                    console.log(values);
-                })}
+                onSubmit={form.onSubmit((values) => {})}
                 onReset={() => form.reset()}
             >
                 <LoadingOverlay
@@ -213,21 +231,33 @@ export default function Page({ params }: { params: { id: number } }) {
                     >
                         Cancel
                     </Link>
-                    <Button
-                        className="flex ml-3 h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
-                        color="green"
-                        onClick={handleSubmit}
-                        disabled={
-                            (formValues.values.qSetName ===
-                                originalSetDetails?.qSetName &&
-                                noChanges &&
-                                questionSet.length === originalQIds.length) ||
-                            questionSet.length === 0 ||
-                            formValues.values.qSetName === ""
-                        }
-                    >
-                        <p className="block">Update Set</p>
-                    </Button>
+                    {questionSet.length > 0 ? (
+                        <Button
+                            className="flex ml-3 h-[40px] bg-[--primary] items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
+                            color="green"
+                            onClick={handleSubmit}
+                            disabled={
+                                (formValues.values.qSetName ===
+                                    originalSetDetails?.qSetName &&
+                                    noChanges &&
+                                    questionSet.length ===
+                                        originalQIds.length) ||
+                                questionSet.length === 0 ||
+                                formValues.values.qSetName === ""
+                            }
+                        >
+                            <p className="block">Update Set</p>
+                        </Button>
+                    ) : (
+                        <Button
+                            className="flex ml-3 h-[40px] bg-red-200 items-center gap-3 rounded-md py-3 text-white text-sm font-medium justify-start px-3"
+                            color="red"
+                            onClick={handleDelete}
+                            disabled={questionSet.length !== 0}
+                        >
+                            <p className="block">Delete Set</p>
+                        </Button>
+                    )}
                 </div>
             </form>
             <AddQuestionToSetModal

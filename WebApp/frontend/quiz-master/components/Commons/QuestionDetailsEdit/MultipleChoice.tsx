@@ -13,6 +13,7 @@ import {
 import { UseFormReturnType } from "@mantine/form";
 import styles from "./MultipleChoice.module.css";
 import { notification } from "@/lib/notifications";
+import { useEffect, useState } from "react";
 
 export default function MultipleChoiceQuestionDetail({
     form,
@@ -21,6 +22,36 @@ export default function MultipleChoiceQuestionDetail({
         details: QuestionDetail[];
     }>;
 }) {
+    const [fomr2, setForm2] = useState(form);
+
+    useEffect(() => {
+        const UpdatedForm = form;
+        const OutDatedForm = fomr2;
+
+        // check if there is a true options in UpdatedForm
+        let hasTrue = false;
+        for(let x = 0; x < OutDatedForm.values.details.length; x++){
+            if(UpdatedForm.values.details[x].detailTypes.includes("answer")){
+                hasTrue = true;
+                break;
+            }
+        }
+
+        OutDatedForm.values.details.map((detail, index) => {
+            
+            // Only update the selected answers if there is an update in the new form
+            if(hasTrue && UpdatedForm.values.details[index]){
+                if(detail.detailTypes.includes("answer") !== UpdatedForm.values.details[index].detailTypes.includes("answer")){
+                    UpdatedForm.values.details[index].detailTypes.push("answer");
+                }else{
+                    UpdatedForm.values.details[index].detailTypes = UpdatedForm.values.details[index].detailTypes.filter((e) => {return e !== "answer"});
+                }
+            }
+        })
+
+        setForm2(UpdatedForm)
+    }, [form]);
+
     const optionFields = form.values.details.map((item, index) => {
         if (!item.detailTypes.includes("option")) {
             return;

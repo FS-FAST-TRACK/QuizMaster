@@ -27,10 +27,7 @@ import ViewQuestionModal from "../modals/ViewQuestionModal";
 import { deleteQuestion as removeQuestion } from "@/lib/hooks/question";
 import { QUIZMASTER_QUESTION_DELETE } from "@/api/api-routes";
 import { notification } from "@/lib/notifications";
-<<<<<<< HEAD
-=======
 import { usePathname, useRouter } from "next/navigation";
->>>>>>> develop
 
 export default function QuestionTable({
     questions,
@@ -75,13 +72,10 @@ export default function QuestionTable({
                     notification({ type: "error", title: res.message });
                 }
                 setDeleteQuestion(undefined);
-<<<<<<< HEAD
-=======
 
                 if (onDeleteCallBack) {
                     onDeleteCallBack();
                 }
->>>>>>> develop
             } catch (error) {
                 notification({ type: "error", title: "Something went wrong" });
             }
@@ -119,7 +113,13 @@ export default function QuestionTable({
                 className="cursor-pointer"
                 onClick={() => setViewQuestion(question)}
             >
-                {question.qStatement}
+                {question.qStatement ? (
+                    question.qStatement
+                ) : (
+                    <p className="text-red-500">
+                        DELETED QUESTION - REMOVE THIS QUESTION -
+                    </p>
+                )}
             </Table.Td>
             <Table.Td>{getQuestionTypeDescription(question.qTypeId)}</Table.Td>
             <Table.Td>

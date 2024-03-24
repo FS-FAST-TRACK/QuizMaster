@@ -3,15 +3,17 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { create } from "zustand";
 
+export const BASE_URL = process.env.NEXT_PUBLIC_QUIZMASTER_GATEWAY;
+
 //connection
 export const useConnection = create((set, get) => ({
   connection: undefined,
 
   setConnection: () => {
-    if (get().connection !== undefined) console.log("initializing");
+    if (get().connection !== undefined) console.info("initializing");
     set({
       connection: new HubConnectionBuilder()
-        .withUrl("https://localhost:7081/gateway/hub/session")
+        .withUrl(`${BASE_URL}/gateway/hub/session`)
         .build(),
     });
   },
@@ -66,3 +68,25 @@ export const useLeaderboard = create((set) => ({
     set({ leader: [] });
   },
 }));
+
+export const useMetaData = create((set) => ({
+  metadata: undefined,
+  setMetadata: (data) => {
+    set({ metadata: data });
+  },
+}));
+
+// answer
+export const useAnswer = create((set) => ({
+  answer: undefined,
+  setAnswer: (data) => {
+    set({ answer: data });
+  }
+}))
+
+export const useAnsweredParticipants = create((set) => ({
+  answeredParticipants: [],
+  setAnsweredParticipants: (data = []) => {
+    set({answeredParticipants: data})
+  }
+}))

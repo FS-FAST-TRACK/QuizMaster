@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "@mantine/form";
 import { UpdateContactDetails, postContactUs } from "@/lib/hooks/contact-us";
 import { UpdateSystemInfo } from "@/lib/hooks/system-info";
+import { notification } from "@/lib/notifications";
 
 export default function EditSystemInfoModal({
     systemInfo,
@@ -19,20 +20,51 @@ export default function EditSystemInfoModal({
     const systemDetails = useForm<SystemInfoDto>({
         initialValues: {
             version: `${systemInfo?.version}`,
-            systemInfo: `${systemInfo?.systemInfo}`,
+            description: `${systemInfo?.description}`,
+            web_link: `${systemInfo?.web_link}`,
+            mobile_link: `${systemInfo?.mobile_link}`,
+            ios_link: `${systemInfo?.ios_link}`,
         },
         clearInputErrorOnChange: true,
-        validateInputOnChange: true,
+        validateInputOnBlur: true,
         validate: {
-            version: (value) =>
-                value.length < 1 ? "Version must not be empty." : null,
-            systemInfo: (value) =>
+            version: (value) => {
+                if (!value) {
+                    return "Version must not be empty.";
+                }
+
+                const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
+
+                if (!versionRegex.test(value)) {
+                    return "Invalid version format. Use the format x.y.z (e.g., 1.0.0)";
+                }
+
+                return null;
+            },
+            description: (value) =>
                 value.length < 1 ? "System Info must not be empty." : null,
+            web_link: (value) =>
+                value.length < 1 ? "Website link must not be empty." : null,
+            mobile_link: (value) =>
+                value.length < 1 ? "Mobile link must not be empty." : null,
+            ios_link: (value) =>
+                value.length < 1 ? "iOS link must not be empty." : null,
         },
     });
 
     const handelSubmit = useCallback(async () => {
-        UpdateSystemInfo({ systemDetails: systemDetails.values });
+        UpdateSystemInfo({ systemDetails: systemDetails.values })
+            .then((res) => {
+                if (res.status === "Success") {
+                    notification({ type: "success", title: res.message });
+                    onClose();
+                } else {
+                    notification({ type: "error", title: res.message });
+                }
+            })
+            .catch((res) => {
+                notification({ type: "error", title: ":" + res.message });
+            });
     }, [systemDetails.values]);
 
     return (
@@ -46,37 +78,60 @@ export default function EditSystemInfoModal({
                     Edit System Information
                 </div>
             }
-            size="md"
+            size="lg"
         >
-            <div className="space-y-8">
+            <form
+                className="space-y-8"
+                onSubmit={systemDetails.onSubmit(() => {
+                    handelSubmit();
+                })}
+                onReset={() => systemDetails.reset()}
+            >
                 <TextInput
                     label="Version"
                     required
                     variant="filled"
-                    placeholder="Email"
+                    placeholder="Version"
                     {...systemDetails.getInputProps("version")}
                 />
                 <Textarea
                     label="System Info"
                     required
                     variant="filled"
-                    placeholder="Phone Number"
+                    placeholder="System Info"
                     rows={10}
-                    {...systemDetails.getInputProps("systemInfo")}
+                    {...systemDetails.getInputProps("description")}
+                />
+                <TextInput
+                    label="Web Link"
+                    required
+                    variant="filled"
+                    placeholder="Web Link"
+                    {...systemDetails.getInputProps("web_link")}
+                />
+                <TextInput
+                    label="Mobile Link"
+                    required
+                    variant="filled"
+                    placeholder="Mobile Link"
+                    {...systemDetails.getInputProps("mobile_link")}
+                />
+                <TextInput
+                    label="iOS Link"
+                    required
+                    variant="filled"
+                    placeholder="iOS Link"
+                    {...systemDetails.getInputProps("ios_link")}
                 />
                 <div className="flex gap-2">
-                    <Button
-                        variant="filled"
-                        color="orange"
-                        onClick={handelSubmit}
-                    >
+                    <Button variant="filled" color="orange" className="bg-orange-500" type="submit">
                         Submit
                     </Button>
-                    <Button variant="outline" color="gray" onClick={onClose}>
+                    <Button variant="outline" color="gray" className="text-gray" onClick={onClose}>
                         Close
                     </Button>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }

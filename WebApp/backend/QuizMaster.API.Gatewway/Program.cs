@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using QuizMaster.API.Authentication.Configuration;
 using QuizMaster.API.Authentication.Helper;
@@ -13,6 +14,7 @@ using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
 using QuizMaster.API.Gateway.Services;
 using QuizMaster.API.Gateway.Services.Email;
+using QuizMaster.API.Gateway.Services.ReportService;
 using QuizMaster.API.Gateway.Services.SystemService;
 using QuizMaster.API.Gateway.SystemData.Contexts;
 using QuizMaster.API.Gatewway.Controllers;
@@ -28,10 +30,16 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 builder.Services.AddLogging();
 builder.Services.AddSignalR();
-builder.Services.AddCors(o => 
-    o.AddDefaultPolicy(builder => 
-    builder.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:3001", "https://localhost:7081").AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddCors(o =>
+{
+    var conf = builder.Configuration.GetSection("AppSettings:CORS_ORIGINS").Get<string[]>();
+    o.AddDefaultPolicy(builder =>
+    builder.WithOrigins(conf).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+}
+    );
 builder.Services.AddDbContext<SystemDbContext>(option => option.UseSqlite("Data Source=SystemData\\System.db"));
+builder.Services.AddSingleton<ReportServiceHandler>();
+builder.Services.AddScoped<ReportRepository>();
 builder.Services.AddScoped<SessionHub>();
 builder.Services.AddSingleton<SessionHandler>();
 builder.Services.AddSingleton<QuizHandler>();
@@ -78,6 +86,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.Configure<GrpcServerConfiguration>(builder.Configuration.GetSection("GrpcServerConfiguration"));
+builder.Services.Configure<QuizSettings>(builder.Configuration.GetSection("QuizSettings"));
 
 // register the services
 builder.Services.AddScoped<IRepository, Repository>();
@@ -87,6 +96,9 @@ builder.Services.AddSingleton<RabbitMqRepository>();
 builder.Services.AddScoped<AccountGatewayController>();
 builder.Services.AddSingleton<IDictionary<string, int>>(o => new Dictionary<string, int>());
 builder.Services.AddScoped<EmailService>();
+
+// Use razor pages
+builder.Services.AddRazorPages();
 
 
 // configure cookie authentication
@@ -103,6 +115,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
         option.ExpireTimeSpan = TimeSpan.FromHours(Convert.ToInt16(builder.Configuration["AppSettings:IntExpireHour"]));
         option.SlidingExpiration = true; // renew cookie when it's about to expire,
+        option.Cookie.SameSite = SameSiteMode.None; // frontend is using different port
     });
 
 var app = builder.Build();
@@ -151,7 +164,13 @@ using(var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var systemDbContext = services.GetRequiredService<SystemDbContext>();
+    systemDbContext.Database.Migrate();
     systemDbContext.Database.EnsureCreated();
+
+    QuizSettings QuizSettings = services.GetRequiredService<IOptions<QuizSettings>>().Value;
+    Console.WriteLine("Multiple Choice: "+QuizSettings.OverrideQuestionTimer.MultipleChoice);
+    Console.WriteLine("Type Answer: " + QuizSettings.OverrideQuestionTimer.TypeAnswer);
+    Console.WriteLine("True or False: " + QuizSettings.OverrideQuestionTimer.TrueOrFalse);
 }
 
 app.Run();

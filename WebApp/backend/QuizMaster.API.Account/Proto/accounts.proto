@@ -12,6 +12,7 @@ service AccountService {
 	rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountReply);
 	rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountReply);
 	rpc SetAdminAccount(SetAccountAdminRequest) returns (SetAccountAdminResponse);
+	rpc ResetPassword(UpdatePasswordRequest) returns (SetAccountAdminResponse);
 	rpc UpdateUserPassword(UpdatePasswordRequest) returns (SetAccountAdminResponse);
 	rpc UpdateUserPasswordConfirm(ConfirmUpdatePasswordRequest) returns (SetAccountAdminResponse);
 }
@@ -24,6 +25,7 @@ message GetAccountByIdRequest {
 // Reply account by id
 message GetAccountByIdReply{
 	string account= 1;
+	string roles=2;
 }
 
 // Reply account or not found
@@ -54,6 +56,7 @@ message AllUserReply{
 	string dateCreated = 7;
 	string dateUpdated = 8;
 	string updatedByUser = 9;
+	string roles = 10;
 }
 
 // Request check username

@@ -11,7 +11,7 @@ interface DataToken {
     exp: ISODateString;
     iat: ISODateString;
 }
-export const authOptions = {
+const authOptions = {
     providers: [
         CredentialsProvider({
             // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -42,20 +42,22 @@ export const authOptions = {
                         username: parsed.UserName,
                         role: parse.Roles[0].Name,
                     };
-
                     return user as any;
                 } catch (error) {
-                    console.log(error);
+                    console.error(error);
                 }
             },
         }),
     ],
     pages: {
-        signIn: "/auth/login",
-        signOut: "/",
+        signIn: `${process.env.BASE_URL ?? 'localhost:3000'}/auth/login`,
+        signOut: `${process.env.BASE_URL ?? 'localhost:3000'}/auth/signout`,
     },
 
-    secret: process.env.NEXTAUTH_SECRET,
+    secret:
+        process.env.NEXTAUTH_SECRET ??
+        process.env.SECRET ??
+        "04e9d3fbe3c8fbfb7e5f89892751f8c5",
     callbacks: {
         jwt: async ({ token, user }: { token: JWT; user: User }) => {
             user && (token.user = user);
@@ -70,6 +72,8 @@ export const authOptions = {
             return session;
         },
     },
+
+    site: process.env.BASE_URL
 };
 
 const handler = NextAuth(authOptions as any);

@@ -5,8 +5,9 @@ import ErrorContainer from "@/components/pages/ErrorContainer";
 import ErrorBoundary from "@/components/pages/ErrorContainer";
 import RegisterForm from "@/components/register-form";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Page({
     params,
@@ -14,14 +15,9 @@ export default function Page({
     params: { authPage: "login" | "signup" | undefined };
 }) {
     const searchParams = useSearchParams();
-
+    const router = useRouter();
     const authPage = params.authPage || "login";
-<<<<<<< HEAD
-    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-=======
-    const callbackUrl =
-        searchParams.get("callbackUrl") || "http://localhost:3000/dashboard";
->>>>>>> develop
+    const callbackUrl = searchParams.get("callbackUrl") || "/home";
     const { status } = useSession();
 
     if (status === "loading") {

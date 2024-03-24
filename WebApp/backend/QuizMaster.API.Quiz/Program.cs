@@ -67,8 +67,8 @@ namespace QuizMaster.API.Quiz
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
 			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
+				//app.UseSwagger();
+				//app.UseSwaggerUI();
 
 				// add the cors policy to the app
 				// allow any origin to access api endpoints on development mode

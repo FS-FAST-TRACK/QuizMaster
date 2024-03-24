@@ -1,15 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using QuizMaster.API.Authentication.Models;
 using QuizMaster.API.Authentication.Proto;
+using QuizMaster.API.Gateway.Configuration;
 using QuizMaster.API.Gateway.Hubs;
+using QuizMaster.API.Gateway.Models.Report;
+using QuizMaster.API.Gateway.Services.ReportService;
+using QuizMaster.API.QuizSession.Models;
 using QuizMaster.API.QuizSession.Protos;
+using QuizMaster.Library.Common.Entities.Questionnaire;
 using QuizMaster.Library.Common.Entities.Rooms;
 using QuizMaster.Library.Common.Models.QuizSession;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Runtime.Intrinsics.X86;
 
 namespace QuizMaster.API.Gateway.Services
 {
@@ -25,7 +32,13 @@ namespace QuizMaster.API.Gateway.Services
         private List<string> ClientsSubmittedAnswers;
         private Dictionary<int, QuizRoom> ActiveRooms;
         private Dictionary<int, IEnumerable<QuizParticipant>> RoomEliminatedParticipants;
-        public SessionHandler()
+        private Dictionary<string, string> SessionId;
+        private readonly ReportServiceHandler ReportHandler;
+        private Dictionary<int, bool> RoomNextSetPaused;
+        private List<int> RoomForceExitIds;
+        private QuizSettings QuizSettings;
+
+        public SessionHandler(ReportServiceHandler reportServiceHandler, IOptions<QuizSettings> options)
         {
             connectionGroupPair = new();
             participantLinkedConnectionId = new();
@@ -36,6 +49,51 @@ namespace QuizMaster.API.Gateway.Services
             ClientsSubmittedAnswers = new();
             ActiveRooms = new();
             RoomEliminatedParticipants = new();
+            SessionId = new();
+            RoomNextSetPaused = new();
+            ReportHandler = reportServiceHandler;
+            RoomForceExitIds = new();
+            QuizSettings = options.Value;
+        }
+
+        public string GenerateSessionId(string roomPin)
+        {
+            Guid guid = Guid.NewGuid();
+            SessionId[roomPin] = guid.ToString();
+            return SessionId[roomPin];
+        }
+
+        public string GetSessionId(string roomPin)
+        {
+            return SessionId[roomPin];
+        }
+
+        public void SetPauseRoom(int roomId, bool Pause)
+        {
+            if(RoomNextSetPaused.ContainsKey(roomId))
+                RoomNextSetPaused[roomId] = Pause;
+            else RoomNextSetPaused.Add(roomId, Pause);
+        }
+
+        public bool GetPausedRoom(int roomId)
+        {
+            RoomNextSetPaused.TryGetValue(roomId, out bool result);
+            return result;
+        }
+
+        public void ForceExitRoom(int roomId)
+        {
+            RoomForceExitIds.Add(roomId);
+        }
+
+        public bool IsRoomForcedToExit(int roomId)
+        {
+            return RoomForceExitIds.Contains(roomId);
+        }
+
+        public void ClearForcedExitRoom()
+        {
+            RoomForceExitIds.Clear();
         }
 
         public async Task AddToGroup(SessionHub hub, string group, string connectionId)
@@ -62,13 +120,14 @@ namespace QuizMaster.API.Gateway.Services
                 connectionGroupPair.Remove(connectionId);
             }
         }
-        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, string channel = "chat", bool sendParticipantData = true)
+        public async Task RemoveClientFromGroups(SessionHub hub, string connectionId, string disconnectMessage, bool sendParticipantData = true)
         {
             if (connectionGroupPair.ContainsKey(connectionId))
             {
                 await hub.Groups.RemoveFromGroupAsync(connectionId, connectionGroupPair[connectionId]);
                 var roomPin = connectionGroupPair[connectionId];
-                await hub.Clients.Group(roomPin).SendAsync(channel, disconnectMessage);
+                await hub.Clients.Group(roomPin).SendAsync("notif", disconnectMessage); // removed chat, set to notif
+                await hub.Clients.Group(roomPin).SendAsync("chat", new { Message = disconnectMessage, Name = "bot", IsAdmin = false });
                 
                 if (sendParticipantData)
                 {
@@ -99,6 +158,20 @@ namespace QuizMaster.API.Gateway.Services
         public bool RemoveHoldOnAnswerSubmission(string connectionId)
         {
             return ClientsSubmittedAnswers.Remove(connectionId);
+        }
+
+        public IReadOnlyList<string> ParticipantsAnswered()
+        {
+            List<string> names = new();
+
+            foreach (var userConnectionId in ClientsSubmittedAnswers)
+            {
+                participantLinkedConnectionId.TryGetValue(userConnectionId, out QuizParticipant? quizParticipant);
+                if(quizParticipant != null && !IsAdmin(userConnectionId))
+                    names.Add(quizParticipant.QParticipantDesc);
+            }
+
+            return names;
         }
 
         public void AddActiveRoom(int roomPin, QuizRoom room)
@@ -150,6 +223,11 @@ namespace QuizMaster.API.Gateway.Services
         public IEnumerable<QuizParticipant> GetEliminatedParticipants(int roomPin)
         {
             return RoomEliminatedParticipants.GetValueOrDefault(roomPin) ?? new List<QuizParticipant>();
+        }
+
+        public QuizParticipant? GetQuizParticipantByUsername(string username)
+        {
+            return participantLinkedConnectionId.Values.Where(qp => qp.QParticipantDesc == username).FirstOrDefault();
         }
 
         public void LinkParticipantConnectionId(string connectionId, QuizParticipant quizParticipant)
@@ -245,7 +323,7 @@ namespace QuizMaster.API.Gateway.Services
             }
             //await hub.Clients.Client(connectionId).SendAsync("notif", "Answer Submitted");
             // get the question data
-            #region GettingQuestionData
+            #region Saving Answer
             var gRpcRequest = new SetRequest() { Id = questionId };
             var gRpcReply = await grpcClient.GetQuestionAsync(gRpcRequest);
             if (gRpcReply == null) return "Failed to retrieve question information";
@@ -258,33 +336,130 @@ namespace QuizMaster.API.Gateway.Services
             var answers = questionData.details.Where(a => a.DetailTypes.Where(dt => dt.DTypeDesc.ToLower() == "answer").Select(Dt => Dt.DTypeDesc).ToList().Count > 0).Select(d => d.QDetailDesc).ToList();
 
             bool correct = false;
-            foreach(string Qanswer in answers)
+            if(questionData.question.QTypeId == 6)
             {
-                if(Qanswer.ToLower() == answer.ToLower())
+                // try checking if puzzle type is correct
+                correct = true;
+                List<string> _answers = JsonConvert.DeserializeObject<List<string>>(answer) ?? new List<string>();
+                List<string> _correct = JsonConvert.DeserializeObject<List<string>>(answers[0]) ?? new List<string>();
+                
+                for(int index = 0; index < _answers.Count(); index++)
                 {
-                    correct = true;
-                    break;
+                    if(index < answers.Count)
+                    {
+                        if (_correct[index] != _answers[index])
+                        {
+                            correct = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                bool answer_found = false;
+                foreach (string Qanswer in answers)
+                {
+                    // See if type answer has multiple answers
+                    string[] correctAnswers = Qanswer.Split("|", StringSplitOptions.TrimEntries);
+
+                    foreach(string correctAnswer in correctAnswers)
+                    {
+                        // No need to trim the correct answer since it's already trimmed during the split operation
+                        if (correctAnswer.ToLower() == answer.ToLower().Trim())
+                        {
+                            correct = true;
+                            answer_found = true;
+                            break;
+                        }
+                    }
+
+                    // let's break out the loop if answer has already specified
+                    if (answer_found) break;
+                    
                 }
             }
 
+            // Get the question difficulty description
+            int Point = QuizSettings.OverridePointSystem.GeneralPoints;
+            QuestionDifficulty diff = questionData.question.QDifficulty;
+            if(diff != null || diff != default)
+            {
+                if (diff.QDifficultyDesc.ToLower().Contains("easy"))
+                    Point = QuizSettings.OverridePointSystem.Easy;
+                else if (diff.QDifficultyDesc.ToLower().Contains("average"))
+                    Point = QuizSettings.OverridePointSystem.Average;
+                else if (diff.QDifficultyDesc.ToLower().Contains("difficult"))
+                    Point = QuizSettings.OverridePointSystem.Difficult;
+                else if (diff.QDifficultyDesc.ToLower().Contains("clincher"))
+                    Point = QuizSettings.OverridePointSystem.Clincher;
+            }
+
+            QuizParticipant? participantData;
+            // get the participant data
+            participantData = GetLinkedParticipantInConnectionId(connectionId);
+            if (participantData == null) return "Participant data not found";
+
             if (correct)
             {
-                // get the participant data
-                var participantData = GetLinkedParticipantInConnectionId(connectionId);
-                if (participantData == null) return "Participant data not found";
-
                 // increment score by 1
-                participantData.Score += 1;
-
-                
+                participantData.Score += Point;
             }
             // Hold Submission of Answer
             HoldClientAnswerSubmission(connectionId);
+            // Save Report
+            ReportHandler.SaveParticipantAnswer(new ParticipantAnswerReport() 
+            {
+                SessionId = GetSessionId(userGroup),
+                ParticipantName = participantData.QParticipantDesc,
+                Answer = answer,
+                QuestionId = questionData.question.Id,
+                ScreenshotLink = "",
+                Points = Point,
+                Score = correct ? Point:0
+            });
             #endregion
             return "Answer submitted";
         }
 
-        
+        public string SubmitScreenshot(QuizRoomService.QuizRoomServiceClient grpcClient, string connectionId, int questionId, string screenshotLink)
+        {
+            /*
+             * If the current displayed questionId is not the same as passed questionId
+             * deny the request and do not update the participant score
+             */
+
+            // retrieve the current group of the user
+            string? userGroup = GetConnectionGroup(connectionId);
+            if (userGroup == null) return "Not in session";
+
+            if (!RoomCurrentQuestionDisplayed.ContainsKey(userGroup)) return "Not in session";
+
+            int? currentQuestionIdDisplayed = RoomCurrentQuestionDisplayed.GetValueOrDefault(userGroup);
+            if (currentQuestionIdDisplayed == null) return "Not in session";
+            if (questionId != currentQuestionIdDisplayed)
+            {
+                return "Question Expired, your screenshot is declined";
+            }
+
+            #region Saving Screenshot
+            QuizParticipant? participantData;
+            // get the participant data
+            participantData = GetLinkedParticipantInConnectionId(connectionId);
+            if (participantData == null) return "Participant data not found";
+
+            // Get the report
+            var participantAnswerReport = ReportHandler.GetParticipantAnswerReport(participantData.QParticipantDesc, GetSessionId(userGroup), questionId);
+            if(participantAnswerReport != null)
+            {
+                // Update the link
+                participantAnswerReport.ScreenshotLink = screenshotLink;
+            }
+            #endregion
+            return "Screenshot Saved";
+        }
+
+
 
         public async Task AuthenticateConnectionId(SessionHub hub, AuthService.AuthServiceClient _authChannelClient, string connectionId, string token)
         {

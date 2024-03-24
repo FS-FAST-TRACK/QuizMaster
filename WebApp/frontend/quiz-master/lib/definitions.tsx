@@ -1,5 +1,25 @@
+export interface UserInfo {
+    message: string;
+    info: {
+        userData: {
+            id: number;
+            lastName: string;
+            firstName: string;
+            email: string;
+            userName: string;
+            activeData: string;
+            dateCreated: string;
+            dateUpdated: string;
+            updatedByUser: string;
+            phoneNumber: string;
+            phoneNumberConfirmed: string;
+        };
+        roles: string[];
+        validUntil: Date;
+        issuedDate: Date;
+    };
+}
 import { RefObject } from "react";
-
 export interface QuestionCore {
     id: number;
     qAudio: string;
@@ -142,6 +162,7 @@ export type Set = {
     dateUpdated: Date;
     createdByUserId: number;
     updatedByUserId: number;
+    numberOfQuestions: number;
 };
 export type SetDTO = {
     qSetDesc: string;
@@ -165,6 +186,39 @@ export type PatchItem = {
     path: string;
     op: string;
     value: any;
+};
+
+export type SystemInfoDto = {
+    description: string;
+    version: string;
+    web_link: string;
+    mobile_link: string;
+    ios_link: string;
+};
+
+export type ContactUsCreateValues = {
+    userId: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    message: string;
+};
+
+export type ContactDetails = {
+    email: string;
+    contact: string;
+};
+
+export type Feedback = {
+    starRating: number;
+    comment: string;
+};
+
+export type Review = {
+    id: number;
+    starRating: number;
+    comment: string;
 };
 
 export type UserAuditTrail = {

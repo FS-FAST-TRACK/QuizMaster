@@ -21,6 +21,7 @@ export default function TypeAnswerQuestionDetails({
         }
         return (
             <TextInput
+                key={index}
                 label="Short Anwer"
                 variant="filled"
                 withAsterisk

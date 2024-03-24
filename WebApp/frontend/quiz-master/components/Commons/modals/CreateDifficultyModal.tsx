@@ -79,8 +79,9 @@ export default function CreateDifficultyModal({
                         Cancel
                     </Button>
                     <Button
+                        
                         variant="filled"
-                        color="green"
+                        className={`${difficultyDesc === "" ? "bg-[#5a5a5a20] text-[#5a5a5a] font-medium cursor-not-allowed":"bg-green-600 text-white font-semibold cursor-pointer"}    rounded  p-2`}
                         disabled={difficultyDesc === ""}
                         onClick={
                             difficulty && onUpdate

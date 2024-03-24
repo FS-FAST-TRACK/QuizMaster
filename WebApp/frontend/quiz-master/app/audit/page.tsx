@@ -85,11 +85,10 @@ export default function Page() {
         const fetchData = async () => {
             try {
                 const { data } = await fetchAudit(setUriAudit(auditType));
-                console.log(data);
                 setUserAudit(data);
                 setFilteredData(data);
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         };
         fetchData();

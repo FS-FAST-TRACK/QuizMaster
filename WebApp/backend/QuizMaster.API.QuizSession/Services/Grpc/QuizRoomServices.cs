@@ -17,11 +17,13 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
     {
         private readonly QuizSessionDbContext _context;
         private readonly RoomAuditServiceClient _roomAuditServiceClient;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public QuizRoomServices(QuizSessionDbContext context, RoomAuditServiceClient roomAuditServiceClient)
+        public QuizRoomServices(QuizSessionDbContext context, RoomAuditServiceClient roomAuditServiceClient, IServiceScopeFactory serviceScopeFactory)
         {
             _context = context;
             _roomAuditServiceClient = roomAuditServiceClient;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
         public override async Task<RoomResponse> CreateRoom(CreateRoomRequest request, ServerCallContext context)
         {
@@ -32,12 +34,16 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if (invalidId != -1)
+                if (invalidId == -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
                     return await Task.FromResult(reply);
                 }
+
+                // create a scoped service
+                using IServiceScope scope = serviceScopeFactory.CreateScope();
+                QuizSessionDbContext quizSessionDbContext = scope.ServiceProvider.GetRequiredService<QuizSessionDbContext>();
 
                 // Capture the details of the user creating the room
                 var userRoles = context.RequestHeaders.FirstOrDefault(h => h.Key == "role")?.Value;
@@ -46,23 +52,23 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 var quizRoom = new QuizRoom { QRoomDesc = room.RoomName, QRoomPin = new Random().Next(10000000, 99999999) };
 
-                QuizRoom? existingRoom = _context.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
+                QuizRoom? existingRoom = quizSessionDbContext.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
                 while (existingRoom != null)
                 {
                     quizRoom.QRoomPin = new Random().Next(10000000, 99999999);
-                    existingRoom = _context.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
+                    existingRoom = quizSessionDbContext.QuizRooms.Where(q => q.QRoomPin == quizRoom.QRoomPin).FirstOrDefault();
                 }
 
                 quizRoom.RoomOptions = JsonConvert.SerializeObject(room.RoomOptions);
 
-                var createdRoomObject = await _context.QuizRooms.AddAsync(quizRoom);
-                await _context.SaveChangesAsync();
+                var createdRoomObject = await quizSessionDbContext.QuizRooms.AddAsync(quizRoom);
+                await quizSessionDbContext.SaveChangesAsync();
 
                 // Todo: Check quiz set ID
                 foreach (var id in room.QuestionSets)
                 {
-                    await _context.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = createdRoomObject.Entity.Id });
-                    await _context.SaveChangesAsync();
+                    await quizSessionDbContext.SetQuizRooms.AddAsync(new SetQuizRoom { QSetId = id, QRoomId = createdRoomObject.Entity.Id });
+                    await quizSessionDbContext.SaveChangesAsync();
                 }
 
                 // Construct the create room event
@@ -109,6 +115,30 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             }
         }
 
+        public override async Task<RoomResponse> GetSetQuizRoom(SetRequest request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var roomId = request.Id;
+                var setQuizRoom = await _context.SetQuizRooms.Where(qR => qR.QRoomId == roomId).ToListAsync();
+                
+               
+
+                reply.Code = 200;
+                reply.Data = JsonConvert.SerializeObject(setQuizRoom);
+
+                return await Task.FromResult(reply);
+            }
+            catch (Exception ex)
+            {
+                reply.Code = 500;
+                reply.Message = ex.Message;
+
+                return await Task.FromResult(reply);
+            }
+        }
+
 
         public override async Task<RoomResponse> UpdateRoom(CreateRoomRequest request, ServerCallContext context)
         {
@@ -119,7 +149,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 // check if quiz set available
                 int invalidId = QuizSetAvailable(room.QuestionSets);
-                if (invalidId != -1)
+                if (invalidId == -1)
                 {
                     reply.Code = 400;
                     reply.Message = $"QuestionSet Id of {invalidId} does not exist.";
@@ -207,7 +237,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             try
             {
-                var allRooms = _context.QuizRooms.Where(a=>a.ActiveData).ToArray();
+                var allRooms = _context.QuizRooms.ToArray();
 
                 reply.Code = 200;
                 reply.Data = JsonConvert.SerializeObject(allRooms);
@@ -287,6 +317,33 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             return await Task.FromResult(reply);
         }
 
+        public override async Task<RoomResponse> DeactivateRoomRequest(DeactivateRoom request, ServerCallContext context)
+        {
+            var reply = new RoomResponse();
+            try
+            {
+                var room = await _context.QuizRooms.Where(r => r.Id == request.Id).FirstOrDefaultAsync();
+                if (room == null)
+                {
+                    reply.Code = 404;
+                    reply.Message = $"Room with room pin {request.Id} does not exists";
+                }
+                else
+                {
+                    room.ActiveData = false;
+                    _context.SaveChanges();
+
+                    reply.Code = 200;
+                }
+            }
+            catch (Exception ex)
+            {
+                reply.Code=500;
+                reply.Message=ex.Message;
+            }
+            return await Task.FromResult(reply);
+        }
+
 
         // In room, get all the Sets
         public override async Task<RoomResponse> GetQuizSet(SetRequest request, ServerCallContext context)
@@ -324,13 +381,19 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
         private int QuizSetAvailable(IEnumerable<int> QuestionSetIds)
         {
-            var sets = _context.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
+            using IServiceScope scope = serviceScopeFactory.CreateScope();
+            QuizSessionDbContext quizSessionDbContext = scope.ServiceProvider.GetRequiredService<QuizSessionDbContext>();
+            
+            var sets = quizSessionDbContext.QuestionSets.Where(q => q.ActiveData).Select(q=>q.SetId).ToArray();
+            int foundId = -1;
             foreach(var id in QuestionSetIds)
             {
-                if (!sets.Contains(id))
-                    return id;
+                if(sets.Contains(id))
+                {
+                    foundId = id; break;
+                };
             }
-            return -1;
+            return foundId ;
         }
 
         // Get Question from a set Id in a list
@@ -339,7 +402,7 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
             var reply = new RoomResponse();
             var id = request.Id;
 
-            var question = _context.Questions.FirstOrDefault(x => x.Id == id);
+            var question = _context.Questions.Include(q => q.QDifficulty).FirstOrDefault(x => x.Id == id);
             //_ = _context.DetailTypes.ToList();
             //var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).Include(qD => qD.DetailTypes).ToList();
             var details = _context.QuestionDetails.Where(x => x.QuestionId == question.Id).Include(qD => qD.DetailTypes).ToList();
@@ -354,6 +417,9 @@ namespace QuizMaster.API.QuizSession.Services.Grpc
 
                 return await Task.FromResult(reply);
             }
+
+            // include the qDifficulty
+            question.QDifficulty = _context.Difficulties.Where(d => d.Id == question.QDifficultyId).First();
 
             reply.Code = 200;
             reply.Data = JsonConvert.SerializeObject(new QuestionsDTO { question=question, details=details});

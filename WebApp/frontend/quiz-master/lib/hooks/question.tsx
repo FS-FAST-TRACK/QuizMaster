@@ -36,6 +36,27 @@ interface QuestionGetResponse extends CustomResponse {
         | undefined;
 }
 
+
+export async function GetAllQuestion()
+    {
+        try {
+            var apiUrl = `${QUIZMASTER_QUESTION_GET_QUESTIONS}?maxPageSize=10000&PageNumber=1&PageSize=10000`;
+            const res = await fetch(apiUrl);
+
+            const isSuccess = res.status === 201 || res.status === 200;
+            var response = res.json();
+    
+            if (!isSuccess) {
+               
+                return res.status;
+            }
+            return response;
+
+        } catch (error) {
+            return error;
+        }
+}
+
 export async function fetchQuestions({
     questionResourceParameter,
 }: {
