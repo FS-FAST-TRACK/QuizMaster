@@ -9,14 +9,20 @@ import QuestionImage from "./questionImage";
 import useUserTokenData from "@/app/util/useUserTokenData";
 import Participants from "../../components/participants";
 import { useScreenshot } from "use-react-screenshot";
-import { useAnswer } from "@/app/util/store";
+import { useAnswer, useMetaData } from "@/app/util/store";
 import { notifications } from "@mantine/notifications";
+import { useAnswerSFX } from "../../hooks/useAnswerSFX";
+import { isCorrectAnswer } from "@/app/util/questionAnswerUtil";
+import { SoundEffectsContext } from "../../contexts/SoundEffectsContext";
+import { useContext } from "react";
+import { AnimateSlideInFromBottom } from "./AnimateSlideInFromBottom";
 
 export default React.forwardRef(TypeAnswer);
 
 function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
   const { isAdmin } = useUserTokenData();
   //const { answer: ANSWER } = useAnswer();
+  const { metadata } = useMetaData();
 
   const [answer, setAnswer] = useState();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -28,6 +34,12 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
     type: "image/jpeg",
     quality: 1.0,
   });
+
+  const { volume, isMute } = useContext(SoundEffectsContext);
+  const { playCorrect, playIncorrect } = useAnswerSFX(
+    isMute ? 0 : volume / 100
+  );
+
   /* Shows/hides question details during buffer time */
   const showDetails = question?.remainingTime <= question?.question?.qTime;
 
@@ -73,6 +85,13 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
       }, 10_000);
       handleSubmit();
     }
+    if (ANSWER && !isAdmin) {
+      if (isCorrectAnswer(answer, ANSWER + "")) {
+        playCorrect();
+      } else {
+        playIncorrect();
+      }
+    }
   }, [ANSWER]);
 
   useEffect(() => {
@@ -89,8 +108,19 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
     <div className="w-full flex flex-col h-full  items-center flex-grow p-5  bg-green-600">
       <ImageModal opened={opened} close={close} imageUrl={imageUrl} />
       <div className="flex flex-col items-center h-96 justify-center ">
-        <div className="mb-4 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
+        <div className="mb-2 text-white px-4 py-2 text-sm font-regular border-2 border-white rounded-full">
           Type Answer
+        </div>
+        <div className="mb-4">
+          <p className="text-sm text-white">{`${
+            metadata?.currentDifficulty
+          } • ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] || 0
+          } ${
+            metadata?.points[metadata?.currentDifficulty.toLowerCase()] > 1
+              ? "points"
+              : "point"
+          }`}</p>
         </div>
         <div className="text-white font-semibold flex flex-wrap text-center sm:text-2xl md:text-3xl lg:text-text-4xl mb-4 h-52 items-center select-none">
           {question?.question.qStatement}
@@ -101,13 +131,15 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
         ? showDetails && (
             <div className="py-8 px-[20%] w-full">
               {ANSWER ? (
-                <div className="py-8 px-[20%]">
-                  <p className="text-white">Correct answer is: </p>
-                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
-                    <p className="px-4">{ANSWER}</p>
-                    <CheckIcon width={20} height={20} />
+                <AnimateSlideInFromBottom>
+                  <div className="py-8 px-[20%]">
+                    <p className="text-white">Correct answer is: </p>
+                    <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
+                      <p className="px-4">{ANSWER}</p>
+                      <CheckIcon width={20} height={20} />
+                    </div>
                   </div>
-                </div>
+                </AnimateSlideInFromBottom>
               ) : (
                 <div className=" flex w-full mt-8 items-center justify-center">
                   <div className="border-2 border-white bg-green-700 rounded-md flex items-center  px-6 py-3">
@@ -124,49 +156,59 @@ function TypeAnswer({ question, connectionId, answer: ANSWER }, ref) {
             </div>
           )
         : showDetails && (
-            <>
+            <div className="py-8 px-[20%] w-full flex flex-col items-center">
               {ANSWER && (
-                <div className="py-8 px-[20%] w-full">
-                  <p className="text-white">Correct answer is: </p>
-                  <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
-                    <p className="px-4">{ANSWER}</p>
-                    <CheckIcon width={20} height={20} />
+                <AnimateSlideInFromBottom className="py-8 px-[20%] w-full">
+                  <div>
+                    <p className="text-white">Correct answer is: </p>
+                    <div className="border-2 bg-white text-dark_green flex justify-center items-center m-5 text-xl font-bold p-3 shadow-lg rounded-md">
+                      <p className="px-4">{ANSWER}</p>
+                      <CheckIcon width={20} height={20} />
+                    </div>
                   </div>
-                </div>
+                </AnimateSlideInFromBottom>
               )}
-              {!isAdmin && (
-                <div className="flex flex-row w-1/2 space-x-2">
-                  <div className="w-3/4">
-                    <Input
-                      id="input-typeAnswer"
-                      placeholder="Type your Answer"
-                      size="xl"
-                      onChange={(e) => {
-                        setAnswer(e.target.value);
-                      }}
-                      disabled={isSubmitted || ANSWER}
-                      value={answer ?? (ANSWER ? "" : "")}
-                    />
+              {!isAdmin && showDetails && (
+                <AnimateSlideInFromBottom className="flex flex-row space-x-2 w-full">
+                  <div className="flex flex-row gap-2 w-full">
+                    <div className={`flex-1`}>
+                      <Input
+                        id="input-typeAnswer"
+                        placeholder="Type your Answer"
+                        size="xl"
+                        onChange={(e) => {
+                          setAnswer(e.target.value);
+                        }}
+                        className={`${
+                          ANSWER && isCorrectAnswer(answer, ANSWER + "")
+                            ? "!border-2 !border-green-700 !text-green-700 !font-semibold !rounded-md"
+                            : ANSWER &&
+                              "!border-2 !border-red-500 !text-red-500 !font-semibold !rounded-md"
+                        }`}
+                        disabled={isSubmitted || ANSWER}
+                        value={answer ?? (ANSWER ? "" : "")}
+                      />
+                    </div>
+                    <div className={`${ANSWER && "hidden"}`}>
+                      <Button
+                        fullWidth
+                        color={"yellow"}
+                        size="xl"
+                        onClick={handleSubmit}
+                        disabled={isSubmitted || ANSWER}
+                        className={`shadow-lg ${
+                          isSubmitted
+                            ? "bg-[#FFAB3E] text-[#FFF9DF] opacity-50"
+                            : "bg-[#FF6633]"
+                        }`}
+                      >
+                        Submit
+                      </Button>
+                    </div>
                   </div>
-                  <div className="w-1/4">
-                    <Button
-                      fullWidth
-                      color={"yellow"}
-                      size="xl"
-                      onClick={handleSubmit}
-                      disabled={isSubmitted || ANSWER}
-                      className={`shadow-lg ${
-                        isSubmitted
-                          ? "bg-[#FFAB3E] text-[##FFF9DF]"
-                          : "bg-[#FF6633]"
-                      }`}
-                    >
-                      Submit
-                    </Button>
-                  </div>
-                </div>
+                </AnimateSlideInFromBottom>
               )}
-            </>
+            </div>
           )}
 
       <div className=" w-full justify-center flex">

@@ -60,9 +60,9 @@ function QuestionCorrectResponses({
             ?.qDetailDesc || "";
     return (
         <View style={styles.questionContainer}>
-            <Text
-                style={styles.qStatement}
-            >{`Question: ${qInfo.qStatement}`}</Text>
+            <Text style={styles.qStatement}>{`Question: ${qInfo.qStatement} (${
+                participantAnswers[0]?.points || 0
+            } points)`}</Text>
             <View
                 style={{
                     flexDirection: "row",

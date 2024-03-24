@@ -90,6 +90,7 @@ services:
       - Kestrel:EndpointDefaults:Protocols=Http1AndHttp2
       - Kestrel:Endpoints:Https:Url=https://*:443
       - AppSettings:CORS_ORIGINS=${GATEWAY_CORS}
+      - QuizSettings:BufferTime=${BUFFER_TIME}
       - QuizSettings:ShowAnswerAfterQuestionDelay=${SHOW_ANSWER_AFTER_QUESTION_DELAY}
       - QuizSettings:ForceNextRoundTimeout=${FORCE_NEXT_ROUND_TIMEOUT}
       - QuizSettings:OverrideQuestionTimer:TypeAnswer=${OVERRIDE_QUESTION_TIMER_TYPEANSWER}

@@ -21,7 +21,6 @@ export default function ConfirmEndGameModal({
     {
       onStart: (event) => {
         intervalRef.current = setInterval(() => {
-          console.log("interval");
           setRingValue((prev) => prev + 7.5);
         }, 200);
       },

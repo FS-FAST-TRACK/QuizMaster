@@ -88,6 +88,14 @@ export function IndividualParticipantAnswersReport({
                             >
                                 Correct Answer
                             </Text>
+                            <Text
+                                style={[
+                                    styles.correctAnswer,
+                                    styles.tableHeader,
+                                ]}
+                            >
+                                Score
+                            </Text>
                         </View>
                         {participantAnswers.map((answer, index) => {
                             return (
@@ -149,6 +157,9 @@ function ParticipantAnswersTableRow({
             )}
 
             <Text style={styles.correctAnswer}>{correctAnswer}</Text>
+            <Text style={styles.correctAnswer}>
+                {participantAnswer.score} {" point(s)"}
+            </Text>
         </View>
     );
 }
